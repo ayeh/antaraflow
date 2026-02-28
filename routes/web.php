@@ -10,9 +10,11 @@ use App\Domain\ActionItem\Controllers\ActionItemController;
 use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
 use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
+use App\Domain\Attendee\Controllers\AttendeeController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
 use App\Domain\Transcription\Controllers\TranscriptionController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,6 +33,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'org.context'])->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
     Route::resource('organizations', OrganizationController::class);
     Route::resource('organizations.members', MemberController::class)->only(['index', 'store', 'update', 'destroy'])->shallow();
     Route::get('organizations/{organization}/settings', [OrganizationSettingsController::class, 'edit'])->name('organizations.settings.edit');
@@ -52,5 +56,10 @@ Route::middleware(['auth', 'org.context'])->group(function () {
         Route::post('chat', [ChatController::class, 'store'])->name('chat.store');
         Route::resource('action-items', ActionItemController::class);
         Route::post('action-items/{actionItem}/carry-forward', [ActionItemController::class, 'carryForward'])->name('action-items.carry-forward');
+
+        Route::resource('attendees', AttendeeController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::post('attendees/bulk-invite', [AttendeeController::class, 'bulkInvite'])->name('attendees.bulk-invite');
+        Route::patch('attendees/{attendee}/rsvp', [AttendeeController::class, 'updateRsvp'])->name('attendees.rsvp');
+        Route::patch('attendees/{attendee}/presence', [AttendeeController::class, 'markPresence'])->name('attendees.presence');
     });
 });

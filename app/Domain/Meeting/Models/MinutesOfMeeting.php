@@ -8,6 +8,8 @@ use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\AI\Models\MomAiConversation;
 use App\Domain\AI\Models\MomExtraction;
 use App\Domain\AI\Models\MomTopic;
+use App\Domain\Attendee\Models\MomAttendee;
+use App\Domain\Attendee\Models\MomJoinSetting;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
@@ -104,5 +106,15 @@ class MinutesOfMeeting extends Model
     public function actionItems(): HasMany
     {
         return $this->hasMany(ActionItem::class);
+    }
+
+    public function attendees(): HasMany
+    {
+        return $this->hasMany(MomAttendee::class);
+    }
+
+    public function joinSetting(): HasOne
+    {
+        return $this->hasOne(MomJoinSetting::class);
     }
 }
