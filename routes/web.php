@@ -6,6 +6,7 @@ use App\Domain\Account\Controllers\Auth\RegisterController;
 use App\Domain\Account\Controllers\MemberController;
 use App\Domain\Account\Controllers\OrganizationController;
 use App\Domain\Account\Controllers\OrganizationSettingsController;
+use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
 use App\Domain\Transcription\Controllers\TranscriptionController;
@@ -40,5 +41,7 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::prefix('meetings/{meeting}')->as('meetings.')->group(function () {
         Route::resource('transcriptions', TranscriptionController::class)->only(['store', 'show', 'destroy']);
         Route::resource('manual-notes', ManualNoteController::class);
+        Route::post('extract', [ExtractionController::class, 'extract'])->name('extract');
+        Route::get('extractions', [ExtractionController::class, 'index'])->name('extractions.index');
     });
 });

@@ -41,13 +41,15 @@ test('factory throws exception for unknown provider', function () {
     AIProviderFactory::make('unknown', []);
 })->throws(InvalidArgumentException::class, 'Unknown AI provider: unknown');
 
-test('stub providers throw runtime exception', function (string $providerName, array $config) {
+test('providers implement all interface methods', function (string $providerName, array $config) {
     $provider = AIProviderFactory::make($providerName, $config);
 
-    expect(fn () => $provider->chat('test'))->toThrow(RuntimeException::class);
-    expect(fn () => $provider->summarize('test'))->toThrow(RuntimeException::class);
-    expect(fn () => $provider->extractActionItems('test'))->toThrow(RuntimeException::class);
-    expect(fn () => $provider->extractDecisions('test'))->toThrow(RuntimeException::class);
+    $reflection = new ReflectionClass($provider);
+
+    expect($reflection->hasMethod('chat'))->toBeTrue()
+        ->and($reflection->hasMethod('summarize'))->toBeTrue()
+        ->and($reflection->hasMethod('extractActionItems'))->toBeTrue()
+        ->and($reflection->hasMethod('extractDecisions'))->toBeTrue();
 })->with([
     'openai' => ['openai', ['api_key' => 'test-key']],
     'anthropic' => ['anthropic', ['api_key' => 'test-key']],

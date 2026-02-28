@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Meeting\Models;
 
+use App\Domain\AI\Models\MomExtraction;
+use App\Domain\AI\Models\MomTopic;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
@@ -80,5 +82,15 @@ class MinutesOfMeeting extends Model
     public function manualNotes(): HasMany
     {
         return $this->hasMany(MomManualNote::class);
+    }
+
+    public function extractions(): HasMany
+    {
+        return $this->hasMany(MomExtraction::class);
+    }
+
+    public function topics(): HasMany
+    {
+        return $this->hasMany(MomTopic::class);
     }
 }
