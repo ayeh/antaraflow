@@ -17,10 +17,12 @@ use App\Domain\Transcription\Controllers\TranscriptionController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
+// Guest routes
 Route::get('/', function () {
     return view('welcome');
 });
 
+// Auth routes
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('login', [LoginController::class, 'login']);
@@ -33,20 +35,25 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'org.context'])->group(function () {
+    // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Organizations
     Route::resource('organizations', OrganizationController::class);
     Route::resource('organizations.members', MemberController::class)->only(['index', 'store', 'update', 'destroy'])->shallow();
     Route::get('organizations/{organization}/settings', [OrganizationSettingsController::class, 'edit'])->name('organizations.settings.edit');
     Route::put('organizations/{organization}/settings', [OrganizationSettingsController::class, 'update'])->name('organizations.settings.update');
 
+    // Meetings
     Route::resource('meetings', MeetingController::class);
     Route::post('meetings/{meeting}/finalize', [MeetingController::class, 'finalize'])->name('meetings.finalize');
     Route::post('meetings/{meeting}/approve', [MeetingController::class, 'approve'])->name('meetings.approve');
     Route::post('meetings/{meeting}/revert', [MeetingController::class, 'revert'])->name('meetings.revert');
 
+    // Cross-meeting dashboards
     Route::get('action-items', [ActionItemDashboardController::class, 'index'])->name('action-items.dashboard');
 
+    // Meeting sub-resources (transcriptions, notes, attendees, actions, chat, extractions)
     Route::prefix('meetings/{meeting}')->as('meetings.')->group(function () {
         Route::resource('transcriptions', TranscriptionController::class)->only(['store', 'show', 'destroy']);
         Route::resource('manual-notes', ManualNoteController::class);
