@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Meeting\Models;
 
+use App\Domain\Transcription\Models\AudioTranscription;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
 use App\Support\Traits\BelongsToOrganization;
@@ -64,5 +65,20 @@ class MinutesOfMeeting extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(MomTag::class, 'mom_tag_mom');
+    }
+
+    public function inputs(): HasMany
+    {
+        return $this->hasMany(MomInput::class);
+    }
+
+    public function transcriptions(): HasMany
+    {
+        return $this->hasMany(AudioTranscription::class);
+    }
+
+    public function manualNotes(): HasMany
+    {
+        return $this->hasMany(MomManualNote::class);
     }
 }

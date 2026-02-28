@@ -6,7 +6,9 @@ use App\Domain\Account\Controllers\Auth\RegisterController;
 use App\Domain\Account\Controllers\MemberController;
 use App\Domain\Account\Controllers\OrganizationController;
 use App\Domain\Account\Controllers\OrganizationSettingsController;
+use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
+use App\Domain\Transcription\Controllers\TranscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -34,4 +36,9 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::post('meetings/{meeting}/finalize', [MeetingController::class, 'finalize'])->name('meetings.finalize');
     Route::post('meetings/{meeting}/approve', [MeetingController::class, 'approve'])->name('meetings.approve');
     Route::post('meetings/{meeting}/revert', [MeetingController::class, 'revert'])->name('meetings.revert');
+
+    Route::prefix('meetings/{meeting}')->as('meetings.')->group(function () {
+        Route::resource('transcriptions', TranscriptionController::class)->only(['store', 'show', 'destroy']);
+        Route::resource('manual-notes', ManualNoteController::class);
+    });
 });
