@@ -6,6 +6,9 @@ use App\Domain\Account\Controllers\Auth\RegisterController;
 use App\Domain\Account\Controllers\MemberController;
 use App\Domain\Account\Controllers\OrganizationController;
 use App\Domain\Account\Controllers\OrganizationSettingsController;
+use App\Domain\ActionItem\Controllers\ActionItemController;
+use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
+use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
@@ -38,10 +41,16 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::post('meetings/{meeting}/approve', [MeetingController::class, 'approve'])->name('meetings.approve');
     Route::post('meetings/{meeting}/revert', [MeetingController::class, 'revert'])->name('meetings.revert');
 
+    Route::get('action-items', [ActionItemDashboardController::class, 'index'])->name('action-items.dashboard');
+
     Route::prefix('meetings/{meeting}')->as('meetings.')->group(function () {
         Route::resource('transcriptions', TranscriptionController::class)->only(['store', 'show', 'destroy']);
         Route::resource('manual-notes', ManualNoteController::class);
         Route::post('extract', [ExtractionController::class, 'extract'])->name('extract');
         Route::get('extractions', [ExtractionController::class, 'index'])->name('extractions.index');
+        Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
+        Route::post('chat', [ChatController::class, 'store'])->name('chat.store');
+        Route::resource('action-items', ActionItemController::class);
+        Route::post('action-items/{actionItem}/carry-forward', [ActionItemController::class, 'carryForward'])->name('action-items.carry-forward');
     });
 });

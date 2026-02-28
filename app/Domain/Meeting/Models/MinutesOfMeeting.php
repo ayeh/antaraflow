@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Meeting\Models;
 
+use App\Domain\ActionItem\Models\ActionItem;
+use App\Domain\AI\Models\MomAiConversation;
 use App\Domain\AI\Models\MomExtraction;
 use App\Domain\AI\Models\MomTopic;
 use App\Domain\Transcription\Models\AudioTranscription;
@@ -92,5 +94,15 @@ class MinutesOfMeeting extends Model
     public function topics(): HasMany
     {
         return $this->hasMany(MomTopic::class);
+    }
+
+    public function aiConversations(): HasMany
+    {
+        return $this->hasMany(MomAiConversation::class);
+    }
+
+    public function actionItems(): HasMany
+    {
+        return $this->hasMany(ActionItem::class);
     }
 }
