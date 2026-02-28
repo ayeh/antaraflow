@@ -6,6 +6,7 @@ use App\Domain\Account\Controllers\Auth\RegisterController;
 use App\Domain\Account\Controllers\MemberController;
 use App\Domain\Account\Controllers\OrganizationController;
 use App\Domain\Account\Controllers\OrganizationSettingsController;
+use App\Domain\Meeting\Controllers\MeetingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -28,4 +29,9 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::resource('organizations.members', MemberController::class)->only(['index', 'store', 'update', 'destroy'])->shallow();
     Route::get('organizations/{organization}/settings', [OrganizationSettingsController::class, 'edit'])->name('organizations.settings.edit');
     Route::put('organizations/{organization}/settings', [OrganizationSettingsController::class, 'update'])->name('organizations.settings.update');
+
+    Route::resource('meetings', MeetingController::class);
+    Route::post('meetings/{meeting}/finalize', [MeetingController::class, 'finalize'])->name('meetings.finalize');
+    Route::post('meetings/{meeting}/approve', [MeetingController::class, 'approve'])->name('meetings.approve');
+    Route::post('meetings/{meeting}/revert', [MeetingController::class, 'revert'])->name('meetings.revert');
 });

@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Domain\Account\Models\Organization;
 use App\Domain\Account\Policies\OrganizationPolicy;
+use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Domain\Meeting\Policies\MinutesOfMeetingPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,5 +25,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Organization::class, OrganizationPolicy::class);
+        Gate::policy(MinutesOfMeeting::class, MinutesOfMeetingPolicy::class);
     }
 }

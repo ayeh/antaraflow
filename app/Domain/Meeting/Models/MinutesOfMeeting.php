@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Meeting\Models;
+
+use App\Models\User;
+use App\Support\Enums\MeetingStatus;
+use App\Support\Traits\BelongsToOrganization;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class MinutesOfMeeting extends Model
+{
+    use BelongsToOrganization, HasFactory, SoftDeletes;
+
+    protected $guarded = ['id'];
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'meeting_date' => 'datetime',
+            'metadata' => 'array',
+            'status' => MeetingStatus::class,
+        ];
+    }
+
+    protected static function newFactory(): \Database\Factories\MinutesOfMeetingFactory
+    {
+        return \Database\Factories\MinutesOfMeetingFactory::new();
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function series(): BelongsTo
+    {
+        return $this->belongsTo(MeetingSeries::class, 'meeting_series_id');
+    }
+
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(MeetingTemplate::class, 'meeting_template_id');
+    }
+
+    public function versions(): HasMany
+    {
+        return $this->hasMany(MomVersion::class);
+    }
+
+    public function latestVersion(): HasOne
+    {
+        return $this->hasOne(MomVersion::class)->latestOfMany('version_number');
+    }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(MomTag::class, 'mom_tag_mom');
+    }
+}

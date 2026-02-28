@@ -1,0 +1,118 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Meeting\Controllers;
+
+use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Domain\Meeting\Requests\CreateMeetingRequest;
+use App\Domain\Meeting\Requests\UpdateMeetingRequest;
+use App\Domain\Meeting\Services\MeetingSearchService;
+use App\Domain\Meeting\Services\MeetingService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\View\View;
+
+class MeetingController extends Controller
+{
+    use AuthorizesRequests;
+
+    public function __construct(
+        private MeetingService $meetingService,
+        private MeetingSearchService $searchService,
+    ) {}
+
+    public function index(Request $request): View
+    {
+        $this->authorize('viewAny', MinutesOfMeeting::class);
+
+        $meetings = $this->searchService->search($request->all());
+
+        return view('meetings.index', compact('meetings'));
+    }
+
+    public function create(): View
+    {
+        $this->authorize('create', MinutesOfMeeting::class);
+
+        return view('meetings.create');
+    }
+
+    public function store(CreateMeetingRequest $request): RedirectResponse
+    {
+        $this->authorize('create', MinutesOfMeeting::class);
+
+        $meeting = $this->meetingService->create($request->validated(), $request->user());
+
+        return redirect()->route('meetings.show', $meeting)
+            ->with('success', 'Meeting created successfully.');
+    }
+
+    public function show(MinutesOfMeeting $meeting): View
+    {
+        $this->authorize('view', $meeting);
+
+        $meeting->load(['createdBy', 'series', 'template', 'tags', 'versions']);
+
+        return view('meetings.show', compact('meeting'));
+    }
+
+    public function edit(MinutesOfMeeting $meeting): View
+    {
+        $this->authorize('update', $meeting);
+
+        return view('meetings.edit', compact('meeting'));
+    }
+
+    public function update(UpdateMeetingRequest $request, MinutesOfMeeting $meeting): RedirectResponse
+    {
+        $this->authorize('update', $meeting);
+
+        $this->meetingService->update($meeting, $request->validated());
+
+        return redirect()->route('meetings.show', $meeting)
+            ->with('success', 'Meeting updated successfully.');
+    }
+
+    public function destroy(MinutesOfMeeting $meeting): RedirectResponse
+    {
+        $this->authorize('delete', $meeting);
+
+        $this->meetingService->delete($meeting);
+
+        return redirect()->route('meetings.index')
+            ->with('success', 'Meeting deleted successfully.');
+    }
+
+    public function finalize(MinutesOfMeeting $meeting, Request $request): RedirectResponse
+    {
+        $this->authorize('finalize', $meeting);
+
+        $this->meetingService->finalize($meeting, $request->user());
+
+        return redirect()->route('meetings.show', $meeting)
+            ->with('success', 'Meeting finalized successfully.');
+    }
+
+    public function approve(MinutesOfMeeting $meeting, Request $request): RedirectResponse
+    {
+        $this->authorize('approve', $meeting);
+
+        $this->meetingService->approve($meeting, $request->user());
+
+        return redirect()->route('meetings.show', $meeting)
+            ->with('success', 'Meeting approved successfully.');
+    }
+
+    public function revert(MinutesOfMeeting $meeting, Request $request): RedirectResponse
+    {
+        $this->authorize('update', $meeting);
+
+        $this->meetingService->revertToDraft($meeting, $request->user());
+
+        return redirect()->route('meetings.show', $meeting)
+            ->with('success', 'Meeting reverted to draft.');
+    }
+}
