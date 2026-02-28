@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Support\Enums\ActionItemStatus;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
@@ -26,15 +27,15 @@ class DashboardController extends Controller
         $upcomingActions = ActionItem::query()
             ->where('organization_id', $orgId)
             ->where('assigned_to', $user->id)
-            ->whereNotIn('status', ['completed', 'cancelled', 'carried_forward'])
+            ->whereNotIn('status', [ActionItemStatus::Completed, ActionItemStatus::Cancelled, ActionItemStatus::CarriedForward])
             ->orderBy('due_date')
             ->take(5)
             ->get();
 
         $stats = [
             'total_meetings' => MinutesOfMeeting::query()->where('organization_id', $orgId)->count(),
-            'pending_actions' => ActionItem::query()->where('organization_id', $orgId)->whereIn('status', ['open', 'in_progress'])->count(),
-            'overdue_actions' => ActionItem::query()->where('organization_id', $orgId)->whereNotIn('status', ['completed', 'cancelled', 'carried_forward'])->where('due_date', '<', now())->count(),
+            'pending_actions' => ActionItem::query()->where('organization_id', $orgId)->whereIn('status', [ActionItemStatus::Open, ActionItemStatus::InProgress])->count(),
+            'overdue_actions' => ActionItem::query()->where('organization_id', $orgId)->whereNotIn('status', [ActionItemStatus::Completed, ActionItemStatus::Cancelled, ActionItemStatus::CarriedForward])->where('due_date', '<', now())->count(),
         ];
 
         return view('dashboard', compact('recentMeetings', 'upcomingActions', 'stats'));

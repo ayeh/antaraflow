@@ -34,30 +34,39 @@ class ProcessTranscriptionJob implements ShouldQueue
             'started_at' => now(),
         ]);
 
-        $result = $transcriber->transcribe(
-            $this->transcription->file_path,
-            ['language' => $this->transcription->language]
-        );
+        try {
+            $result = $transcriber->transcribe(
+                $this->transcription->file_path,
+                ['language' => $this->transcription->language]
+            );
 
-        $this->transcription->update([
-            'status' => TranscriptionStatus::Completed,
-            'full_text' => $result->fullText,
-            'confidence_score' => $result->confidence,
-            'completed_at' => now(),
-        ]);
-
-        foreach ($result->segments as $i => $segment) {
-            $this->transcription->segments()->create([
-                'text' => $segment->text,
-                'speaker' => $segment->speaker,
-                'start_time' => $segment->startTime,
-                'end_time' => $segment->endTime,
-                'confidence' => $segment->confidence,
-                'sequence_order' => $i,
+            $this->transcription->update([
+                'status' => TranscriptionStatus::Completed,
+                'full_text' => $result->fullText,
+                'confidence_score' => $result->confidence,
+                'completed_at' => now(),
             ]);
-        }
 
-        event(new TranscriptionCompleted($this->transcription));
+            foreach ($result->segments as $i => $segment) {
+                $this->transcription->segments()->create([
+                    'text' => $segment->text,
+                    'speaker' => $segment->speaker,
+                    'start_time' => $segment->startTime,
+                    'end_time' => $segment->endTime,
+                    'confidence' => $segment->confidence,
+                    'sequence_order' => $i,
+                ]);
+            }
+
+            event(new TranscriptionCompleted($this->transcription));
+        } catch (\Throwable $e) {
+            $this->transcription->update([
+                'retry_count' => $this->transcription->retry_count + 1,
+                'error_message' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
     }
 
     public function failed(\Throwable $exception): void

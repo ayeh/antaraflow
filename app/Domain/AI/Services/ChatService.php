@@ -59,7 +59,6 @@ class ChatService
 
         $history = $mom->aiConversations()
             ->where('user_id', $user->id)
-            ->orderBy('created_at')
             ->latest()
             ->take(10)
             ->get()
