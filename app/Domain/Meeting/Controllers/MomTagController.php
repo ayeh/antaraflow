@@ -6,10 +6,10 @@ namespace App\Domain\Meeting\Controllers;
 
 use App\Domain\Meeting\Models\MomTag;
 use App\Domain\Meeting\Requests\CreateMomTagRequest;
+use App\Domain\Meeting\Requests\UpdateMomTagRequest;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class MomTagController extends Controller
@@ -31,20 +31,17 @@ class MomTagController extends Controller
 
         $data = $request->validated();
         $data['organization_id'] = $request->user()->current_organization_id;
-        $data['slug'] = Str::slug($data['name']);
 
         MomTag::query()->create($data);
 
         return redirect()->route('tags.index')->with('success', 'Tag created.');
     }
 
-    public function update(CreateMomTagRequest $request, MomTag $momTag): RedirectResponse
+    public function update(UpdateMomTagRequest $request, MomTag $momTag): RedirectResponse
     {
         $this->authorize('update', $momTag);
 
-        $data = $request->validated();
-        $data['slug'] = Str::slug($data['name']);
-        $momTag->update($data);
+        $momTag->update($request->validated());
 
         return redirect()->route('tags.index')->with('success', 'Tag updated.');
     }

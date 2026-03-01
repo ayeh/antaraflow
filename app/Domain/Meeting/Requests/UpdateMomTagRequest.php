@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
-class CreateMomTagRequest extends FormRequest
+class UpdateMomTagRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -19,16 +19,17 @@ class CreateMomTagRequest extends FormRequest
     public function rules(): array
     {
         $orgId = $this->user()->current_organization_id;
+        $momTag = $this->route('momTag');
 
         return [
             'name' => [
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('mom_tags')->where('organization_id', $orgId),
+                Rule::unique('mom_tags')->where('organization_id', $orgId)->ignore($momTag),
             ],
             'slug' => [
-                Rule::unique('mom_tags')->where('organization_id', $orgId),
+                Rule::unique('mom_tags')->where('organization_id', $orgId)->ignore($momTag),
             ],
             'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ];
