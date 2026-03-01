@@ -6,6 +6,8 @@ use App\Domain\Account\Models\Organization;
 use App\Domain\Account\Policies\OrganizationPolicy;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\ActionItem\Policies\ActionItemPolicy;
+use App\Domain\Collaboration\Models\MeetingShare;
+use App\Domain\Collaboration\Policies\MeetingSharePolicy;
 use App\Domain\Meeting\Models\MeetingSeries;
 use App\Domain\Meeting\Models\MeetingTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
@@ -28,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(MeetingTemplate::class, MeetingTemplatePolicy::class);
         Gate::policy(MeetingSeries::class, MeetingSeriesPolicy::class);
         Gate::policy(ActionItem::class, ActionItemPolicy::class);
+        Gate::policy(MeetingShare::class, MeetingSharePolicy::class);
 
         View::composer('layouts.app', function ($view) {
             if (Auth::check() && Auth::user()->current_organization_id) {

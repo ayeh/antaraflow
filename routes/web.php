@@ -87,5 +87,9 @@ Route::middleware(['auth', 'org.context'])->group(function () {
         Route::get('export/pdf', [\App\Domain\Export\Controllers\ExportController::class, 'pdf'])->name('export.pdf');
         Route::get('export/word', [\App\Domain\Export\Controllers\ExportController::class, 'word'])->name('export.word');
         Route::get('export/csv', [\App\Domain\Export\Controllers\ExportController::class, 'csv'])->name('export.csv');
+
+        Route::get('shares', [\App\Domain\Collaboration\Controllers\ShareController::class, 'index'])->name('shares.index');
+        Route::post('shares', [\App\Domain\Collaboration\Controllers\ShareController::class, 'store'])->name('shares.store');
+        Route::delete('shares/{share}', [\App\Domain\Collaboration\Controllers\ShareController::class, 'destroy'])->name('shares.destroy');
     });
 });
