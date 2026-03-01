@@ -63,7 +63,7 @@ test('updating join settings persists', function () {
         'minutes_of_meeting_id' => $meeting->id,
         'allow_external_join' => true,
         'require_rsvp' => true,
-        'auto_notify' => false,
+        'auto_notify' => true,
     ]);
 });
 

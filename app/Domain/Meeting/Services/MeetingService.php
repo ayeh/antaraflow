@@ -55,7 +55,7 @@ class MeetingService
         $tags = array_key_exists('tags', $data) ? $data['tags'] : false;
         $allowExternalJoin = $data['allow_external_join'] ?? false;
         $requireRsvp = $data['require_rsvp'] ?? false;
-        $autoNotify = $data['auto_notify'] ?? false;
+        $autoNotify = $data['auto_notify'] ?? true;
 
         unset($data['tags'], $data['allow_external_join'], $data['require_rsvp'], $data['auto_notify']);
 
