@@ -55,6 +55,31 @@ test('viewer cannot view AI provider configs', function () {
     $response->assertForbidden();
 });
 
+test('index only shows configs from current organization', function () {
+    $user = User::factory()->create();
+    $org = Organization::factory()->create();
+    $otherOrg = Organization::factory()->create();
+    $org->members()->attach($user, ['role' => UserRole::Owner->value]);
+    $user->update(['current_organization_id' => $org->id]);
+
+    AiProviderConfig::factory()->create([
+        'organization_id' => $org->id,
+        'display_name' => 'Org One Config',
+    ]);
+
+    AiProviderConfig::factory()->create([
+        'organization_id' => $otherOrg->id,
+        'display_name' => 'Org Two Config',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('ai-provider-configs.index'));
+
+    $response->assertOk();
+    $response->assertSee('Org One Config');
+    $response->assertDontSee('Org Two Config');
+    $response->assertViewHas('configs', fn ($configs) => $configs->count() === 1);
+});
+
 test('owner can create AI provider config', function () {
     $user = User::factory()->create();
     $org = Organization::factory()->create();
@@ -102,6 +127,7 @@ test('creating default config clears other defaults', function () {
 
     expect($firstConfig->fresh()->is_default)->toBeFalse();
     $this->assertDatabaseHas('ai_provider_configs', [
+        'organization_id' => $org->id,
         'display_name' => 'New Default',
         'is_default' => true,
     ]);
