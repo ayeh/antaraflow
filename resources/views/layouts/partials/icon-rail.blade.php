@@ -28,7 +28,7 @@ $groups = [
     [
         'key'    => 'analytics',
         'label'  => 'Analytics',
-        'active' => false,
+        'active' => request()->routeIs('analytics.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
     ],
     [
@@ -81,14 +81,14 @@ $groups = [
 
     {{-- Avatar / Profile (bottom) --}}
     <div class="relative group mt-auto">
-        <button
-            @click="activeFlyout = activeFlyout === 'profile' ? null : 'profile'"
+        <a
+            href="{{ route('profile.edit') }}"
             class="flex items-center justify-center w-8 h-8 rounded-full
                    bg-primary-600 dark:bg-primary-500 text-white text-xs font-bold
                    hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
         >
             {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-        </button>
+        </a>
         <span class="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2
                      rounded-md bg-slate-900 dark:bg-slate-700 text-white text-xs px-2 py-1 whitespace-nowrap
                      opacity-0 group-hover:opacity-100 transition-opacity delay-500 z-50 shadow-lg">
