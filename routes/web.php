@@ -91,5 +91,11 @@ Route::middleware(['auth', 'org.context'])->group(function () {
         Route::get('shares', [\App\Domain\Collaboration\Controllers\ShareController::class, 'index'])->name('shares.index');
         Route::post('shares', [\App\Domain\Collaboration\Controllers\ShareController::class, 'store'])->name('shares.store');
         Route::delete('shares/{share}', [\App\Domain\Collaboration\Controllers\ShareController::class, 'destroy'])->name('shares.destroy');
+
+        // Comments
+        Route::post('comments', [\App\Domain\Collaboration\Controllers\CommentController::class, 'store'])->name('comments.store');
     });
+
+    Route::put('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'update'])->name('comments.update');
+    Route::delete('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
 });
