@@ -57,6 +57,33 @@
         <p class="text-sm text-gray-500 dark:text-gray-400">This meeting has not been shared yet.</p>
     @endif
 
+
+    {{-- Guest Link Display --}}
+    @php
+        $guestShare = $shares->first(fn($s) => is_null($s->shared_with_user_id));
+    @endphp
+    @if($guestShare)
+        <div class="border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-950">
+            <h3 class="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">Shareable Link</h3>
+            <p class="text-xs text-blue-600 dark:text-blue-400 mb-3">Anyone with this link can view this meeting (read-only).</p>
+            <div x-data="{ copied: false }" class="flex items-center gap-2">
+                <input
+                    type="text"
+                    value="{{ route('guest.meeting', $guestShare->share_token) }}"
+                    readonly
+                    class="flex-1 text-xs rounded border border-blue-300 dark:border-blue-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 px-3 py-2 focus:outline-none"
+                >
+                <button
+                    @click="navigator.clipboard.writeText(@js(route('guest.meeting', $guestShare->share_token))); copied = true; setTimeout(() => copied = false, 2000)"
+                    class="shrink-0 text-xs bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 transition-colors"
+                >
+                    <span x-show="!copied">Copy</span>
+                    <span x-show="copied" x-cloak>Copied!</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
     <div class="border border-gray-200 dark:border-slate-700 rounded-lg p-4 bg-gray-50 dark:bg-slate-800">
         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Add New Share</h3>
         <form method="POST" action="{{ route('meetings.shares.store', $meeting) }}" class="space-y-4">

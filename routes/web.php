@@ -23,6 +23,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Guest meeting view (no auth required)
+Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessController::class, 'show'])->name('guest.meeting');
+
 // Auth routes
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
