@@ -18,11 +18,13 @@ beforeEach(function () {
 
 test('org member can view tags index', function () {
     $tag = MomTag::factory()->for($this->org)->create(['name' => 'Strategy']);
+    $otherTag = MomTag::factory()->create(['name' => 'OtherOrgTag']); // different org
 
     $response = $this->actingAs($this->user)->get(route('tags.index'));
 
     $response->assertOk();
     $response->assertSee($tag->name);
+    $response->assertDontSee($otherTag->name);
 });
 
 test('org admin can create tag', function () {
@@ -61,7 +63,7 @@ test('same tag name can exist in different organizations', function () {
         'color' => '#A855F7',
     ]);
 
-    $response->assertRedirect();
+    $response->assertRedirect(route('tags.index'));
     $this->assertDatabaseCount('mom_tags', 2);
 });
 
