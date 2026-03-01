@@ -10,4 +10,5 @@ enum ExportFormat: string
     case Docx = 'docx';
     case Json = 'json';
     case Markdown = 'markdown';
+    case Csv = 'csv';
 }

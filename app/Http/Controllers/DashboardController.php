@@ -32,12 +32,25 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $totalActions = ActionItem::query()->where('organization_id', $orgId)->count();
+        $completedActions = ActionItem::query()->where('organization_id', $orgId)->where('status', ActionItemStatus::Completed)->count();
+        $completionRate = $totalActions > 0 ? (int) round(($completedActions / $totalActions) * 100) : 0;
+
         $stats = [
             'total_meetings' => MinutesOfMeeting::query()->where('organization_id', $orgId)->count(),
             'pending_actions' => ActionItem::query()->where('organization_id', $orgId)->whereIn('status', [ActionItemStatus::Open, ActionItemStatus::InProgress])->count(),
             'overdue_actions' => ActionItem::query()->where('organization_id', $orgId)->whereNotIn('status', [ActionItemStatus::Completed, ActionItemStatus::Cancelled, ActionItemStatus::CarriedForward])->where('due_date', '<', now())->count(),
+            'meetings_this_week' => MinutesOfMeeting::query()->where('organization_id', $orgId)->where('created_at', '>=', now()->startOfWeek())->count(),
+            'completion_rate' => $completionRate,
         ];
 
-        return view('dashboard', compact('recentMeetings', 'upcomingActions', 'stats'));
+        $upcomingMeetings = MinutesOfMeeting::query()
+            ->where('organization_id', $orgId)
+            ->where('meeting_date', '>=', now()->startOfDay())
+            ->orderBy('meeting_date')
+            ->limit(5)
+            ->get();
+
+        return view('dashboard', compact('recentMeetings', 'upcomingActions', 'stats', 'upcomingMeetings'));
     }
 }

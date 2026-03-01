@@ -26,18 +26,23 @@ $flyoutGroups = [
     ],
     'analytics' => [
         'title' => 'Analytics',
-        'items' => [],
-        'note'  => 'Coming in Phase 2.',
+        'items' => [
+            ['label' => 'Overview', 'route' => route('analytics.index'), 'active' => request()->routeIs('analytics.*')],
+        ],
     ],
     'settings' => [
         'title' => 'Settings',
         'items' => [
-            ['label' => 'Organizations', 'route' => route('organizations.index'), 'active' => request()->routeIs('organizations.index', 'organizations.create')],
+            ['label' => 'Organizations',      'route' => route('organizations.index'),     'active' => request()->routeIs('organizations.index', 'organizations.create')],
+            ['label' => 'Meeting Templates',  'route' => route('meeting-templates.index'), 'active' => request()->routeIs('meeting-templates.*')],
+            ['label' => 'Meeting Series',     'route' => route('meeting-series.index'),    'active' => request()->routeIs('meeting-series.*')],
         ],
     ],
     'profile' => [
         'title'   => 'Account',
-        'items'   => [],
+        'items'   => [
+            ['label' => 'Edit Profile', 'route' => route('profile.edit'), 'active' => request()->routeIs('profile.edit')],
+        ],
         'profile' => true,
     ],
 ];
