@@ -111,7 +111,7 @@ class AnalyticsService
             );
 
         $topAttendees = (clone $baseQuery)
-            ->selectRaw('name, email, COUNT(*) as count')
+            ->selectRaw('name, COUNT(*) as count')
             ->groupBy('name')
             ->orderByDesc('count')
             ->limit(10)
