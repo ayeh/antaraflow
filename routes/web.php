@@ -6,6 +6,7 @@ use App\Domain\Account\Controllers\Auth\RegisterController;
 use App\Domain\Account\Controllers\MemberController;
 use App\Domain\Account\Controllers\OrganizationController;
 use App\Domain\Account\Controllers\OrganizationSettingsController;
+use App\Domain\Account\Controllers\ProfileController;
 use App\Domain\ActionItem\Controllers\ActionItemController;
 use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
 use App\Domain\AI\Controllers\ChatController;
@@ -37,6 +38,12 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'org.context'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Profile
+    Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
 
     // Organizations
     Route::resource('organizations', OrganizationController::class);
