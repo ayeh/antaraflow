@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('sequence_order');
             $table->boolean('is_edited')->default(false);
             $table->timestamps();
-            $table->index(['audio_transcription_id', 'sequence_order']);
+            $table->index(['audio_transcription_id', 'sequence_order'], 'ts_transcription_sequence_index');
         });
     }
 
