@@ -55,6 +55,10 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     // Meeting Templates
     Route::resource('meeting-templates', \App\Domain\Meeting\Controllers\MeetingTemplateController::class);
 
+    // Meeting Series
+    Route::resource('meeting-series', \App\Domain\Meeting\Controllers\MeetingSeriesController::class);
+    Route::post('meeting-series/{meetingSeries}/generate', [\App\Domain\Meeting\Controllers\MeetingSeriesController::class, 'generateMeetings'])->name('meeting-series.generate');
+
     // Meetings
     Route::resource('meetings', MeetingController::class);
     Route::post('meetings/{meeting}/finalize', [MeetingController::class, 'finalize'])->name('meetings.finalize');
