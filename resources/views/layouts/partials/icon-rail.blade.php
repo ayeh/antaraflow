@@ -83,11 +83,15 @@ $groups = [
     <div class="relative group mt-auto">
         <a
             href="{{ route('profile.edit') }}"
-            class="flex items-center justify-center w-8 h-8 rounded-full
+            class="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden
                    bg-primary-600 dark:bg-primary-500 text-white text-xs font-bold
                    hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
         >
-            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+            @if(auth()->user()->avatar_path)
+                <img src="{{ Storage::url(auth()->user()->avatar_path) }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
+            @else
+                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+            @endif
         </a>
         <span class="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2
                      rounded-md bg-slate-900 dark:bg-slate-700 text-white text-xs px-2 py-1 whitespace-nowrap
