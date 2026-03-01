@@ -19,7 +19,11 @@ class MeetingService
     public function create(array $data, User $user): MinutesOfMeeting
     {
         $tags = $data['tags'] ?? null;
-        unset($data['tags']);
+        $allowExternalJoin = $data['allow_external_join'] ?? false;
+        $requireRsvp = $data['require_rsvp'] ?? false;
+        $autoNotify = $data['auto_notify'] ?? true;
+
+        unset($data['tags'], $data['allow_external_join'], $data['require_rsvp'], $data['auto_notify']);
 
         $data['created_by'] = $user->id;
         $data['organization_id'] = $user->current_organization_id;
@@ -30,6 +34,12 @@ class MeetingService
         if ($tags !== null) {
             $mom->tags()->sync($tags);
         }
+
+        $mom->joinSetting()->create([
+            'allow_external_join' => $allowExternalJoin,
+            'require_rsvp' => $requireRsvp,
+            'auto_notify' => $autoNotify,
+        ]);
 
         $this->auditService->log('created', $mom);
 
@@ -43,7 +53,11 @@ class MeetingService
         }
 
         $tags = array_key_exists('tags', $data) ? $data['tags'] : false;
-        unset($data['tags']);
+        $allowExternalJoin = $data['allow_external_join'] ?? false;
+        $requireRsvp = $data['require_rsvp'] ?? false;
+        $autoNotify = $data['auto_notify'] ?? false;
+
+        unset($data['tags'], $data['allow_external_join'], $data['require_rsvp'], $data['auto_notify']);
 
         $oldValues = $mom->only(array_keys($data));
         $mom->update($data);
@@ -51,6 +65,15 @@ class MeetingService
         if ($tags !== false) {
             $mom->tags()->sync($tags ?? []);
         }
+
+        $mom->joinSetting()->updateOrCreate(
+            ['minutes_of_meeting_id' => $mom->id],
+            [
+                'allow_external_join' => $allowExternalJoin,
+                'require_rsvp' => $requireRsvp,
+                'auto_notify' => $autoNotify,
+            ]
+        );
 
         $this->auditService->log('updated', $mom, $oldValues, $data);
 

@@ -79,6 +79,39 @@
             <textarea name="content" id="content" rows="6" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">{{ old('content', $meeting->content) }}</textarea>
         </div>
 
+        <div class="border border-gray-200 rounded-lg p-4 space-y-3">
+            <h3 class="text-sm font-medium text-gray-900">Join Settings</h3>
+            <div class="space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="allow_external_join" value="1"
+                        {{ old('allow_external_join', $meeting->joinSetting?->allow_external_join) ? 'checked' : '' }}
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <div>
+                        <span class="text-sm font-medium text-gray-700">Allow External Join</span>
+                        <p class="text-xs text-gray-500">Allow people outside the organization to join this meeting.</p>
+                    </div>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="require_rsvp" value="1"
+                        {{ old('require_rsvp', $meeting->joinSetting?->require_rsvp) ? 'checked' : '' }}
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <div>
+                        <span class="text-sm font-medium text-gray-700">Require RSVP</span>
+                        <p class="text-xs text-gray-500">Attendees must confirm attendance before joining.</p>
+                    </div>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="auto_notify" value="1"
+                        {{ old('auto_notify', $meeting->joinSetting?->auto_notify ?? true) ? 'checked' : '' }}
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <div>
+                        <span class="text-sm font-medium text-gray-700">Auto-notify Attendees</span>
+                        <p class="text-xs text-gray-500">Automatically notify attendees when the meeting is updated.</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
             <a href="{{ route('meetings.show', $meeting) }}" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">Cancel</a>
             <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Update Meeting</button>
