@@ -113,7 +113,13 @@ test('edit form pre-fills join settings from existing record', function () {
     $response = $this->actingAs($this->user)->get(route('meetings.edit', $meeting));
 
     $response->assertSuccessful();
-    // allow_external_join=true should render as checked
-    $response->assertSee('name="allow_external_join"', false);
-    $response->assertSee('checked', false);
+    // allow_external_join=true should render the checkbox as checked
+    $response->assertSeeInOrder([
+        'name="allow_external_join" value="1"',
+        'checked',
+        'Allow External Join',
+    ], false);
+    // require_rsvp=false and auto_notify=false should not be checked
+    $response->assertDontSee('name="require_rsvp" value="1" checked', false);
+    $response->assertDontSee('name="auto_notify" value="1" checked', false);
 });

@@ -97,6 +97,7 @@
             <h3 class="text-sm font-medium text-gray-900">Join Settings</h3>
             <div class="space-y-3">
                 <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="hidden" name="allow_external_join" value="0">
                     <input type="checkbox" name="allow_external_join" value="1"
                         {{ old('allow_external_join', false) ? 'checked' : '' }}
                         class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
@@ -106,6 +107,7 @@
                     </div>
                 </label>
                 <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="hidden" name="require_rsvp" value="0">
                     <input type="checkbox" name="require_rsvp" value="1"
                         {{ old('require_rsvp', false) ? 'checked' : '' }}
                         class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
@@ -115,6 +117,7 @@
                     </div>
                 </label>
                 <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="hidden" name="auto_notify" value="0">
                     <input type="checkbox" name="auto_notify" value="1"
                         {{ old('auto_notify', true) ? 'checked' : '' }}
                         class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">

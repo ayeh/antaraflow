@@ -8,6 +8,7 @@ use App\Domain\Account\Services\AuditService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
+use Illuminate\Support\Facades\DB;
 
 class MeetingService
 {
@@ -29,21 +30,23 @@ class MeetingService
         $data['organization_id'] = $user->current_organization_id;
         $data['status'] = MeetingStatus::Draft;
 
-        $mom = MinutesOfMeeting::query()->create($data);
+        return DB::transaction(function () use ($data, $tags, $allowExternalJoin, $requireRsvp, $autoNotify) {
+            $mom = MinutesOfMeeting::query()->create($data);
 
-        if ($tags !== null) {
-            $mom->tags()->sync($tags);
-        }
+            if ($tags !== null) {
+                $mom->tags()->sync($tags);
+            }
 
-        $mom->joinSetting()->create([
-            'allow_external_join' => $allowExternalJoin,
-            'require_rsvp' => $requireRsvp,
-            'auto_notify' => $autoNotify,
-        ]);
+            $mom->joinSetting()->create([
+                'allow_external_join' => $allowExternalJoin,
+                'require_rsvp' => $requireRsvp,
+                'auto_notify' => $autoNotify,
+            ]);
 
-        $this->auditService->log('created', $mom);
+            $this->auditService->log('created', $mom);
 
-        return $mom;
+            return $mom;
+        });
     }
 
     public function update(MinutesOfMeeting $mom, array $data): MinutesOfMeeting
@@ -59,25 +62,27 @@ class MeetingService
 
         unset($data['tags'], $data['allow_external_join'], $data['require_rsvp'], $data['auto_notify']);
 
-        $oldValues = $mom->only(array_keys($data));
-        $mom->update($data);
+        return DB::transaction(function () use ($mom, $data, $tags, $allowExternalJoin, $requireRsvp, $autoNotify) {
+            $oldValues = $mom->only(array_keys($data));
+            $mom->update($data);
 
-        if ($tags !== false) {
-            $mom->tags()->sync($tags ?? []);
-        }
+            if ($tags !== false) {
+                $mom->tags()->sync($tags ?? []);
+            }
 
-        $mom->joinSetting()->updateOrCreate(
-            ['minutes_of_meeting_id' => $mom->id],
-            [
-                'allow_external_join' => $allowExternalJoin,
-                'require_rsvp' => $requireRsvp,
-                'auto_notify' => $autoNotify,
-            ]
-        );
+            $mom->joinSetting()->updateOrCreate(
+                [],
+                [
+                    'allow_external_join' => $allowExternalJoin,
+                    'require_rsvp' => $requireRsvp,
+                    'auto_notify' => $autoNotify,
+                ]
+            );
 
-        $this->auditService->log('updated', $mom, $oldValues, $data);
+            $this->auditService->log('updated', $mom, $oldValues, $data);
 
-        return $mom->fresh();
+            return $mom->fresh();
+        });
     }
 
     public function finalize(MinutesOfMeeting $mom, User $user): MinutesOfMeeting
