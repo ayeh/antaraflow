@@ -57,7 +57,8 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Resource</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Resource Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Resource ID</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">IP Address</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Details</th>
                         </tr>
@@ -72,7 +73,14 @@
                                 </td>
                                 <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                                     @if($log->auditable_type)
-                                        {{ class_basename($log->auditable_type) }} #{{ $log->auditable_id }}
+                                        {{ class_basename($log->auditable_type) }}
+                                    @else
+                                        &mdash;
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                                    @if($log->auditable_id)
+                                        #{{ $log->auditable_id }}
                                     @else
                                         &mdash;
                                     @endif
@@ -92,7 +100,7 @@
                             </tr>
                             @if($log->old_values || $log->new_values)
                                 <tr x-show="expanded" x-cloak class="bg-gray-50 dark:bg-slate-700/20">
-                                    <td colspan="6" class="px-4 pb-4 pt-0">
+                                    <td colspan="7" class="px-4 pb-4 pt-0">
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mt-2">
                                             @if($log->old_values)
                                                 <div>
