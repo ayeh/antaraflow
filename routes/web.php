@@ -59,6 +59,12 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::resource('meeting-series', \App\Domain\Meeting\Controllers\MeetingSeriesController::class);
     Route::post('meeting-series/{meetingSeries}/generate', [\App\Domain\Meeting\Controllers\MeetingSeriesController::class, 'generateMeetings'])->name('meeting-series.generate');
 
+    // Tags
+    Route::get('tags', [\App\Domain\Meeting\Controllers\MomTagController::class, 'index'])->name('tags.index');
+    Route::post('tags', [\App\Domain\Meeting\Controllers\MomTagController::class, 'store'])->name('tags.store');
+    Route::put('tags/{momTag}', [\App\Domain\Meeting\Controllers\MomTagController::class, 'update'])->name('tags.update');
+    Route::delete('tags/{momTag}', [\App\Domain\Meeting\Controllers\MomTagController::class, 'destroy'])->name('tags.destroy');
+
     // Meetings
     Route::resource('meetings', MeetingController::class);
     Route::post('meetings/{meeting}/finalize', [MeetingController::class, 'finalize'])->name('meetings.finalize');
