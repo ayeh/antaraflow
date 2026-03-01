@@ -1,13 +1,58 @@
-<h1>{{ $actionItem->title }}</h1>
+@extends('layouts.app')
 
-<p>Status: {{ $actionItem->status->value }}</p>
-<p>Priority: {{ $actionItem->priority->value }}</p>
-@if($actionItem->description)
-    <p>{{ $actionItem->description }}</p>
-@endif
-@if($actionItem->assignedTo)
-    <p>Assigned to: {{ $actionItem->assignedTo->name }}</p>
-@endif
-@if($actionItem->due_date)
-    <p>Due: {{ $actionItem->due_date->format('Y-m-d') }}</p>
-@endif
+@section('content')
+<div class="max-w-3xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{{ route('meetings.action-items.index', $actionItem->meeting) }}" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $actionItem->title }}</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $actionItem->meeting->title }}</p>
+            </div>
+        </div>
+        <a href="{{ route('meetings.action-items.edit', [$actionItem->meeting, $actionItem]) }}" class="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">Edit</a>
+    </div>
+
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-6">
+        <div class="flex flex-wrap gap-3">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                @if($actionItem->status === \App\Support\Enums\ActionItemStatus::Open) bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300
+                @elseif($actionItem->status === \App\Support\Enums\ActionItemStatus::InProgress) bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300
+                @elseif($actionItem->status === \App\Support\Enums\ActionItemStatus::Completed) bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300
+                @elseif($actionItem->status === \App\Support\Enums\ActionItemStatus::Cancelled) bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300
+                @elseif($actionItem->status === \App\Support\Enums\ActionItemStatus::CarriedForward) bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300
+                @endif">
+                {{ ucfirst(str_replace('_', ' ', $actionItem->status->value)) }}
+            </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                @if($actionItem->priority === \App\Support\Enums\ActionItemPriority::Low) bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300
+                @elseif($actionItem->priority === \App\Support\Enums\ActionItemPriority::Medium) bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300
+                @elseif($actionItem->priority === \App\Support\Enums\ActionItemPriority::High) bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300
+                @elseif($actionItem->priority === \App\Support\Enums\ActionItemPriority::Critical) bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300
+                @endif">
+                {{ ucfirst($actionItem->priority->value) }} Priority
+            </span>
+        </div>
+
+        @if($actionItem->description)
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ $actionItem->description }}</p>
+            </div>
+        @endif
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assigned To</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $actionItem->assignedTo?->name ?? 'Unassigned' }}</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $actionItem->due_date?->format('M j, Y') ?? 'No due date' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
