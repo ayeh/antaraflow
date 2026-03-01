@@ -9,6 +9,7 @@ use App\Domain\Collaboration\Requests\CreateShareRequest;
 use App\Domain\Collaboration\Services\ShareService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Support\Enums\SharePermission;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
@@ -37,9 +38,9 @@ class ShareController extends Controller
 
         $validated = $request->validated();
         $permission = SharePermission::from($validated['permission']);
-        $expiresAt = isset($validated['expires_at']) ? \Carbon\Carbon::parse($validated['expires_at']) : null;
+        $expiresAt = isset($validated['expires_at']) ? Carbon::parse($validated['expires_at']) : null;
 
-        if ($request->boolean('is_link_share') || empty($validated['shared_with_user_id'])) {
+        if ($request->boolean('is_link_share') || empty($validated['shared_with_user_id'] ?? null)) {
             $this->shareService->generateShareLink($meeting, $permission, $request->user(), $expiresAt);
         } else {
             $this->shareService->shareWithUser($meeting, (int) $validated['shared_with_user_id'], $permission, $request->user());
