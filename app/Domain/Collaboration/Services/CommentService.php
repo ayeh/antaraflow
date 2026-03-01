@@ -29,7 +29,7 @@ class CommentService
 
         $this->auditService->log('created', $comment);
 
-        return $comment->fresh();
+        return $comment->refresh();
     }
 
     public function updateComment(Comment $comment, string $body): Comment
@@ -37,7 +37,7 @@ class CommentService
         $comment->update(['body' => $body]);
         $this->auditService->log('updated', $comment);
 
-        return $comment->fresh();
+        return $comment->refresh();
     }
 
     public function deleteComment(Comment $comment): void

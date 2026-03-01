@@ -6,6 +6,7 @@ namespace App\Domain\Collaboration\Models;
 
 use App\Models\User;
 use App\Support\Traits\BelongsToOrganization;
+use Database\Factories\CommentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,9 +20,9 @@ class Comment extends Model
 
     protected $guarded = ['id'];
 
-    protected static function newFactory(): \Database\Factories\CommentFactory
+    protected static function newFactory(): CommentFactory
     {
-        return \Database\Factories\CommentFactory::new();
+        return CommentFactory::new();
     }
 
     public function commentable(): MorphTo

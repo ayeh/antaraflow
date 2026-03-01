@@ -23,6 +23,8 @@ class CommentController extends Controller
 
     public function store(CreateCommentRequest $request, MinutesOfMeeting $meeting): RedirectResponse
     {
+        $this->authorize('view', $meeting);
+
         $validated = $request->validated();
 
         $this->commentService->addComment(
