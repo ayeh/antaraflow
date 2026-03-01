@@ -8,4 +8,19 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Primary — Violet */
+    --color-primary-50:  #F5F3FF;
+    --color-primary-100: #EDE9FE;
+    --color-primary-500: #8B5CF6;
+    --color-primary-600: #7C3AED;
+    --color-primary-700: #6D28D9;
+
+    /* Secondary — Blue */
+    --color-secondary-500: #3B82F6;
+    --color-secondary-600: #2563EB;
+
+    /* Accent — Teal */
+    --color-accent-500: #2DD4BF;
+    --color-accent-600: #0D9488;
 }
