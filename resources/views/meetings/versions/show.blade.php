@@ -25,6 +25,7 @@
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Change Summary</p>
                     <p class="text-sm text-gray-900">{{ $version->change_summary ?? 'Auto-saved' }}</p>
                 </div>
+                @if(!$isLatest)
                 <form method="POST" action="{{ route('meetings.revert', $meeting) }}"
                       onsubmit="return confirm('Are you sure you want to revert this meeting to draft?')">
                     @csrf
@@ -35,6 +36,7 @@
                         Restore this version
                     </button>
                 </form>
+                @endif
             </div>
             <div class="flex items-center gap-4 text-xs text-gray-500">
                 @if($version->createdBy)

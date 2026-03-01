@@ -30,6 +30,11 @@ class MomVersionController extends Controller
     {
         $this->authorize('view', $meeting);
 
-        return view('meetings.versions.show', compact('meeting', 'version'));
+        abort_if($version->minutes_of_meeting_id !== $meeting->id, 404);
+
+        $latestVersionNumber = $meeting->versions()->max('version_number');
+        $isLatest = $version->version_number === $latestVersionNumber;
+
+        return view('meetings.versions.show', compact('meeting', 'version', 'isLatest'));
     }
 }
