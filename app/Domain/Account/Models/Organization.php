@@ -41,4 +41,9 @@ class Organization extends Model
             ->withPivot('role')
             ->withTimestamps();
     }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(OrganizationSubscription::class);
+    }
 }

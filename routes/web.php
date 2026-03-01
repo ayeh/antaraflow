@@ -50,6 +50,7 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::resource('organizations.members', MemberController::class)->only(['index', 'store', 'update', 'destroy'])->shallow();
     Route::get('organizations/{organization}/settings', [OrganizationSettingsController::class, 'edit'])->name('organizations.settings.edit');
     Route::put('organizations/{organization}/settings', [OrganizationSettingsController::class, 'update'])->name('organizations.settings.update');
+    Route::post('organizations/{organization}/settings/logo', [OrganizationSettingsController::class, 'uploadLogo'])->name('organizations.settings.logo');
 
     // Meetings
     Route::resource('meetings', MeetingController::class);
