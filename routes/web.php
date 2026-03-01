@@ -81,6 +81,9 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::get('analytics', [\App\Domain\Analytics\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('analytics/data', [\App\Domain\Analytics\Controllers\AnalyticsController::class, 'data'])->name('analytics.data');
 
+    // Audit Log
+    Route::get('audit-log', [\App\Domain\Account\Controllers\AuditLogController::class, 'index'])->name('audit-log.index');
+
     // Cross-meeting dashboards
     Route::get('action-items', [ActionItemDashboardController::class, 'index'])->name('action-items.dashboard');
 
