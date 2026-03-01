@@ -12,6 +12,7 @@ use App\Support\Enums\SharePermission;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
@@ -23,13 +24,14 @@ class ShareController extends Controller
         private ShareService $shareService,
     ) {}
 
-    public function index(MinutesOfMeeting $meeting): View
+    public function index(MinutesOfMeeting $meeting, Request $request): View
     {
         $this->authorize('viewAny', MeetingShare::class);
 
         $shares = $this->shareService->getSharesForMeeting($meeting);
+        $orgMembers = $request->user()->currentOrganization->members()->get();
 
-        return view('collaboration.share-panel', compact('meeting', 'shares'));
+        return view('collaboration.share-panel', compact('meeting', 'shares', 'orgMembers'));
     }
 
     public function store(CreateShareRequest $request, MinutesOfMeeting $meeting): RedirectResponse
