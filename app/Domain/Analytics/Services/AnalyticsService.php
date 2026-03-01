@@ -69,7 +69,13 @@ class AnalyticsService
             ->where('status', ActionItemStatus::Completed)
             ->count();
 
-        $pending = $total - $completed;
+        $pending = (clone $baseQuery)
+            ->whereNotIn('status', [
+                ActionItemStatus::Completed->value,
+                ActionItemStatus::Cancelled->value,
+                ActionItemStatus::CarriedForward->value,
+            ])
+            ->count();
 
         $overdue = (clone $baseQuery)
             ->whereNotIn('status', [ActionItemStatus::Completed, ActionItemStatus::Cancelled, ActionItemStatus::CarriedForward])
@@ -98,28 +104,28 @@ class AnalyticsService
      */
     public function getParticipationStats(int $orgId, Carbon $startDate, Carbon $endDate): array
     {
-        $attendees = MomAttendee::query()
+        $baseQuery = MomAttendee::query()
             ->whereHas('meeting', fn ($query) => $query
                 ->where('organization_id', $orgId)
                 ->whereBetween('meeting_date', [$startDate, $endDate])
-            )
-            ->get(['name', 'email']);
+            );
 
-        $topAttendees = $attendees
+        $topAttendees = (clone $baseQuery)
+            ->selectRaw('name, email, COUNT(*) as count')
             ->groupBy('name')
-            ->map(fn ($group, $name) => [
-                'name' => $name,
-                'count' => $group->count(),
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()
+            ->map(fn ($row) => [
+                'name' => $row->name,
+                'count' => (int) $row->count,
             ])
-            ->sortByDesc('count')
-            ->take(10)
-            ->values()
             ->toArray();
 
-        $totalAttendees = $attendees
-            ->filter(fn ($attendee) => $attendee->email !== null)
-            ->unique('email')
-            ->count();
+        $totalAttendees = (clone $baseQuery)
+            ->distinct('email')
+            ->whereNotNull('email')
+            ->count('email');
 
         return [
             'top_attendees' => $topAttendees,

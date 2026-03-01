@@ -18,7 +18,7 @@ class AnalyticsController extends Controller
 
     public function index(): View
     {
-        $orgId = auth()->user()->current_organization_id;
+        $orgId = (int) auth()->user()->current_organization_id;
         $startDate = now()->subMonths(6)->startOfMonth();
         $endDate = now()->endOfMonth();
 
@@ -32,7 +32,7 @@ class AnalyticsController extends Controller
 
     public function data(Request $request): JsonResponse
     {
-        $orgId = auth()->user()->current_organization_id;
+        $orgId = (int) auth()->user()->current_organization_id;
         $startDate = $request->date('start_date') ?? now()->subMonths(6)->startOfMonth();
         $endDate = $request->date('end_date') ?? now()->endOfMonth();
 
