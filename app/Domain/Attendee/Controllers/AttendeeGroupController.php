@@ -6,6 +6,7 @@ namespace App\Domain\Attendee\Controllers;
 
 use App\Domain\Attendee\Models\AttendeeGroup;
 use App\Domain\Attendee\Requests\CreateAttendeeGroupRequest;
+use App\Domain\Attendee\Requests\UpdateAttendeeGroupRequest;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
@@ -50,7 +51,7 @@ class AttendeeGroupController extends Controller
         return view('attendee-groups.edit', compact('attendeeGroup'));
     }
 
-    public function update(CreateAttendeeGroupRequest $request, AttendeeGroup $attendeeGroup): RedirectResponse
+    public function update(UpdateAttendeeGroupRequest $request, AttendeeGroup $attendeeGroup): RedirectResponse
     {
         $this->authorize('update', $attendeeGroup);
 
