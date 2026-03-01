@@ -59,6 +59,7 @@
                         <label x-data="{ checked: {{ $isChecked ? 'true' : 'false' }} }" class="cursor-pointer">
                             <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
                                 x-model="checked"
+                                {{ $isChecked ? 'checked' : '' }}
                                 class="sr-only">
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border-2 transition-all select-none"
                                 :style="checked
