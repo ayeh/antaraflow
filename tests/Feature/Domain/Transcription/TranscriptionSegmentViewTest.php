@@ -63,7 +63,7 @@ test('transcription show page displays timestamps in mm:ss format', function () 
     TranscriptionSegment::factory()->create([
         'audio_transcription_id' => $transcription->id,
         'start_time' => 65.0,
-        'end_time' => 70.5,
+        'end_time' => 70.0,
         'confidence' => null,
         'is_edited' => false,
     ]);

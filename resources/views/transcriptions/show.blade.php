@@ -48,8 +48,10 @@
             <div class="space-y-0">
                 @foreach($transcription->segments as $segment)
                     @php
-                        $startFormatted = sprintf('%02d:%02d', (int) floor($segment->start_time / 60), (int) ($segment->start_time % 60));
-                        $endFormatted   = sprintf('%02d:%02d', (int) floor($segment->end_time / 60), (int) ($segment->end_time % 60));
+                        $startSecs      = (int) floor($segment->start_time);
+                        $endSecs        = (int) floor($segment->end_time);
+                        $startFormatted = sprintf('%02d:%02d', intdiv($startSecs, 60), $startSecs % 60);
+                        $endFormatted   = sprintf('%02d:%02d', intdiv($endSecs, 60), $endSecs % 60);
 
                         if ($segment->speaker !== null && ! isset($speakerColorMap[$segment->speaker])) {
                             $speakerColorMap[$segment->speaker] = $speakerColors[$speakerColorIndex % count($speakerColors)];
