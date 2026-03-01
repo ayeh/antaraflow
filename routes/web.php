@@ -92,6 +92,12 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::post('api-keys', [\App\Domain\Account\Controllers\ApiKeyController::class, 'store'])->name('api-keys.store');
     Route::delete('api-keys/{apiKey}', [\App\Domain\Account\Controllers\ApiKeyController::class, 'destroy'])->name('api-keys.destroy');
 
+    // Notifications
+    Route::get('notifications', [\App\Domain\Account\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/unread', [\App\Domain\Account\Controllers\NotificationController::class, 'unread'])->name('notifications.unread');
+    Route::post('notifications/read-all', [\App\Domain\Account\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('notifications/{id}/read', [\App\Domain\Account\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+
     // AI Provider Configs
     Route::resource('ai-provider-configs', \App\Domain\Account\Controllers\AiProviderConfigController::class);
 
