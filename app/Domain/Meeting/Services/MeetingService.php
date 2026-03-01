@@ -18,11 +18,18 @@ class MeetingService
 
     public function create(array $data, User $user): MinutesOfMeeting
     {
+        $tags = $data['tags'] ?? null;
+        unset($data['tags']);
+
         $data['created_by'] = $user->id;
         $data['organization_id'] = $user->current_organization_id;
         $data['status'] = MeetingStatus::Draft;
 
         $mom = MinutesOfMeeting::query()->create($data);
+
+        if ($tags !== null) {
+            $mom->tags()->sync($tags);
+        }
 
         $this->auditService->log('created', $mom);
 
@@ -35,8 +42,16 @@ class MeetingService
             throw new \DomainException('Cannot edit an approved meeting.');
         }
 
+        $tags = array_key_exists('tags', $data) ? $data['tags'] : false;
+        unset($data['tags']);
+
         $oldValues = $mom->only(array_keys($data));
         $mom->update($data);
+
+        if ($tags !== false) {
+            $mom->tags()->sync($tags ?? []);
+        }
+
         $this->auditService->log('updated', $mom, $oldValues, $data);
 
         return $mom->fresh();

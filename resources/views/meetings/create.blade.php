@@ -64,6 +64,29 @@
             </div>
         </div>
 
+        @if($availableTags->isNotEmpty())
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                <div class="flex flex-wrap gap-2">
+                    @foreach($availableTags as $tag)
+                        @php $isChecked = in_array($tag->id, old('tags', [])); @endphp
+                        <label x-data="{ checked: {{ $isChecked ? 'true' : 'false' }} }" class="cursor-pointer">
+                            <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
+                                x-model="checked"
+                                class="sr-only">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border-2 transition-all select-none"
+                                :style="checked
+                                    ? 'background-color: {{ $tag->color }}; color: #fff; border-color: {{ $tag->color }};'
+                                    : 'background-color: {{ $tag->color }}1a; color: {{ $tag->color }}; border-color: {{ $tag->color }}40;'">
+                                <svg x-show="checked" class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                {{ $tag->name }}
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         <div>
             <label for="content" class="block text-sm font-medium text-gray-700 mb-1">Content</label>
             <textarea name="content" id="content" rows="6" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">{{ old('content') }}</textarea>

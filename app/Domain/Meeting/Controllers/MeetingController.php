@@ -7,6 +7,7 @@ namespace App\Domain\Meeting\Controllers;
 use App\Domain\Collaboration\Services\CommentService;
 use App\Domain\Collaboration\Services\ShareService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Domain\Meeting\Models\MomTag;
 use App\Domain\Meeting\Requests\CreateMeetingRequest;
 use App\Domain\Meeting\Requests\UpdateMeetingRequest;
 use App\Domain\Meeting\Services\MeetingSearchService;
@@ -41,7 +42,9 @@ class MeetingController extends Controller
     {
         $this->authorize('create', MinutesOfMeeting::class);
 
-        return view('meetings.create');
+        $availableTags = MomTag::query()->orderBy('name')->get();
+
+        return view('meetings.create', compact('availableTags'));
     }
 
     public function store(CreateMeetingRequest $request): RedirectResponse
@@ -72,7 +75,9 @@ class MeetingController extends Controller
     {
         $this->authorize('update', $meeting);
 
-        return view('meetings.edit', compact('meeting'));
+        $availableTags = MomTag::query()->orderBy('name')->get();
+
+        return view('meetings.edit', compact('meeting', 'availableTags'));
     }
 
     public function update(UpdateMeetingRequest $request, MinutesOfMeeting $meeting): RedirectResponse

@@ -25,6 +25,8 @@ class CreateMeetingRequest extends FormRequest
             'meeting_template_id' => ['nullable', 'exists:meeting_templates,id'],
             'summary' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
+            'tags' => ['nullable', 'array'],
+            'tags.*' => ['integer', 'exists:mom_tags,id'],
         ];
     }
 
@@ -39,6 +41,7 @@ class CreateMeetingRequest extends FormRequest
             'duration_minutes.min' => 'The duration must be at least 1 minute.',
             'meeting_series_id.exists' => 'The selected meeting series does not exist.',
             'meeting_template_id.exists' => 'The selected meeting template does not exist.',
+            'tags.*.exists' => 'One or more selected tags do not exist.',
         ];
     }
 }
