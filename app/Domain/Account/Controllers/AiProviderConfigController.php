@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AiProviderConfigController extends Controller
@@ -67,25 +68,27 @@ class AiProviderConfigController extends Controller
 
         $validated = $request->validated();
 
-        if ($request->boolean('is_default')) {
-            AiProviderConfig::query()
-                ->where('organization_id', $organization->id)
-                ->update(['is_default' => false]);
-        }
+        DB::transaction(function () use ($organization, $validated, $request): void {
+            if ($request->boolean('is_default')) {
+                AiProviderConfig::query()
+                    ->where('organization_id', $organization->id)
+                    ->update(['is_default' => false]);
+            }
 
-        AiProviderConfig::query()->create([
-            'organization_id' => $organization->id,
-            'provider' => $validated['provider'],
-            'display_name' => $validated['display_name'],
-            'api_key_encrypted' => isset($validated['api_key']) && $validated['api_key'] !== null
-                ? Crypt::encryptString($validated['api_key'])
-                : null,
-            'model' => $validated['model'],
-            'base_url' => $validated['base_url'] ?? null,
-            'is_default' => $validated['is_default'] ?? false,
-            'is_active' => $validated['is_active'] ?? true,
-            'settings' => $validated['settings'] ?? null,
-        ]);
+            AiProviderConfig::query()->create([
+                'organization_id' => $organization->id,
+                'provider' => $validated['provider'],
+                'display_name' => $validated['display_name'],
+                'api_key_encrypted' => isset($validated['api_key']) && $validated['api_key'] !== null
+                    ? Crypt::encryptString($validated['api_key'])
+                    : null,
+                'model' => $validated['model'],
+                'base_url' => $validated['base_url'] ?? null,
+                'is_default' => $validated['is_default'] ?? false,
+                'is_active' => $validated['is_active'] ?? true,
+                'settings' => $validated['settings'] ?? null,
+            ]);
+        });
 
         return redirect()->route('ai-provider-configs.index')
             ->with('success', 'AI provider configuration created successfully.');
@@ -102,6 +105,8 @@ class AiProviderConfigController extends Controller
             403
         );
 
+        abort_unless($aiProviderConfig->organization_id === $organization->id, 403);
+
         return view('ai-provider-configs.edit', compact('aiProviderConfig'));
     }
 
@@ -116,27 +121,31 @@ class AiProviderConfigController extends Controller
             403
         );
 
+        abort_unless($aiProviderConfig->organization_id === $organization->id, 403);
+
         $validated = $request->validated();
 
-        if ($request->boolean('is_default')) {
-            AiProviderConfig::query()
-                ->where('organization_id', $organization->id)
-                ->whereKeyNot($aiProviderConfig->id)
-                ->update(['is_default' => false]);
-        }
+        DB::transaction(function () use ($organization, $validated, $request, $aiProviderConfig): void {
+            if ($request->boolean('is_default')) {
+                AiProviderConfig::query()
+                    ->where('organization_id', $organization->id)
+                    ->whereKeyNot($aiProviderConfig->id)
+                    ->update(['is_default' => false]);
+            }
 
-        $aiProviderConfig->update([
-            'provider' => $validated['provider'],
-            'display_name' => $validated['display_name'],
-            'api_key_encrypted' => isset($validated['api_key']) && $validated['api_key'] !== null
-                ? Crypt::encryptString($validated['api_key'])
-                : $aiProviderConfig->api_key_encrypted,
-            'model' => $validated['model'],
-            'base_url' => $validated['base_url'] ?? null,
-            'is_default' => $validated['is_default'] ?? false,
-            'is_active' => $validated['is_active'] ?? true,
-            'settings' => $validated['settings'] ?? null,
-        ]);
+            $aiProviderConfig->update([
+                'provider' => $validated['provider'],
+                'display_name' => $validated['display_name'],
+                'api_key_encrypted' => isset($validated['api_key']) && $validated['api_key'] !== null
+                    ? Crypt::encryptString($validated['api_key'])
+                    : $aiProviderConfig->api_key_encrypted,
+                'model' => $validated['model'],
+                'base_url' => $validated['base_url'] ?? null,
+                'is_default' => $validated['is_default'] ?? false,
+                'is_active' => $validated['is_active'] ?? true,
+                'settings' => $validated['settings'] ?? null,
+            ]);
+        });
 
         return redirect()->route('ai-provider-configs.index')
             ->with('success', 'AI provider configuration updated successfully.');
@@ -152,6 +161,8 @@ class AiProviderConfigController extends Controller
             $this->authService->hasPermission($user, $organization, 'manage_organization'),
             403
         );
+
+        abort_unless($aiProviderConfig->organization_id === $organization->id, 403);
 
         $aiProviderConfig->delete();
 
