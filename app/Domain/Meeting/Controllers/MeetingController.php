@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Meeting\Controllers;
 
+use App\Domain\Collaboration\Services\CommentService;
+use App\Domain\Collaboration\Services\ShareService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Meeting\Requests\CreateMeetingRequest;
 use App\Domain\Meeting\Requests\UpdateMeetingRequest;
@@ -22,6 +24,8 @@ class MeetingController extends Controller
     public function __construct(
         private MeetingService $meetingService,
         private MeetingSearchService $searchService,
+        private ShareService $shareService,
+        private CommentService $commentService,
     ) {}
 
     public function index(Request $request): View
@@ -50,13 +54,17 @@ class MeetingController extends Controller
             ->with('success', 'Meeting created successfully.');
     }
 
-    public function show(MinutesOfMeeting $meeting): View
+    public function show(MinutesOfMeeting $meeting, Request $request): View
     {
         $this->authorize('view', $meeting);
 
         $meeting->load(['createdBy', 'series', 'template', 'tags', 'versions']);
 
-        return view('meetings.show', compact('meeting'));
+        $shares = $this->shareService->getSharesForMeeting($meeting);
+        $comments = $this->commentService->getComments($meeting);
+        $orgMembers = $request->user()->currentOrganization->members()->get();
+
+        return view('meetings.show', compact('meeting', 'shares', 'comments', 'orgMembers'));
     }
 
     public function edit(MinutesOfMeeting $meeting): View

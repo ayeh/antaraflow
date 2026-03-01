@@ -68,7 +68,7 @@
         </div>
     </div>
 
-    <div x-data="{ activeTab: 'content' }">
+    <div x-data="{ activeTab: 'content', isLinkShare: false }">
         <div class="border-b border-gray-200 bg-white rounded-t-xl">
             <nav class="flex -mb-px overflow-x-auto">
                 <button @click="activeTab = 'content'" :class="activeTab === 'content' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Content</button>
@@ -77,6 +77,8 @@
                 <button @click="activeTab = 'actions'" :class="activeTab === 'actions' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Action Items</button>
                 <button @click="activeTab = 'attendees'" :class="activeTab === 'attendees' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Attendees</button>
                 <button @click="activeTab = 'chat'" :class="activeTab === 'chat' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">AI Chat</button>
+                <button @click="activeTab = 'sharing'" :class="activeTab === 'sharing' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Sharing</button>
+                <button @click="activeTab = 'comments'" :class="activeTab === 'comments' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Comments</button>
             </nav>
         </div>
 
@@ -98,6 +100,12 @@
             </div>
             <div x-show="activeTab === 'chat'" x-cloak>
                 @include('meetings.tabs.chat', ['meeting' => $meeting])
+            </div>
+            <div x-show="activeTab === 'sharing'" x-cloak>
+                @include('collaboration.share-panel', ['meeting' => $meeting, 'shares' => $shares, 'orgMembers' => $orgMembers])
+            </div>
+            <div x-show="activeTab === 'comments'" x-cloak>
+                @include('collaboration.comments', ['meeting' => $meeting, 'comments' => $comments])
             </div>
         </div>
     </div>
