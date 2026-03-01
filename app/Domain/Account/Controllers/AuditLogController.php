@@ -38,7 +38,12 @@ class AuditLogController extends Controller
             ->latest()
             ->paginate(50);
 
-        $actions = AuditLog::query()->distinct()->pluck('action')->sort()->values();
+        $actions = AuditLog::query()
+            ->where('organization_id', $organization->id)
+            ->distinct()
+            ->pluck('action')
+            ->sort()
+            ->values();
 
         $orgUsers = User::query()
             ->whereHas('organizations', fn ($q) => $q->where('organization_id', $user->current_organization_id))

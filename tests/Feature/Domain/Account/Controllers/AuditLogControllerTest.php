@@ -129,4 +129,5 @@ test('audit log only shows entries from current organization', function () {
     $response->assertOk();
     $response->assertSee('own_org_action');
     $response->assertDontSee('other_org_action');
+    $response->assertViewHas('logs', fn ($logs) => $logs->total() === 1);
 });
