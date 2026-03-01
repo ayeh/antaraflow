@@ -54,6 +54,7 @@
                                 'Europe/London' => 'Europe/London',
                                 'Europe/Paris' => 'Europe/Paris',
                                 'Europe/Berlin' => 'Europe/Berlin',
+                                'Asia/Kuala_Lumpur' => 'Asia/Kuala_Lumpur',
                                 'Asia/Tokyo' => 'Asia/Tokyo',
                                 'Asia/Jakarta' => 'Asia/Jakarta',
                                 'Asia/Singapore' => 'Asia/Singapore',
@@ -71,7 +72,7 @@
                         <label for="language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
                         <select name="language" id="language" class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                             <option value="en" {{ old('language', $user->language) === 'en' ? 'selected' : '' }}>English</option>
-                            <option value="id" {{ old('language', $user->language) === 'id' ? 'selected' : '' }}>Indonesian</option>
+                            <option value="ms" {{ old('language', $user->language) === 'ms' ? 'selected' : '' }}>Bahasa Melayu</option>
                         </select>
                         @error('language')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -122,7 +123,7 @@
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Preferences</h2>
         <div class="border-t border-gray-200 dark:border-slate-700 mt-4 pt-4">
-            <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
+            <form method="POST" action="{{ route('profile.preferences') }}" class="space-y-4">
                 @csrf
                 @method('PUT')
 

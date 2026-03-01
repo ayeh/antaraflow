@@ -51,7 +51,10 @@ class OrganizationController extends Controller
     {
         $this->authorize('view', $organization);
 
-        return view('organizations.show', compact('organization'));
+        $members = $organization->members()->withPivot('role')->get();
+        $subscription = $organization->subscriptions()->with('subscriptionPlan')->latest()->first();
+
+        return view('organizations.show', compact('organization', 'members', 'subscription'));
     }
 
     public function edit(Organization $organization): View

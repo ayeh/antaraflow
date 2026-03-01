@@ -43,6 +43,7 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::put('profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences');
     Route::post('profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
 
     // Organizations

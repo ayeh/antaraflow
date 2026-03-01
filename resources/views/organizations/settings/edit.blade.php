@@ -58,6 +58,7 @@
                                 'Europe/London' => 'Europe/London',
                                 'Europe/Paris' => 'Europe/Paris',
                                 'Europe/Berlin' => 'Europe/Berlin',
+                                'Asia/Kuala_Lumpur' => 'Asia/Kuala_Lumpur',
                                 'Asia/Tokyo' => 'Asia/Tokyo',
                                 'Asia/Jakarta' => 'Asia/Jakarta',
                                 'Asia/Singapore' => 'Asia/Singapore',
@@ -76,7 +77,7 @@
                         <select name="language" id="language"
                             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                             <option value="en" {{ old('language', $organization->language ?? 'en') === 'en' ? 'selected' : '' }}>English</option>
-                            <option value="id" {{ old('language', $organization->language ?? 'en') === 'id' ? 'selected' : '' }}>Indonesian</option>
+                            <option value="ms" {{ old('language', $organization->language ?? 'en') === 'ms' ? 'selected' : '' }}>Bahasa Melayu</option>
                         </select>
                         @error('language')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>

@@ -46,6 +46,22 @@ class ProfileController extends Controller
         return redirect()->route('profile.edit')->with('success', 'Password updated successfully.');
     }
 
+    public function updatePreferences(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'preferences' => ['required', 'array'],
+            'preferences.theme' => ['nullable', 'string', \Illuminate\Validation\Rule::in(['light', 'dark', 'system'])],
+            'preferences.default_meeting_duration' => ['nullable', 'integer', 'min:5', 'max:480'],
+            'preferences.notifications' => ['nullable', 'array'],
+        ]);
+
+        $user = $request->user();
+        $preferences = array_merge($user->preferences ?? [], $data['preferences']);
+        $user->update(['preferences' => $preferences]);
+
+        return redirect()->route('profile.edit')->with('success', 'Preferences updated successfully.');
+    }
+
     public function updateAvatar(Request $request): RedirectResponse
     {
         $request->validate([

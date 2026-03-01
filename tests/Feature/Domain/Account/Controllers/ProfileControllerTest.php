@@ -34,16 +34,16 @@ test('user can update profile information', function () {
     $response = $this->actingAs($this->user)->put(route('profile.update'), [
         'name' => 'Updated Name',
         'email' => $this->user->email,
-        'timezone' => 'Asia/Jakarta',
-        'language' => 'id',
+        'timezone' => 'Asia/Kuala_Lumpur',
+        'language' => 'ms',
     ]);
 
     $response->assertRedirect(route('profile.edit'));
     $this->assertDatabaseHas('users', [
         'id' => $this->user->id,
         'name' => 'Updated Name',
-        'timezone' => 'Asia/Jakarta',
-        'language' => 'id',
+        'timezone' => 'Asia/Kuala_Lumpur',
+        'language' => 'ms',
     ]);
 });
 
@@ -84,6 +84,23 @@ test('user can upload avatar', function () {
     $response->assertRedirect(route('profile.edit'));
     $this->assertNotNull($this->user->fresh()->avatar_path);
     Storage::disk('public')->assertExists($this->user->fresh()->avatar_path);
+});
+
+test('user can update preferences', function () {
+    $response = $this->actingAs($this->user)->put(route('profile.preferences'), [
+        'preferences' => [
+            'theme' => 'dark',
+            'default_meeting_duration' => 30,
+            'notifications' => ['meeting_invite', 'action_item_assigned'],
+        ],
+    ]);
+
+    $response->assertRedirect(route('profile.edit'));
+
+    $user = $this->user->fresh();
+    expect($user->preferences['theme'])->toBe('dark');
+    expect($user->preferences['default_meeting_duration'])->toBe(30);
+    expect($user->preferences['notifications'])->toContain('meeting_invite', 'action_item_assigned');
 });
 
 test('profile update validates required fields', function () {
