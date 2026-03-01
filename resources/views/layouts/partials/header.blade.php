@@ -1,12 +1,15 @@
 <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm
                border-b border-slate-200 dark:border-slate-700 px-6 py-3
                flex items-center gap-3">
-    {{-- Organization name --}}
-    <div class="flex-1 min-w-0">
+    {{-- Organization name + logo --}}
+    <div class="flex-1 min-w-0 flex items-center gap-2">
         @if(auth()->user()->currentOrganization)
-        <span class="text-sm font-medium text-slate-600 dark:text-slate-400 truncate">
-            {{ auth()->user()->currentOrganization->name }}
-        </span>
+            @if(auth()->user()->currentOrganization->logo_path)
+                <img src="{{ Storage::url(auth()->user()->currentOrganization->logo_path) }}" alt="{{ auth()->user()->currentOrganization->name }}" class="w-6 h-6 rounded object-cover flex-shrink-0">
+            @endif
+            <span class="text-sm font-medium text-slate-600 dark:text-slate-400 truncate">
+                {{ auth()->user()->currentOrganization->name }}
+            </span>
         @endif
     </div>
 
