@@ -88,8 +88,8 @@
         @if($meeting->content)
             <div class="bg-white rounded-xl border border-gray-200 p-6">
                 <h2 class="text-base font-semibold text-gray-900 mb-3">Meeting Notes</h2>
-                <div class="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">
-                    {!! nl2br(e($meeting->content)) !!}
+                <div class="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none whitespace-pre-line">
+                    {{ $meeting->content }}
                 </div>
             </div>
         @endif
