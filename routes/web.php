@@ -53,6 +53,9 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::put('organizations/{organization}/settings', [OrganizationSettingsController::class, 'update'])->name('organizations.settings.update');
     Route::post('organizations/{organization}/settings/logo', [OrganizationSettingsController::class, 'uploadLogo'])->name('organizations.settings.logo');
 
+    // Attendee Groups
+    Route::resource('attendee-groups', \App\Domain\Attendee\Controllers\AttendeeGroupController::class)->except(['show']);
+
     // Meeting Templates
     Route::resource('meeting-templates', \App\Domain\Meeting\Controllers\MeetingTemplateController::class);
 

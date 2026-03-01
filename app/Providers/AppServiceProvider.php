@@ -6,6 +6,8 @@ use App\Domain\Account\Models\Organization;
 use App\Domain\Account\Policies\OrganizationPolicy;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\ActionItem\Policies\ActionItemPolicy;
+use App\Domain\Attendee\Models\AttendeeGroup;
+use App\Domain\Attendee\Policies\AttendeeGroupPolicy;
 use App\Domain\Collaboration\Models\Comment;
 use App\Domain\Collaboration\Models\MeetingShare;
 use App\Domain\Collaboration\Policies\CommentPolicy;
@@ -29,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Gate::policy(AttendeeGroup::class, AttendeeGroupPolicy::class);
         Gate::policy(Organization::class, OrganizationPolicy::class);
         Gate::policy(MinutesOfMeeting::class, MinutesOfMeetingPolicy::class);
         Gate::policy(MeetingTemplate::class, MeetingTemplatePolicy::class);
