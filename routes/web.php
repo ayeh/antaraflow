@@ -92,6 +92,10 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::post('api-keys', [\App\Domain\Account\Controllers\ApiKeyController::class, 'store'])->name('api-keys.store');
     Route::delete('api-keys/{apiKey}', [\App\Domain\Account\Controllers\ApiKeyController::class, 'destroy'])->name('api-keys.destroy');
 
+    // Usage Tracking
+    Route::get('subscription', [\App\Domain\Account\Controllers\SubscriptionController::class, 'index'])->name('subscription.index');
+    Route::get('usage', [\App\Domain\Account\Controllers\UsageController::class, 'index'])->name('usage.index');
+
     // Notifications
     Route::get('notifications', [\App\Domain\Account\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/unread', [\App\Domain\Account\Controllers\NotificationController::class, 'unread'])->name('notifications.unread');
