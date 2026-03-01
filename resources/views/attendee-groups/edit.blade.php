@@ -35,7 +35,7 @@
 
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Members</label>
-            <div x-data="{ members: {{ json_encode(old('default_members', $attendeeGroup->default_members ?? [])) }} }">
+            <div x-data="{ members: @js(old('default_members', $attendeeGroup->default_members ?? [])) }">
                 <template x-for="(member, index) in members" :key="index">
                     <div class="flex gap-2 mb-2">
                         <input type="text" :name="`default_members[${index}][name]`" x-model="member.name" placeholder="Name" class="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2">

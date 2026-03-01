@@ -27,7 +27,7 @@ test('org member can view attendee groups index', function () {
     $response->assertDontSee($otherGroup->name);
 });
 
-test('org admin can create attendee group', function () {
+test('org owner can create attendee group', function () {
     $response = $this->actingAs($this->user)->post(route('attendee-groups.store'), [
         'name' => 'Finance Team',
         'description' => 'All finance members',
@@ -41,7 +41,7 @@ test('org admin can create attendee group', function () {
     ]);
 });
 
-test('org admin can create group with members', function () {
+test('org owner can create group with members', function () {
     $response = $this->actingAs($this->user)->post(route('attendee-groups.store'), [
         'name' => 'Engineering Team',
         'default_members' => [
@@ -61,7 +61,7 @@ test('org admin can create group with members', function () {
     expect($group->default_members[1]['name'])->toBe('Bob');
 });
 
-test('org admin can update attendee group', function () {
+test('org owner can update attendee group', function () {
     $group = AttendeeGroup::factory()->for($this->org)->create(['default_members' => []]);
 
     $response = $this->actingAs($this->user)->put(route('attendee-groups.update', $group), [
@@ -77,13 +77,21 @@ test('org admin can update attendee group', function () {
     ]);
 });
 
-test('org admin can delete attendee group', function () {
+test('org owner can delete attendee group', function () {
     $group = AttendeeGroup::factory()->for($this->org)->create(['default_members' => []]);
 
     $response = $this->actingAs($this->user)->delete(route('attendee-groups.destroy', $group));
 
     $response->assertRedirect(route('attendee-groups.index'));
     $this->assertDatabaseMissing('attendee_groups', ['id' => $group->id]);
+});
+
+test('viewer cannot access create attendee group page', function () {
+    $viewer = User::factory()->create(['current_organization_id' => $this->org->id]);
+    $this->org->members()->attach($viewer, ['role' => UserRole::Viewer->value]);
+
+    $response = $this->actingAs($viewer)->get(route('attendee-groups.create'));
+    $response->assertForbidden();
 });
 
 test('viewer cannot create attendee group', function () {
