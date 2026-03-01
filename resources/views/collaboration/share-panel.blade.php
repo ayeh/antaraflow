@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ isLinkShare: false }">
     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Sharing</h2>
 
     @if($shares->isNotEmpty())

@@ -62,7 +62,8 @@ class MeetingController extends Controller
 
         $shares = $this->shareService->getSharesForMeeting($meeting);
         $comments = $this->commentService->getComments($meeting);
-        $orgMembers = $request->user()->currentOrganization->members()->get();
+        $user = $request->user()->loadMissing('currentOrganization');
+        $orgMembers = $user->currentOrganization->members()->get();
 
         return view('meetings.show', compact('meeting', 'shares', 'comments', 'orgMembers'));
     }
