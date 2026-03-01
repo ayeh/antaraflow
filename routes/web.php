@@ -52,6 +52,9 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::put('organizations/{organization}/settings', [OrganizationSettingsController::class, 'update'])->name('organizations.settings.update');
     Route::post('organizations/{organization}/settings/logo', [OrganizationSettingsController::class, 'uploadLogo'])->name('organizations.settings.logo');
 
+    // Meeting Templates
+    Route::resource('meeting-templates', \App\Domain\Meeting\Controllers\MeetingTemplateController::class);
+
     // Meetings
     Route::resource('meetings', MeetingController::class);
     Route::post('meetings/{meeting}/finalize', [MeetingController::class, 'finalize'])->name('meetings.finalize');
