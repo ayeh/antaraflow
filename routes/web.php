@@ -65,6 +65,10 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::post('meetings/{meeting}/approve', [MeetingController::class, 'approve'])->name('meetings.approve');
     Route::post('meetings/{meeting}/revert', [MeetingController::class, 'revert'])->name('meetings.revert');
 
+    // Analytics
+    Route::get('analytics', [\App\Domain\Analytics\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('analytics/data', [\App\Domain\Analytics\Controllers\AnalyticsController::class, 'data'])->name('analytics.data');
+
     // Cross-meeting dashboards
     Route::get('action-items', [ActionItemDashboardController::class, 'index'])->name('action-items.dashboard');
 
