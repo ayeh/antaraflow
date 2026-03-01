@@ -57,11 +57,10 @@ $groups = [
         <div class="relative group">
             <button
                 @click="activeFlyout = activeFlyout === '{{ $group['key'] }}' ? null : '{{ $group['key'] }}'"
-                :class="activeFlyout === '{{ $group['key'] }}' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : ''"
-                class="relative flex items-center justify-center w-full h-10 rounded-xl transition-all duration-150
-                       {{ $group['active']
-                           ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400'
-                           : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200' }}"
+                class="relative flex items-center justify-center w-full h-10 rounded-xl transition-all duration-150"
+                :class="(activeFlyout === '{{ $group['key'] }}' || {{ $group['active'] ? 'true' : 'false' }})
+                    ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200'"
             >
                 @if($group['active'])
                 <span class="absolute -left-1.5 top-2 bottom-2 w-1 rounded-r-full bg-primary-600 dark:bg-primary-400"></span>
