@@ -17,11 +17,14 @@ class ApiKeyFactory extends Factory
     /** @return array<string, mixed> */
     public function definition(): array
     {
+        $prefix = Str::random(8);
+        $fullKey = 'af_'.$prefix.'_'.Str::random(32);
+
         return [
             'organization_id' => Organization::factory(),
             'name' => fake()->words(2, true),
-            'key' => 'ak_'.Str::random(56),
-            'secret_hash' => bcrypt(Str::random(32)),
+            'key' => $prefix,
+            'secret_hash' => hash('sha256', $fullKey),
             'permissions' => ['read', 'write'],
             'last_used_at' => null,
             'expires_at' => now()->addYear(),
