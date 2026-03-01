@@ -75,6 +75,8 @@ class MeetingController extends Controller
     {
         $this->authorize('update', $meeting);
 
+        $meeting->loadMissing('tags');
+
         $availableTags = MomTag::query()->orderBy('name')->get();
 
         return view('meetings.edit', compact('meeting', 'availableTags'));
