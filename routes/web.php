@@ -84,6 +84,11 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     // Audit Log
     Route::get('audit-log', [\App\Domain\Account\Controllers\AuditLogController::class, 'index'])->name('audit-log.index');
 
+    // API Keys
+    Route::get('api-keys', [\App\Domain\Account\Controllers\ApiKeyController::class, 'index'])->name('api-keys.index');
+    Route::post('api-keys', [\App\Domain\Account\Controllers\ApiKeyController::class, 'store'])->name('api-keys.store');
+    Route::delete('api-keys/{apiKey}', [\App\Domain\Account\Controllers\ApiKeyController::class, 'destroy'])->name('api-keys.destroy');
+
     // AI Provider Configs
     Route::resource('ai-provider-configs', \App\Domain\Account\Controllers\AiProviderConfigController::class);
 
