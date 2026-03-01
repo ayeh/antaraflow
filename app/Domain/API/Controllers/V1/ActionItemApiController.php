@@ -6,6 +6,7 @@ namespace App\Domain\API\Controllers\V1;
 
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\API\Resources\ActionItemResource;
+use App\Support\Enums\ActionItemStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -24,7 +25,10 @@ class ActionItemApiController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->whereRaw('LOWER(status) = ?', [strtolower($request->string('status')->toString())]);
+            $statusEnum = ActionItemStatus::tryFrom($request->string('status')->toString());
+            if ($statusEnum !== null) {
+                $query->where('status', $statusEnum->value);
+            }
         }
 
         $actionItems = $query->latest()->paginate(20);

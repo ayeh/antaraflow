@@ -35,7 +35,8 @@ class MeetingApiController extends Controller
         $orgId = $request->attributes->get('organization_id');
         $meeting = MinutesOfMeeting::query()
             ->where('organization_id', $orgId)
-            ->findOrFail($id);
+            ->where('id', $id)
+            ->firstOrFail();
 
         return response()->json(new MeetingResource($meeting));
     }
