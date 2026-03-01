@@ -84,6 +84,9 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     // Audit Log
     Route::get('audit-log', [\App\Domain\Account\Controllers\AuditLogController::class, 'index'])->name('audit-log.index');
 
+    // AI Provider Configs
+    Route::resource('ai-provider-configs', \App\Domain\Account\Controllers\AiProviderConfigController::class);
+
     // Cross-meeting dashboards
     Route::get('action-items', [ActionItemDashboardController::class, 'index'])->name('action-items.dashboard');
 
