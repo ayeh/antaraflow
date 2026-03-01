@@ -27,9 +27,9 @@ class UpdateMeetingRequest extends FormRequest
             'content' => ['nullable', 'string'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['integer', 'exists:mom_tags,id'],
-            'allow_external_join' => ['boolean'],
-            'require_rsvp' => ['boolean'],
-            'auto_notify' => ['boolean'],
+            'allow_external_join' => ['nullable', 'boolean'],
+            'require_rsvp' => ['nullable', 'boolean'],
+            'auto_notify' => ['nullable', 'boolean'],
         ];
     }
 

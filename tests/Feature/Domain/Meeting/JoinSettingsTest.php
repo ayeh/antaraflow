@@ -80,3 +80,23 @@ test('join settings are shown in edit form', function () {
     $response->assertSee('Require RSVP');
     $response->assertSee('Auto-notify Attendees');
 });
+
+test('edit form pre-fills join settings from existing record', function () {
+    $meeting = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $meeting->joinSetting()->create([
+        'allow_external_join' => true,
+        'require_rsvp' => false,
+        'auto_notify' => false,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('meetings.edit', $meeting));
+
+    $response->assertSuccessful();
+    // allow_external_join=true should render as checked
+    $response->assertSee('name="allow_external_join"', false);
+    $response->assertSee('checked', false);
+});
