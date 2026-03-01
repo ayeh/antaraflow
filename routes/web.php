@@ -83,5 +83,9 @@ Route::middleware(['auth', 'org.context'])->group(function () {
         Route::post('attendees/bulk-invite', [AttendeeController::class, 'bulkInvite'])->name('attendees.bulk-invite');
         Route::patch('attendees/{attendee}/rsvp', [AttendeeController::class, 'updateRsvp'])->name('attendees.rsvp');
         Route::patch('attendees/{attendee}/presence', [AttendeeController::class, 'markPresence'])->name('attendees.presence');
+
+        Route::get('export/pdf', [\App\Domain\Export\Controllers\ExportController::class, 'pdf'])->name('export.pdf');
+        Route::get('export/word', [\App\Domain\Export\Controllers\ExportController::class, 'word'])->name('export.word');
+        Route::get('export/csv', [\App\Domain\Export\Controllers\ExportController::class, 'csv'])->name('export.csv');
     });
 });
