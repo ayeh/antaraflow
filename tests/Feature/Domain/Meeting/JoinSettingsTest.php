@@ -81,6 +81,23 @@ test('join settings are shown in edit form', function () {
     $response->assertSee('Auto-notify Attendees');
 });
 
+test('auto_notify can be explicitly set to false', function () {
+    $meeting = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $this->actingAs($this->user)->put(route('meetings.update', $meeting), [
+        'title' => $meeting->title,
+        'auto_notify' => 0,
+    ]);
+
+    $this->assertDatabaseHas('mom_join_settings', [
+        'minutes_of_meeting_id' => $meeting->id,
+        'auto_notify' => false,
+    ]);
+});
+
 test('edit form pre-fills join settings from existing record', function () {
     $meeting = MinutesOfMeeting::factory()->create([
         'organization_id' => $this->org->id,
