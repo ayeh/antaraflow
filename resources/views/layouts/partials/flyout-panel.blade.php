@@ -36,6 +36,11 @@ $flyoutGroups = [
             ['label' => 'Organizations',      'route' => route('organizations.index'),     'active' => request()->routeIs('organizations.index', 'organizations.create')],
             ['label' => 'Meeting Templates',  'route' => route('meeting-templates.index'), 'active' => request()->routeIs('meeting-templates.*')],
             ['label' => 'Meeting Series',     'route' => route('meeting-series.index'),    'active' => request()->routeIs('meeting-series.*')],
+            ['label' => 'Tags',              'route' => route('tags.index'),              'active' => request()->routeIs('tags.*')],
+            ['label' => 'Attendee Groups',   'route' => route('attendee-groups.index'),   'active' => request()->routeIs('attendee-groups.*')],
+            ['label' => 'AI Providers',      'route' => route('ai-provider-configs.index'), 'active' => request()->routeIs('ai-provider-configs.*')],
+            ['label' => 'API Keys',          'route' => route('api-keys.index'),          'active' => request()->routeIs('api-keys.*')],
+            ['label' => 'Audit Log',         'route' => route('audit-log.index'),         'active' => request()->routeIs('audit-log.*')],
         ],
     ],
     'profile' => [
