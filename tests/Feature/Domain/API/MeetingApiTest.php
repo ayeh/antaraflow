@@ -32,7 +32,7 @@ it('GET /api/v1/meetings returns meetings for the organization', function () {
         ->assertJsonCount(3, 'data');
 });
 
-it('GET /api/v1/meetings/{id} returns the meeting', function () {
+it('GET /api/v1/meetings/{id} returns the meeting with correct structure', function () {
     $meeting = MinutesOfMeeting::factory()->create(['organization_id' => $this->org->id]);
 
     $response = $this->getJson("/api/v1/meetings/{$meeting->id}", $this->headers);
@@ -43,7 +43,12 @@ it('GET /api/v1/meetings/{id} returns the meeting', function () {
             ->where('title', $meeting->title)
             ->where('status', $meeting->status->value)
             ->etc()
-        );
+        )
+        ->assertJsonStructure([
+            'id', 'title', 'meeting_date', 'location', 'duration_minutes',
+            'status', 'summary', 'content', 'created_by', 'created_at', 'updated_at',
+        ])
+        ->assertJsonMissingPath('organization_id');
 });
 
 it('GET /api/v1/meetings/{id} returns 404 for meeting in different org', function () {

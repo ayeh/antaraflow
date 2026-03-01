@@ -20,8 +20,7 @@ class MeetingResource extends JsonResource
             'duration_minutes' => $this->duration_minutes,
             'status' => $this->status->value,
             'summary' => $this->summary,
-            'content' => $this->content,
-            'organization_id' => $this->organization_id,
+            'content' => $this->content, // intentionally exposed: full meeting content for API consumers
             'created_by' => $this->created_by,
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),

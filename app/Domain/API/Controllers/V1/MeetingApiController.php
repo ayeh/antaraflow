@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\Domain\API\Controllers\V1;
 
+use App\Domain\API\Controllers\ApiController;
 use App\Domain\API\Resources\MeetingResource;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 
-class MeetingApiController extends Controller
+class MeetingApiController extends ApiController
 {
     public function index(Request $request): JsonResponse
     {
-        $orgId = $request->attributes->get('organization_id');
         $meetings = MinutesOfMeeting::query()
-            ->where('organization_id', $orgId)
+            ->where('organization_id', $this->organizationId($request))
             ->latest()
             ->paginate(20);
 
@@ -32,9 +31,8 @@ class MeetingApiController extends Controller
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $orgId = $request->attributes->get('organization_id');
         $meeting = MinutesOfMeeting::query()
-            ->where('organization_id', $orgId)
+            ->where('organization_id', $this->organizationId($request))
             ->where('id', $id)
             ->firstOrFail();
 

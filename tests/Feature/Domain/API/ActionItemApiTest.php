@@ -72,3 +72,19 @@ it('GET /api/v1/action-items requires auth', function () {
     $this->getJson('/api/v1/action-items')
         ->assertUnauthorized();
 });
+
+it('GET /api/v1/action-items returns empty for meeting_id from different org', function () {
+    $otherMeeting = MinutesOfMeeting::factory()->create(); // different org
+    ActionItem::factory()->count(2)->create(['organization_id' => $this->org->id]);
+
+    $response = $this->getJson("/api/v1/action-items?meeting_id={$otherMeeting->id}", $this->headers);
+
+    $response->assertOk()
+        ->assertJsonCount(0, 'data');
+});
+
+it('GET /api/v1/action-items returns 422 for invalid status value', function () {
+    $this->getJson('/api/v1/action-items?status=bogus', $this->headers)
+        ->assertUnprocessable()
+        ->assertJsonPath('message', fn (string $msg) => str_contains($msg, 'Invalid status value'));
+});
