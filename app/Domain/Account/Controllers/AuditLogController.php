@@ -30,6 +30,7 @@ class AuditLogController extends Controller
         );
 
         $logs = AuditLog::query()
+            ->where('organization_id', $organization->id)
             ->with('user')
             ->when($request->input('action'), fn ($q, $action) => $q->where('action', $action))
             ->when($request->input('user_id'), fn ($q, $userId) => $q->where('user_id', $userId))
