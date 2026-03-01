@@ -71,6 +71,8 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     Route::post('meetings/{meeting}/finalize', [MeetingController::class, 'finalize'])->name('meetings.finalize');
     Route::post('meetings/{meeting}/approve', [MeetingController::class, 'approve'])->name('meetings.approve');
     Route::post('meetings/{meeting}/revert', [MeetingController::class, 'revert'])->name('meetings.revert');
+    Route::get('meetings/{meeting}/versions', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'index'])->name('meetings.versions.index');
+    Route::get('meetings/{meeting}/versions/{version}', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'show'])->name('meetings.versions.show');
 
     // Analytics
     Route::get('analytics', [\App\Domain\Analytics\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');
