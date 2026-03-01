@@ -32,7 +32,10 @@ class AiProviderConfigController extends Controller
             'Only admins and owners can manage AI provider configurations.'
         );
 
-        $configs = AiProviderConfig::query()->orderBy('provider')->get();
+        $configs = AiProviderConfig::query()
+            ->where('organization_id', $organization->id)
+            ->orderBy('provider')
+            ->get();
 
         return view('ai-provider-configs.index', compact('configs'));
     }
@@ -65,7 +68,9 @@ class AiProviderConfigController extends Controller
         $validated = $request->validated();
 
         if ($request->boolean('is_default')) {
-            AiProviderConfig::query()->update(['is_default' => false]);
+            AiProviderConfig::query()
+                ->where('organization_id', $organization->id)
+                ->update(['is_default' => false]);
         }
 
         AiProviderConfig::query()->create([
@@ -115,6 +120,7 @@ class AiProviderConfigController extends Controller
 
         if ($request->boolean('is_default')) {
             AiProviderConfig::query()
+                ->where('organization_id', $organization->id)
                 ->whereKeyNot($aiProviderConfig->id)
                 ->update(['is_default' => false]);
         }
