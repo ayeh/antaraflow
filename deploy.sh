@@ -2,9 +2,12 @@
 
 set -euo pipefail
 
-# CPANEL CRON SETUP (one-time manual step):
-# In cPanel > Cron Jobs, add:
-# * * * * * /usr/local/bin/php /home/USERNAME/DEPLOY_PATH/artisan schedule:run >> /dev/null 2>&1
+# CPANEL SETUP (one-time manual steps):
+# 1. In cPanel > Domains, set document root to the "public/" subdirectory of this project.
+#    This is the recommended approach and avoids needing a root-level .htaccess redirect.
+#
+# 2. In cPanel > Cron Jobs, add:
+# * * * * * /usr/local/bin/php /home/your-cpanel-user/your-app-directory/artisan schedule:run >> /dev/null 2>&1
 
 echo "🚀 Starting deployment..."
 
