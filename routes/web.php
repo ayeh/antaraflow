@@ -18,9 +18,11 @@ use App\Domain\Transcription\Controllers\TranscriptionController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
-// Guest routes
+// Root redirect
 Route::get('/', function () {
-    return view('welcome');
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
 });
 
 // Guest meeting view (no auth required)
