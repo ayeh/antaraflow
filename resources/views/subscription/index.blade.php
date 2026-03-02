@@ -81,30 +81,32 @@
                         <ul class="mb-4 space-y-1.5 text-sm text-gray-600 dark:text-gray-300">
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                Up to {{ $plan->max_users }} user{{ $plan->max_users === 1 ? '' : 's' }}
+                                {{ $plan->max_users === -1 ? 'Unlimited users' : 'Up to ' . $plan->max_users . ' user' . ($plan->max_users === 1 ? '' : 's') }}
                             </li>
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                {{ $plan->max_meetings_per_month }} meetings/month
+                                {{ $plan->max_meetings_per_month === -1 ? 'Unlimited meetings' : $plan->max_meetings_per_month . ' meetings/month' }}
                             </li>
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                {{ $plan->max_audio_minutes_per_month }} audio minutes/month
+                                {{ $plan->max_audio_minutes_per_month === -1 ? 'Unlimited audio minutes' : $plan->max_audio_minutes_per_month . ' audio minutes/month' }}
                             </li>
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                {{ number_format($plan->max_storage_mb) }} MB storage
+                                {{ $plan->max_storage_mb === -1 ? 'Unlimited storage' : number_format($plan->max_storage_mb) . ' MB storage' }}
                             </li>
                         </ul>
 
                         {{-- Features --}}
                         @if($plan->features && count($plan->features) > 0)
                             <ul class="mb-5 space-y-1.5 text-sm text-gray-600 dark:text-gray-300">
-                                @foreach($plan->features as $feature)
-                                    <li class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-violet-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                        {{ $feature }}
-                                    </li>
+                                @foreach($plan->features as $featureKey => $enabled)
+                                    @if($enabled)
+                                        <li class="flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-violet-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                            {{ ucwords(str_replace('_', ' ', $featureKey)) }}
+                                        </li>
+                                    @endif
                                 @endforeach
                             </ul>
                         @endif

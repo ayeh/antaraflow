@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Account\Services\AuthorizationService;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Support\Enums\ActionItemStatus;
@@ -12,6 +13,8 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
+    public function __construct(private AuthorizationService $authorizationService) {}
+
     public function index(): View
     {
         $user = auth()->user();
@@ -51,6 +54,8 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        return view('dashboard', compact('recentMeetings', 'upcomingActions', 'stats', 'upcomingMeetings'));
+        $canCreateMeeting = $this->authorizationService->hasPermission($user, $user->currentOrganization, 'create_meeting');
+
+        return view('dashboard', compact('recentMeetings', 'upcomingActions', 'stats', 'upcomingMeetings', 'canCreateMeeting'));
     }
 }

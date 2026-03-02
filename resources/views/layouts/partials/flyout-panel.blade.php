@@ -40,6 +40,8 @@ $flyoutGroups = [
             ['label' => 'Attendee Groups',   'route' => route('attendee-groups.index'),   'active' => request()->routeIs('attendee-groups.*')],
             ['label' => 'AI Providers',      'route' => route('ai-provider-configs.index'), 'active' => request()->routeIs('ai-provider-configs.*')],
             ['label' => 'API Keys',          'route' => route('api-keys.index'),          'active' => request()->routeIs('api-keys.*')],
+            ['label' => 'Subscription',      'route' => route('subscription.index'),      'active' => request()->routeIs('subscription.*')],
+            ['label' => 'Usage',             'route' => route('usage.index'),             'active' => request()->routeIs('usage.*')],
             ['label' => 'Audit Log',         'route' => route('audit-log.index'),         'active' => request()->routeIs('audit-log.*')],
         ],
     ],

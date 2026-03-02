@@ -56,10 +56,10 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $item->assignedTo?->name ?? '&mdash;' }}
+                                {{ $item->assignedTo?->name ?? '—' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $item->due_date?->format('M j, Y') ?? '&mdash;' }}
+                                {{ $item->due_date?->format('M j, Y') ?? '—' }}
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <a href="{{ route('meetings.action-items.edit', [$meeting, $item]) }}" class="text-sm text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300 font-medium">Edit</a>

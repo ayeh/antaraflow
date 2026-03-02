@@ -50,10 +50,10 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $item->assignedTo?->name ?? '&mdash;' }}
+                                {{ $item->assignedTo?->name ?? '—' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $item->due_date?->format('M j, Y') ?? '&mdash;' }}
+                                {{ $item->due_date?->format('M j, Y') ?? '—' }}
                             </td>
                         </tr>
                     @empty
