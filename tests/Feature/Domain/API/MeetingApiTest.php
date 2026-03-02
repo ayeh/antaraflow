@@ -133,3 +133,27 @@ it('DELETE /api/v1/meetings/{id} returns 404 for wrong org', function () {
     $this->deleteJson("/api/v1/meetings/{$otherMeeting->id}", [], $this->headers)
         ->assertNotFound();
 });
+
+it('GET /api/v1/meetings rejects expired API key', function () {
+    $rawToken = 'expired-key-'.uniqid();
+    ApiKey::factory()->expired()->create([
+        'organization_id' => $this->org->id,
+        'secret_hash' => hash('sha256', $rawToken),
+        'is_active' => true,
+    ]);
+
+    $this->getJson('/api/v1/meetings', ['Authorization' => 'Bearer '.$rawToken])
+        ->assertUnauthorized();
+});
+
+it('GET /api/v1/meetings rejects inactive API key', function () {
+    $rawToken = 'inactive-key-'.uniqid();
+    ApiKey::factory()->inactive()->create([
+        'organization_id' => $this->org->id,
+        'secret_hash' => hash('sha256', $rawToken),
+        'expires_at' => null,
+    ]);
+
+    $this->getJson('/api/v1/meetings', ['Authorization' => 'Bearer '.$rawToken])
+        ->assertUnauthorized();
+});
