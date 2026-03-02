@@ -53,9 +53,9 @@ class MeetingController extends Controller
     {
         $this->authorize('create', MinutesOfMeeting::class);
 
-        $availableTags = MomTag::query()->orderBy('name')->get();
+        $projects = Project::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']);
 
-        return view('meetings.create', compact('availableTags'));
+        return view('meetings.create', compact('projects'));
     }
 
     public function store(CreateMeetingRequest $request): RedirectResponse
