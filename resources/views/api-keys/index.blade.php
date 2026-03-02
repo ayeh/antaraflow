@@ -134,7 +134,7 @@
                                 <div class="flex flex-wrap gap-1">
                                     @foreach($apiKey->permissions as $permission)
                                         @php
-                                            $permColors = ['read' => 'bg-blue-100 text-blue-700', 'write' => 'bg-amber-100 text-amber-700', 'delete' => 'bg-red-100 text-red-700'];
+                                            $permColors = ['read' => 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300', 'write' => 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', 'delete' => 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'];
                                         @endphp
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $permColors[$permission] ?? 'bg-gray-100 text-gray-700' }}">
                                             {{ $permission }}
@@ -150,9 +150,9 @@
                             </td>
                             <td class="px-6 py-4">
                                 @if($apiKey->is_active)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Active</span>
                                 @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Inactive</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">Inactive</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-right">

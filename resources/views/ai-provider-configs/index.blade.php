@@ -34,12 +34,12 @@
             @foreach($configs as $config)
                 @php
                     $providerColors = [
-                        'openai'    => 'bg-green-100 text-green-700',
-                        'anthropic' => 'bg-orange-100 text-orange-700',
-                        'google'    => 'bg-blue-100 text-blue-700',
-                        'ollama'    => 'bg-gray-100 text-gray-700',
+                        'openai'    => 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
+                        'anthropic' => 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
+                        'google'    => 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+                        'ollama'    => 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300',
                     ];
-                    $badgeClass = $providerColors[$config->provider] ?? 'bg-gray-100 text-gray-700';
+                    $badgeClass = $providerColors[$config->provider] ?? 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300';
                 @endphp
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 space-y-3 hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
                     <div class="flex items-start justify-between gap-2">
@@ -54,9 +54,9 @@
 
                     <div class="flex items-center gap-2 flex-wrap">
                         @if($config->is_active)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Active</span>
                         @else
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Inactive</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">Inactive</span>
                         @endif
 
                         @if($config->is_default)
