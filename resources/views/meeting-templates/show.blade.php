@@ -4,14 +4,14 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <a href="{{ route('meeting-templates.index') }}" class="text-gray-400 hover:text-gray-600">
+            <a href="{{ route('meeting-templates.index') }}" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </a>
             <div>
                 <div class="flex items-center gap-2">
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $meetingTemplate->name }}</h1>
                     @if($meetingTemplate->is_default)
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700">Default</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">Default</span>
                     @endif
                     @if(!$meetingTemplate->is_shared)
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">Private</span>
