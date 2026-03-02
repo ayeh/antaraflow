@@ -14,6 +14,7 @@ use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\Attendee\Controllers\AttendeeController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
+use App\Domain\Project\Controllers\ProjectController;
 use App\Domain\Transcription\Controllers\TranscriptionController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +64,11 @@ Route::middleware(['auth', 'org.context'])->group(function () {
 
     // Meeting Templates
     Route::resource('meeting-templates', \App\Domain\Meeting\Controllers\MeetingTemplateController::class);
+
+    // Projects
+    Route::resource('projects', ProjectController::class);
+    Route::post('projects/{project}/members', [ProjectController::class, 'addMember'])->name('projects.members.add');
+    Route::delete('projects/{project}/members/{user}', [ProjectController::class, 'removeMember'])->name('projects.members.remove');
 
     // Meeting Series
     Route::resource('meeting-series', \App\Domain\Meeting\Controllers\MeetingSeriesController::class);
