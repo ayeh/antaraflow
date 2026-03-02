@@ -1,0 +1,27 @@
+name: Deploy to Production
+
+# Required GitHub Secrets:
+# SSH_HOST     — server IP or hostname
+# SSH_USER     — SSH username (cPanel user)
+# SSH_KEY      — private SSH key (add public key to ~/.ssh/authorized_keys on server)
+# SSH_PORT     — SSH port (usually 22; optional, defaults to 22)
+# DEPLOY_PATH  — full path to app directory on server (e.g. /home/username/app.yourdomain.com)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            bash deploy.sh
