@@ -43,10 +43,6 @@
             </div>
 
             @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress)
-                <a href="{{ route('meetings.edit', $meeting) }}" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</a>
-            @endif
-
-            @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress)
                 <form method="POST" action="{{ route('meetings.finalize', $meeting) }}" class="inline">
                     @csrf
                     <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors">Finalize</button>

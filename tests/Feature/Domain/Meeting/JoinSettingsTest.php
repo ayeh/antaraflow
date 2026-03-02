@@ -67,7 +67,7 @@ test('updating join settings persists', function () {
     ]);
 });
 
-test('join settings are shown in edit form', function () {
+test('edit route redirects to wizard', function () {
     $meeting = MinutesOfMeeting::factory()->create([
         'organization_id' => $this->org->id,
         'created_by' => $this->user->id,
@@ -75,10 +75,7 @@ test('join settings are shown in edit form', function () {
 
     $response = $this->actingAs($this->user)->get(route('meetings.edit', $meeting));
 
-    $response->assertSuccessful();
-    $response->assertSee('Allow External Join');
-    $response->assertSee('Require RSVP');
-    $response->assertSee('Auto-notify Attendees');
+    $response->assertRedirect(route('meetings.show', ['meeting' => $meeting, 'step' => 1]));
 });
 
 test('auto_notify can be explicitly set to false', function () {
@@ -98,7 +95,7 @@ test('auto_notify can be explicitly set to false', function () {
     ]);
 });
 
-test('edit form pre-fills join settings from existing record', function () {
+test('edit route with join settings redirects to wizard', function () {
     $meeting = MinutesOfMeeting::factory()->create([
         'organization_id' => $this->org->id,
         'created_by' => $this->user->id,
@@ -112,14 +109,5 @@ test('edit form pre-fills join settings from existing record', function () {
 
     $response = $this->actingAs($this->user)->get(route('meetings.edit', $meeting));
 
-    $response->assertSuccessful();
-    // allow_external_join=true should render the checkbox as checked
-    $response->assertSeeInOrder([
-        'name="allow_external_join" value="1"',
-        'checked',
-        'Allow External Join',
-    ], false);
-    // require_rsvp=false and auto_notify=false should not be checked
-    $response->assertDontSee('name="require_rsvp" value="1" checked', false);
-    $response->assertDontSee('name="auto_notify" value="1" checked', false);
+    $response->assertRedirect(route('meetings.show', ['meeting' => $meeting, 'step' => 1]));
 });
