@@ -2,7 +2,7 @@
     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Sharing</h2>
 
     @if($shares->isNotEmpty())
-        <div class="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg">
+        <div class="overflow-x-auto border border-gray-200 dark:border-slate-700 rounded-lg">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                 <thead class="bg-gray-50 dark:bg-slate-800">
                     <tr>

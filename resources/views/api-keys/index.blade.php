@@ -110,7 +110,7 @@
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create an API key to access your data programmatically.</p>
         </div>
     @else
-        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                 <thead class="bg-gray-50 dark:bg-slate-700/50">
                     <tr>
