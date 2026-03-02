@@ -101,6 +101,29 @@ class ActionItemService
             ->get();
     }
 
+    /**
+     * Mark all open action items in a meeting as having tasks created.
+     *
+     * @return int Number of action items marked
+     */
+    public function createAllTasks(MinutesOfMeeting $mom, User $user): int
+    {
+        $items = $mom->actionItems()
+            ->whereNotIn('status', [ActionItemStatus::Completed, ActionItemStatus::Cancelled, ActionItemStatus::CarriedForward])
+            ->whereNull('metadata->tasks_created_at')
+            ->get();
+
+        foreach ($items as $item) {
+            $metadata = $item->metadata ?? [];
+            $metadata['tasks_created_at'] = now()->toIso8601String();
+            $metadata['tasks_created_by'] = $user->id;
+            $item->update(['metadata' => $metadata]);
+            $this->auditService->log('tasks_created', $item);
+        }
+
+        return $items->count();
+    }
+
     public function getDashboard(int $organizationId, ?int $userId = null): Collection
     {
         $query = ActionItem::query()

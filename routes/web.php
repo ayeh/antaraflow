@@ -133,6 +133,7 @@ Route::middleware(['auth', 'org.context'])->group(function () {
         Route::get('extractions', [ExtractionController::class, 'index'])->name('extractions.index');
         Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
         Route::post('chat', [ChatController::class, 'store'])->name('chat.store');
+        Route::post('action-items/create-all-tasks', [ActionItemController::class, 'createAllTasks'])->name('action-items.create-all-tasks');
         Route::resource('action-items', ActionItemController::class);
         Route::post('action-items/{actionItem}/carry-forward', [ActionItemController::class, 'carryForward'])->name('action-items.carry-forward');
 
