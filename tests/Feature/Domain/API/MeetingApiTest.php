@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Account\Models\ApiKey;
 use App\Domain\Account\Models\Organization;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 
@@ -12,6 +13,9 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->org = Organization::factory()->create();
+    $this->orgOwner = User::factory()->create();
+    $this->org->members()->attach($this->orgOwner->id, ['role' => 'owner']);
+
     $rawToken = 'test-api-key-'.uniqid();
     $this->apiKey = ApiKey::factory()->create([
         'organization_id' => $this->org->id,
@@ -71,4 +75,60 @@ it('GET /api/v1/meetings response includes pagination meta', function () {
     $response->assertOk()
         ->assertJsonPath('meta.current_page', 1)
         ->assertJsonStructure(['meta' => ['current_page', 'last_page', 'total']]);
+});
+
+it('POST /api/v1/meetings creates a meeting', function () {
+    $response = $this->postJson('/api/v1/meetings', [
+        'title' => 'API Created Meeting',
+        'meeting_date' => '2026-03-15',
+    ], $this->headers);
+
+    $response->assertCreated()
+        ->assertJsonPath('title', 'API Created Meeting');
+
+    $this->assertDatabaseHas('minutes_of_meetings', [
+        'title' => 'API Created Meeting',
+        'organization_id' => $this->org->id,
+    ]);
+});
+
+it('POST /api/v1/meetings validates required fields', function () {
+    $this->postJson('/api/v1/meetings', [], $this->headers)
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['title']);
+});
+
+it('PATCH /api/v1/meetings/{id} updates a meeting', function () {
+    $meeting = MinutesOfMeeting::factory()->create(['organization_id' => $this->org->id]);
+
+    $this->patchJson("/api/v1/meetings/{$meeting->id}", [
+        'title' => 'Updated Title',
+    ], $this->headers)
+        ->assertOk()
+        ->assertJsonPath('title', 'Updated Title');
+});
+
+it('PATCH /api/v1/meetings/{id} returns 404 for wrong org', function () {
+    $otherMeeting = MinutesOfMeeting::factory()->create();
+
+    $this->patchJson("/api/v1/meetings/{$otherMeeting->id}", [
+        'title' => 'Hack',
+    ], $this->headers)
+        ->assertNotFound();
+});
+
+it('DELETE /api/v1/meetings/{id} deletes a meeting', function () {
+    $meeting = MinutesOfMeeting::factory()->create(['organization_id' => $this->org->id]);
+
+    $this->deleteJson("/api/v1/meetings/{$meeting->id}", [], $this->headers)
+        ->assertNoContent();
+
+    $this->assertSoftDeleted('minutes_of_meetings', ['id' => $meeting->id]);
+});
+
+it('DELETE /api/v1/meetings/{id} returns 404 for wrong org', function () {
+    $otherMeeting = MinutesOfMeeting::factory()->create();
+
+    $this->deleteJson("/api/v1/meetings/{$otherMeeting->id}", [], $this->headers)
+        ->assertNotFound();
 });

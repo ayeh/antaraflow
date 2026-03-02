@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domain\API\Controllers\V1;
 
+use App\Domain\Account\Models\Organization;
 use App\Domain\API\Controllers\ApiController;
+use App\Domain\API\Requests\V1\StoreApiMeetingRequest;
+use App\Domain\API\Requests\V1\UpdateApiMeetingRequest;
 use App\Domain\API\Resources\MeetingResource;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Support\Enums\MeetingStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -37,5 +41,47 @@ class MeetingApiController extends ApiController
             ->firstOrFail();
 
         return response()->json(new MeetingResource($meeting));
+    }
+
+    public function store(StoreApiMeetingRequest $request): JsonResponse
+    {
+        $orgId = $this->organizationId($request);
+        $data = $request->validated();
+        $data['organization_id'] = $orgId;
+        $data['status'] = MeetingStatus::Draft;
+
+        // API key auth has no user. Use org owner as fallback, then first member.
+        $org = Organization::findOrFail($orgId);
+        $owner = $org->members()->wherePivot('role', 'owner')->first()
+            ?? $org->members()->first();
+        $data['created_by'] = $owner->id;
+
+        $meeting = MinutesOfMeeting::query()->create($data);
+
+        return response()->json(new MeetingResource($meeting), 201);
+    }
+
+    public function update(UpdateApiMeetingRequest $request, int $id): JsonResponse
+    {
+        $meeting = MinutesOfMeeting::query()
+            ->where('organization_id', $this->organizationId($request))
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $meeting->update($request->validated());
+
+        return response()->json(new MeetingResource($meeting->fresh()));
+    }
+
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $meeting = MinutesOfMeeting::query()
+            ->where('organization_id', $this->organizationId($request))
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $meeting->delete();
+
+        return response()->json(null, 204);
     }
 }
