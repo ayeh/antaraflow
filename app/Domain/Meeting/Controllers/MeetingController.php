@@ -12,6 +12,8 @@ use App\Domain\Meeting\Requests\CreateMeetingRequest;
 use App\Domain\Meeting\Requests\UpdateMeetingRequest;
 use App\Domain\Meeting\Services\MeetingSearchService;
 use App\Domain\Meeting\Services\MeetingService;
+use App\Domain\Project\Models\Project;
+use App\Support\Enums\MeetingStatus;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,9 +35,18 @@ class MeetingController extends Controller
     {
         $this->authorize('viewAny', MinutesOfMeeting::class);
 
+        $stats = [
+            'total' => MinutesOfMeeting::count(),
+            'draft' => MinutesOfMeeting::where('status', MeetingStatus::Draft)->count(),
+            'finalized' => MinutesOfMeeting::where('status', MeetingStatus::Finalized)->count(),
+            'approved' => MinutesOfMeeting::where('status', MeetingStatus::Approved)->count(),
+        ];
+
+        $projects = Project::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']);
+
         $meetings = $this->searchService->search($request->all());
 
-        return view('meetings.index', compact('meetings'));
+        return view('meetings.index', compact('meetings', 'stats', 'projects'));
     }
 
     public function create(): View

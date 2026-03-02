@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Domain\Account\Models\Organization;
+use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Project\Models\Project;
 use App\Models\User;
+use App\Support\Enums\ActionItemStatus;
 use App\Support\Enums\MeetingStatus;
 use App\Support\Enums\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -146,4 +148,106 @@ test('validates end_time must be after start_time', function () {
     ]);
 
     $response->assertSessionHasErrors(['end_time']);
+});
+
+test('displays meeting stats on index', function () {
+    MinutesOfMeeting::factory()->draft()->count(3)->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    MinutesOfMeeting::factory()->finalized()->count(2)->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    MinutesOfMeeting::factory()->approved()->count(1)->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('meetings.index'));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('stats', [
+        'total' => 6,
+        'draft' => 3,
+        'finalized' => 2,
+        'approved' => 1,
+    ]);
+});
+
+test('displays projects in filter dropdown', function () {
+    $project = Project::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'name' => 'Alpha Project',
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('meetings.index'));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('projects');
+    $response->assertSee('Alpha Project');
+});
+
+test('filters meetings by project', function () {
+    $project = Project::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'project_id' => $project->id,
+        'title' => 'Project Meeting',
+        'meeting_date' => now(),
+    ]);
+
+    MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'project_id' => null,
+        'title' => 'Unlinked Meeting',
+        'meeting_date' => now(),
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('meetings.index', ['project_id' => $project->id]));
+
+    $response->assertSuccessful();
+
+    $meetings = $response->viewData('meetings');
+    expect($meetings)->toHaveCount(1);
+    expect($meetings->first()->title)->toBe('Project Meeting');
+});
+
+test('displays action item counts on index', function () {
+    $meeting = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'title' => 'Meeting With Actions',
+        'meeting_date' => now(),
+    ]);
+
+    ActionItem::factory()->count(2)->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $meeting->id,
+        'created_by' => $this->user->id,
+        'assigned_to' => $this->user->id,
+        'status' => ActionItemStatus::Open,
+    ]);
+
+    ActionItem::factory()->completed()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $meeting->id,
+        'created_by' => $this->user->id,
+        'assigned_to' => $this->user->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('meetings.index'));
+
+    $response->assertSuccessful();
+    $response->assertSee('1/3');
 });
