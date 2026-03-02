@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domain\API\Controllers\V1;
 
-use App\Domain\Account\Models\Organization;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\API\Controllers\ApiController;
 use App\Domain\API\Requests\V1\StoreApiActionItemRequest;
@@ -88,16 +87,7 @@ class ActionItemApiController extends ApiController
             ? ActionItemPriority::from($data['priority'])
             : ActionItemPriority::Medium;
 
-        // API key auth has no user. Use org owner as fallback, then first member.
-        $org = Organization::findOrFail($orgId);
-        $owner = $org->members()->wherePivot('role', 'owner')->first()
-            ?? $org->members()->first();
-
-        if ($owner === null) {
-            return response()->json(['message' => 'Organization has no members.'], 422);
-        }
-
-        $data['created_by'] = $owner->id;
+        $data['created_by'] = $this->resolveCreatedBy($orgId);
 
         $actionItem = ActionItem::query()->create($data);
 

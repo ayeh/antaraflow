@@ -111,6 +111,12 @@ it('POST /api/v1/action-items creates an action item', function () {
     ]);
 });
 
+it('POST /api/v1/action-items validates required fields', function () {
+    $this->postJson('/api/v1/action-items', [], $this->headers)
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['title', 'minutes_of_meeting_id']);
+});
+
 it('POST /api/v1/action-items rejects meeting from different org', function () {
     $otherMeeting = MinutesOfMeeting::factory()->create(); // different org
 
