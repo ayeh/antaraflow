@@ -17,10 +17,17 @@
     @endif
 
     @if($series->isEmpty())
-        <div class="bg-white rounded-xl border border-gray-200 px-6 py-16 text-center">
-            <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            <p class="text-sm text-gray-500 mb-4">No meeting series yet.</p>
-            <a href="{{ route('meeting-series.create') }}" class="text-sm font-medium text-violet-600 hover:text-violet-700">Create your first series</a>
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 px-6 py-16 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No meeting series yet</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Group related meetings into a series to track recurring topics.</p>
+            <div class="mt-6">
+                <a href="{{ route('meeting-series.create') }}" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">
+                    New Series
+                </a>
+            </div>
         </div>
     @else
         <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">

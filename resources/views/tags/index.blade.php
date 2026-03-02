@@ -26,9 +26,12 @@
         {{-- Left: existing tags --}}
         <div class="lg:col-span-2 space-y-3">
             @if($tags->isEmpty())
-                <div class="bg-white rounded-xl border border-gray-200 px-6 py-16 text-center">
-                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                    <p class="text-sm text-gray-500">No tags yet. Create your first tag.</p>
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 px-6 py-16 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tags yet</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tags help you organize and filter your meetings.</p>
                 </div>
             @else
                 <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">

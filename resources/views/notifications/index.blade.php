@@ -30,11 +30,11 @@
 
     @if($notifications->isEmpty())
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 px-6 py-16 text-center">
-            <svg class="mx-auto w-12 h-12 text-gray-300 dark:text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
             </svg>
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">No notifications yet</p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">You're all caught up!</p>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">You're all caught up!</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No notifications yet. New activity will appear here.</p>
         </div>
     @else
         @php
