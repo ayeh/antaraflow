@@ -10,6 +10,7 @@ use App\Domain\AI\Models\MomExtraction;
 use App\Domain\AI\Models\MomTopic;
 use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Attendee\Models\MomJoinSetting;
+use App\Domain\Project\Models\Project;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
@@ -33,6 +34,9 @@ class MinutesOfMeeting extends Model
     {
         return [
             'meeting_date' => 'datetime',
+            'start_time' => 'datetime:H:i',
+            'end_time' => 'datetime:H:i',
+            'share_with_client' => 'boolean',
             'metadata' => 'array',
             'status' => MeetingStatus::class,
         ];
@@ -51,6 +55,11 @@ class MinutesOfMeeting extends Model
     public function series(): BelongsTo
     {
         return $this->belongsTo(MeetingSeries::class, 'meeting_series_id');
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function template(): BelongsTo

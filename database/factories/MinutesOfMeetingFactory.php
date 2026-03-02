@@ -29,6 +29,13 @@ class MinutesOfMeetingFactory extends Factory
             'meeting_date' => fake()->dateTimeBetween('-1 month', '+1 month'),
             'duration_minutes' => fake()->randomElement([30, 45, 60, 90, 120]),
             'metadata' => null,
+            'mom_number' => null,
+            'start_time' => fake()->time('H:i'),
+            'end_time' => fake()->time('H:i'),
+            'language' => 'ms',
+            'prepared_by' => fake()->name(),
+            'share_with_client' => false,
+            'project_id' => null,
         ];
     }
 
