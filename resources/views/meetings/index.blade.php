@@ -10,7 +10,7 @@
         </a>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200">
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
         <div class="px-6 py-4 border-b border-gray-200">
             <form method="GET" action="{{ route('meetings.index') }}" class="flex flex-col sm:flex-row gap-3">
                 <div class="flex-1">

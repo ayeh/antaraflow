@@ -24,7 +24,7 @@
             <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No templates yet</h3>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create templates to reuse meeting structures and save time.</p>
             <div class="mt-6">
-                <a href="{{ route('meeting-templates.create') }}" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">
+                <a href="{{ route('meeting-templates.create') }}" class="inline-flex items-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700">
                     New Template
                 </a>
             </div>
