@@ -13,6 +13,8 @@ use App\Domain\Meeting\Requests\UpdateMeetingRequest;
 use App\Domain\Meeting\Services\MeetingSearchService;
 use App\Domain\Meeting\Services\MeetingService;
 use App\Domain\Project\Models\Project;
+use App\Models\User;
+use App\Support\Enums\ActionItemStatus;
 use App\Support\Enums\MeetingStatus;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -72,14 +74,44 @@ class MeetingController extends Controller
     {
         $this->authorize('view', $meeting);
 
-        $meeting->load(['createdBy', 'series', 'template', 'tags', 'versions']);
+        $meeting->load([
+            'createdBy', 'project', 'tags',
+            'attendees.user', 'actionItems.assignedTo',
+            'inputs', 'transcriptions', 'manualNotes',
+            'extractions', 'aiConversations',
+        ]);
 
-        $shares = $this->shareService->getSharesForMeeting($meeting);
-        $comments = $this->commentService->getComments($meeting);
+        $isEditable = in_array($meeting->status, [MeetingStatus::Draft, MeetingStatus::InProgress]);
+
         $user = $request->user()->loadMissing('currentOrganization');
-        $orgMembers = $user->currentOrganization->members()->get();
+        $orgMembers = User::where('current_organization_id', $user->current_organization_id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
-        return view('meetings.show', compact('meeting', 'shares', 'comments', 'orgMembers'));
+        $attendeeStats = [
+            'total' => $meeting->attendees->count(),
+            'present' => $meeting->attendees->where('is_present', true)->count(),
+            'absent' => $meeting->attendees->where('is_present', false)->count(),
+            'confirmed' => $meeting->attendees->where('rsvp_status', 'accepted')->count(),
+        ];
+
+        $actionItemStats = [
+            'total' => $meeting->actionItems->count(),
+            'completed' => $meeting->actionItems->where('status', ActionItemStatus::Completed)->count(),
+            'in_progress' => $meeting->actionItems->where('status', ActionItemStatus::InProgress)->count(),
+            'overdue' => $meeting->actionItems->filter(fn ($ai) => $ai->due_date && $ai->due_date->isPast() &&
+                ! in_array($ai->status, [ActionItemStatus::Completed, ActionItemStatus::Cancelled])
+            )->count(),
+        ];
+
+        $comments = $this->commentService->getComments($meeting);
+        $shares = $this->shareService->getSharesForMeeting($meeting);
+
+        return view('meetings.show', compact(
+            'meeting', 'isEditable', 'orgMembers',
+            'attendeeStats', 'actionItemStats',
+            'comments', 'shares',
+        ));
     }
 
     public function edit(MinutesOfMeeting $meeting): View
