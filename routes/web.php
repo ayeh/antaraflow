@@ -12,6 +12,7 @@ use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
 use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\Attendee\Controllers\AttendeeController;
+use App\Domain\Attendee\Controllers\QrRegistrationController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
 use App\Domain\Project\Controllers\ProjectController;
@@ -28,6 +29,10 @@ Route::get('/', function () {
 
 // Guest meeting view (no auth required)
 Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessController::class, 'show'])->name('guest.meeting');
+
+// QR Registration (public)
+Route::get('register/{token}', [QrRegistrationController::class, 'showForm'])->name('qr-registration.form');
+Route::post('register/{token}', [QrRegistrationController::class, 'register'])->name('qr-registration.submit');
 
 // Auth routes
 Route::middleware('guest')->group(function () {
@@ -115,6 +120,10 @@ Route::middleware(['auth', 'org.context'])->group(function () {
 
     // Cross-meeting dashboards
     Route::get('action-items', [ActionItemDashboardController::class, 'index'])->name('action-items.dashboard');
+
+    // QR Registration token generation
+    Route::post('meetings/{meeting}/qr-registration', [QrRegistrationController::class, 'generate'])
+        ->name('meetings.qr-registration.generate');
 
     // Meeting sub-resources (transcriptions, notes, attendees, actions, chat, extractions)
     Route::prefix('meetings/{meeting}')->as('meetings.')->group(function () {
