@@ -3,7 +3,7 @@
 @section('content')
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900">AI Provider Configurations</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">AI Provider Configurations</h1>
         <a href="{{ route('ai-provider-configs.create') }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Add Provider
@@ -11,7 +11,7 @@
     </div>
 
     @if(session('success'))
-        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg text-sm">
             {{ session('success') }}
         </div>
     @endif
@@ -41,11 +41,11 @@
                     ];
                     $badgeClass = $providerColors[$config->provider] ?? 'bg-gray-100 text-gray-700';
                 @endphp
-                <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-3 hover:border-gray-300 transition-colors">
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 space-y-3 hover:border-gray-300 dark:hover:border-slate-600 transition-colors">
                     <div class="flex items-start justify-between gap-2">
                         <div class="min-w-0">
-                            <p class="text-base font-bold text-gray-900">{{ $config->display_name }}</p>
-                            <p class="text-sm text-gray-500 mt-0.5">{{ $config->model }}</p>
+                            <p class="text-base font-bold text-gray-900 dark:text-white">{{ $config->display_name }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ $config->model }}</p>
                         </div>
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $badgeClass }} shrink-0">
                             {{ ucfirst($config->provider) }}
@@ -64,8 +64,8 @@
                         @endif
                     </div>
 
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
-                        <a href="{{ route('ai-provider-configs.edit', $config) }}" class="text-xs font-medium text-gray-500 hover:text-gray-700">Edit</a>
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-slate-700">
+                        <a href="{{ route('ai-provider-configs.edit', $config) }}" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Edit</a>
                         <form method="POST" action="{{ route('ai-provider-configs.destroy', $config) }}" onsubmit="return confirm('Delete this provider configuration?')">
                             @csrf
                             @method('DELETE')
