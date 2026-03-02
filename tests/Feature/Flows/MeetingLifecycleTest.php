@@ -20,9 +20,9 @@ beforeEach(function () {
 test('full meeting lifecycle: create, edit, add attendees, finalize, approve', function () {
     $response = $this->actingAs($this->user)->post(route('meetings.store'), [
         'title' => 'Sprint Planning',
-        'meeting_date' => now()->addDay()->format('Y-m-d\TH:i'),
+        'meeting_date' => now()->addDay()->format('Y-m-d'),
         'location' => 'Conference Room A',
-        'duration_minutes' => 60,
+        'prepared_by' => 'Test User',
     ]);
     $response->assertRedirect();
 
@@ -81,6 +81,8 @@ test('viewer cannot create or finalize meetings', function () {
 
     $this->actingAs($viewer)->post(route('meetings.store'), [
         'title' => 'Should not work',
+        'meeting_date' => '2026-04-01',
+        'prepared_by' => 'Viewer User',
     ])->assertForbidden();
 
     $meeting = MinutesOfMeeting::factory()->draft()->create([
