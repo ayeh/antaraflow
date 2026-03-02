@@ -14,4 +14,6 @@ Route::prefix('v1')->middleware(ApiKeyAuthentication::class)->group(function () 
     Route::patch('meetings/{id}', [MeetingApiController::class, 'update']);
     Route::delete('meetings/{id}', [MeetingApiController::class, 'destroy']);
     Route::get('action-items', [ActionItemApiController::class, 'index']);
+    Route::post('action-items', [ActionItemApiController::class, 'store']);
+    Route::patch('action-items/{id}', [ActionItemApiController::class, 'update']);
 });
