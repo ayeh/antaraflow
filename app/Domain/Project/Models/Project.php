@@ -12,10 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
 {
-    use BelongsToOrganization, HasFactory;
+    use BelongsToOrganization, HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
 
@@ -45,6 +46,10 @@ class Project extends Model
             ->withTimestamps();
     }
 
+    /**
+     * Direct access to the pivot model. Use when you need role or timestamps on the pivot.
+     * Prefer members() for User collection access.
+     */
     public function projectMembers(): HasMany
     {
         return $this->hasMany(ProjectMember::class);
