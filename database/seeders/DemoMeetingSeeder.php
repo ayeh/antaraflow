@@ -11,6 +11,8 @@ use App\Domain\Meeting\Models\MeetingSeries;
 use App\Domain\Meeting\Models\MeetingTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Meeting\Models\MomTag;
+use App\Domain\Meeting\Services\MomNumberService;
+use App\Domain\Project\Models\Project;
 use App\Support\Enums\ActionItemPriority;
 use App\Support\Enums\ActionItemStatus;
 use Illuminate\Database\Seeder;
@@ -22,6 +24,23 @@ class DemoMeetingSeeder extends Seeder
         $org = Organization::query()->where('slug', 'antaraflow-demo')->firstOrFail();
         $users = $org->members()->get();
         $owner = $users->first();
+
+        $momNumberService = app(MomNumberService::class);
+
+        // Create demo projects
+        $projectAlpha = Project::factory()->create([
+            'organization_id' => $org->id,
+            'name' => 'Project Alpha',
+            'code' => 'ALPHA',
+            'description' => 'Main product development project',
+        ]);
+
+        $projectBeta = Project::factory()->create([
+            'organization_id' => $org->id,
+            'name' => 'Project Beta',
+            'code' => 'BETA',
+            'description' => 'Internal tooling and infrastructure',
+        ]);
 
         $tags = collect(['engineering', 'product', 'standup', 'review'])->map(
             fn (string $name) => MomTag::factory()->create([
@@ -46,16 +65,34 @@ class DemoMeetingSeeder extends Seeder
         $draftMeetings = MinutesOfMeeting::factory()->count(3)->draft()->create([
             'organization_id' => $org->id,
             'created_by' => $owner->id,
+            'project_id' => $projectAlpha->id,
+            'mom_number' => fn () => $momNumberService->generate($org->id),
+            'prepared_by' => $owner->name,
+            'language' => 'ms',
+            'start_time' => '09:00',
+            'end_time' => '10:00',
         ]);
 
         $finalizedMeetings = MinutesOfMeeting::factory()->count(2)->finalized()->create([
             'organization_id' => $org->id,
             'created_by' => $owner->id,
+            'project_id' => $projectBeta->id,
+            'mom_number' => fn () => $momNumberService->generate($org->id),
+            'prepared_by' => $owner->name,
+            'language' => 'en',
+            'start_time' => '14:00',
+            'end_time' => '15:30',
         ]);
 
         $approvedMeeting = MinutesOfMeeting::factory()->approved()->create([
             'organization_id' => $org->id,
             'created_by' => $owner->id,
+            'project_id' => $projectAlpha->id,
+            'mom_number' => $momNumberService->generate($org->id),
+            'prepared_by' => $owner->name,
+            'language' => 'ms',
+            'start_time' => '10:00',
+            'end_time' => '11:00',
         ]);
 
         $allMeetings = $draftMeetings->merge($finalizedMeetings)->push($approvedMeeting);
