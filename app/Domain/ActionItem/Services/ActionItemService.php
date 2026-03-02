@@ -23,6 +23,7 @@ class ActionItemService
         $data['minutes_of_meeting_id'] = $mom->id;
         $data['organization_id'] = $mom->organization_id;
         $data['created_by'] = $user->id;
+        $data['status'] = ActionItemStatus::Open;
 
         $item = ActionItem::query()->create($data);
         $this->auditService->log('created', $item);

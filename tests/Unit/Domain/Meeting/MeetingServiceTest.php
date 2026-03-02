@@ -176,6 +176,18 @@ it('revertToDraft() throws DomainException on a non-finalized meeting', function
         ->toThrow(\DomainException::class, 'Only finalized meetings can be reverted to draft.');
 });
 
+it('revertToDraft() throws DomainException on an approved meeting', function () {
+    $meeting = MinutesOfMeeting::factory()->approved()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    expect(fn () => $this->service->revertToDraft($meeting, $this->user))
+        ->toThrow(\DomainException::class);
+
+    expect($meeting->fresh()->status)->toBe(MeetingStatus::Approved);
+});
+
 it('delete() soft-deletes the meeting', function () {
     $meeting = MinutesOfMeeting::factory()->draft()->create([
         'organization_id' => $this->org->id,
