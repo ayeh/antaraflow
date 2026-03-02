@@ -15,6 +15,7 @@ class MeetingService
     public function __construct(
         private readonly VersionService $versionService,
         private readonly AuditService $auditService,
+        private readonly MomNumberService $momNumberService,
     ) {}
 
     public function create(array $data, User $user): MinutesOfMeeting
@@ -31,6 +32,7 @@ class MeetingService
         $data['created_by'] = $user->id;
         $data['organization_id'] = $user->current_organization_id;
         $data['status'] = MeetingStatus::Draft;
+        $data['mom_number'] = $this->momNumberService->generate($user->current_organization_id);
 
         return DB::transaction(function () use ($data, $tags, $allowExternalJoin, $requireRsvp, $autoNotify) {
             $mom = MinutesOfMeeting::query()->create($data);
