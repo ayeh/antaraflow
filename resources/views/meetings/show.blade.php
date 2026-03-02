@@ -4,12 +4,12 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex items-center gap-4">
-            <a href="{{ route('meetings.index') }}" class="text-gray-400 hover:text-gray-600">
+            <a href="{{ route('meetings.index') }}" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ $meeting->title }}</h1>
-                <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $meeting->title }}</h1>
+                <div class="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
                     @if($meeting->meeting_date)
                         <span>{{ $meeting->meeting_date->format('M j, Y g:i A') }}</span>
                     @endif
@@ -45,7 +45,7 @@
                 </div>
             </div>
             @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress)
-                <a href="{{ route('meetings.edit', $meeting) }}" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">Edit</a>
+                <a href="{{ route('meetings.edit', $meeting) }}" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Edit</a>
             @endif
             @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress)
                 <form method="POST" action="{{ route('meetings.finalize', $meeting) }}" class="inline">
@@ -62,31 +62,31 @@
             @if($meeting->status !== \App\Support\Enums\MeetingStatus::Draft)
                 <form method="POST" action="{{ route('meetings.revert', $meeting) }}" class="inline">
                     @csrf
-                    <button type="submit" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">Revert to Draft</button>
+                    <button type="submit" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Revert to Draft</button>
                 </form>
             @endif
         </div>
     </div>
 
     <div x-data="{ activeTab: 'content', isLinkShare: false }">
-        <div class="border-b border-gray-200 bg-white rounded-t-xl">
+        <div class="border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-t-xl">
             <nav class="flex -mb-px overflow-x-auto">
-                <button @click="activeTab = 'content'" :class="activeTab === 'content' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Content</button>
-                <button @click="activeTab = 'transcription'" :class="activeTab === 'transcription' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Transcription</button>
-                <button @click="activeTab = 'ai'" :class="activeTab === 'ai' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">AI Insights</button>
-                <button @click="activeTab = 'actions'" :class="activeTab === 'actions' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Action Items</button>
-                <button @click="activeTab = 'attendees'" :class="activeTab === 'attendees' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Attendees</button>
-                <button @click="activeTab = 'chat'" :class="activeTab === 'chat' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">AI Chat</button>
-                <button @click="activeTab = 'sharing'" :class="activeTab === 'sharing' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Sharing</button>
-                <button @click="activeTab = 'comments'" :class="activeTab === 'comments' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Comments</button>
-                <a href="{{ route('meetings.versions.index', $meeting) }}" class="inline-flex items-center gap-1.5 px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap transition-colors">
+                <button @click="activeTab = 'content'" :class="activeTab === 'content' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Content</button>
+                <button @click="activeTab = 'transcription'" :class="activeTab === 'transcription' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Transcription</button>
+                <button @click="activeTab = 'ai'" :class="activeTab === 'ai' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">AI Insights</button>
+                <button @click="activeTab = 'actions'" :class="activeTab === 'actions' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Action Items</button>
+                <button @click="activeTab = 'attendees'" :class="activeTab === 'attendees' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Attendees</button>
+                <button @click="activeTab = 'chat'" :class="activeTab === 'chat' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">AI Chat</button>
+                <button @click="activeTab = 'sharing'" :class="activeTab === 'sharing' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Sharing</button>
+                <button @click="activeTab = 'comments'" :class="activeTab === 'comments' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'" class="px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">Comments</button>
+                <a href="{{ route('meetings.versions.index', $meeting) }}" class="inline-flex items-center gap-1.5 px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600 whitespace-nowrap transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     History
                 </a>
             </nav>
         </div>
 
-        <div class="bg-white rounded-b-xl border-x border-b border-gray-200 p-6">
+        <div class="bg-white dark:bg-slate-800 rounded-b-xl border-x border-b border-gray-200 dark:border-slate-700 p-6">
             <div x-show="activeTab === 'content'">
                 @include('meetings.tabs.content', ['meeting' => $meeting])
             </div>
