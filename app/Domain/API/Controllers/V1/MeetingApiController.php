@@ -54,6 +54,11 @@ class MeetingApiController extends ApiController
         $org = Organization::findOrFail($orgId);
         $owner = $org->members()->wherePivot('role', 'owner')->first()
             ?? $org->members()->first();
+
+        if ($owner === null) {
+            return response()->json(['message' => 'Organization has no members.'], 422);
+        }
+
         $data['created_by'] = $owner->id;
 
         $meeting = MinutesOfMeeting::query()->create($data);

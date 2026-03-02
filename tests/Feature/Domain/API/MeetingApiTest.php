@@ -84,7 +84,8 @@ it('POST /api/v1/meetings creates a meeting', function () {
     ], $this->headers);
 
     $response->assertCreated()
-        ->assertJsonPath('title', 'API Created Meeting');
+        ->assertJsonPath('title', 'API Created Meeting')
+        ->assertJsonPath('status', 'draft');
 
     $this->assertDatabaseHas('minutes_of_meetings', [
         'title' => 'API Created Meeting',
