@@ -17,7 +17,7 @@ beforeEach(function () {
     $this->org->members()->attach($this->user, ['role' => UserRole::Owner->value]);
 });
 
-it('cannot update an approved meeting (policy returns 403)', function () {
+it('cannot update an approved meeting', function () {
     $meeting = MinutesOfMeeting::factory()->approved()->create([
         'organization_id' => $this->org->id,
         'created_by' => $this->user->id,
@@ -55,26 +55,28 @@ it('can finalize an in-progress meeting', function () {
     expect($meeting->fresh()->status)->toBe(MeetingStatus::Finalized);
 });
 
-it('cannot finalize an already-finalized meeting (throws DomainException)', function () {
+it('cannot finalize an already-finalized meeting', function () {
     $meeting = MinutesOfMeeting::factory()->finalized()->create([
         'organization_id' => $this->org->id,
         'created_by' => $this->user->id,
     ]);
 
     $this->actingAs($this->user)->post(route('meetings.finalize', $meeting))
-        ->assertStatus(500);
+        ->assertRedirect()
+        ->assertSessionHas('error');
 
     expect($meeting->fresh()->status)->toBe(MeetingStatus::Finalized);
 });
 
-it('cannot finalize an approved meeting (throws DomainException)', function () {
+it('cannot finalize an approved meeting', function () {
     $meeting = MinutesOfMeeting::factory()->approved()->create([
         'organization_id' => $this->org->id,
         'created_by' => $this->user->id,
     ]);
 
     $this->actingAs($this->user)->post(route('meetings.finalize', $meeting))
-        ->assertStatus(500);
+        ->assertRedirect()
+        ->assertSessionHas('error');
 
     expect($meeting->fresh()->status)->toBe(MeetingStatus::Approved);
 });

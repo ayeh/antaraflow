@@ -106,7 +106,12 @@ class MeetingController extends Controller
     {
         $this->authorize('finalize', $meeting);
 
-        $this->meetingService->finalize($meeting, $request->user());
+        try {
+            $this->meetingService->finalize($meeting, $request->user());
+        } catch (\DomainException $e) {
+            return redirect()->route('meetings.show', $meeting)
+                ->with('error', $e->getMessage());
+        }
 
         return redirect()->route('meetings.show', $meeting)
             ->with('success', 'Meeting finalized successfully.');
@@ -116,7 +121,12 @@ class MeetingController extends Controller
     {
         $this->authorize('approve', $meeting);
 
-        $this->meetingService->approve($meeting, $request->user());
+        try {
+            $this->meetingService->approve($meeting, $request->user());
+        } catch (\DomainException $e) {
+            return redirect()->route('meetings.show', $meeting)
+                ->with('error', $e->getMessage());
+        }
 
         return redirect()->route('meetings.show', $meeting)
             ->with('success', 'Meeting approved successfully.');
@@ -126,7 +136,12 @@ class MeetingController extends Controller
     {
         $this->authorize('update', $meeting);
 
-        $this->meetingService->revertToDraft($meeting, $request->user());
+        try {
+            $this->meetingService->revertToDraft($meeting, $request->user());
+        } catch (\DomainException $e) {
+            return redirect()->route('meetings.show', $meeting)
+                ->with('error', $e->getMessage());
+        }
 
         return redirect()->route('meetings.show', $meeting)
             ->with('success', 'Meeting reverted to draft.');
