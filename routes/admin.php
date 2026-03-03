@@ -31,9 +31,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
         // Users
         Route::get('users/export/csv', [UserController::class, 'exportCsv'])->name('users.export');
         Route::get('users', [UserController::class, 'index'])->name('users.index');
-        Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::get('users/{user}', [UserController::class, 'show'])->name('users.show')->withTrashed();
         Route::post('users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
-        Route::post('users/{user}/unsuspend', [UserController::class, 'unsuspend'])->name('users.unsuspend');
+        Route::post('users/{user}/unsuspend', [UserController::class, 'unsuspend'])->name('users.unsuspend')->withTrashed();
         Route::post('users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
 
         // Organizations
