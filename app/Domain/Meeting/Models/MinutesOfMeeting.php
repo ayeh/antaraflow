@@ -10,6 +10,7 @@ use App\Domain\AI\Models\MomExtraction;
 use App\Domain\AI\Models\MomTopic;
 use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Attendee\Models\MomJoinSetting;
+use App\Domain\Attendee\Models\QrRegistrationToken;
 use App\Domain\Project\Models\Project;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Models\User;
@@ -97,6 +98,11 @@ class MinutesOfMeeting extends Model
         return $this->hasMany(MomManualNote::class);
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(MomDocument::class);
+    }
+
     public function extractions(): HasMany
     {
         return $this->hasMany(MomExtraction::class);
@@ -125,5 +131,10 @@ class MinutesOfMeeting extends Model
     public function joinSetting(): HasOne
     {
         return $this->hasOne(MomJoinSetting::class);
+    }
+
+    public function qrRegistrationTokens(): HasMany
+    {
+        return $this->hasMany(QrRegistrationToken::class);
     }
 }

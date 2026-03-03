@@ -62,27 +62,33 @@ class DemoMeetingSeeder extends Seeder
             'name' => 'Sprint Retrospective Template',
         ]);
 
-        $draftMeetings = MinutesOfMeeting::factory()->count(3)->draft()->create([
-            'organization_id' => $org->id,
-            'created_by' => $owner->id,
-            'project_id' => $projectAlpha->id,
-            'mom_number' => fn () => $momNumberService->generate($org->id),
-            'prepared_by' => $owner->name,
-            'language' => 'ms',
-            'start_time' => '09:00',
-            'end_time' => '10:00',
-        ]);
+        $draftMeetings = collect();
+        for ($i = 0; $i < 3; $i++) {
+            $draftMeetings->push(MinutesOfMeeting::factory()->draft()->create([
+                'organization_id' => $org->id,
+                'created_by' => $owner->id,
+                'project_id' => $projectAlpha->id,
+                'mom_number' => $momNumberService->generate($org->id),
+                'prepared_by' => $owner->name,
+                'language' => 'ms',
+                'start_time' => '09:00',
+                'end_time' => '10:00',
+            ]));
+        }
 
-        $finalizedMeetings = MinutesOfMeeting::factory()->count(2)->finalized()->create([
-            'organization_id' => $org->id,
-            'created_by' => $owner->id,
-            'project_id' => $projectBeta->id,
-            'mom_number' => fn () => $momNumberService->generate($org->id),
-            'prepared_by' => $owner->name,
-            'language' => 'en',
-            'start_time' => '14:00',
-            'end_time' => '15:30',
-        ]);
+        $finalizedMeetings = collect();
+        for ($i = 0; $i < 2; $i++) {
+            $finalizedMeetings->push(MinutesOfMeeting::factory()->finalized()->create([
+                'organization_id' => $org->id,
+                'created_by' => $owner->id,
+                'project_id' => $projectBeta->id,
+                'mom_number' => $momNumberService->generate($org->id),
+                'prepared_by' => $owner->name,
+                'language' => 'en',
+                'start_time' => '14:00',
+                'end_time' => '15:30',
+            ]));
+        }
 
         $approvedMeeting = MinutesOfMeeting::factory()->approved()->create([
             'organization_id' => $org->id,

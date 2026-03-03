@@ -9,6 +9,7 @@ use App\Domain\Meeting\Models\MomManualNote;
 use App\Domain\Meeting\Requests\CreateManualNoteRequest;
 use App\Support\Enums\InputType;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
@@ -26,7 +27,7 @@ class ManualNoteController extends Controller
         return view('manual-notes.index', compact('meeting', 'notes'));
     }
 
-    public function store(CreateManualNoteRequest $request, MinutesOfMeeting $meeting): RedirectResponse
+    public function store(CreateManualNoteRequest $request, MinutesOfMeeting $meeting): JsonResponse|RedirectResponse
     {
         $this->authorize('update', $meeting);
 
@@ -41,6 +42,12 @@ class ManualNoteController extends Controller
             'source_type' => MomManualNote::class,
             'source_id' => $note->id,
         ]);
+
+        if ($request->wantsJson()) {
+            $note->load('createdBy');
+
+            return response()->json(['note' => $note], 201);
+        }
 
         return redirect()->route('meetings.manual-notes.index', $meeting)
             ->with('success', 'Note added successfully.');

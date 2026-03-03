@@ -314,6 +314,120 @@
             this.errorMessage = 'Import from project is not yet available.';
             setTimeout(() => this.errorMessage = '', 4000);
         },
+
+        // QR Registration state
+        qrView: @js($meeting->qrRegistrationTokens()->where('is_active', true)->exists() ? 'preview' : 'setup'),
+        qrSetupMode: false,
+        qrLoading: false,
+        qrData: @js($meeting->qrRegistrationTokens()->where('is_active', true)->first()?->toArray()),
+        qrSettings: {
+            expires_at: '',
+            max_attendees: '',
+            required_fields: ['name'],
+            welcome_message: '',
+        },
+
+        get qrUrl() {
+            return this.qrData ? '{{ url('register') }}/' + this.qrData.token : null;
+        },
+
+        async generateQr() {
+            this.qrLoading = true;
+            this.errorMessage = '';
+
+            try {
+                const response = await fetch('{{ route('meetings.qr-registration.generate', $meeting) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken(),
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(this.qrSettings),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.qrData = data;
+                    this.qrView = 'preview';
+                    this.qrSetupMode = false;
+                    this.successMessage = 'QR registration activated.';
+                    setTimeout(() => this.successMessage = '', 3000);
+                } else {
+                    const data = await response.json().catch(() => null);
+                    this.errorMessage = data?.message || 'Failed to generate QR code.';
+                    setTimeout(() => this.errorMessage = '', 4000);
+                }
+            } catch (e) {
+                console.error('QR generation failed:', e);
+                this.errorMessage = 'Network error. Please try again.';
+                setTimeout(() => this.errorMessage = '', 4000);
+            }
+
+            this.qrLoading = false;
+        },
+
+        async disableQr() {
+            if (!confirm('Disable QR registration? Existing links will stop working.')) return;
+            this.qrLoading = true;
+
+            try {
+                const response = await fetch('{{ route('meetings.qr-registration.disable', $meeting) }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken(),
+                        'Accept': 'application/json',
+                    },
+                });
+
+                if (response.ok) {
+                    this.qrData = null;
+                    this.qrView = 'setup';
+                    this.successMessage = 'QR registration disabled.';
+                    setTimeout(() => this.successMessage = '', 3000);
+                }
+            } catch (e) {
+                console.error('Disable failed:', e);
+            }
+
+            this.qrLoading = false;
+        },
+
+        copyQrUrl() {
+            if (this.qrUrl) {
+                navigator.clipboard.writeText(this.qrUrl);
+                this.successMessage = 'Registration link copied!';
+                setTimeout(() => this.successMessage = '', 3000);
+            }
+        },
+
+        copyJoinCode() {
+            if (this.qrData?.join_code) {
+                navigator.clipboard.writeText(this.qrData.join_code);
+                this.successMessage = 'Join code copied!';
+                setTimeout(() => this.successMessage = '', 3000);
+            }
+        },
+
+        shareVia(platform) {
+            if (!this.qrUrl) return;
+            const text = 'Join the meeting: ' + this.qrUrl;
+            const urls = {
+                whatsapp: 'https://wa.me/?text=' + encodeURIComponent(text),
+                telegram: 'https://t.me/share/url?url=' + encodeURIComponent(this.qrUrl) + '&text=' + encodeURIComponent('Join the meeting'),
+                email: 'mailto:?subject=' + encodeURIComponent('Meeting Registration') + '&body=' + encodeURIComponent(text),
+            };
+            window.open(urls[platform], '_blank');
+        },
+
+        toggleRequiredField(field) {
+            const idx = this.qrSettings.required_fields.indexOf(field);
+            if (idx > -1) {
+                this.qrSettings.required_fields.splice(idx, 1);
+            } else {
+                this.qrSettings.required_fields.push(field);
+            }
+        },
     }"
     class="space-y-6"
 >
@@ -697,18 +811,179 @@
                     </div>
                 </div>
 
-                {{-- QR Registration Link --}}
+                {{-- QR Registration --}}
                 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                    <div class="flex items-center gap-3 text-sm">
-                        <div class="flex-shrink-0 h-8 w-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                            <svg class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-3 text-sm mb-3">
+                        <div class="flex-shrink-0 h-8 w-8 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center">
+                            <svg class="h-4 w-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                             </svg>
                         </div>
-                        <div>
+                        <div class="flex-1">
                             <p class="font-medium text-gray-900 dark:text-white">QR Registration</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Set up QR code for walk-in registration</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Walk-in guest registration via QR code</p>
                         </div>
+                        <template x-if="qrData && qrView === 'preview'">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                                <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Active
+                            </span>
+                        </template>
+                    </div>
+
+                    {{-- Setup: Initial prompt to configure --}}
+                    <div x-show="qrView === 'setup' && !qrSetupMode">
+                        <button
+                            type="button"
+                            @click="qrSetupMode = true"
+                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors"
+                        >
+                            Set Up QR Registration
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- Setup: Registration Settings Form --}}
+                    <div x-show="qrSetupMode" x-cloak class="space-y-4">
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Registration Settings</h4>
+
+                        {{-- Expiration --}}
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Expiration Date & Time</label>
+                            <input
+                                type="datetime-local"
+                                x-model="qrSettings.expires_at"
+                                class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        {{-- Max Attendees --}}
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Max Attendees <span class="text-gray-400">(optional)</span></label>
+                            <input
+                                type="number"
+                                min="1"
+                                x-model="qrSettings.max_attendees"
+                                placeholder="Unlimited"
+                                class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        {{-- Required Fields --}}
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Required Fields</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <template x-for="field in [{key: 'name', label: 'Name'}, {key: 'email', label: 'Email'}, {key: 'phone', label: 'Phone'}, {key: 'company', label: 'Company'}]" :key="field.key">
+                                    <label class="flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors"
+                                           :class="qrSettings.required_fields.includes(field.key) ? 'border-violet-300 dark:border-violet-600 bg-violet-50 dark:bg-violet-900/20' : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                                        <input
+                                            type="checkbox"
+                                            :checked="qrSettings.required_fields.includes(field.key)"
+                                            @change="toggleRequiredField(field.key)"
+                                            class="h-3.5 w-3.5 rounded border-gray-300 text-violet-600 focus:ring-violet-500"
+                                        />
+                                        <span class="text-xs text-gray-700 dark:text-gray-300" x-text="field.label"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+
+                        {{-- Welcome Message --}}
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Welcome Message <span class="text-gray-400">(optional)</span></label>
+                            <textarea
+                                x-model="qrSettings.welcome_message"
+                                rows="3"
+                                maxlength="500"
+                                placeholder="Welcome to the meeting! Please register below."
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+                            ></textarea>
+                            <p class="text-xs text-gray-400 mt-1 text-right" x-text="(qrSettings.welcome_message?.length || 0) + '/500'"></p>
+                        </div>
+
+                        {{-- Action Buttons --}}
+                        <div class="flex gap-2">
+                            <button
+                                type="button"
+                                @click="qrSetupMode = false"
+                                class="flex-1 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                            >Cancel</button>
+                            <button
+                                type="button"
+                                @click="generateQr()"
+                                :disabled="qrLoading"
+                                class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <svg x-show="qrLoading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span x-text="qrLoading ? 'Saving...' : 'Save & Generate'"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Preview: QR Code & Details --}}
+                    <div x-show="qrView === 'preview' && qrData" x-cloak class="space-y-3">
+                        {{-- QR Code --}}
+                        <div class="flex items-center justify-center p-3 bg-white rounded-lg border border-gray-200 dark:border-gray-600">
+                            <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(qrUrl)" alt="QR Code" class="w-40 h-40" />
+                        </div>
+
+                        {{-- Join Code --}}
+                        <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Join Code</p>
+                                <p class="text-lg font-bold font-mono tracking-widest text-gray-900 dark:text-white" x-text="qrData.join_code"></p>
+                            </div>
+                            <button type="button" @click="copyJoinCode()" class="p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 rounded-md hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors" title="Copy code">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </button>
+                        </div>
+
+                        {{-- Registration URL --}}
+                        <div class="flex items-center gap-2">
+                            <input type="text" :value="qrUrl" readonly class="flex-1 px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 truncate" />
+                            <button type="button" @click="copyQrUrl()" class="flex-shrink-0 p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 rounded-md hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors" title="Copy link">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </button>
+                        </div>
+
+                        {{-- Registration Counter --}}
+                        <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <span x-text="(qrData.registrations_count || 0) + ' registered' + (qrData.max_attendees ? ' / ' + qrData.max_attendees + ' max' : '')"></span>
+                            <span x-text="qrData.expires_at ? 'Expires ' + new Date(qrData.expires_at).toLocaleDateString() : ''"></span>
+                        </div>
+
+                        {{-- Share Buttons --}}
+                        <div class="flex gap-2">
+                            <button type="button" @click="shareVia('whatsapp')" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.983-1.395A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.66 0-3.2-.507-4.483-1.372l-.32-.192-3.32.93.973-3.234-.21-.337A7.95 7.95 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/></svg>
+                                WhatsApp
+                            </button>
+                            <button type="button" @click="shareVia('telegram')" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                                Telegram
+                            </button>
+                            <button type="button" @click="shareVia('email')" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                Email
+                            </button>
+                        </div>
+
+                        {{-- Actions --}}
+                        <div class="flex gap-2 pt-1">
+                            <a :href="'https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=png&download=1&data=' + encodeURIComponent(qrUrl)" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Download QR
+                            </a>
+                            <button type="button" @click="qrData = null; qrSetupMode = true; qrView = 'setup'" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                Regenerate
+                            </button>
+                        </div>
+                        <button type="button" @click="disableQr()" :disabled="qrLoading" class="w-full px-3 py-1.5 text-xs font-medium rounded-lg text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50">
+                            Disable Registration
+                        </button>
                     </div>
                 </div>
             </div>

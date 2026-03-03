@@ -18,6 +18,9 @@ class QrRegistrationToken extends Model
         return [
             'is_active' => 'boolean',
             'expires_at' => 'datetime',
+            'required_fields' => 'array',
+            'max_attendees' => 'integer',
+            'registrations_count' => 'integer',
         ];
     }
 
@@ -29,5 +32,15 @@ class QrRegistrationToken extends Model
     public function isValid(): bool
     {
         return $this->is_active && ($this->expires_at === null || $this->expires_at->isFuture());
+    }
+
+    public function isFull(): bool
+    {
+        return $this->max_attendees !== null && $this->registrations_count >= $this->max_attendees;
+    }
+
+    public function incrementRegistrations(): void
+    {
+        $this->increment('registrations_count');
     }
 }

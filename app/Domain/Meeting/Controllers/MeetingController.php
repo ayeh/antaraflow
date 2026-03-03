@@ -76,7 +76,7 @@ class MeetingController extends Controller
         $meeting->load([
             'createdBy', 'project', 'tags',
             'attendees.user', 'actionItems.assignedTo',
-            'inputs', 'transcriptions', 'manualNotes',
+            'inputs', 'transcriptions', 'manualNotes', 'documents',
             'extractions', 'aiConversations',
         ]);
 

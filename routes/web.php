@@ -13,6 +13,7 @@ use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\Attendee\Controllers\AttendeeController;
 use App\Domain\Attendee\Controllers\QrRegistrationController;
+use App\Domain\Meeting\Controllers\DocumentController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
 use App\Domain\Project\Controllers\ProjectController;
@@ -33,6 +34,7 @@ Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessCo
 // QR Registration (public)
 Route::get('register/{token}', [QrRegistrationController::class, 'showForm'])->name('qr-registration.form');
 Route::post('register/{token}', [QrRegistrationController::class, 'register'])->name('qr-registration.submit');
+Route::get('register/{token}/success', [QrRegistrationController::class, 'success'])->name('qr-registration.success');
 
 // Auth routes
 Route::middleware('guest')->group(function () {
@@ -46,7 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [LogoutController::class, 'logout'])->name('logout');
 });
 
-Route::middleware(['auth', 'org.context'])->group(function () {
+Route::middleware(['auth', 'org.context', 'org.suspended'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -121,13 +123,16 @@ Route::middleware(['auth', 'org.context'])->group(function () {
     // Cross-meeting dashboards
     Route::get('action-items', [ActionItemDashboardController::class, 'index'])->name('action-items.dashboard');
 
-    // QR Registration token generation
+    // QR Registration token generation & management
     Route::post('meetings/{meeting}/qr-registration', [QrRegistrationController::class, 'generate'])
         ->name('meetings.qr-registration.generate');
+    Route::post('meetings/{meeting}/qr-registration/disable', [QrRegistrationController::class, 'disable'])
+        ->name('meetings.qr-registration.disable');
 
     // Meeting sub-resources (transcriptions, notes, attendees, actions, chat, extractions)
     Route::prefix('meetings/{meeting}')->as('meetings.')->group(function () {
         Route::resource('transcriptions', TranscriptionController::class)->only(['store', 'show', 'destroy']);
+        Route::resource('documents', DocumentController::class)->only(['store', 'destroy']);
         Route::resource('manual-notes', ManualNoteController::class);
         Route::post('extract', [ExtractionController::class, 'extract'])->name('extract');
         Route::get('extractions', [ExtractionController::class, 'index'])->name('extractions.index');
