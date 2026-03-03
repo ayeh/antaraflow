@@ -46,13 +46,25 @@ it('create() sets organization_id from the user', function () {
     expect($meeting->organization_id)->toBe($this->org->id);
 });
 
-it('create() creates a join setting record', function () {
+it('create() creates a join setting record when join settings are provided', function () {
+    $meeting = $this->service->create([
+        'title' => 'Test Meeting',
+        'meeting_date' => now(),
+        'allow_external_join' => false,
+        'require_rsvp' => false,
+        'auto_notify' => true,
+    ], $this->user);
+
+    expect($meeting->joinSetting)->not->toBeNull();
+});
+
+it('create() does not create join setting when no join setting keys are provided', function () {
     $meeting = $this->service->create([
         'title' => 'Test Meeting',
         'meeting_date' => now(),
     ], $this->user);
 
-    expect($meeting->joinSetting)->not->toBeNull();
+    expect($meeting->joinSetting)->toBeNull();
 });
 
 it('update() throws DomainException on approved meeting', function () {

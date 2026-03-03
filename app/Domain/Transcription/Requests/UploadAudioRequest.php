@@ -17,7 +17,7 @@ class UploadAudioRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'audio' => ['required', 'file', 'mimetypes:audio/*', 'max:102400'],
+            'audio' => ['required', 'file', 'mimes:mp3,wav,m4a,ogg,webm,mpeg,mpga', 'max:204800'],
             'language' => ['nullable', 'string', 'max:5'],
         ];
     }
@@ -28,8 +28,8 @@ class UploadAudioRequest extends FormRequest
         return [
             'audio.required' => 'An audio file is required.',
             'audio.file' => 'The audio must be a valid file.',
-            'audio.mimetypes' => 'The file must be an audio file.',
-            'audio.max' => 'The audio file must not exceed 100MB.',
+            'audio.mimes' => 'The file must be an audio file (MP3, WAV, M4A, OGG, or WebM).',
+            'audio.max' => 'The audio file must not exceed 200MB.',
             'language.max' => 'The language code must not exceed 5 characters.',
         ];
     }

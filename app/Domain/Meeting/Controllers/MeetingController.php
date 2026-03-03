@@ -7,11 +7,14 @@ namespace App\Domain\Meeting\Controllers;
 use App\Domain\Collaboration\Services\CommentService;
 use App\Domain\Collaboration\Services\ShareService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
-use App\Domain\Meeting\Models\MomTag;
 use App\Domain\Meeting\Requests\CreateMeetingRequest;
 use App\Domain\Meeting\Requests\UpdateMeetingRequest;
 use App\Domain\Meeting\Services\MeetingSearchService;
 use App\Domain\Meeting\Services\MeetingService;
+use App\Domain\Project\Models\Project;
+use App\Models\User;
+use App\Support\Enums\ActionItemStatus;
+use App\Support\Enums\MeetingStatus;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,18 +36,27 @@ class MeetingController extends Controller
     {
         $this->authorize('viewAny', MinutesOfMeeting::class);
 
+        $stats = [
+            'total' => MinutesOfMeeting::count(),
+            'draft' => MinutesOfMeeting::where('status', MeetingStatus::Draft)->count(),
+            'finalized' => MinutesOfMeeting::where('status', MeetingStatus::Finalized)->count(),
+            'approved' => MinutesOfMeeting::where('status', MeetingStatus::Approved)->count(),
+        ];
+
+        $projects = Project::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']);
+
         $meetings = $this->searchService->search($request->all());
 
-        return view('meetings.index', compact('meetings'));
+        return view('meetings.index', compact('meetings', 'stats', 'projects'));
     }
 
     public function create(): View
     {
         $this->authorize('create', MinutesOfMeeting::class);
 
-        $availableTags = MomTag::query()->orderBy('name')->get();
+        $projects = Project::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']);
 
-        return view('meetings.create', compact('availableTags'));
+        return view('meetings.create', compact('projects'));
     }
 
     public function store(CreateMeetingRequest $request): RedirectResponse
@@ -61,25 +73,51 @@ class MeetingController extends Controller
     {
         $this->authorize('view', $meeting);
 
-        $meeting->load(['createdBy', 'series', 'template', 'tags', 'versions']);
+        $meeting->load([
+            'createdBy', 'project', 'tags',
+            'attendees.user', 'actionItems.assignedTo',
+            'inputs', 'transcriptions', 'manualNotes', 'documents',
+            'extractions', 'aiConversations',
+        ]);
 
-        $shares = $this->shareService->getSharesForMeeting($meeting);
-        $comments = $this->commentService->getComments($meeting);
+        $isEditable = in_array($meeting->status, [MeetingStatus::Draft, MeetingStatus::InProgress]);
+
         $user = $request->user()->loadMissing('currentOrganization');
-        $orgMembers = $user->currentOrganization->members()->get();
+        $orgMembers = User::where('current_organization_id', $user->current_organization_id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
-        return view('meetings.show', compact('meeting', 'shares', 'comments', 'orgMembers'));
+        $attendeeStats = [
+            'total' => $meeting->attendees->count(),
+            'present' => $meeting->attendees->where('is_present', true)->count(),
+            'absent' => $meeting->attendees->where('is_present', false)->count(),
+            'confirmed' => $meeting->attendees->where('rsvp_status', 'accepted')->count(),
+        ];
+
+        $actionItemStats = [
+            'total' => $meeting->actionItems->count(),
+            'completed' => $meeting->actionItems->where('status', ActionItemStatus::Completed)->count(),
+            'in_progress' => $meeting->actionItems->where('status', ActionItemStatus::InProgress)->count(),
+            'overdue' => $meeting->actionItems->filter(fn ($ai) => $ai->due_date && $ai->due_date->isPast() &&
+                ! in_array($ai->status, [ActionItemStatus::Completed, ActionItemStatus::Cancelled])
+            )->count(),
+        ];
+
+        $comments = $this->commentService->getComments($meeting);
+        $shares = $this->shareService->getSharesForMeeting($meeting);
+
+        return view('meetings.show', compact(
+            'meeting', 'isEditable', 'orgMembers',
+            'attendeeStats', 'actionItemStats',
+            'comments', 'shares',
+        ));
     }
 
-    public function edit(MinutesOfMeeting $meeting): View
+    public function edit(MinutesOfMeeting $meeting): RedirectResponse
     {
         $this->authorize('update', $meeting);
 
-        $meeting->loadMissing(['tags', 'joinSetting']);
-
-        $availableTags = MomTag::query()->orderBy('name')->get();
-
-        return view('meetings.edit', compact('meeting', 'availableTags'));
+        return redirect()->route('meetings.show', ['meeting' => $meeting, 'step' => 1]);
     }
 
     public function update(UpdateMeetingRequest $request, MinutesOfMeeting $meeting): RedirectResponse

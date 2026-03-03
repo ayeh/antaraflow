@@ -8,6 +8,7 @@ use App\Domain\Meeting\Models\MeetingTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Meeting\Models\MomTag;
 use App\Domain\Meeting\Models\MomVersion;
+use App\Domain\Project\Models\Project;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -140,4 +141,31 @@ test('meeting template belongs to creator', function () {
     ]);
 
     expect($template->createdBy->id)->toBe($user->id);
+});
+
+it('has wizard columns', function () {
+    $meeting = MinutesOfMeeting::factory()->create([
+        'mom_number' => 'MOM-2026-000001',
+        'start_time' => '09:00',
+        'end_time' => '10:00',
+        'language' => 'ms',
+        'prepared_by' => 'Test User',
+        'share_with_client' => true,
+    ]);
+
+    expect($meeting->mom_number)->toBe('MOM-2026-000001')
+        ->and($meeting->language)->toBe('ms')
+        ->and($meeting->prepared_by)->toBe('Test User')
+        ->and($meeting->share_with_client)->toBeTrue();
+});
+
+it('belongs to a project', function () {
+    $project = Project::factory()->create();
+    $meeting = MinutesOfMeeting::factory()->create([
+        'project_id' => $project->id,
+        'organization_id' => $project->organization_id,
+    ]);
+
+    expect($meeting->project)->toBeInstanceOf(Project::class)
+        ->and($meeting->project->id)->toBe($project->id);
 });

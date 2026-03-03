@@ -15,15 +15,18 @@ class MeetingService
     public function __construct(
         private readonly VersionService $versionService,
         private readonly AuditService $auditService,
+        private readonly MomNumberService $momNumberService,
     ) {}
 
     public function create(array $data, User $user): MinutesOfMeeting
     {
         $tags = $data['tags'] ?? null;
+        $hasJoinSettings = array_key_exists('allow_external_join', $data)
+            || array_key_exists('require_rsvp', $data)
+            || array_key_exists('auto_notify', $data);
+
         $allowExternalJoin = $data['allow_external_join'] ?? false;
         $requireRsvp = $data['require_rsvp'] ?? false;
-        // Defaults to true; form submissions always supply a value via hidden input,
-        // so this fallback applies only to non-form callers (e.g. programmatic/API use).
         $autoNotify = $data['auto_notify'] ?? true;
 
         unset($data['tags'], $data['allow_external_join'], $data['require_rsvp'], $data['auto_notify']);
@@ -31,19 +34,22 @@ class MeetingService
         $data['created_by'] = $user->id;
         $data['organization_id'] = $user->current_organization_id;
         $data['status'] = MeetingStatus::Draft;
+        $data['mom_number'] = $this->momNumberService->generate($user->current_organization_id);
 
-        return DB::transaction(function () use ($data, $tags, $allowExternalJoin, $requireRsvp, $autoNotify) {
+        return DB::transaction(function () use ($data, $tags, $hasJoinSettings, $allowExternalJoin, $requireRsvp, $autoNotify) {
             $mom = MinutesOfMeeting::query()->create($data);
 
             if ($tags !== null) {
                 $mom->tags()->sync($tags);
             }
 
-            $mom->joinSetting()->create([
-                'allow_external_join' => $allowExternalJoin,
-                'require_rsvp' => $requireRsvp,
-                'auto_notify' => $autoNotify,
-            ]);
+            if ($hasJoinSettings) {
+                $mom->joinSetting()->create([
+                    'allow_external_join' => $allowExternalJoin,
+                    'require_rsvp' => $requireRsvp,
+                    'auto_notify' => $autoNotify,
+                ]);
+            }
 
             $this->auditService->log('created', $mom);
 

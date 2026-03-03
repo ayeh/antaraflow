@@ -18,18 +18,14 @@ class CreateMeetingRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
-            'meeting_date' => ['nullable', 'date'],
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'meeting_date' => ['required', 'date'],
+            'start_time' => ['nullable', 'date_format:H:i'],
+            'end_time' => ['nullable', 'date_format:H:i', 'after:start_time'],
             'location' => ['nullable', 'string', 'max:255'],
-            'duration_minutes' => ['nullable', 'integer', 'min:1'],
-            'meeting_series_id' => ['nullable', 'exists:meeting_series,id'],
-            'meeting_template_id' => ['nullable', 'exists:meeting_templates,id'],
-            'summary' => ['nullable', 'string'],
-            'content' => ['nullable', 'string'],
-            'tags' => ['nullable', 'array'],
-            'tags.*' => ['integer', 'exists:mom_tags,id'],
-            'allow_external_join' => ['nullable', 'boolean'],
-            'require_rsvp' => ['nullable', 'boolean'],
-            'auto_notify' => ['nullable', 'boolean'],
+            'language' => ['nullable', 'string', 'in:ms,en'],
+            'prepared_by' => ['required', 'string', 'max:255'],
+            'share_with_client' => ['nullable', 'boolean'],
         ];
     }
 
@@ -39,12 +35,15 @@ class CreateMeetingRequest extends FormRequest
         return [
             'title.required' => 'The meeting title is required.',
             'title.max' => 'The meeting title cannot exceed 255 characters.',
+            'meeting_date.required' => 'The meeting date is required.',
             'meeting_date.date' => 'The meeting date must be a valid date.',
-            'duration_minutes.integer' => 'The duration must be a whole number.',
-            'duration_minutes.min' => 'The duration must be at least 1 minute.',
-            'meeting_series_id.exists' => 'The selected meeting series does not exist.',
-            'meeting_template_id.exists' => 'The selected meeting template does not exist.',
-            'tags.*.exists' => 'One or more selected tags do not exist.',
+            'start_time.date_format' => 'The start time must be in HH:MM format.',
+            'end_time.date_format' => 'The end time must be in HH:MM format.',
+            'end_time.after' => 'The end time must be after the start time.',
+            'project_id.exists' => 'The selected project does not exist.',
+            'prepared_by.required' => 'The prepared by field is required.',
+            'prepared_by.max' => 'The prepared by field cannot exceed 255 characters.',
+            'language.in' => 'The language must be either Malay (ms) or English (en).',
         ];
     }
 }

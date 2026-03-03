@@ -1,137 +1,144 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-3xl mx-auto space-y-6">
+<div class="max-w-2xl mx-auto space-y-6">
+    {{-- Header --}}
     <div class="flex items-center gap-4">
-        <a href="{{ route('meetings.index') }}" class="text-gray-400 hover:text-gray-600">
+        <a href="{{ route('meetings.index') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </a>
-        <h1 class="text-2xl font-bold text-gray-900">Create Meeting</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Create Meeting</h1>
     </div>
 
-    <form method="POST" action="{{ route('meetings.store') }}" class="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+    <form method="POST" action="{{ route('meetings.store') }}" class="space-y-6">
         @csrf
 
-        @if($errors->any())
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                <ul class="list-disc list-inside space-y-1">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        {{-- Basic Information --}}
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Basic Information</h2>
 
-        <div>
-            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
-            <input type="text" name="title" id="title" value="{{ old('title') }}" required class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {{-- Meeting Title --}}
             <div>
-                <label for="meeting_date" class="block text-sm font-medium text-gray-700 mb-1">Meeting Date</label>
-                <input type="datetime-local" name="meeting_date" id="meeting_date" value="{{ old('meeting_date') }}" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
+                <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meeting Title <span class="text-red-500">*</span></label>
+                <input type="text" name="title" id="title" value="{{ old('title') }}" required
+                    placeholder="e.g. Weekly Project Sync"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                @error('title')
+                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                @enderror
             </div>
-            <div>
-                <label for="duration_minutes" class="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
-                <input type="number" name="duration_minutes" id="duration_minutes" value="{{ old('duration_minutes') }}" min="1" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
-            </div>
-        </div>
 
-        <div>
-            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-            <input type="text" name="location" id="location" value="{{ old('location') }}" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
-        </div>
+            {{-- Project + Meeting Date --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="project_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project</label>
+                    <select name="project_id" id="project_id"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        <option value="">— Select Project —</option>
+                        @foreach($projects as $project)
+                            <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>{{ $project->name }} ({{ $project->code }})</option>
+                        @endforeach
+                    </select>
+                    @error('project_id')
+                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-                <label for="meeting_series_id" class="block text-sm font-medium text-gray-700 mb-1">Series</label>
-                <select name="meeting_series_id" id="meeting_series_id" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
-                    <option value="">None</option>
-                    @foreach(\App\Domain\Meeting\Models\MeetingSeries::all() as $series)
-                        <option value="{{ $series->id }}" {{ old('meeting_series_id') == $series->id ? 'selected' : '' }}>{{ $series->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label for="meeting_template_id" class="block text-sm font-medium text-gray-700 mb-1">Template</label>
-                <select name="meeting_template_id" id="meeting_template_id" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
-                    <option value="">None</option>
-                    @foreach(\App\Domain\Meeting\Models\MeetingTemplate::all() as $template)
-                        <option value="{{ $template->id }}" {{ old('meeting_template_id') == $template->id ? 'selected' : '' }}>{{ $template->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-
-        @if($availableTags->isNotEmpty())
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-                <div class="flex flex-wrap gap-2">
-                    @foreach($availableTags as $tag)
-                        @php $isChecked = in_array($tag->id, old('tags', [])); @endphp
-                        <label x-data="{ checked: {{ $isChecked ? 'true' : 'false' }} }" class="cursor-pointer">
-                            <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
-                                x-model="checked"
-                                {{ $isChecked ? 'checked' : '' }}
-                                class="sr-only">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border-2 transition-all select-none"
-                                :style="checked
-                                    ? 'background-color: {{ $tag->color }}; color: #fff; border-color: {{ $tag->color }};'
-                                    : 'background-color: {{ $tag->color }}1a; color: {{ $tag->color }}; border-color: {{ $tag->color }}40;'">
-                                <svg x-show="checked" class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                                {{ $tag->name }}
-                            </span>
-                        </label>
-                    @endforeach
+                <div>
+                    <label for="meeting_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meeting Date <span class="text-red-500">*</span></label>
+                    <input type="date" name="meeting_date" id="meeting_date" value="{{ old('meeting_date', now()->format('Y-m-d')) }}" required
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    @error('meeting_date')
+                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
-        @endif
 
-        <div>
-            <label for="content" class="block text-sm font-medium text-gray-700 mb-1">Content</label>
-            <textarea name="content" id="content" rows="6" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">{{ old('content') }}</textarea>
+            {{-- Start Time + End Time --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="start_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
+                    <input type="time" name="start_time" id="start_time" value="{{ old('start_time') }}"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    @error('start_time')
+                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="end_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
+                    <input type="time" name="end_time" id="end_time" value="{{ old('end_time') }}"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    @error('end_time')
+                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Location --}}
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                <input type="text" name="location" id="location" value="{{ old('location') }}"
+                    placeholder="e.g. Conference Room A / Zoom"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                @error('location')
+                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
         </div>
 
-        <div class="border border-gray-200 rounded-lg p-4 space-y-3">
-            <h3 class="text-sm font-medium text-gray-900">Join Settings</h3>
-            <div class="space-y-3">
+        {{-- Settings --}}
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Settings</h2>
+
+            {{-- Language --}}
+            <div>
+                <label for="language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
+                <select name="language" id="language"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    <option value="ms" {{ old('language', 'ms') === 'ms' ? 'selected' : '' }}>Bahasa Melayu</option>
+                    <option value="en" {{ old('language', 'ms') === 'en' ? 'selected' : '' }}>English</option>
+                </select>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">AI-generated content will be in this language</p>
+                @error('language')
+                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+
+        {{-- Additional Information --}}
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Additional Information</h2>
+
+            {{-- Prepared By --}}
+            <div>
+                <label for="prepared_by" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prepared By <span class="text-red-500">*</span></label>
+                <input type="text" name="prepared_by" id="prepared_by" value="{{ old('prepared_by', auth()->user()->name) }}" required
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                @error('prepared_by')
+                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Share with Client --}}
+            <div>
                 <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="hidden" name="allow_external_join" value="0">
-                    <input type="checkbox" name="allow_external_join" value="1"
-                        {{ old('allow_external_join', false) ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <input type="hidden" name="share_with_client" value="0">
+                    <input type="checkbox" name="share_with_client" value="1"
+                        {{ old('share_with_client') ? 'checked' : '' }}
+                        class="rounded border-gray-300 dark:border-gray-600 text-violet-600 focus:ring-violet-500">
                     <div>
-                        <span class="text-sm font-medium text-gray-700">Allow External Join</span>
-                        <p class="text-xs text-gray-500">Allow people outside the organization to join this meeting.</p>
-                    </div>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="hidden" name="require_rsvp" value="0">
-                    <input type="checkbox" name="require_rsvp" value="1"
-                        {{ old('require_rsvp', false) ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                    <div>
-                        <span class="text-sm font-medium text-gray-700">Require RSVP</span>
-                        <p class="text-xs text-gray-500">Attendees must confirm attendance before joining.</p>
-                    </div>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="hidden" name="auto_notify" value="0">
-                    <input type="checkbox" name="auto_notify" value="1"
-                        {{ old('auto_notify', true) ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                    <div>
-                        <span class="text-sm font-medium text-gray-700">Auto-notify Attendees</span>
-                        <p class="text-xs text-gray-500">Automatically notify attendees when the meeting is updated.</p>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Share with Client</span>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Allow the client to view this meeting's minutes.</p>
                     </div>
                 </label>
             </div>
         </div>
 
-        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
-            <a href="{{ route('meetings.index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">Cancel</a>
-            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Create Meeting</button>
+        {{-- Footer --}}
+        <div class="flex items-center justify-end gap-3">
+            <a href="{{ route('meetings.index') }}" class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Cancel</a>
+            <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white rounded-lg px-6 py-2.5 text-sm font-medium transition-colors">Create MOM</button>
         </div>
     </form>
 </div>

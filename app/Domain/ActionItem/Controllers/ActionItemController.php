@@ -100,4 +100,14 @@ class ActionItemController extends Controller
         return redirect()->route('meetings.action-items.index', $meeting)
             ->with('success', 'Action item carried forward successfully.');
     }
+
+    public function createAllTasks(MinutesOfMeeting $meeting, Request $request): RedirectResponse
+    {
+        $this->authorize('update', $meeting);
+
+        $count = $this->actionItemService->createAllTasks($meeting, $request->user());
+
+        return redirect()->route('meetings.show', ['meeting' => $meeting, 'step' => 4])
+            ->with('success', "{$count} action item(s) marked as tasks created.");
+    }
 }

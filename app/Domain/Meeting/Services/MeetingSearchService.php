@@ -11,12 +11,13 @@ class MeetingSearchService
 {
     public function search(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = MinutesOfMeeting::query()->with(['createdBy', 'series', 'tags']);
+        $query = MinutesOfMeeting::query()->with(['createdBy', 'series', 'tags', 'project', 'actionItems']);
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('mom_number', 'like', "%{$search}%")
                     ->orWhere('summary', 'like', "%{$search}%")
                     ->orWhere('content', 'like', "%{$search}%");
             });
@@ -24,6 +25,10 @@ class MeetingSearchService
 
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
+        }
+
+        if (! empty($filters['project_id'])) {
+            $query->where('project_id', $filters['project_id']);
         }
 
         if (! empty($filters['date_from'])) {

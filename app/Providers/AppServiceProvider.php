@@ -22,6 +22,8 @@ use App\Domain\Meeting\Policies\MeetingSeriesPolicy;
 use App\Domain\Meeting\Policies\MeetingTemplatePolicy;
 use App\Domain\Meeting\Policies\MinutesOfMeetingPolicy;
 use App\Domain\Meeting\Policies\MomTagPolicy;
+use App\Domain\Project\Models\Project;
+use App\Domain\Project\Policies\ProjectPolicy;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
@@ -42,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ActionItem::class, ActionItemPolicy::class);
         Gate::policy(MeetingShare::class, MeetingSharePolicy::class);
         Gate::policy(Comment::class, CommentPolicy::class);
+        Gate::policy(Project::class, ProjectPolicy::class);
 
         View::composer('layouts.app', function ($view) {
             if (Auth::check() && Auth::user()->current_organization_id) {

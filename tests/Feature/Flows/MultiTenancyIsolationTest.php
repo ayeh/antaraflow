@@ -100,10 +100,14 @@ test('users cannot access other organizations action items directly', function (
 test('data created in one org does not leak to another', function () {
     $this->actingAs($this->user1)->post(route('meetings.store'), [
         'title' => 'Org1 Meeting',
+        'meeting_date' => '2026-03-15',
+        'prepared_by' => 'User 1',
     ])->assertRedirect();
 
     $this->actingAs($this->user2)->post(route('meetings.store'), [
         'title' => 'Org2 Meeting',
+        'meeting_date' => '2026-03-15',
+        'prepared_by' => 'User 2',
     ])->assertRedirect();
 
     $response1 = $this->actingAs($this->user1)->get(route('meetings.index'));
