@@ -26,6 +26,16 @@ class SmtpConfiguration extends Model
         return $this->belongsTo(Organization::class);
     }
 
+    public function setUsernameAttribute(string $value): void
+    {
+        $this->attributes['username'] = Crypt::encryptString($value);
+    }
+
+    public function getDecryptedUsernameAttribute(): string
+    {
+        return Crypt::decryptString($this->attributes['username']);
+    }
+
     public function setPasswordAttribute(string $value): void
     {
         $this->attributes['password'] = Crypt::encryptString($value);

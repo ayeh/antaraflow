@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete();
             $table->string('host');
             $table->integer('port')->default(587);
-            $table->string('username');
+            $table->text('username');
             $table->text('password');
             $table->string('encryption')->default('tls');
             $table->string('from_address');

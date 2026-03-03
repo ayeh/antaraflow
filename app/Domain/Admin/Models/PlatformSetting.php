@@ -14,20 +14,18 @@ class PlatformSetting extends Model
     {
         $setting = static::query()->where('key', $key)->first();
 
-        if (! $setting) {
+        if (! $setting || $setting->value === null) {
             return $default;
         }
 
-        $decoded = json_decode($setting->value, true);
-
-        return json_last_error() === JSON_ERROR_NONE ? $decoded : $setting->value;
+        return json_decode($setting->value, true);
     }
 
     public static function setValue(string $key, mixed $value): void
     {
         static::query()->updateOrCreate(
             ['key' => $key],
-            ['value' => is_array($value) || is_object($value) ? json_encode($value) : (string) $value],
+            ['value' => json_encode($value)],
         );
     }
 }
