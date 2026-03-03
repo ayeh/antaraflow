@@ -22,6 +22,8 @@ class Organization extends Model
     {
         return [
             'settings' => 'array',
+            'is_suspended' => 'boolean',
+            'suspended_at' => 'datetime',
         ];
     }
 
