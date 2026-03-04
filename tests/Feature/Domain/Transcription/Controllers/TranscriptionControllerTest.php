@@ -86,6 +86,28 @@ test('user can delete transcription', function () {
     $this->assertDatabaseMissing('audio_transcriptions', ['id' => $transcription->id]);
 });
 
+test('store returns json response when accept header is json', function () {
+    Storage::fake('local');
+    Queue::fake();
+
+    $file = UploadedFile::fake()->create('recording.webm', 500, 'audio/webm');
+
+    $response = $this->actingAs($this->user)
+        ->postJson(route('meetings.transcriptions.store', $this->meeting), [
+            'audio' => $file,
+            'language' => 'en',
+        ]);
+
+    $response->assertOk();
+    $response->assertJsonStructure(['message', 'transcription']);
+
+    $this->assertDatabaseHas('audio_transcriptions', [
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'uploaded_by' => $this->user->id,
+        'original_filename' => 'recording.webm',
+    ]);
+});
+
 test('guest cannot upload audio', function () {
     $response = $this->post(route('meetings.transcriptions.store', $this->meeting), [
         'audio' => UploadedFile::fake()->create('meeting.mp3', 1024, 'audio/mpeg'),

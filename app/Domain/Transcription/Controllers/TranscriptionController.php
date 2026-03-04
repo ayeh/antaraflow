@@ -24,7 +24,7 @@ class TranscriptionController extends Controller
         private AudioStorageService $audioStorageService,
     ) {}
 
-    public function store(UploadAudioRequest $request, MinutesOfMeeting $meeting): JsonResponse|RedirectResponse
+    public function store(UploadAudioRequest $request, MinutesOfMeeting $meeting): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $meeting);
 
@@ -36,7 +36,10 @@ class TranscriptionController extends Controller
         );
 
         if ($request->wantsJson()) {
-            return response()->json(['transcription' => $transcription], 201);
+            return response()->json([
+                'message' => 'Audio uploaded and transcription started.',
+                'transcription' => $transcription,
+            ]);
         }
 
         return redirect()->route('meetings.show', $meeting)

@@ -17,6 +17,7 @@ use App\Domain\Meeting\Controllers\DocumentController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
 use App\Domain\Project\Controllers\ProjectController;
+use App\Domain\Transcription\Controllers\AudioChunkController;
 use App\Domain\Transcription\Controllers\TranscriptionController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -154,6 +155,11 @@ Route::middleware(['auth', 'org.context', 'org.suspended'])->group(function () {
         Route::get('shares', [\App\Domain\Collaboration\Controllers\ShareController::class, 'index'])->name('shares.index');
         Route::post('shares', [\App\Domain\Collaboration\Controllers\ShareController::class, 'store'])->name('shares.store');
         Route::delete('shares/{share}', [\App\Domain\Collaboration\Controllers\ShareController::class, 'destroy'])->name('shares.destroy');
+
+        // Audio chunks (browser recording)
+        Route::post('audio-chunks', [AudioChunkController::class, 'store'])->name('audio-chunks.store');
+        Route::post('audio-chunks/finalize', [AudioChunkController::class, 'finalize'])->name('audio-chunks.finalize');
+        Route::delete('audio-chunks', [AudioChunkController::class, 'destroy'])->name('audio-chunks.destroy');
 
         // Comments
         Route::post('comments', [\App\Domain\Collaboration\Controllers\CommentController::class, 'store'])->name('comments.store');

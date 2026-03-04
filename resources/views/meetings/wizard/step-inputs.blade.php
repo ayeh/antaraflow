@@ -296,7 +296,16 @@
 
             this.loading = false;
         },
+
+        handleRecordingComplete(detail) {
+            if (detail?.transcription) {
+                this.transcriptions.push(detail.transcription);
+                this.successMessage = 'Browser recording uploaded. Transcription processing...';
+                setTimeout(() => this.successMessage = '', 4000);
+            }
+        },
     }"
+    @recording-complete.window="handleRecordingComplete($event.detail)"
     class="space-y-6"
 >
     {{-- Flash Messages --}}
@@ -526,18 +535,239 @@
                             />
                         </div>
 
-                        {{-- Browser Recording Placeholder --}}
-                        <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div class="flex items-center gap-3">
-                                <div class="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                                    <div class="h-3 w-3 rounded-full bg-red-500"></div>
+                        {{-- Browser Recording --}}
+                        <div
+                            x-data="audioRecorder({
+                                uploadUrl: '{{ route('meetings.transcriptions.store', $meeting) }}',
+                                chunkUrl: '{{ route('meetings.audio-chunks.store', $meeting) }}',
+                                finalizeUrl: '{{ route('meetings.audio-chunks.finalize', $meeting) }}',
+                                cancelUrl: '{{ route('meetings.audio-chunks.destroy', $meeting) }}',
+                                meetingId: {{ $meeting->id }},
+                            })"
+                            class="mt-4 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden"
+                        >
+                            {{-- Recovery Banner --}}
+                            <template x-if="hasPendingRecovery">
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 p-3 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="h-4 w-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                        </svg>
+                                        <span class="text-xs text-amber-700 dark:text-amber-300">
+                                            Unsaved recording found from <span x-text="new Date(recoveryTimestamp).toLocaleString()"></span>
+                                        </span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button @click="recoverRecording()" class="text-xs font-medium text-amber-700 dark:text-amber-300 hover:underline">Recover</button>
+                                        <button @click="discardRecovery()" class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">Discard</button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Browser Recording</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">Record audio directly from your browser</p>
+                            </template>
+
+                            <div class="p-4">
+                                {{-- Header --}}
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-6 w-6 rounded-full flex items-center justify-center"
+                                             :class="{
+                                                 'bg-gray-100 dark:bg-gray-700': state === 'idle',
+                                                 'bg-green-100 dark:bg-green-900/30': state === 'ready',
+                                                 'bg-red-100 dark:bg-red-900/30': ['recording', 'countdown'].includes(state),
+                                                 'bg-amber-100 dark:bg-amber-900/30': state === 'paused',
+                                                 'bg-blue-100 dark:bg-blue-900/30': isProcessing,
+                                             }">
+                                            <div x-show="state === 'recording'"
+                                                 class="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"></div>
+                                            <div x-show="state !== 'recording'"
+                                                 class="h-2.5 w-2.5 rounded-full"
+                                                 :class="{
+                                                     'bg-gray-400': state === 'idle',
+                                                     'bg-green-500': state === 'ready' || state === 'complete',
+                                                     'bg-red-500': state === 'countdown',
+                                                     'bg-amber-500': state === 'paused',
+                                                     'bg-blue-500': isProcessing,
+                                                 }"></div>
+                                        </div>
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">Browser Recording</p>
+                                    </div>
+
+                                    {{-- Timer --}}
+                                    <div x-show="['recording', 'paused', 'stopping'].includes(state)"
+                                         x-cloak
+                                         class="flex items-center gap-1.5 text-sm font-mono"
+                                         :class="state === 'paused' ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'">
+                                        <div x-show="state === 'recording'" class="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                        <span x-text="formattedTimer"></span>
+                                        <span x-show="state === 'paused'" class="text-xs font-sans">(Paused)</span>
+                                    </div>
+                                </div>
+
+                                {{-- Waveform Canvas --}}
+                                <div x-show="!['idle', 'complete'].includes(state)"
+                                     x-cloak
+                                     class="relative mb-3 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-700/50"
+                                     style="height: 64px;">
+
+                                    <canvas x-ref="waveformCanvas"
+                                            width="600"
+                                            height="64"
+                                            class="w-full h-full"></canvas>
+
+                                    {{-- Countdown Overlay --}}
+                                    <div x-show="state === 'countdown'"
+                                         x-transition
+                                         class="absolute inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm">
+                                        <span x-text="countdownValue"
+                                              class="text-3xl font-bold text-white"></span>
+                                    </div>
+                                </div>
+
+                                {{-- Controls --}}
+                                <div class="flex items-center gap-2">
+                                    {{-- Start Recording (idle / ready) --}}
+                                    <template x-if="['idle', 'ready'].includes(state)">
+                                        <button @click="startRecording()"
+                                                class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
+                                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="6" />
+                                            </svg>
+                                            <span x-text="state === 'ready' ? 'Record' : 'Start Recording'"></span>
+                                        </button>
+                                    </template>
+
+                                    {{-- Pause / Stop (recording) --}}
+                                    <template x-if="state === 'recording'">
+                                        <div class="flex items-center gap-2">
+                                            <button @click="pauseRecording()"
+                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                                    <rect x="6" y="4" width="4" height="16" />
+                                                    <rect x="14" y="4" width="4" height="16" />
+                                                </svg>
+                                                Pause
+                                            </button>
+                                            <button @click="stopRecording()"
+                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-gray-600 hover:bg-gray-900 dark:hover:bg-gray-500 transition-colors">
+                                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                                    <rect x="6" y="6" width="12" height="12" rx="1" />
+                                                </svg>
+                                                Stop
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    {{-- Resume / Stop (paused) --}}
+                                    <template x-if="state === 'paused'">
+                                        <div class="flex items-center gap-2">
+                                            <button @click="resumeRecording()"
+                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white bg-green-500 hover:bg-green-600 transition-colors">
+                                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                                    <polygon points="5,3 19,12 5,21" />
+                                                </svg>
+                                                Resume
+                                            </button>
+                                            <button @click="stopRecording()"
+                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-gray-600 hover:bg-gray-900 dark:hover:bg-gray-500 transition-colors">
+                                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                                    <rect x="6" y="6" width="12" height="12" rx="1" />
+                                                </svg>
+                                                Stop
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    {{-- Processing States --}}
+                                    <template x-if="state === 'stopping'">
+                                        <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                            <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            Finalizing audio...
+                                        </div>
+                                    </template>
+
+                                    <template x-if="state === 'processing'">
+                                        <div class="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                                            <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            Processing audio...
+                                        </div>
+                                    </template>
+
+                                    {{-- Upload Progress --}}
+                                    <template x-if="state === 'uploading'">
+                                        <div class="flex-1">
+                                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                                <span>Uploading...</span>
+                                                <span x-text="uploadProgress + '%'"></span>
+                                            </div>
+                                            <div class="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                                                <div class="h-full rounded-full bg-blue-500 transition-all duration-300"
+                                                     :style="{ width: uploadProgress + '%' }"></div>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    {{-- Complete --}}
+                                    <template x-if="state === 'complete'">
+                                        <div class="flex items-center justify-between w-full">
+                                            <div class="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span x-text="successMessage"></span>
+                                            </div>
+                                            <button @click="resetRecorder()"
+                                                    class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                                Record another
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    {{-- Error --}}
+                                    <template x-if="state === 'error'">
+                                        <div class="flex items-center justify-between w-full">
+                                            <div class="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span x-text="errorMessage" class="text-xs"></span>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button @click="retryUpload()"
+                                                        x-show="recordedBlob || isLongRecording"
+                                                        class="text-xs font-medium text-red-600 dark:text-red-400 hover:underline">
+                                                    Retry
+                                                </button>
+                                                <button @click="resetRecorder()"
+                                                        class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                                    Reset
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    {{-- Requesting Permission --}}
+                                    <template x-if="state === 'requesting_permission'">
+                                        <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                            <svg class="h-4 w-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                            </svg>
+                                            Please allow microphone access...
+                                        </div>
+                                    </template>
+                                </div>
+
+                                {{-- Long recording indicator --}}
+                                <div x-show="isLongRecording && state === 'recording'"
+                                     x-cloak
+                                     class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+                                    Progressive upload active — <span x-text="uploadedChunks"></span> chunks uploaded
                                 </div>
                             </div>
-                            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500 italic">Coming soon — browser audio recording with live waveform visualization.</p>
                         </div>
                     </div>
 

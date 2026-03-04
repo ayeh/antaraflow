@@ -30,4 +30,65 @@ class AudioStorageService
     {
         return Storage::disk('local')->path($path);
     }
+
+    public function storeChunk(UploadedFile $file, int $organizationId, string $sessionId, int $chunkIndex): string
+    {
+        $path = "organizations/{$organizationId}/audio/chunks/{$sessionId}";
+
+        return $file->storeAs($path, sprintf('chunk_%05d.%s', $chunkIndex, $file->getClientOriginalExtension()), 'local');
+    }
+
+    public function mergeChunks(int $organizationId, string $sessionId, string $mimeType): string
+    {
+        $chunkDir = "organizations/{$organizationId}/audio/chunks/{$sessionId}";
+        $disk = Storage::disk('local');
+        $files = collect($disk->files($chunkDir))->sort()->values();
+
+        if ($files->isEmpty()) {
+            throw new \RuntimeException("No chunks found for session {$sessionId}");
+        }
+
+        $extension = match (true) {
+            str_contains($mimeType, 'webm') => 'webm',
+            str_contains($mimeType, 'mp4') => 'mp4',
+            str_contains($mimeType, 'ogg') => 'ogg',
+            default => 'webm',
+        };
+
+        $mergedFilename = 'recording_'.now()->format('Ymd_His').'.'.$extension;
+        $mergedPath = "organizations/{$organizationId}/audio/{$mergedFilename}";
+
+        $mergedFullPath = $disk->path($mergedPath);
+
+        $dir = dirname($mergedFullPath);
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $outputStream = fopen($mergedFullPath, 'wb');
+
+        foreach ($files as $file) {
+            $chunkStream = fopen($disk->path($file), 'rb');
+            stream_copy_to_stream($chunkStream, $outputStream);
+            fclose($chunkStream);
+        }
+
+        fclose($outputStream);
+
+        $this->deleteChunks($organizationId, $sessionId);
+
+        return $mergedPath;
+    }
+
+    public function deleteChunks(int $organizationId, string $sessionId): void
+    {
+        $chunkDir = "organizations/{$organizationId}/audio/chunks/{$sessionId}";
+        $disk = Storage::disk('local');
+
+        foreach ($disk->files($chunkDir) as $file) {
+            $disk->delete($file);
+        }
+
+        $disk->deleteDirectory($chunkDir);
+    }
 }
