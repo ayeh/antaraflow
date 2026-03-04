@@ -266,3 +266,58 @@ test('login background upload rejects files over 5mb', function () {
         ]))
         ->assertSessionHasErrors('login_background');
 });
+
+test('saving a preset with duplicate name replaces the existing one', function () {
+    $this->actingAs($this->admin, 'admin')
+        ->postJson(route('admin.branding.presets.store'), [
+            'name' => 'My Theme',
+            'primary_color' => '#ff0000',
+            'secondary_color' => '#00ff00',
+        ])
+        ->assertJson(['success' => true]);
+
+    $this->actingAs($this->admin, 'admin')
+        ->postJson(route('admin.branding.presets.store'), [
+            'name' => 'My Theme',
+            'primary_color' => '#123456',
+            'secondary_color' => '#654321',
+        ])
+        ->assertJson(['success' => true]);
+
+    $themes = json_decode(PlatformSetting::getValue('custom_themes', '[]'), true);
+    expect($themes)->toHaveCount(1);
+    expect($themes[0]['primary_color'])->toBe('#123456');
+});
+
+test('deleting a non-existent preset name succeeds idempotently', function () {
+    $this->actingAs($this->admin, 'admin')
+        ->deleteJson(route('admin.branding.presets.destroy', 'does-not-exist'))
+        ->assertJson(['success' => true]);
+});
+
+test('unauthenticated user cannot access preset endpoints', function () {
+    $this->postJson(route('admin.branding.presets.store'), [])
+        ->assertRedirect(route('admin.login'));
+
+    $this->deleteJson(route('admin.branding.presets.destroy', 'test'))
+        ->assertRedirect(route('admin.login'));
+});
+
+test('uploading a new logo deletes the old file', function () {
+    Storage::fake('public');
+
+    $oldFile = UploadedFile::fake()->image('old-logo.png');
+    $oldPath = $oldFile->store('branding', 'public');
+    PlatformSetting::setValue('logo_path', $oldPath);
+
+    $newFile = UploadedFile::fake()->image('new-logo.png');
+
+    $this->actingAs($this->admin, 'admin')
+        ->put(route('admin.branding.update'), array_merge(basePayload(), [
+            'logo' => $newFile,
+        ]))
+        ->assertRedirect(route('admin.branding.index'));
+
+    Storage::disk('public')->assertMissing($oldPath);
+    Storage::disk('public')->assertExists('branding/'.$newFile->hashName());
+});
