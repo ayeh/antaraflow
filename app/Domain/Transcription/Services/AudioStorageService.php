@@ -35,7 +35,7 @@ class AudioStorageService
     {
         $path = "organizations/{$organizationId}/audio/chunks/{$sessionId}";
 
-        return $file->storeAs($path, "chunk_{$chunkIndex}.".$file->getClientOriginalExtension(), 'local');
+        return $file->storeAs($path, sprintf('chunk_%05d.%s', $chunkIndex, $file->getClientOriginalExtension()), 'local');
     }
 
     public function mergeChunks(int $organizationId, string $sessionId, string $mimeType): string
@@ -43,6 +43,10 @@ class AudioStorageService
         $chunkDir = "organizations/{$organizationId}/audio/chunks/{$sessionId}";
         $disk = Storage::disk('local');
         $files = collect($disk->files($chunkDir))->sort()->values();
+
+        if ($files->isEmpty()) {
+            throw new \RuntimeException("No chunks found for session {$sessionId}");
+        }
 
         $extension = match (true) {
             str_contains($mimeType, 'webm') => 'webm',
@@ -54,12 +58,11 @@ class AudioStorageService
         $mergedFilename = 'recording_'.now()->format('Ymd_His').'.'.$extension;
         $mergedPath = "organizations/{$organizationId}/audio/{$mergedFilename}";
 
-        $mergedContent = '';
-        foreach ($files as $file) {
-            $mergedContent .= $disk->get($file);
-        }
+        $disk->put($mergedPath, '');
 
-        $disk->put($mergedPath, $mergedContent);
+        foreach ($files as $file) {
+            $disk->append($mergedPath, $disk->get($file));
+        }
 
         $this->deleteChunks($organizationId, $sessionId);
 
