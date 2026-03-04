@@ -6,13 +6,38 @@ use App\Domain\Admin\Models\Admin;
 use App\Domain\Admin\Models\PlatformSetting;
 use App\Domain\Admin\Services\BrandingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->admin = Admin::factory()->create();
 });
+
+function basePayload(): array
+{
+    return [
+        'app_name' => 'TestBrand',
+        'primary_color' => '#7c3aed',
+        'secondary_color' => '#3b82f6',
+        'accent_color' => '#10b981',
+        'danger_color' => '#ef4444',
+        'success_color' => '#22c55e',
+        'heading_font' => 'Inter',
+        'body_font' => 'Inter',
+        'footer_text' => '',
+        'support_email' => '',
+        'custom_css' => '',
+        'custom_domain' => '',
+        'logo_url' => '',
+        'favicon_url' => '',
+        'login_background_url' => '',
+        'email_header_html' => '',
+        'email_footer_html' => '',
+    ];
+}
 
 test('branding service returns defaults when no settings exist', function () {
     $service = app(BrandingService::class);
@@ -127,4 +152,78 @@ test('branding service includes new default keys', function () {
         ->toHaveKey('logo_path', '')
         ->toHaveKey('favicon_path', '')
         ->toHaveKey('login_background_path', '');
+});
+
+test('admin can upload logo file', function () {
+    Storage::fake('public');
+
+    $file = UploadedFile::fake()->image('logo.png', 200, 200);
+
+    $this->actingAs($this->admin, 'admin')
+        ->put(route('admin.branding.update'), array_merge(basePayload(), [
+            'logo' => $file,
+        ]))
+        ->assertRedirect(route('admin.branding.index'));
+
+    Storage::disk('public')->assertExists('branding/'.$file->hashName());
+    expect(PlatformSetting::getValue('logo_path'))->toContain('branding/');
+});
+
+test('admin can upload favicon file', function () {
+    Storage::fake('public');
+
+    $file = UploadedFile::fake()->image('favicon.ico', 32, 32);
+
+    $this->actingAs($this->admin, 'admin')
+        ->put(route('admin.branding.update'), array_merge(basePayload(), [
+            'favicon' => $file,
+        ]))
+        ->assertRedirect(route('admin.branding.index'));
+
+    Storage::disk('public')->assertExists('branding/'.$file->hashName());
+    expect(PlatformSetting::getValue('favicon_path'))->toContain('branding/');
+});
+
+test('logo upload rejects non-image files', function () {
+    Storage::fake('public');
+
+    $file = UploadedFile::fake()->create('malware.php', 100, 'application/php');
+
+    $this->actingAs($this->admin, 'admin')
+        ->put(route('admin.branding.update'), array_merge(basePayload(), [
+            'logo' => $file,
+        ]))
+        ->assertSessionHasErrors('logo');
+});
+
+test('admin can save a custom theme preset', function () {
+    $this->actingAs($this->admin, 'admin')
+        ->postJson(route('admin.branding.presets.store'), [
+            'name' => 'My Theme',
+            'primary_color' => '#ff0000',
+            'secondary_color' => '#00ff00',
+            'accent_color' => '#0000ff',
+            'danger_color' => '#ff4444',
+            'success_color' => '#44ff44',
+            'heading_font' => 'Poppins',
+            'body_font' => 'Inter',
+        ])
+        ->assertJson(['success' => true]);
+
+    $themes = json_decode(PlatformSetting::getValue('custom_themes', '[]'), true);
+    expect($themes)->toHaveCount(1);
+    expect($themes[0]['name'])->toBe('My Theme');
+});
+
+test('admin can delete a custom theme preset', function () {
+    PlatformSetting::setValue('custom_themes', json_encode([
+        ['name' => 'My Theme', 'primary_color' => '#ff0000'],
+    ]));
+
+    $this->actingAs($this->admin, 'admin')
+        ->deleteJson(route('admin.branding.presets.destroy', 'My Theme'))
+        ->assertJson(['success' => true]);
+
+    $themes = json_decode(PlatformSetting::getValue('custom_themes', '[]'), true);
+    expect($themes)->toHaveCount(0);
 });
