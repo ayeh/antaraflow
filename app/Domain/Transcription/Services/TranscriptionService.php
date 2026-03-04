@@ -13,6 +13,7 @@ use App\Support\Enums\InputType;
 use App\Support\Enums\TranscriptionStatus;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class TranscriptionService
 {
@@ -37,6 +38,41 @@ class TranscriptionService
 
         $mom->inputs()->create([
             'type' => InputType::Audio,
+            'source_type' => AudioTranscription::class,
+            'source_id' => $transcription->id,
+        ]);
+
+        ProcessTranscriptionJob::dispatch($transcription);
+
+        return $transcription;
+    }
+
+    public function createFromBrowserRecording(
+        string $filePath,
+        MinutesOfMeeting $mom,
+        User $user,
+        string $mimeType,
+        int $durationSeconds,
+        string $language = 'en',
+    ): AudioTranscription {
+        $disk = Storage::disk('local');
+        $fileSize = $disk->size($filePath);
+        $filename = basename($filePath);
+
+        $transcription = AudioTranscription::query()->create([
+            'minutes_of_meeting_id' => $mom->id,
+            'uploaded_by' => $user->id,
+            'original_filename' => $filename,
+            'file_path' => $filePath,
+            'mime_type' => $mimeType,
+            'file_size' => $fileSize,
+            'duration_seconds' => $durationSeconds,
+            'language' => $language,
+            'status' => TranscriptionStatus::Pending,
+        ]);
+
+        $mom->inputs()->create([
+            'type' => InputType::BrowserRecording,
             'source_type' => AudioTranscription::class,
             'source_id' => $transcription->id,
         ]);
