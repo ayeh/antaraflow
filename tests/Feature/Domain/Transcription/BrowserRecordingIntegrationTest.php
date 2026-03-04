@@ -30,7 +30,7 @@ beforeEach(function () {
 });
 
 it('handles short recording upload via existing transcription endpoint with json', function () {
-    $file = UploadedFile::fake()->create('recording.webm', 500, 'audio/webm');
+    $file = UploadedFile::fake()->create('recording.mp3', 500, 'audio/mpeg');
 
     $response = $this->actingAs($this->user)
         ->postJson(route('meetings.transcriptions.store', $this->meeting), [

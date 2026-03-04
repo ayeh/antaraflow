@@ -90,7 +90,7 @@ test('store returns json response when accept header is json', function () {
     Storage::fake('local');
     Queue::fake();
 
-    $file = UploadedFile::fake()->create('recording.webm', 500, 'audio/webm');
+    $file = UploadedFile::fake()->create('recording.mp3', 500, 'audio/mpeg');
 
     $response = $this->actingAs($this->user)
         ->postJson(route('meetings.transcriptions.store', $this->meeting), [
@@ -104,7 +104,7 @@ test('store returns json response when accept header is json', function () {
     $this->assertDatabaseHas('audio_transcriptions', [
         'minutes_of_meeting_id' => $this->meeting->id,
         'uploaded_by' => $this->user->id,
-        'original_filename' => 'recording.webm',
+        'original_filename' => 'recording.mp3',
     ]);
 });
 
