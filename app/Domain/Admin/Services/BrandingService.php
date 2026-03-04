@@ -14,6 +14,9 @@ class BrandingService
         'app_name' => 'antaraFLOW',
         'primary_color' => '#7c3aed',
         'secondary_color' => '#3b82f6',
+        'accent_color' => '#10b981',
+        'danger_color' => '#ef4444',
+        'success_color' => '#22c55e',
         'footer_text' => '',
         'support_email' => '',
         'custom_css' => '',
@@ -21,8 +24,14 @@ class BrandingService
         'logo_url' => '',
         'favicon_url' => '',
         'login_background_url' => '',
+        'logo_path' => '',
+        'favicon_path' => '',
+        'login_background_path' => '',
         'email_header_html' => '',
         'email_footer_html' => '',
+        'heading_font' => 'Inter',
+        'body_font' => 'Inter',
+        'custom_themes' => '[]',
     ];
 
     public function get(string $key, mixed $default = null): mixed

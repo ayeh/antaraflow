@@ -112,3 +112,19 @@ test('unauthenticated user cannot access branding', function () {
     $this->get(route('admin.branding.index'))
         ->assertRedirect(route('admin.login'));
 });
+
+test('branding service includes new default keys', function () {
+    $service = app(BrandingService::class);
+    $all = $service->all();
+
+    expect($all)
+        ->toHaveKey('accent_color', '#10b981')
+        ->toHaveKey('danger_color', '#ef4444')
+        ->toHaveKey('success_color', '#22c55e')
+        ->toHaveKey('heading_font', 'Inter')
+        ->toHaveKey('body_font', 'Inter')
+        ->toHaveKey('custom_themes', '[]')
+        ->toHaveKey('logo_path', '')
+        ->toHaveKey('favicon_path', '')
+        ->toHaveKey('login_background_path', '');
+});
