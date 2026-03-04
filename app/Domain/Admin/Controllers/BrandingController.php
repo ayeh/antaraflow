@@ -71,7 +71,6 @@ class BrandingController extends Controller
 
     public function destroyPreset(string $name): JsonResponse
     {
-        $name = substr($name, 0, 100);
 
         $existing = json_decode(PlatformSetting::getValue('custom_themes', '[]'), true);
         $existing = is_array($existing) ? $existing : [];

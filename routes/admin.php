@@ -47,7 +47,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('branding', [BrandingController::class, 'index'])->name('branding.index');
         Route::put('branding', [BrandingController::class, 'update'])->name('branding.update');
         Route::post('branding/presets', [BrandingController::class, 'storePreset'])->name('branding.presets.store');
-        Route::delete('branding/presets/{name}', [BrandingController::class, 'destroyPreset'])->name('branding.presets.destroy');
+        Route::delete('branding/presets/{name}', [BrandingController::class, 'destroyPreset'])
+            ->name('branding.presets.destroy')
+            ->where('name', '[^/]{1,100}');
 
         // SMTP
         Route::get('smtp', [SmtpController::class, 'index'])->name('smtp.index');

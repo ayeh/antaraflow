@@ -10,7 +10,7 @@ class UpdateBrandingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return auth()->guard('admin')->check();
     }
 
     /** @return array<string, array<string>> */
