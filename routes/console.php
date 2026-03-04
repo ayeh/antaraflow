@@ -10,3 +10,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::job(new CheckOverdueActionItemsJob)->dailyAt('08:00');
+
+Schedule::command('transcription:cleanup-chunks')->hourly();
