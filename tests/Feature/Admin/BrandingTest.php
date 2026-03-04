@@ -227,3 +227,42 @@ test('admin can delete a custom theme preset', function () {
     $themes = json_decode(PlatformSetting::getValue('custom_themes', '[]'), true);
     expect($themes)->toHaveCount(0);
 });
+
+test('admin can upload login background file', function () {
+    Storage::fake('public');
+
+    $file = UploadedFile::fake()->image('background.jpg', 1920, 1080);
+
+    $this->actingAs($this->admin, 'admin')
+        ->put(route('admin.branding.update'), array_merge(basePayload(), [
+            'login_background' => $file,
+        ]))
+        ->assertRedirect(route('admin.branding.index'));
+
+    Storage::disk('public')->assertExists('branding/'.$file->hashName());
+    expect(PlatformSetting::getValue('login_background_path'))->toContain('branding/');
+});
+
+test('logo upload rejects files over 2mb', function () {
+    Storage::fake('public');
+
+    $file = UploadedFile::fake()->image('logo.png')->size(2049);
+
+    $this->actingAs($this->admin, 'admin')
+        ->put(route('admin.branding.update'), array_merge(basePayload(), [
+            'logo' => $file,
+        ]))
+        ->assertSessionHasErrors('logo');
+});
+
+test('login background upload rejects files over 5mb', function () {
+    Storage::fake('public');
+
+    $file = UploadedFile::fake()->image('bg.jpg')->size(5121);
+
+    $this->actingAs($this->admin, 'admin')
+        ->put(route('admin.branding.update'), array_merge(basePayload(), [
+            'login_background' => $file,
+        ]))
+        ->assertSessionHasErrors('login_background');
+});
