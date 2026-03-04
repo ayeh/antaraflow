@@ -10,6 +10,7 @@ use App\Domain\Transcription\Requests\UploadAudioRequest;
 use App\Domain\Transcription\Services\AudioStorageService;
 use App\Domain\Transcription\Services\TranscriptionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
@@ -23,16 +24,23 @@ class TranscriptionController extends Controller
         private AudioStorageService $audioStorageService,
     ) {}
 
-    public function store(UploadAudioRequest $request, MinutesOfMeeting $meeting): RedirectResponse
+    public function store(UploadAudioRequest $request, MinutesOfMeeting $meeting): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $meeting);
 
-        $this->transcriptionService->upload(
+        $transcription = $this->transcriptionService->upload(
             $request->file('audio'),
             $meeting,
             $request->user(),
             $request->validated('language', 'en'),
         );
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Audio uploaded and transcription started.',
+                'transcription' => $transcription,
+            ]);
+        }
 
         return redirect()->route('meetings.show', $meeting)
             ->with('success', 'Audio uploaded and transcription started.');
