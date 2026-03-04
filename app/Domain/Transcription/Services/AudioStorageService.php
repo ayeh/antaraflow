@@ -58,11 +58,22 @@ class AudioStorageService
         $mergedFilename = 'recording_'.now()->format('Ymd_His').'.'.$extension;
         $mergedPath = "organizations/{$organizationId}/audio/{$mergedFilename}";
 
-        $disk->put($mergedPath, '');
+        $mergedFullPath = $disk->path($mergedPath);
+
+        $dir = dirname($mergedFullPath);
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $outputStream = fopen($mergedFullPath, 'wb');
 
         foreach ($files as $file) {
-            $disk->append($mergedPath, $disk->get($file));
+            $chunkStream = fopen($disk->path($file), 'rb');
+            stream_copy_to_stream($chunkStream, $outputStream);
+            fclose($chunkStream);
         }
+
+        fclose($outputStream);
 
         $this->deleteChunks($organizationId, $sessionId);
 

@@ -75,6 +75,25 @@ it('deletes all chunks for a session', function () {
     expect(Storage::disk('local')->files($chunkDir))->toBeEmpty();
 });
 
+it('merges chunk content correctly without corruption', function () {
+    Storage::fake('local');
+
+    $service = app(AudioStorageService::class);
+    $sessionId = 'content-test';
+    $orgId = 1;
+
+    $chunk1Content = random_bytes(100);
+    $chunk2Content = random_bytes(100);
+
+    Storage::disk('local')->put("organizations/1/audio/chunks/{$sessionId}/chunk_00000.webm", $chunk1Content);
+    Storage::disk('local')->put("organizations/1/audio/chunks/{$sessionId}/chunk_00001.webm", $chunk2Content);
+
+    $mergedPath = $service->mergeChunks($orgId, $sessionId, 'audio/webm');
+
+    $mergedContent = Storage::disk('local')->get($mergedPath);
+    expect($mergedContent)->toBe($chunk1Content.$chunk2Content);
+});
+
 it('throws an exception when merging with no chunks', function () {
     Storage::fake('local');
 
