@@ -90,27 +90,14 @@ test('admin can view branding page', function () {
 
 test('admin can update branding settings', function () {
     $this->actingAs($this->admin, 'admin')
-        ->put(route('admin.branding.update'), [
-            'app_name' => 'NewBrand',
-            'primary_color' => '#ff0000',
-            'secondary_color' => '#00ff00',
-            'footer_text' => 'Footer text here',
-            'support_email' => 'help@example.com',
-            'custom_css' => '',
-            'custom_domain' => '',
-            'logo_url' => '',
-            'favicon_url' => '',
-            'login_background_url' => '',
-            'email_header_html' => '',
-            'email_footer_html' => '',
-        ])
+        ->put(route('admin.branding.update'), basePayload())
         ->assertRedirect(route('admin.branding.index'))
         ->assertSessionHas('success', 'Branding settings updated successfully.');
 });
 
 test('updated branding persists in database', function () {
     $this->actingAs($this->admin, 'admin')
-        ->put(route('admin.branding.update'), [
+        ->put(route('admin.branding.update'), array_merge(basePayload(), [
             'app_name' => 'PersistBrand',
             'primary_color' => '#123456',
             'secondary_color' => '#654321',
@@ -123,7 +110,7 @@ test('updated branding persists in database', function () {
             'login_background_url' => 'https://example.com/bg.jpg',
             'email_header_html' => '<div>Header</div>',
             'email_footer_html' => '<div>Footer</div>',
-        ]);
+        ]));
 
     expect(PlatformSetting::getValue('app_name'))->toBe('PersistBrand');
     expect(PlatformSetting::getValue('primary_color'))->toBe('#123456');
