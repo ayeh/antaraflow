@@ -24,8 +24,11 @@ use App\Domain\Meeting\Policies\MinutesOfMeetingPolicy;
 use App\Domain\Meeting\Policies\MomTagPolicy;
 use App\Domain\Project\Models\Project;
 use App\Domain\Project\Policies\ProjectPolicy;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -35,6 +38,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        RateLimiter::for('api', function (Request $request) {
+            $apiKey = $request->attributes->get('api_key');
+
+            return Limit::perMinute(60)->by($apiKey?->id ?: $request->ip());
+        });
+
         Gate::policy(AttendeeGroup::class, AttendeeGroupPolicy::class);
         Gate::policy(Organization::class, OrganizationPolicy::class);
         Gate::policy(MinutesOfMeeting::class, MinutesOfMeetingPolicy::class);

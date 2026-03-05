@@ -7,7 +7,7 @@ use App\Domain\API\Controllers\V1\MeetingApiController;
 use App\Domain\API\Middleware\ApiKeyAuthentication;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->middleware(ApiKeyAuthentication::class)->group(function () {
+Route::prefix('v1')->middleware([ApiKeyAuthentication::class, 'throttle:api'])->group(function () {
     Route::get('meetings', [MeetingApiController::class, 'index']);
     Route::post('meetings', [MeetingApiController::class, 'store']);
     Route::get('meetings/{id}', [MeetingApiController::class, 'show']);

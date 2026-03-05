@@ -25,6 +25,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'org.suspended' => \App\Domain\Admin\Middleware\CheckOrganizationSuspended::class,
             'admin.auth' => \App\Domain\Admin\Middleware\AdminAuthenticated::class,
         ]);
+
+        $middleware->prependToPriorityList(
+            before: \Illuminate\Routing\Middleware\ThrottleRequests::class,
+            prepend: \App\Domain\API\Middleware\ApiKeyAuthentication::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
