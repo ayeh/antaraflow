@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Meeting\Services;
 
 use App\Domain\Account\Services\AuditService;
+use App\Domain\Meeting\Events\MeetingApproved;
+use App\Domain\Meeting\Events\MeetingFinalized;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
@@ -106,6 +108,8 @@ class MeetingService
         $mom->update(['status' => MeetingStatus::Finalized]);
         $this->auditService->log('finalized', $mom);
 
+        MeetingFinalized::dispatch($mom, $user);
+
         return $mom->fresh();
     }
 
@@ -117,6 +121,8 @@ class MeetingService
 
         $mom->update(['status' => MeetingStatus::Approved]);
         $this->auditService->log('approved', $mom);
+
+        MeetingApproved::dispatch($mom, $user);
 
         return $mom->fresh();
     }
