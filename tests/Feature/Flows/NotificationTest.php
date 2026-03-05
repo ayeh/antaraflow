@@ -70,12 +70,13 @@ test('meeting finalized notification contains correct data', function () {
         'created_by' => $this->user->id,
     ]);
 
-    $notification = new MeetingFinalizedNotification($meeting);
+    $notification = new MeetingFinalizedNotification($meeting, $this->user);
     $data = $notification->toArray($this->user);
 
     expect($data['type'])->toBe('meeting_finalized');
     expect($data['meeting_id'])->toBe($meeting->id);
     expect($data['title'])->toBe($meeting->title);
+    expect($data['finalized_by'])->toBe($this->user->name);
 });
 
 test('meeting invite notification contains correct data', function () {

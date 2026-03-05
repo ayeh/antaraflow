@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Meeting\Services;
 
+use App\Domain\Account\Models\Organization;
 use App\Domain\Account\Services\AuditService;
+use App\Domain\Account\Services\SubscriptionService;
 use App\Domain\Meeting\Events\MeetingApproved;
 use App\Domain\Meeting\Events\MeetingFinalized;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
@@ -18,10 +20,17 @@ class MeetingService
         private readonly VersionService $versionService,
         private readonly AuditService $auditService,
         private readonly MomNumberService $momNumberService,
+        private readonly SubscriptionService $subscriptionService,
     ) {}
 
     public function create(array $data, User $user): MinutesOfMeeting
     {
+        $org = Organization::find($user->current_organization_id);
+
+        if ($org) {
+            $this->subscriptionService->checkLimit($org, 'meetings');
+        }
+
         $tags = $data['tags'] ?? null;
         $hasJoinSettings = array_key_exists('allow_external_join', $data)
             || array_key_exists('require_rsvp', $data)

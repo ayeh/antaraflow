@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Meeting\Controllers;
 
+use App\Domain\Account\Exceptions\LimitExceededException;
+use App\Domain\Account\Services\SubscriptionService;
 use App\Domain\Collaboration\Services\CommentService;
 use App\Domain\Collaboration\Services\ShareService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
@@ -63,7 +65,15 @@ class MeetingController extends Controller
     {
         $this->authorize('create', MinutesOfMeeting::class);
 
-        $meeting = $this->meetingService->create($request->validated(), $request->user());
+        try {
+            $meeting = $this->meetingService->create($request->validated(), $request->user());
+
+            app(SubscriptionService::class)
+                ->incrementUsage($request->user()->currentOrganization, 'meetings');
+        } catch (LimitExceededException $e) {
+            return redirect()->route('subscription.index')
+                ->with('limit_exceeded', $e->getMessage());
+        }
 
         return redirect()->route('meetings.show', $meeting)
             ->with('success', 'Meeting created successfully.');
@@ -77,7 +87,7 @@ class MeetingController extends Controller
             'createdBy', 'project', 'tags',
             'attendees.user', 'actionItems.assignedTo',
             'inputs', 'transcriptions', 'manualNotes', 'documents',
-            'extractions', 'aiConversations',
+            'extractions', 'topics', 'aiConversations',
         ]);
 
         $isEditable = in_array($meeting->status, [MeetingStatus::Draft, MeetingStatus::InProgress]);
