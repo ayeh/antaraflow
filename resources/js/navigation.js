@@ -8,6 +8,9 @@ export default function appState() {
         theme: localStorage.getItem('theme') || 'system',
         bottomSheetOpen: false,
         recentMeetings: [],
+        searchResults: { meetings: [], action_items: [], projects: [] },
+        searchLoading: false,
+        searchDebounceTimer: null,
         navCommands: [
             { label: 'Dashboard',    href: '/dashboard' },
             { label: 'Meetings',     href: '/meetings' },
@@ -50,20 +53,58 @@ export default function appState() {
             this.applyTheme(next);
         },
 
+        searchGlobal() {
+            clearTimeout(this.searchDebounceTimer);
+            this.commandSelectedIndex = 0;
+
+            if (this.commandQuery.length < 2) {
+                this.searchResults = { meetings: [], action_items: [], projects: [] };
+                this.searchLoading = false;
+                return;
+            }
+
+            this.searchLoading = true;
+
+            this.searchDebounceTimer = setTimeout(() => {
+                fetch('/search?q=' + encodeURIComponent(this.commandQuery), {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                })
+                .then(r => r.json())
+                .then(data => {
+                    this.searchResults = data;
+                    this.searchLoading = false;
+                })
+                .catch(() => {
+                    this.searchLoading = false;
+                });
+            }, 300);
+        },
+
         get filteredCommands() {
             const q = this.commandQuery.toLowerCase();
+            const isSearching = q.length >= 2;
+
             return {
                 nav: q
                     ? this.navCommands.filter(c => c.label.toLowerCase().includes(q))
                     : this.navCommands,
-                meetings: q
-                    ? this.recentMeetings.filter(m => m.title.toLowerCase().includes(q))
-                    : this.recentMeetings.slice(0, 5),
+                meetings: isSearching
+                    ? this.searchResults.meetings
+                    : (q ? this.recentMeetings.filter(m => m.title.toLowerCase().includes(q)) : this.recentMeetings.slice(0, 5)),
+                action_items: isSearching ? this.searchResults.action_items : [],
+                projects: isSearching ? this.searchResults.projects : [],
             };
         },
 
         get commandResultCount() {
-            return this.filteredCommands.nav.length + this.filteredCommands.meetings.length;
+            return this.filteredCommands.nav.length
+                + this.filteredCommands.meetings.length
+                + this.filteredCommands.action_items.length
+                + this.filteredCommands.projects.length;
         },
 
         navigateCommand(direction) {
@@ -75,12 +116,14 @@ export default function appState() {
         },
 
         executeCommand(index) {
-            const meetingLinks = this.filteredCommands.meetings.map(m => ({
-                href: `/meetings/${m.id}`,
-            }));
-            const all = [...this.filteredCommands.nav, ...meetingLinks];
-            const item = all[index ?? this.commandSelectedIndex];
-            if (!item) { return; }
+            const allItems = [
+                ...this.filteredCommands.nav,
+                ...this.filteredCommands.meetings.map(m => ({ href: m.url || '/meetings/' + m.id })),
+                ...this.filteredCommands.action_items.map(a => ({ href: a.url })),
+                ...this.filteredCommands.projects.map(p => ({ href: p.url })),
+            ];
+            const item = allItems[index ?? this.commandSelectedIndex];
+            if (!item?.href) { return; }
             this.commandPaletteOpen = false;
             window.location.href = item.href;
         },

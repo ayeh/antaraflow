@@ -17,6 +17,7 @@ use App\Domain\Meeting\Controllers\DocumentController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
 use App\Domain\Project\Controllers\ProjectController;
+use App\Domain\Search\Controllers\SearchController;
 use App\Domain\Transcription\Controllers\AudioChunkController;
 use App\Domain\Transcription\Controllers\TranscriptionController;
 use App\Http\Controllers\DashboardController;
@@ -52,6 +53,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'org.context', 'org.suspended'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Global Search
+    Route::get('search', [SearchController::class, 'index'])->name('search');
 
     // Profile
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -136,6 +140,7 @@ Route::middleware(['auth', 'org.context', 'org.suspended'])->group(function () {
         Route::resource('documents', DocumentController::class)->only(['store', 'destroy']);
         Route::resource('manual-notes', ManualNoteController::class);
         Route::post('extract', [ExtractionController::class, 'extract'])->name('extract');
+        Route::post('generate', [ExtractionController::class, 'generate'])->name('generate');
         Route::get('extractions', [ExtractionController::class, 'index'])->name('extractions.index');
         Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
         Route::post('chat', [ChatController::class, 'store'])->name('chat.store');
