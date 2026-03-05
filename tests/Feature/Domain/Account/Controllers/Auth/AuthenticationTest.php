@@ -15,7 +15,7 @@ test('user can register', function () {
         'password_confirmation' => 'password123',
     ]);
 
-    $response->assertRedirect(route('organizations.index'));
+    $response->assertRedirect(route('onboarding.step', ['step' => 1]));
     $this->assertAuthenticated();
     $this->assertDatabaseHas('users', ['email' => 'john@example.com']);
 });

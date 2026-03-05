@@ -37,6 +37,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'preferences' => 'array',
             'last_login_at' => 'datetime',
+            'onboarding_completed_at' => 'datetime',
         ];
     }
 

@@ -39,6 +39,6 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('organizations.index');
+        return redirect()->route('onboarding.step', ['step' => 1]);
     }
 }

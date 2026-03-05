@@ -4,6 +4,7 @@ use App\Domain\Account\Controllers\Auth\LoginController;
 use App\Domain\Account\Controllers\Auth\LogoutController;
 use App\Domain\Account\Controllers\Auth\RegisterController;
 use App\Domain\Account\Controllers\MemberController;
+use App\Domain\Account\Controllers\OnboardingController;
 use App\Domain\Account\Controllers\OrganizationController;
 use App\Domain\Account\Controllers\OrganizationSettingsController;
 use App\Domain\Account\Controllers\ProfileController;
@@ -50,7 +51,13 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [LogoutController::class, 'logout'])->name('logout');
 });
 
-Route::middleware(['auth', 'org.context', 'org.suspended'])->group(function () {
+Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(function () {
+    Route::get('/step/{step}', [OnboardingController::class, 'show'])->name('step');
+    Route::post('/step/{step}', [OnboardingController::class, 'update'])->name('update');
+    Route::post('/skip', [OnboardingController::class, 'skip'])->name('skip');
+});
+
+Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

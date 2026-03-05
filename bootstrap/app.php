@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'org.context' => \App\Infrastructure\Tenancy\SetOrganizationContext::class,
             'org.suspended' => \App\Domain\Admin\Middleware\CheckOrganizationSuspended::class,
             'admin.auth' => \App\Domain\Admin\Middleware\AdminAuthenticated::class,
+            'onboarding' => \App\Domain\Account\Middleware\OnboardingMiddleware::class,
         ]);
 
         $middleware->prependToPriorityList(
