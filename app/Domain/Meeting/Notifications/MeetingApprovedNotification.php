@@ -11,13 +11,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class MeetingFinalizedNotification extends Notification implements ShouldQueue
+class MeetingApprovedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public function __construct(
         public MinutesOfMeeting $meeting,
-        public User $finalizedBy,
+        public User $approvedBy,
     ) {}
 
     /** @return array<int, string> */
@@ -29,10 +29,9 @@ class MeetingFinalizedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Meeting Finalized: {$this->meeting->title}")
+            ->subject("Meeting Approved: {$this->meeting->title}")
             ->greeting("Hello {$notifiable->name},")
-            ->line("The meeting **{$this->meeting->title}** has been finalized by {$this->finalizedBy->name}.")
-            ->line('Please review and take action on your assigned items.')
+            ->line("The meeting **{$this->meeting->title}** has been approved by {$this->approvedBy->name}.")
             ->action('View Meeting', route('meetings.show', $this->meeting));
     }
 
@@ -40,10 +39,10 @@ class MeetingFinalizedNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'type' => 'meeting_finalized',
+            'type' => 'meeting_approved',
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
-            'finalized_by' => $this->finalizedBy->name,
+            'approved_by' => $this->approvedBy->name,
         ];
     }
 }

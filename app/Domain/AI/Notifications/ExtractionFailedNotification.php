@@ -2,22 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Meeting\Notifications;
+namespace App\Domain\AI\Notifications;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class MeetingFinalizedNotification extends Notification implements ShouldQueue
+class ExtractionFailedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public function __construct(
         public MinutesOfMeeting $meeting,
-        public User $finalizedBy,
+        public string $error,
     ) {}
 
     /** @return array<int, string> */
@@ -29,10 +28,10 @@ class MeetingFinalizedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Meeting Finalized: {$this->meeting->title}")
+            ->subject("AI Extraction Failed: {$this->meeting->title}")
             ->greeting("Hello {$notifiable->name},")
-            ->line("The meeting **{$this->meeting->title}** has been finalized by {$this->finalizedBy->name}.")
-            ->line('Please review and take action on your assigned items.')
+            ->line("AI extraction failed for meeting: **{$this->meeting->title}**.")
+            ->line('Please try running the extraction again.')
             ->action('View Meeting', route('meetings.show', $this->meeting));
     }
 
@@ -40,10 +39,10 @@ class MeetingFinalizedNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'type' => 'meeting_finalized',
+            'type' => 'extraction_failed',
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
-            'finalized_by' => $this->finalizedBy->name,
+            'error' => $this->error,
         ];
     }
 }

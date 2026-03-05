@@ -8,12 +8,20 @@ use App\Domain\Account\Models\Organization;
 use App\Domain\Account\Policies\OrganizationPolicy;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\ActionItem\Policies\ActionItemPolicy;
+use App\Domain\AI\Events\ExtractionCompleted;
+use App\Domain\AI\Events\ExtractionFailed;
+use App\Domain\AI\Listeners\NotifyExtractionComplete;
+use App\Domain\AI\Listeners\NotifyExtractionFailed;
 use App\Domain\Attendee\Models\AttendeeGroup;
 use App\Domain\Attendee\Policies\AttendeeGroupPolicy;
 use App\Domain\Collaboration\Models\Comment;
 use App\Domain\Collaboration\Models\MeetingShare;
 use App\Domain\Collaboration\Policies\CommentPolicy;
 use App\Domain\Collaboration\Policies\MeetingSharePolicy;
+use App\Domain\Meeting\Events\MeetingApproved;
+use App\Domain\Meeting\Events\MeetingFinalized;
+use App\Domain\Meeting\Listeners\NotifyMeetingApproved;
+use App\Domain\Meeting\Listeners\NotifyMeetingFinalized;
 use App\Domain\Meeting\Models\MeetingSeries;
 use App\Domain\Meeting\Models\MeetingTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
@@ -24,9 +32,14 @@ use App\Domain\Meeting\Policies\MinutesOfMeetingPolicy;
 use App\Domain\Meeting\Policies\MomTagPolicy;
 use App\Domain\Project\Models\Project;
 use App\Domain\Project\Policies\ProjectPolicy;
+use App\Domain\Transcription\Events\TranscriptionCompleted;
+use App\Domain\Transcription\Events\TranscriptionFailed;
+use App\Domain\Transcription\Listeners\NotifyTranscriptionComplete;
+use App\Domain\Transcription\Listeners\NotifyTranscriptionFailed;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
@@ -64,5 +77,12 @@ class AppServiceProvider extends ServiceProvider
                     ->get(['id', 'title', 'meeting_date']));
             }
         });
+
+        Event::listen(TranscriptionCompleted::class, NotifyTranscriptionComplete::class);
+        Event::listen(TranscriptionFailed::class, NotifyTranscriptionFailed::class);
+        Event::listen(ExtractionCompleted::class, NotifyExtractionComplete::class);
+        Event::listen(ExtractionFailed::class, NotifyExtractionFailed::class);
+        Event::listen(MeetingFinalized::class, NotifyMeetingFinalized::class);
+        Event::listen(MeetingApproved::class, NotifyMeetingApproved::class);
     }
 }
