@@ -14,6 +14,7 @@ use App\Domain\AI\Listeners\NotifyExtractionComplete;
 use App\Domain\AI\Listeners\NotifyExtractionFailed;
 use App\Domain\Attendee\Models\AttendeeGroup;
 use App\Domain\Attendee\Policies\AttendeeGroupPolicy;
+use App\Domain\Calendar\Listeners\SyncMeetingToCalendar;
 use App\Domain\Collaboration\Models\Comment;
 use App\Domain\Collaboration\Models\MeetingShare;
 use App\Domain\Collaboration\Policies\CommentPolicy;
@@ -83,6 +84,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(ExtractionCompleted::class, NotifyExtractionComplete::class);
         Event::listen(ExtractionFailed::class, NotifyExtractionFailed::class);
         Event::listen(MeetingFinalized::class, NotifyMeetingFinalized::class);
+        Event::listen(MeetingFinalized::class, SyncMeetingToCalendar::class);
         Event::listen(MeetingApproved::class, NotifyMeetingApproved::class);
     }
 }

@@ -14,6 +14,8 @@ use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\Attendee\Controllers\AttendeeController;
 use App\Domain\Attendee\Controllers\QrRegistrationController;
+use App\Domain\Calendar\Controllers\CalendarConnectionController;
+use App\Domain\Calendar\Controllers\CalendarWebhookController;
 use App\Domain\Meeting\Controllers\DocumentController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
@@ -38,6 +40,9 @@ Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessCo
 Route::get('register/{token}', [QrRegistrationController::class, 'showForm'])->name('qr-registration.form');
 Route::post('register/{token}', [QrRegistrationController::class, 'register'])->name('qr-registration.submit');
 Route::get('register/{token}/success', [QrRegistrationController::class, 'success'])->name('qr-registration.success');
+
+// Calendar Webhooks (no auth - called by Google/Microsoft)
+Route::post('calendar/webhook/{provider}', [CalendarWebhookController::class, 'handle'])->name('calendar.webhook');
 
 // Auth routes
 Route::middleware('guest')->group(function () {
@@ -128,6 +133,14 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     Route::get('notifications/unread', [\App\Domain\Account\Controllers\NotificationController::class, 'unread'])->name('notifications.unread');
     Route::post('notifications/read-all', [\App\Domain\Account\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::post('notifications/{id}/read', [\App\Domain\Account\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+
+    // Calendar Connections
+    Route::prefix('calendar')->name('calendar.')->group(function () {
+        Route::get('connections', [CalendarConnectionController::class, 'index'])->name('connections');
+        Route::get('connect/{provider}', [CalendarConnectionController::class, 'connect'])->name('connect');
+        Route::get('callback/{provider}', [CalendarConnectionController::class, 'callback'])->name('callback');
+        Route::delete('disconnect/{connection}', [CalendarConnectionController::class, 'disconnect'])->name('disconnect');
+    });
 
     // AI Provider Configs
     Route::resource('ai-provider-configs', \App\Domain\Account\Controllers\AiProviderConfigController::class);
