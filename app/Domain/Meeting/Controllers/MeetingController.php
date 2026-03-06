@@ -56,8 +56,12 @@ class MeetingController extends Controller
     {
         $this->authorize('viewAny', MinutesOfMeeting::class);
 
-        $year = (int) $request->get('year', now()->year);
-        $month = (int) $request->get('month', now()->month);
+        $validated = $request->validate([
+            'year' => ['sometimes', 'integer', 'min:2000', 'max:2100'],
+            'month' => ['sometimes', 'integer', 'min:1', 'max:12'],
+        ]);
+        $year = $validated['year'] ?? now()->year;
+        $month = $validated['month'] ?? now()->month;
 
         $start = \Carbon\Carbon::create($year, $month, 1)->startOfMonth();
         $end = $start->copy()->endOfMonth();
