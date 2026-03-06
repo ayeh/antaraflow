@@ -8,11 +8,13 @@ use App\Domain\Account\Controllers\OnboardingController;
 use App\Domain\Account\Controllers\OrganizationController;
 use App\Domain\Account\Controllers\OrganizationSettingsController;
 use App\Domain\Account\Controllers\ProfileController;
+use App\Domain\Account\Controllers\SocialAuthController;
 use App\Domain\ActionItem\Controllers\ActionItemController;
 use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
 use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\AI\Controllers\ExtractionTemplateController;
+use App\Domain\Analytics\Controllers\GovernanceAnalyticsController;
 use App\Domain\Attendee\Controllers\AttendeeController;
 use App\Domain\Attendee\Controllers\QrRegistrationController;
 use App\Domain\Calendar\Controllers\CalendarConnectionController;
@@ -51,6 +53,9 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [LoginController::class, 'login']);
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register']);
+
+    Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
+    Route::get('auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
 });
 
 Route::middleware('auth')->group(function () {
@@ -76,6 +81,10 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::put('profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences');
     Route::post('profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::get('profile/connected-accounts', [ProfileController::class, 'connectedAccounts'])->name('profile.connected-accounts');
+
+    // Social Auth (unlink)
+    Route::delete('auth/{provider}/unlink', [SocialAuthController::class, 'unlink'])->name('social.unlink');
 
     // Organizations
     Route::resource('organizations', OrganizationController::class);
@@ -117,6 +126,9 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     // Analytics
     Route::get('analytics', [\App\Domain\Analytics\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('analytics/data', [\App\Domain\Analytics\Controllers\AnalyticsController::class, 'data'])->name('analytics.data');
+    Route::get('analytics/governance', [GovernanceAnalyticsController::class, 'index'])->name('analytics.governance');
+    Route::get('analytics/governance/data', [GovernanceAnalyticsController::class, 'data'])->name('analytics.governance.data');
+    Route::get('analytics/governance/export', [GovernanceAnalyticsController::class, 'export'])->name('analytics.governance.export');
 
     // Audit Log
     Route::get('audit-log', [\App\Domain\Account\Controllers\AuditLogController::class, 'index'])->name('audit-log.index');
@@ -197,6 +209,10 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         // Follow-up Email
         Route::get('follow-up-email', [\App\Domain\AI\Controllers\FollowUpEmailController::class, 'generate'])->name('follow-up-email.generate');
         Route::post('follow-up-email', [\App\Domain\AI\Controllers\FollowUpEmailController::class, 'send'])->name('follow-up-email.send');
+
+        // Meeting Preparation
+        Route::get('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'generate'])->name('prepare-agenda.generate');
+        Route::post('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'apply'])->name('prepare-agenda.apply');
     });
 
     Route::put('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'update'])->name('comments.update');

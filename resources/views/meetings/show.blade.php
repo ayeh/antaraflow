@@ -74,6 +74,10 @@
                     Follow-up Email
                 </a>
             @endif
+
+            @if(($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress) && $meeting->project_id)
+                @include('meetings.partials.preparation-modal')
+            @endif
         </div>
     </div>
 

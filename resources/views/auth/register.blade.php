@@ -39,6 +39,12 @@
     <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Register</button>
 </form>
 
+<div class="relative my-4">
+    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+    <div class="relative flex justify-center text-xs"><span class="bg-white px-2 text-gray-500">or continue with</span></div>
+</div>
+@include('auth.partials.social-buttons')
+
 <p class="mt-4 text-center text-sm text-gray-500">
     Already have an account? <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-700 font-medium">Login</a>
 </p>

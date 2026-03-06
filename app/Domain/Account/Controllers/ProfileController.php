@@ -62,6 +62,13 @@ class ProfileController extends Controller
         return redirect()->route('profile.edit')->with('success', 'Preferences updated successfully.');
     }
 
+    public function connectedAccounts(): View
+    {
+        $socialAccounts = auth()->user()->socialAccounts;
+
+        return view('settings.connected-accounts', compact('socialAccounts'));
+    }
+
     public function updateAvatar(Request $request): RedirectResponse
     {
         $request->validate([

@@ -10,6 +10,18 @@
         </div>
     </div>
 
+    {{-- Tab navigation --}}
+    <div class="border-b border-gray-200">
+        <nav class="-mb-px flex space-x-8">
+            <a href="{{ route('analytics.index') }}" class="border-b-2 border-purple-500 py-3 px-1 text-sm font-medium text-purple-600">
+                Overview
+            </a>
+            <a href="{{ route('analytics.governance') }}" class="border-b-2 border-transparent py-3 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                Governance
+            </a>
+        </nav>
+    </div>
+
     {{-- Summary stat cards --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="bg-white rounded-xl border border-gray-200 p-6">

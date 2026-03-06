@@ -11,6 +11,7 @@ enum ExtractionType: string
     case Decisions = 'decisions';
     case Topics = 'topics';
     case FollowUpEmail = 'follow_up_email';
+    case MeetingPreparation = 'meeting_preparation';
 
     public function label(): string
     {
@@ -20,6 +21,7 @@ enum ExtractionType: string
             self::Decisions => 'Decisions',
             self::Topics => 'Topics',
             self::FollowUpEmail => 'Follow-up Email',
+            self::MeetingPreparation => 'Meeting Preparation',
         };
     }
 }
