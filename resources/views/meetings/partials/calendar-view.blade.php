@@ -58,6 +58,9 @@
         </div>
     </div>
 
+    {{-- Error message --}}
+    <div x-show="error" x-cloak class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400" x-text="error"></div>
+
     {{-- Loading overlay --}}
     <div x-show="loading" x-cloak
          class="absolute inset-0 bg-white/60 dark:bg-gray-800/60 flex items-center justify-center rounded-xl">
@@ -125,6 +128,7 @@ function calendarView() {
         month: {{ now()->month }},
         meetings: [],
         loading: false,
+        error: null,
         modal: { open: false, meeting: null },
 
         get monthLabel() {
@@ -170,12 +174,19 @@ function calendarView() {
 
         async fetchMeetings() {
             this.loading = true;
+            this.error = null;
             try {
                 const res = await fetch(
                     `/meetings/calendar-data?year=${this.year}&month=${this.month}`,
                     { headers: { 'X-Requested-With': 'XMLHttpRequest' } }
                 );
+                if (!res.ok) {
+                    throw new Error(`Failed to load meetings (${res.status})`);
+                }
                 this.meetings = await res.json();
+            } catch (e) {
+                this.error = 'Could not load meetings. Please refresh the page.';
+                this.meetings = [];
             } finally {
                 this.loading = false;
             }
