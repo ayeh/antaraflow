@@ -52,6 +52,36 @@ class MeetingController extends Controller
         return view('meetings.index', compact('meetings', 'stats', 'projects'));
     }
 
+    public function calendarData(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('viewAny', MinutesOfMeeting::class);
+
+        $year = (int) $request->get('year', now()->year);
+        $month = (int) $request->get('month', now()->month);
+
+        $start = \Carbon\Carbon::create($year, $month, 1)->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+
+        $meetings = MinutesOfMeeting::with('project')
+            ->whereBetween('meeting_date', [$start, $end])
+            ->orderBy('meeting_date')
+            ->get(['id', 'title', 'mom_number', 'meeting_date', 'start_time', 'end_time', 'status', 'project_id']);
+
+        return response()->json($meetings->map(fn (MinutesOfMeeting $meeting): array => [
+            'id' => $meeting->id,
+            'mom_number' => $meeting->mom_number,
+            'title' => $meeting->title,
+            'meeting_date' => $meeting->meeting_date?->format('Y-m-d'),
+            'start_time' => $meeting->start_time?->format('H:i'),
+            'end_time' => $meeting->end_time?->format('H:i'),
+            'status' => $meeting->status->value,
+            'project' => $meeting->project
+                ? ['name' => $meeting->project->name, 'code' => $meeting->project->code]
+                : null,
+            'url' => route('meetings.show', $meeting->id),
+        ]));
+    }
+
     public function create(): View
     {
         $this->authorize('create', MinutesOfMeeting::class);

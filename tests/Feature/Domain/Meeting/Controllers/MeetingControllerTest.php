@@ -251,3 +251,48 @@ test('displays action item counts on index', function () {
     $response->assertSuccessful();
     $response->assertSee('1/3');
 });
+
+test('user can fetch calendar data for a month', function () {
+    MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'title' => 'March Meeting',
+        'meeting_date' => '2026-03-15 09:00:00',
+        'status' => MeetingStatus::Finalized,
+    ]);
+
+    // Meeting outside the month should not appear
+    MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'title' => 'April Meeting',
+        'meeting_date' => '2026-04-01 09:00:00',
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->getJson(route('meetings.calendar-data', ['year' => 2026, 'month' => 3]));
+
+    $response->assertOk();
+    $response->assertJsonCount(1);
+    $response->assertJsonPath('0.title', 'March Meeting');
+    $response->assertJsonPath('0.meeting_date', '2026-03-15');
+    $response->assertJsonPath('0.status', 'finalized');
+    $response->assertJsonStructure(['*' => ['id', 'title', 'mom_number', 'meeting_date', 'start_time', 'end_time', 'status', 'project', 'url']]);
+});
+
+test('calendar data defaults to current month', function () {
+    MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'meeting_date' => now()->startOfMonth()->addDays(2),
+    ]);
+
+    $response = $this->actingAs($this->user)->getJson(route('meetings.calendar-data'));
+
+    $response->assertOk();
+    $response->assertJsonCount(1);
+});
+
+test('unauthenticated user cannot fetch calendar data', function () {
+    $this->get(route('meetings.calendar-data'))->assertRedirect();
+});

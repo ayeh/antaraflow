@@ -12,6 +12,7 @@ use App\Domain\ActionItem\Controllers\ActionItemController;
 use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
 use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
+use App\Domain\AI\Controllers\ExtractionTemplateController;
 use App\Domain\Attendee\Controllers\AttendeeController;
 use App\Domain\Attendee\Controllers\QrRegistrationController;
 use App\Domain\Calendar\Controllers\CalendarConnectionController;
@@ -105,6 +106,7 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     Route::delete('tags/{momTag}', [\App\Domain\Meeting\Controllers\MomTagController::class, 'destroy'])->name('tags.destroy');
 
     // Meetings
+    Route::get('meetings/calendar-data', [MeetingController::class, 'calendarData'])->name('meetings.calendar-data');
     Route::resource('meetings', MeetingController::class);
     Route::post('meetings/{meeting}/finalize', [MeetingController::class, 'finalize'])->name('meetings.finalize');
     Route::post('meetings/{meeting}/approve', [MeetingController::class, 'approve'])->name('meetings.approve');
@@ -144,6 +146,9 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
 
     // AI Provider Configs
     Route::resource('ai-provider-configs', \App\Domain\Account\Controllers\AiProviderConfigController::class);
+
+    // Extraction Templates
+    Route::resource('extraction-templates', ExtractionTemplateController::class)->except(['show']);
 
     // Cross-meeting dashboards
     Route::get('action-items', [ActionItemDashboardController::class, 'index'])->name('action-items.dashboard');
@@ -188,8 +193,16 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
 
         // Comments
         Route::post('comments', [\App\Domain\Collaboration\Controllers\CommentController::class, 'store'])->name('comments.store');
+
+        // Follow-up Email
+        Route::get('follow-up-email', [\App\Domain\AI\Controllers\FollowUpEmailController::class, 'generate'])->name('follow-up-email.generate');
+        Route::post('follow-up-email', [\App\Domain\AI\Controllers\FollowUpEmailController::class, 'send'])->name('follow-up-email.send');
     });
 
     Route::put('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'update'])->name('comments.update');
     Route::delete('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
+
+    // Webhooks
+    Route::resource('webhooks', \App\Domain\Webhook\Controllers\WebhookEndpointController::class);
+    Route::post('webhooks/{webhook}/ping', [\App\Domain\Webhook\Controllers\WebhookEndpointController::class, 'ping'])->name('webhooks.ping');
 });
