@@ -13,6 +13,7 @@ final readonly class TranscriptionResult
         public string $fullText,
         public float $confidence,
         public array $segments,
+        public ?string $language = null,
         public ?int $durationSeconds = null,
     ) {}
 }

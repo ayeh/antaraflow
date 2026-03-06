@@ -70,7 +70,7 @@ class ManualNoteController extends Controller
             ->with('success', 'Note updated successfully.');
     }
 
-    public function destroy(MinutesOfMeeting $meeting, MomManualNote $manualNote): RedirectResponse
+    public function destroy(MinutesOfMeeting $meeting, MomManualNote $manualNote): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $meeting);
 
@@ -80,6 +80,10 @@ class ManualNoteController extends Controller
             ->delete();
 
         $manualNote->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Note deleted successfully.']);
+        }
 
         return redirect()->route('meetings.manual-notes.index', $meeting)
             ->with('success', 'Note deleted successfully.');

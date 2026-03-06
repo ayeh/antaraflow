@@ -55,7 +55,7 @@ class TranscriptionController extends Controller
         return view('transcriptions.show', compact('meeting', 'transcription'));
     }
 
-    public function destroy(MinutesOfMeeting $meeting, AudioTranscription $transcription): RedirectResponse
+    public function destroy(MinutesOfMeeting $meeting, AudioTranscription $transcription): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $meeting);
 
@@ -67,6 +67,10 @@ class TranscriptionController extends Controller
             ->delete();
 
         $transcription->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Transcription deleted successfully.']);
+        }
 
         return redirect()->route('meetings.show', $meeting)
             ->with('success', 'Transcription deleted successfully.');

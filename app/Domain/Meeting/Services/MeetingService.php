@@ -47,6 +47,10 @@ class MeetingService
         $data['status'] = MeetingStatus::Draft;
         $data['mom_number'] = $this->momNumberService->generate($user->current_organization_id);
 
+        if (isset($data['meeting_link'])) {
+            $data['meeting_platform'] = MeetingLinkDetector::detect($data['meeting_link']);
+        }
+
         return DB::transaction(function () use ($data, $tags, $hasJoinSettings, $allowExternalJoin, $requireRsvp, $autoNotify) {
             $mom = MinutesOfMeeting::query()->create($data);
 
@@ -82,6 +86,10 @@ class MeetingService
         $autoNotify = $data['auto_notify'] ?? true;
 
         unset($data['tags'], $data['allow_external_join'], $data['require_rsvp'], $data['auto_notify']);
+
+        if (isset($data['meeting_link'])) {
+            $data['meeting_platform'] = MeetingLinkDetector::detect($data['meeting_link']);
+        }
 
         return DB::transaction(function () use ($mom, $data, $tags, $allowExternalJoin, $requireRsvp, $autoNotify) {
             $oldValues = $mom->only(array_keys($data));

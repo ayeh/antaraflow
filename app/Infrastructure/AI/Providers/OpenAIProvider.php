@@ -58,11 +58,16 @@ class OpenAIProvider implements AIProviderInterface
             ."Transcript:\n{$text}";
 
         $response = $this->chat($prompt, ['system' => 'You are a meeting summarization expert. Always respond with valid JSON.']);
-        $data = json_decode($response, true) ?? [];
+        $data = json_decode($this->cleanJsonResponse($response), true) ?? [];
+
+        $keyPoints = $data['key_points'] ?? '';
+        if (is_array($keyPoints)) {
+            $keyPoints = implode("\n", $keyPoints);
+        }
 
         return new MeetingSummary(
             summary: $data['summary'] ?? $response,
-            keyPoints: $data['key_points'] ?? '',
+            keyPoints: $keyPoints,
             confidenceScore: (float) ($data['confidence_score'] ?? 0.8),
         );
     }
@@ -80,7 +85,7 @@ class OpenAIProvider implements AIProviderInterface
             ."Transcript:\n{$text}";
 
         $response = $this->chat($prompt, ['system' => 'You are an expert at extracting action items from meetings. Always respond with valid JSON.']);
-        $items = json_decode($response, true) ?? [];
+        $items = json_decode($this->cleanJsonResponse($response), true) ?? [];
 
         return array_map(
             fn (array $item) => new ExtractedActionItem(
@@ -105,7 +110,7 @@ class OpenAIProvider implements AIProviderInterface
             ."Transcript:\n{$text}";
 
         $response = $this->chat($prompt, ['system' => 'You are an expert at identifying decisions from meetings. Always respond with valid JSON.']);
-        $decisions = json_decode($response, true) ?? [];
+        $decisions = json_decode($this->cleanJsonResponse($response), true) ?? [];
 
         return array_map(
             fn (array $item) => new ExtractedDecision(
@@ -115,5 +120,19 @@ class OpenAIProvider implements AIProviderInterface
             ),
             $decisions,
         );
+    }
+
+    /**
+     * Strip markdown code block fences from AI responses before JSON parsing.
+     */
+    private function cleanJsonResponse(string $response): string
+    {
+        $cleaned = trim($response);
+
+        if (preg_match('/^```(?:json)?\s*\n?(.*?)\n?\s*```$/s', $cleaned, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return $cleaned;
     }
 }

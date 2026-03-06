@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Meeting\Notifications;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Infrastructure\Notifications\Messages\TeamsMessage;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,7 +24,13 @@ class MeetingFinalizedNotification extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        $channels = ['database', 'mail'];
+
+        if ($notifiable->currentOrganization?->hasTeamsWebhook()) {
+            $channels[] = 'teams';
+        }
+
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -33,6 +40,16 @@ class MeetingFinalizedNotification extends Notification implements ShouldQueue
             ->greeting("Hello {$notifiable->name},")
             ->line("The meeting **{$this->meeting->title}** has been finalized by {$this->finalizedBy->name}.")
             ->line('Please review and take action on your assigned items.')
+            ->action('View Meeting', route('meetings.show', $this->meeting));
+    }
+
+    public function toTeams(object $notifiable): TeamsMessage
+    {
+        return (new TeamsMessage)
+            ->title('Meeting Finalized')
+            ->content("The meeting **{$this->meeting->title}** has been finalized by {$this->finalizedBy->name}.")
+            ->fact('Meeting', $this->meeting->title)
+            ->fact('Finalized By', $this->finalizedBy->name)
             ->action('View Meeting', route('meetings.show', $this->meeting));
     }
 

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? $branding->appName() }}</title>
+    <x-pwa-meta />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if($branding->get('custom_css'))
     <style>{!! $branding->get('custom_css') !!}</style>
@@ -13,7 +14,7 @@
 <body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors">
     <div
         x-data="appState"
-        x-init="recentMeetings = @json($recentMeetings ?? [])"
+        x-init="recentMeetings = {!! \Illuminate\Support\Js::from($recentMeetings ?? []) !!}"
         class="min-h-full"
     >
         {{-- Icon Rail (desktop only) --}}

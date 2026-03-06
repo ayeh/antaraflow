@@ -33,6 +33,7 @@ class UpdateMeetingRequest extends FormRequest
             'allow_external_join' => ['nullable', 'boolean'],
             'require_rsvp' => ['nullable', 'boolean'],
             'auto_notify' => ['nullable', 'boolean'],
+            'meeting_link' => ['nullable', 'url', 'max:2048'],
         ];
     }
 

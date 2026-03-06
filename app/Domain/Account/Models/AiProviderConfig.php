@@ -27,6 +27,7 @@ class AiProviderConfig extends Model
     protected function casts(): array
     {
         return [
+            'api_key_encrypted' => 'encrypted',
             'settings' => 'array',
             'is_default' => 'boolean',
             'is_active' => 'boolean',

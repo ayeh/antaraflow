@@ -5,10 +5,12 @@
     {{-- Header --}}
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Projects</h1>
+        @can('create', \App\Domain\Project\Models\Project::class)
         <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             + New Project
         </a>
+        @endcan
     </div>
 
     @if(session('success'))
@@ -59,12 +61,16 @@
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-3">
                                     <a href="{{ route('projects.show', $project) }}" class="text-sm text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300 font-medium">View</a>
+                                    @can('update', $project)
                                     <a href="{{ route('projects.edit', $project) }}" class="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 font-medium">Edit</a>
+                                    @endcan
+                                    @can('delete', $project)
                                     <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="return confirm('Are you sure you want to delete this project?')" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium">Delete</button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
@@ -76,11 +82,13 @@
                                 </svg>
                                 <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No projects yet</h3>
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating your first project.</p>
+                                @can('create', \App\Domain\Project\Models\Project::class)
                                 <div class="mt-6">
                                     <a href="{{ route('projects.create') }}" class="inline-flex items-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500">
                                         + New Project
                                     </a>
                                 </div>
+                                @endcan
                             </td>
                         </tr>
                     @endforelse

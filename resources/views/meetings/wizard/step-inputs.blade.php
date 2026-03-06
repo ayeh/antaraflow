@@ -187,13 +187,18 @@
                     },
                 });
 
-                if (response.ok || response.redirected) {
+                if (response.ok) {
                     this.transcriptions = this.transcriptions.filter(t => t.id !== id);
                     this.successMessage = 'Transcription removed.';
                     setTimeout(() => this.successMessage = '', 3000);
+                } else {
+                    this.errorMessage = 'Failed to remove transcription.';
+                    setTimeout(() => this.errorMessage = '', 4000);
                 }
             } catch (e) {
                 console.error('Delete failed:', e);
+                this.errorMessage = 'Network error. Please try again.';
+                setTimeout(() => this.errorMessage = '', 4000);
             }
 
             this.loading = false;
@@ -285,13 +290,18 @@
                     },
                 });
 
-                if (response.ok || response.redirected) {
+                if (response.ok) {
                     this.manualNotes = this.manualNotes.filter(n => n.id !== id);
                     this.successMessage = 'Note removed.';
                     setTimeout(() => this.successMessage = '', 3000);
+                } else {
+                    this.errorMessage = 'Failed to remove note.';
+                    setTimeout(() => this.errorMessage = '', 4000);
                 }
             } catch (e) {
                 console.error('Delete failed:', e);
+                this.errorMessage = 'Network error. Please try again.';
+                setTimeout(() => this.errorMessage = '', 4000);
             }
 
             this.loading = false;
@@ -627,7 +637,7 @@
                                     {{-- Start Recording (idle / ready) --}}
                                     <template x-if="['idle', 'ready'].includes(state)">
                                         <button @click="startRecording()"
-                                                class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
+                                                class="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
                                             <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                                 <circle cx="12" cy="12" r="6" />
                                             </svg>
@@ -713,7 +723,7 @@
 
                                     {{-- Complete --}}
                                     <template x-if="state === 'complete'">
-                                        <div class="flex items-center justify-between w-full">
+                                        <div class="w-full space-y-2">
                                             <div class="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -721,8 +731,11 @@
                                                 <span x-text="successMessage"></span>
                                             </div>
                                             <button @click="resetRecorder()"
-                                                    class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                                Record another
+                                                    class="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
+                                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="6" />
+                                                </svg>
+                                                Record Another
                                             </button>
                                         </div>
                                     </template>
@@ -1001,24 +1014,39 @@
                     </div>
                 </div>
 
-                {{-- AI Extraction Button --}}
+                {{-- Generate MOM Button --}}
                 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4"
                      x-data="{
-                        extracting: false,
-                        extractionDone: false,
-                        extractionError: '',
-                        extractionProgress: 0,
+                        generating: false,
+                        generationProgress: 0,
+                        generationStep: '',
+                        generationError: '',
                         progressInterval: null,
 
-                        async runExtraction() {
-                            this.extracting = true;
-                            this.extractionDone = false;
-                            this.extractionError = '';
-                            this.extractionProgress = 0;
-                            this.startProgressAnimation();
+                        async generateMom() {
+                            this.generating = true;
+                            this.generationProgress = 0;
+                            this.generationStep = 'Starting...';
+                            this.generationError = '';
+
+                            const steps = [
+                                { progress: 20, step: 'Analyzing meeting content...' },
+                                { progress: 40, step: 'Generating summary...' },
+                                { progress: 60, step: 'Extracting action items...' },
+                                { progress: 80, step: 'Extracting decisions...' },
+                            ];
+                            let stepIndex = 0;
+
+                            this.progressInterval = setInterval(() => {
+                                if (stepIndex < steps.length) {
+                                    this.generationProgress = steps[stepIndex].progress;
+                                    this.generationStep = steps[stepIndex].step;
+                                    stepIndex++;
+                                }
+                            }, 2000);
 
                             try {
-                                const response = await fetch('{{ route('meetings.extract', $meeting) }}', {
+                                const response = await fetch('{{ route('meetings.generate', $meeting) }}', {
                                     method: 'POST',
                                     headers: {
                                         'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || '',
@@ -1026,87 +1054,72 @@
                                     },
                                 });
 
-                                if (response.ok || response.status === 202) {
-                                    this.extractionProgress = 100;
-                                    clearInterval(this.progressInterval);
-                                    await new Promise(r => setTimeout(r, 400));
-                                    this.extractionDone = true;
-                                    this.extracting = false;
+                                clearInterval(this.progressInterval);
+                                const data = await response.json();
+
+                                if (data.success) {
+                                    this.generationProgress = 100;
+                                    this.generationStep = 'Complete!';
+
+                                    setTimeout(() => {
+                                        window.location.href = data.redirect_url;
+                                    }, 1000);
                                 } else {
-                                    const data = await response.json().catch(() => null);
-                                    this.extractionError = data?.message || 'Extraction failed. Please try again.';
-                                    this.extracting = false;
-                                    clearInterval(this.progressInterval);
-                                    this.extractionProgress = 0;
-                                    setTimeout(() => this.extractionError = '', 5000);
+                                    this.generationError = data.message || 'Generation failed. Please try again.';
+                                    this.generating = false;
+                                    this.generationProgress = 0;
+                                    this.generationStep = '';
                                 }
                             } catch (e) {
-                                this.extractionError = 'Network error. Please try again.';
-                                this.extracting = false;
                                 clearInterval(this.progressInterval);
-                                this.extractionProgress = 0;
-                                setTimeout(() => this.extractionError = '', 5000);
+                                this.generationError = 'Network error. Please try again.';
+                                this.generating = false;
+                                this.generationProgress = 0;
+                                this.generationStep = '';
                             }
-                        },
-
-                        startProgressAnimation() {
-                            this.progressInterval = setInterval(() => {
-                                if (this.extractionProgress < 90) {
-                                    this.extractionProgress += Math.random() * 15 + 5;
-                                    if (this.extractionProgress > 90) this.extractionProgress = 90;
-                                }
-                            }, 600);
                         },
                      }"
                 >
                     <button
                         type="button"
-                        @click="runExtraction()"
-                        :disabled="extracting"
+                        @click="generateMom()"
+                        :disabled="generating"
                         class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        <template x-if="!extracting">
+                        <template x-if="!generating">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
                         </template>
-                        <template x-if="extracting">
+                        <template x-if="generating">
                             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </template>
-                        <span x-text="extracting ? 'Extracting...' : 'Run AI Extraction'"></span>
+                        <span x-text="generating ? 'Generating...' : 'Generate MOM'"></span>
                     </button>
 
                     {{-- Progress Bar --}}
-                    <div x-show="extracting" x-cloak class="mt-3">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs font-medium text-violet-700 dark:text-violet-300">Processing</span>
-                            <span class="text-xs font-medium text-violet-700 dark:text-violet-300" x-text="Math.round(extractionProgress) + '%'"></span>
+                    <div x-show="generating" x-cloak class="mt-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs font-medium text-violet-700 dark:text-violet-300" x-text="generationStep"></span>
+                            <span class="text-xs font-medium text-violet-700 dark:text-violet-300" x-text="Math.round(generationProgress) + '%'"></span>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                            <div class="bg-gradient-to-r from-violet-500 to-purple-500 h-2 rounded-full transition-all duration-500 ease-out" :style="'width: ' + extractionProgress + '%'"></div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 overflow-hidden">
+                            <div class="bg-gradient-to-r from-violet-500 to-purple-500 h-2 rounded-full transition-all duration-500 ease-out" :style="'width: ' + generationProgress + '%'"></div>
                         </div>
-                    </div>
-
-                    {{-- Success State --}}
-                    <div x-show="extractionDone" x-cloak class="mt-3 flex items-center gap-2 text-green-600 dark:text-green-400">
-                        <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span class="text-xs font-medium">Extraction started! Processing in the background.</span>
                     </div>
 
                     {{-- Error State --}}
-                    <div x-show="extractionError" x-cloak class="mt-3 flex items-center gap-2 text-red-600 dark:text-red-400">
+                    <div x-show="generationError" x-cloak class="mt-3 flex items-center gap-2 text-red-600 dark:text-red-400">
                         <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
-                        <span class="text-xs font-medium" x-text="extractionError"></span>
+                        <span class="text-xs font-medium" x-text="generationError"></span>
                     </div>
 
-                    <p x-show="!extracting && !extractionDone" class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">Generate summary, action items, and decisions from all inputs.</p>
+                    <p x-show="!generating && !generationError" class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">Generate summary, action items, and decisions from all inputs.</p>
                 </div>
             </div>
         @else

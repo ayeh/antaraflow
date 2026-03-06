@@ -20,6 +20,12 @@ $groups = [
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
     ],
     [
+        'key'    => 'projects',
+        'label'  => 'Projects',
+        'active' => request()->routeIs('projects.*'),
+        'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>',
+    ],
+    [
         'key'    => 'ai',
         'label'  => 'AI',
         'active' => request()->routeIs('meetings.extractions.*', 'meetings.chat.*', 'meetings.transcriptions.*'),
@@ -81,18 +87,19 @@ $groups = [
 
     {{-- Avatar / Profile (bottom) --}}
     <div class="relative group mt-auto">
-        <a
-            href="{{ route('profile.edit') }}"
+        <button
+            @click="activeFlyout = activeFlyout === 'profile' ? null : 'profile'"
             class="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden
                    bg-primary-600 dark:bg-primary-500 text-white text-xs font-bold
                    hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
+            :class="activeFlyout === 'profile' ? 'ring-2 ring-primary-400' : ''"
         >
             @if(auth()->user()->avatar_path)
                 <img src="{{ Storage::url(auth()->user()->avatar_path) }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
             @else
                 {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
             @endif
-        </a>
+        </button>
         <span class="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2
                      rounded-md bg-slate-900 dark:bg-slate-700 text-white text-xs px-2 py-1 whitespace-nowrap
                      opacity-0 group-hover:opacity-100 transition-opacity delay-500 z-50 shadow-lg">

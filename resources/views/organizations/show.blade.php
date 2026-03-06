@@ -19,11 +19,17 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
+            @can('manageMembers', $organization)
             <a href="{{ route('organizations.members.index', $organization) }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Members</a>
+            @endcan
+            @can('manageSettings', $organization)
             <a href="{{ route('organizations.settings.edit', $organization) }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Settings</a>
+            @endcan
+            @can('update', $organization)
             <a href="{{ route('organizations.edit', $organization) }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
                 Edit
             </a>
+            @endcan
         </div>
     </div>
 

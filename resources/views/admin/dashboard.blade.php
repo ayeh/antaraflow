@@ -88,13 +88,17 @@
         {{-- User Growth Chart --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
             <h3 class="text-sm font-semibold text-slate-200 mb-4">User Growth</h3>
-            <canvas id="userGrowthChart" class="w-full" style="height: 256px;"></canvas>
+            <div class="relative h-64">
+                <canvas id="userGrowthChart"></canvas>
+            </div>
         </div>
 
         {{-- Organization Growth Chart --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
             <h3 class="text-sm font-semibold text-slate-200 mb-4">Organization Growth</h3>
-            <canvas id="orgGrowthChart" class="w-full" style="height: 256px;"></canvas>
+            <div class="relative h-64">
+                <canvas id="orgGrowthChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -104,7 +108,9 @@
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
             <h3 class="text-sm font-semibold text-slate-200 mb-4">Subscription Distribution</h3>
             @if(count($subscriptionDistribution) > 0)
-                <canvas id="subscriptionChart" class="w-full" style="height: 256px;"></canvas>
+                <div class="relative h-64">
+                    <canvas id="subscriptionChart"></canvas>
+                </div>
             @else
                 <p class="text-slate-400 text-sm py-8 text-center">No active subscriptions.</p>
             @endif

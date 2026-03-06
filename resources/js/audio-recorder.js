@@ -13,8 +13,6 @@ export default function audioRecorder(config) {
         // Recording data
         mediaRecorder: null,
         mediaStream: null,
-        audioContext: null,
-        analyserNode: null,
         chunks: [],
         sessionId: null,
         mimeType: null,
@@ -142,7 +140,7 @@ export default function audioRecorder(config) {
             }
         },
 
-        // -- Stream & Audio Context Setup --
+        // -- Stream Setup --
         async setupStream() {
             this.mediaStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
@@ -152,18 +150,20 @@ export default function audioRecorder(config) {
                 },
             });
 
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const source = this.audioContext.createMediaStreamSource(this.mediaStream);
-            this.analyserNode = this.audioContext.createAnalyser();
-            this.analyserNode.fftSize = 2048;
-            source.connect(this.analyserNode);
-
             this.drawWaveform();
         },
 
-        // -- Waveform Visualization --
+        // -- Waveform Visualization (time-based animation) --
         drawWaveform() {
-            if (!this.analyserNode || !this.canvasContext) {
+            // Re-acquire canvas context if not yet available (canvas may have been hidden during init)
+            if (!this.canvasContext) {
+                const canvas = this.$refs.waveformCanvas;
+                if (canvas) {
+                    this.canvasContext = canvas.getContext('2d');
+                }
+            }
+
+            if (!this.canvasContext) {
                 this.animationFrame = requestAnimationFrame(() => this.drawWaveform());
                 return;
             }
@@ -174,50 +174,65 @@ export default function audioRecorder(config) {
             const ctx = this.canvasContext;
             const width = canvas.width;
             const height = canvas.height;
-            const bufferLength = this.analyserNode.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
+            const centerY = height / 2;
+            const time = performance.now() / 1000;
 
-            this.analyserNode.getByteTimeDomainData(dataArray);
-
+            // Clear canvas
             ctx.fillStyle = getComputedStyle(document.documentElement)
                 .getPropertyValue('--color-gray-50')?.trim() || '#f9fafb';
-
             if (document.documentElement.classList.contains('dark')) {
                 ctx.fillStyle = 'rgba(55, 65, 81, 0.3)';
             }
-
             ctx.fillRect(0, 0, width, height);
 
-            ctx.lineWidth = 2;
-
+            // Bar color by state
             if (this.state === 'recording') {
-                ctx.strokeStyle = '#ef4444';
-            } else if (this.state === 'ready') {
-                ctx.strokeStyle = '#22c55e';
+                ctx.fillStyle = '#ef4444';
+            } else if (this.state === 'ready' || this.state === 'countdown') {
+                ctx.fillStyle = '#22c55e';
             } else if (this.state === 'paused') {
-                ctx.strokeStyle = '#f59e0b';
+                ctx.fillStyle = '#f59e0b';
             } else {
-                ctx.strokeStyle = '#9ca3af';
+                ctx.fillStyle = '#9ca3af';
             }
 
-            ctx.beginPath();
-            const sliceWidth = width / bufferLength;
-            let x = 0;
-
-            for (let i = 0; i < bufferLength; i++) {
-                const v = dataArray[i] / 128.0;
-                const y = (v * height) / 2;
-
-                if (i === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-                x += sliceWidth;
+            // Volume level: animate when recording, gentle pulse when ready/paused, flat otherwise
+            let vol;
+            if (this.state === 'recording') {
+                vol = 0.6;
+            } else if (this.state === 'paused') {
+                vol = 0.15 + Math.sin(time * 1.5) * 0.05;
+            } else if (this.state === 'ready' || this.state === 'countdown') {
+                vol = 0.1 + Math.sin(time * 2) * 0.05;
+            } else {
+                vol = 0;
             }
 
-            ctx.lineTo(width, height / 2);
-            ctx.stroke();
+            // Draw animated bars
+            const barCount = 40;
+            const barWidth = Math.max(2, (width / barCount) * 0.6);
+            const gap = width / barCount;
+
+            for (let i = 0; i < barCount; i++) {
+                const x = i * gap + (gap - barWidth) / 2;
+
+                // Layered sine waves for natural-looking waveform movement
+                const wave1 = Math.sin(time * 3.0 + i * 0.4) * 0.3;
+                const wave2 = Math.sin(time * 5.7 + i * 0.7) * 0.2;
+                const wave3 = Math.sin(time * 2.3 + i * 0.15) * 0.5;
+                const envelope = Math.sin((i / barCount) * Math.PI); // Taper at edges
+
+                const baseHeight = 2;
+                const maxHeight = (height / 2) - 4;
+                const barHeight = baseHeight + (wave1 + wave2 + wave3) * envelope * vol * maxHeight;
+                const h = Math.max(baseHeight, Math.abs(barHeight));
+
+                // Symmetric bar from center
+                const radius = Math.min(barWidth / 2, h / 2);
+                ctx.beginPath();
+                ctx.roundRect(x, centerY - h, barWidth, h * 2, radius);
+                ctx.fill();
+            }
 
             if (!['idle', 'complete', 'error'].includes(this.state)) {
                 this.animationFrame = requestAnimationFrame(() => this.drawWaveform());
@@ -695,10 +710,6 @@ export default function audioRecorder(config) {
 
             if (this.animationFrame) {
                 cancelAnimationFrame(this.animationFrame);
-            }
-
-            if (this.audioContext?.state !== 'closed') {
-                this.audioContext?.close();
             }
 
             if (this.mediaStream) {

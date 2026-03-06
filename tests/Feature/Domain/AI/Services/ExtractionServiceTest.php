@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 use App\Domain\Account\Models\AiProviderConfig;
 use App\Domain\Account\Models\Organization;
+use App\Domain\AI\Models\ExtractionTemplate;
 use App\Domain\AI\Models\MomExtraction;
 use App\Domain\AI\Models\MomTopic;
 use App\Domain\AI\Services\ExtractionService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Models\User;
+use App\Support\Enums\ExtractionType;
+use App\Support\Enums\MeetingType;
 use App\Support\Enums\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -223,4 +226,143 @@ test('extraction service creates topics', function () {
         'title' => 'Hiring Plan',
         'sort_order' => 1,
     ]);
+});
+
+test('extraction service uses custom template when available', function () {
+    $emptyJson = json_encode([]);
+    Http::fake([
+        'api.openai.com/*' => Http::sequence()
+            ->push(['choices' => [['message' => ['content' => 'Custom summary from template']]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]]),
+    ]);
+
+    ExtractionTemplate::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'extraction_type' => ExtractionType::Summary,
+        'meeting_type' => MeetingType::StandUp,
+        'prompt_template' => 'Custom standup summary prompt: {transcript}',
+        'system_message' => 'You are a standup expert.',
+        'is_active' => true,
+    ]);
+
+    $mom = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'content' => 'Standup meeting content.',
+        'meeting_type' => MeetingType::StandUp,
+    ]);
+
+    $service = app(ExtractionService::class);
+    $service->extractAll($mom);
+
+    $extraction = MomExtraction::query()
+        ->where('minutes_of_meeting_id', $mom->id)
+        ->where('type', 'summary')
+        ->first();
+
+    expect($extraction)->not->toBeNull()
+        ->and($extraction->content)->toBe('Custom summary from template')
+        ->and($extraction->structured_data)->toHaveKey('custom_template');
+
+    Http::assertSent(function ($request) {
+        $body = json_decode($request->body(), true);
+        $messages = $body['messages'] ?? [];
+        $hasCustomPrompt = false;
+        foreach ($messages as $msg) {
+            if (str_contains($msg['content'] ?? '', 'Custom standup summary prompt:')) {
+                $hasCustomPrompt = true;
+            }
+        }
+
+        return $hasCustomPrompt;
+    });
+});
+
+test('extraction service prefers specific meeting type template over wildcard', function () {
+    $emptyJson = json_encode([]);
+    Http::fake([
+        'api.openai.com/*' => Http::sequence()
+            ->push(['choices' => [['message' => ['content' => 'Specific template used']]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]]),
+    ]);
+
+    $wildcard = ExtractionTemplate::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'extraction_type' => ExtractionType::Summary,
+        'meeting_type' => null,
+        'prompt_template' => 'Wildcard prompt: {transcript}',
+        'is_active' => true,
+    ]);
+
+    $specific = ExtractionTemplate::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'extraction_type' => ExtractionType::Summary,
+        'meeting_type' => MeetingType::Retrospective,
+        'prompt_template' => 'Retro-specific prompt: {transcript}',
+        'is_active' => true,
+    ]);
+
+    $mom = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'content' => 'Retrospective content.',
+        'meeting_type' => MeetingType::Retrospective,
+    ]);
+
+    $service = app(ExtractionService::class);
+    $service->extractAll($mom);
+
+    $extraction = MomExtraction::query()
+        ->where('minutes_of_meeting_id', $mom->id)
+        ->where('type', 'summary')
+        ->first();
+
+    expect($extraction->structured_data['custom_template'])->toBe($specific->id);
+});
+
+test('extraction service ignores inactive templates', function () {
+    $emptyJson = json_encode([]);
+    Http::fake([
+        'api.openai.com/*' => Http::sequence()
+            ->push(['choices' => [['message' => ['content' => json_encode([
+                'summary' => 'Default summary',
+                'key_points' => '',
+                'confidence_score' => 0.85,
+            ])]]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]]),
+    ]);
+
+    ExtractionTemplate::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'extraction_type' => ExtractionType::Summary,
+        'meeting_type' => null,
+        'prompt_template' => 'Should not be used: {transcript}',
+        'is_active' => false,
+    ]);
+
+    $mom = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'content' => 'Meeting content.',
+    ]);
+
+    $service = app(ExtractionService::class);
+    $service->extractAll($mom);
+
+    $extraction = MomExtraction::query()
+        ->where('minutes_of_meeting_id', $mom->id)
+        ->where('type', 'summary')
+        ->first();
+
+    expect($extraction->structured_data)->not->toHaveKey('custom_template');
 });

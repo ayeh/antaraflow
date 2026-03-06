@@ -12,6 +12,8 @@ use App\Domain\AI\Events\ExtractionCompleted;
 use App\Domain\AI\Events\ExtractionFailed;
 use App\Domain\AI\Listeners\NotifyExtractionComplete;
 use App\Domain\AI\Listeners\NotifyExtractionFailed;
+use App\Domain\AI\Models\ExtractionTemplate;
+use App\Domain\AI\Policies\ExtractionTemplatePolicy;
 use App\Domain\Attendee\Models\AttendeeGroup;
 use App\Domain\Attendee\Policies\AttendeeGroupPolicy;
 use App\Domain\Calendar\Listeners\SyncMeetingToCalendar;
@@ -37,11 +39,16 @@ use App\Domain\Transcription\Events\TranscriptionCompleted;
 use App\Domain\Transcription\Events\TranscriptionFailed;
 use App\Domain\Transcription\Listeners\NotifyTranscriptionComplete;
 use App\Domain\Transcription\Listeners\NotifyTranscriptionFailed;
+use App\Domain\Webhook\Listeners\WebhookEventSubscriber;
+use App\Domain\Webhook\Models\WebhookEndpoint;
+use App\Domain\Webhook\Policies\WebhookEndpointPolicy;
+use App\Infrastructure\Notifications\Channels\TeamsChannel;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -68,6 +75,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(MeetingShare::class, MeetingSharePolicy::class);
         Gate::policy(Comment::class, CommentPolicy::class);
         Gate::policy(Project::class, ProjectPolicy::class);
+        Gate::policy(ExtractionTemplate::class, ExtractionTemplatePolicy::class);
+        Gate::policy(WebhookEndpoint::class, WebhookEndpointPolicy::class);
 
         View::composer('layouts.app', function ($view) {
             if (Auth::check() && Auth::user()->current_organization_id) {
@@ -86,5 +95,11 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(MeetingFinalized::class, NotifyMeetingFinalized::class);
         Event::listen(MeetingFinalized::class, SyncMeetingToCalendar::class);
         Event::listen(MeetingApproved::class, NotifyMeetingApproved::class);
+
+        Event::subscribe(WebhookEventSubscriber::class);
+
+        Notification::extend('teams', function ($app) {
+            return $app->make(TeamsChannel::class);
+        });
     }
 }

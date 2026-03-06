@@ -28,6 +28,11 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
                 'timestamp_granularities' => ['segment'],
             ]);
 
+        if ($response->failed()) {
+            $error = $response->json('error.message', 'Whisper API request failed with status '.$response->status());
+            throw new \RuntimeException($error);
+        }
+
         $data = $response->json();
 
         $segments = [];

@@ -126,7 +126,36 @@
         </div>
     </div>
 
-    {{-- Section 3: Team Members --}}
+    {{-- Section 3: Integrations --}}
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Integrations</h2>
+        <div class="border-t border-gray-200 dark:border-slate-700 mt-4 pt-4">
+            <form method="POST" action="{{ route('organizations.settings.update', $organization) }}" class="space-y-4">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="name" value="{{ $organization->name }}">
+                <input type="hidden" name="timezone" value="{{ $organization->timezone ?? 'UTC' }}">
+                <input type="hidden" name="language" value="{{ $organization->language ?? 'en' }}">
+
+                <div>
+                    <label for="teams_webhook_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Microsoft Teams Webhook URL</label>
+                    <input type="url" name="teams_webhook_url" id="teams_webhook_url" value="{{ old('teams_webhook_url', $organization->teams_webhook_url) }}"
+                        placeholder="https://outlook.office.com/webhook/..."
+                        class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Add an Incoming Webhook URL from your Teams channel to receive meeting notifications.</p>
+                    @error('teams_webhook_url')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="flex items-center justify-end pt-4 border-t border-gray-200 dark:border-slate-700">
+                    <button type="submit" class="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">Save Integrations</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Section 4: Team Members --}}
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
         <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Team Members</h2>

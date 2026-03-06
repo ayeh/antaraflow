@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? $branding->appName() }}</title>
+    <x-pwa-meta />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if($branding->get('custom_css'))
     <style>{!! $branding->get('custom_css') !!}</style>

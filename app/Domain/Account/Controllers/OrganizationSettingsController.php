@@ -43,6 +43,7 @@ class OrganizationSettingsController extends Controller
             'description' => $data['description'] ?? null,
             'timezone' => $data['timezone'],
             'language' => $data['language'],
+            'teams_webhook_url' => $data['teams_webhook_url'] ?? $organization->teams_webhook_url,
         ]);
 
         if (isset($data['settings'])) {

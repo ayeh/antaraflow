@@ -14,7 +14,9 @@ use App\Domain\Attendee\Models\QrRegistrationToken;
 use App\Domain\Project\Models\Project;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Models\User;
+use App\Support\Enums\MeetingPlatform;
 use App\Support\Enums\MeetingStatus;
+use App\Support\Enums\MeetingType;
 use App\Support\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -40,6 +42,8 @@ class MinutesOfMeeting extends Model
             'share_with_client' => 'boolean',
             'metadata' => 'array',
             'status' => MeetingStatus::class,
+            'meeting_type' => MeetingType::class,
+            'meeting_platform' => MeetingPlatform::class,
         ];
     }
 

@@ -21,6 +21,7 @@ class UpdateOrganizationSettingsRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:1000'],
             'timezone' => ['required', 'string', 'max:100'],
             'language' => ['required', 'string', 'max:10'],
+            'teams_webhook_url' => ['nullable', 'url', 'max:2048'],
             'settings' => ['nullable', 'array'],
         ];
     }

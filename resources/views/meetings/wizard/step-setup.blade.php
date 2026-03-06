@@ -73,6 +73,35 @@
                 @endif
             </div>
         @endif
+
+        @if($meeting->meeting_link)
+            <div class="mt-4 flex items-center gap-3">
+                <div class="flex-1">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Meeting Link</p>
+                    <div class="flex items-center gap-2 mt-1">
+                        @if($meeting->meeting_platform)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                @if($meeting->meeting_platform === \App\Support\Enums\MeetingPlatform::Zoom) bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300
+                                @elseif($meeting->meeting_platform === \App\Support\Enums\MeetingPlatform::GoogleMeet) bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300
+                                @elseif($meeting->meeting_platform === \App\Support\Enums\MeetingPlatform::MicrosoftTeams) bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300
+                                @else bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300
+                                @endif">
+                                {{ $meeting->meeting_platform->label() }}
+                            </span>
+                        @endif
+                        <a href="{{ $meeting->meeting_link }}" target="_blank" rel="noopener noreferrer"
+                            class="text-sm text-violet-600 dark:text-violet-400 hover:underline truncate max-w-md">
+                            {{ $meeting->meeting_link }}
+                        </a>
+                    </div>
+                </div>
+                <a href="{{ $meeting->meeting_link }}" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    Join Meeting
+                </a>
+            </div>
+        @endif
     </div>
 
     {{-- Tags --}}

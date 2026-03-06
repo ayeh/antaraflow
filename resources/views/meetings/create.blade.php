@@ -85,6 +85,39 @@
                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                 @enderror
             </div>
+
+            {{-- Meeting Link --}}
+            <div x-data="{
+                link: '{{ old('meeting_link') }}',
+                get platform() {
+                    if (!this.link) return null;
+                    if (this.link.includes('zoom.us')) return { name: 'Zoom', color: 'blue' };
+                    if (this.link.includes('meet.google.com')) return { name: 'Google Meet', color: 'green' };
+                    if (this.link.includes('teams.microsoft.com') || this.link.includes('teams.live.com')) return { name: 'Microsoft Teams', color: 'violet' };
+                    return { name: 'Other', color: 'gray' };
+                }
+            }">
+                <label for="meeting_link" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meeting Link</label>
+                <div class="relative">
+                    <input type="url" name="meeting_link" id="meeting_link" x-model="link"
+                        placeholder="e.g. https://zoom.us/j/123456789"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 px-4 py-2 pr-28 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    <span x-show="platform" x-cloak
+                        class="absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                        :class="{
+                            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300': platform?.color === 'blue',
+                            'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300': platform?.color === 'green',
+                            'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300': platform?.color === 'violet',
+                            'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300': platform?.color === 'gray',
+                        }"
+                        x-text="platform?.name">
+                    </span>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Platform will be auto-detected from the URL</p>
+                @error('meeting_link')
+                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
         </div>
 
         {{-- Settings --}}
@@ -96,8 +129,8 @@
                 <label for="language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
                 <select name="language" id="language"
                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
-                    <option value="ms" {{ old('language', 'ms') === 'ms' ? 'selected' : '' }}>Bahasa Melayu</option>
-                    <option value="en" {{ old('language', 'ms') === 'en' ? 'selected' : '' }}>English</option>
+                    <option value="ms" {{ old('language', auth()->user()->currentOrganization?->language ?? 'en') === 'ms' ? 'selected' : '' }}>Bahasa Melayu</option>
+                    <option value="en" {{ old('language', auth()->user()->currentOrganization?->language ?? 'en') === 'en' ? 'selected' : '' }}>English</option>
                 </select>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">AI-generated content will be in this language</p>
                 @error('language')

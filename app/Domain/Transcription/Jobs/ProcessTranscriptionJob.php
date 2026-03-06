@@ -14,6 +14,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Storage;
 
 class ProcessTranscriptionJob implements ShouldQueue
 {
@@ -22,6 +24,9 @@ class ProcessTranscriptionJob implements ShouldQueue
     public int $tries = 3;
 
     public int $backoff = 60;
+
+    /** Maximum file size in bytes for the Whisper API (25 MB). */
+    private const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
     public function __construct(
         public AudioTranscription $transcription,
@@ -34,9 +39,19 @@ class ProcessTranscriptionJob implements ShouldQueue
             'started_at' => now(),
         ]);
 
+        $compressedPath = null;
+
         try {
+            $filePath = Storage::disk('local')->path($this->transcription->file_path);
+
+            // Compress large files to fit within the Whisper API 25 MB limit
+            if (file_exists($filePath) && filesize($filePath) > self::MAX_FILE_SIZE) {
+                $filePath = $this->compressAudio($filePath);
+                $compressedPath = $filePath;
+            }
+
             $result = $transcriber->transcribe(
-                $this->transcription->file_path,
+                $filePath,
                 ['language' => $this->transcription->language]
             );
 
@@ -66,7 +81,36 @@ class ProcessTranscriptionJob implements ShouldQueue
             ]);
 
             throw $e;
+        } finally {
+            // Clean up temporary compressed file
+            if ($compressedPath && file_exists($compressedPath)) {
+                @unlink($compressedPath);
+            }
         }
+    }
+
+    /**
+     * Compress audio to mono 16kHz MP3 to fit within the Whisper API size limit.
+     * Whisper only uses 16kHz internally, so this is lossless for transcription quality.
+     */
+    private function compressAudio(string $filePath): string
+    {
+        $compressedPath = sys_get_temp_dir().'/whisper_'.uniqid().'.mp3';
+
+        $result = Process::timeout(120)->run([
+            'ffmpeg', '-i', $filePath,
+            '-ac', '1',           // Mono
+            '-ar', '16000',       // 16kHz (Whisper's native sample rate)
+            '-b:a', '48k',        // 48kbps bitrate
+            '-y',                 // Overwrite
+            $compressedPath,
+        ]);
+
+        if ($result->failed() || ! file_exists($compressedPath)) {
+            throw new \RuntimeException('Failed to compress audio: '.$result->errorOutput());
+        }
+
+        return $compressedPath;
     }
 
     public function failed(\Throwable $exception): void

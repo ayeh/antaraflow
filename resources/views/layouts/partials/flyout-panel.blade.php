@@ -19,6 +19,13 @@ $flyoutGroups = [
             ['label' => 'Action Items', 'route' => route('action-items.dashboard'), 'active' => request()->routeIs('action-items.dashboard')],
         ],
     ],
+    'projects' => [
+        'title' => 'Projects',
+        'items' => [
+            ['label' => 'All Projects', 'route' => route('projects.index'),  'active' => request()->routeIs('projects.index')],
+            ['label' => 'New Project',  'route' => route('projects.create'), 'active' => request()->routeIs('projects.create')],
+        ],
+    ],
     'ai' => [
         'title' => 'AI Tools',
         'items' => [],
@@ -42,7 +49,8 @@ $flyoutGroups = [
             ['label' => 'API Keys',          'route' => route('api-keys.index'),          'active' => request()->routeIs('api-keys.*')],
             ['label' => 'Subscription',      'route' => route('subscription.index'),      'active' => request()->routeIs('subscription.*')],
             ['label' => 'Usage',             'route' => route('usage.index'),             'active' => request()->routeIs('usage.*')],
-            ['label' => 'Audit Log',         'route' => route('audit-log.index'),         'active' => request()->routeIs('audit-log.*')],
+            ['label' => 'Audit Log',            'route' => route('audit-log.index'),        'active' => request()->routeIs('audit-log.*')],
+            ['label' => 'Calendar Connections', 'route' => route('calendar.connections'),   'active' => request()->routeIs('calendar.*')],
         ],
     ],
     'profile' => [
@@ -67,7 +75,7 @@ $flyoutGroups = [
     class="fixed left-[68px] z-40 w-60 rounded-2xl
            bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
            shadow-xl py-3 overflow-y-auto"
-    style="top: 12px; max-height: calc(100vh - 24px)"
+    :style="activeFlyout === 'profile' ? 'bottom: 12px; max-height: calc(100vh - 24px)' : 'top: 12px; max-height: calc(100vh - 24px)'"
 >
     @foreach($flyoutGroups as $key => $group)
     <div x-show="activeFlyout === '{{ $key }}'">

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\AI\Notifications;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Infrastructure\Notifications\Messages\TeamsMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -20,7 +21,22 @@ class ExtractionCompletedNotification extends Notification implements ShouldQueu
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        $channels = ['database'];
+
+        if ($notifiable->currentOrganization?->hasTeamsWebhook()) {
+            $channels[] = 'teams';
+        }
+
+        return $channels;
+    }
+
+    public function toTeams(object $notifiable): TeamsMessage
+    {
+        return (new TeamsMessage)
+            ->title('AI Extraction Completed')
+            ->content("AI extraction has been completed for **{$this->meeting->title}**. Summary, action items, and decisions are now available.")
+            ->fact('Meeting', $this->meeting->title)
+            ->action('View Extractions', route('meetings.show', $this->meeting));
     }
 
     /** @return array<string, mixed> */

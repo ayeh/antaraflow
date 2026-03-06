@@ -95,9 +95,14 @@
                     $decisions = $meeting->extractions->firstWhere('type', 'decisions');
                 @endphp
                 @if($decisions && !empty($decisions->structured_data))
-                    <ol class="space-y-2 list-decimal list-inside">
+                    <ol class="space-y-3 list-decimal list-inside">
                         @foreach($decisions->structured_data as $decision)
-                            <li class="text-sm text-gray-900 dark:text-white">{{ is_array($decision) ? ($decision['content'] ?? $decision['text'] ?? json_encode($decision)) : $decision }}</li>
+                            <li class="text-sm text-gray-900 dark:text-white">
+                                {{ is_array($decision) ? ($decision['decision'] ?? $decision['content'] ?? $decision['text'] ?? '') : $decision }}
+                                @if(is_array($decision) && !empty($decision['made_by']) && $decision['made_by'] !== 'Unspecified speaker')
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">— {{ $decision['made_by'] }}</span>
+                                @endif
+                            </li>
                         @endforeach
                     </ol>
                 @elseif($decisions && $decisions->content)
@@ -116,9 +121,11 @@
                     $issues = $meeting->extractions->firstWhere('type', 'issues');
                 @endphp
                 @if($issues && !empty($issues->structured_data))
-                    <ol class="space-y-2 list-decimal list-inside">
+                    <ol class="space-y-3 list-decimal list-inside">
                         @foreach($issues->structured_data as $issue)
-                            <li class="text-sm text-gray-900 dark:text-white">{{ is_array($issue) ? ($issue['content'] ?? $issue['text'] ?? json_encode($issue)) : $issue }}</li>
+                            <li class="text-sm text-gray-900 dark:text-white">
+                                {{ is_array($issue) ? ($issue['issue'] ?? $issue['content'] ?? $issue['text'] ?? $issue['description'] ?? '') : $issue }}
+                            </li>
                         @endforeach
                     </ol>
                 @elseif($issues && $issues->content)

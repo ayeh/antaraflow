@@ -1,4 +1,5 @@
 import './bootstrap';
+import './sw-register';
 import Alpine from 'alpinejs';
 import appState from './navigation';
 import audioRecorder from './audio-recorder';

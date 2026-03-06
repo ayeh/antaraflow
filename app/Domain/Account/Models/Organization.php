@@ -22,6 +22,7 @@ class Organization extends Model
     {
         return [
             'settings' => 'array',
+            'teams_webhook_url' => 'encrypted',
             'is_suspended' => 'boolean',
             'suspended_at' => 'datetime',
         ];
@@ -47,5 +48,10 @@ class Organization extends Model
     public function subscriptions(): HasMany
     {
         return $this->hasMany(OrganizationSubscription::class);
+    }
+
+    public function hasTeamsWebhook(): bool
+    {
+        return $this->teams_webhook_url !== null && $this->teams_webhook_url !== '';
     }
 }

@@ -312,6 +312,146 @@
         </div>
     </div>
 
+    {{-- Meeting Content Preview --}}
+    @php
+        $summary = $meeting->extractions->firstWhere('type', 'summary');
+        $decisions = $meeting->extractions->firstWhere('type', 'decisions');
+        $topics = $meeting->topics->sortBy('sort_order');
+        $transcriptionTexts = $meeting->transcriptions->where('status', 'completed');
+        $totalDuration = $transcriptionTexts->sum('duration_seconds');
+        $contentParts = [];
+        if ($meeting->content) {
+            $contentParts[] = $meeting->content;
+        }
+        foreach ($transcriptionTexts as $t) {
+            if ($t->full_text) {
+                $contentParts[] = $t->full_text;
+            }
+        }
+        if ($meeting->manualNotes->isNotEmpty()) {
+            foreach ($meeting->manualNotes as $note) {
+                $contentParts[] = $note->content;
+            }
+        }
+        $fullText = implode("\n\n", $contentParts);
+        $wordCount = str_word_count($fullText);
+    @endphp
+
+    @if($summary || $fullText)
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6" x-data="{ expanded: false }">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                    <svg class="h-5 w-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Meeting Content Preview</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Review the content from your meeting inputs before generating action items</p>
+                </div>
+            </div>
+            <button @click="expanded = !expanded" class="text-sm font-medium text-violet-600 dark:text-violet-400 hover:underline" x-text="expanded ? 'Collapse' : 'Expand'">
+                Expand
+            </button>
+        </div>
+
+        {{-- Metadata Tags --}}
+        <div class="flex flex-wrap items-center gap-3 mb-4 text-sm text-gray-500 dark:text-gray-400">
+            @if($meeting->language)
+                <span class="inline-flex items-center gap-1">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
+                    {{ strtoupper($meeting->language) }}
+                </span>
+            @endif
+            @if($totalDuration > 0)
+                <span class="inline-flex items-center gap-1">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    {{ sprintf('%02d:%02d:%02d', floor($totalDuration / 3600), floor(($totalDuration % 3600) / 60), $totalDuration % 60) }}
+                </span>
+            @endif
+            @if($wordCount > 0)
+                <span class="inline-flex items-center gap-1">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
+                    {{ number_format($wordCount) }} words
+                </span>
+            @endif
+        </div>
+
+        {{-- Full Transcript (Collapsible) --}}
+        @if($fullText)
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4" :class="expanded ? '' : 'max-h-40 overflow-hidden relative'">
+                <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ $fullText }}</p>
+                <div x-show="!expanded" class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 dark:from-gray-700/50 to-transparent"></div>
+            </div>
+        @endif
+
+        {{-- AI Summary --}}
+        @if($summary)
+            <div class="bg-violet-50 dark:bg-violet-900/20 rounded-lg p-4 mb-4">
+                <h4 class="text-sm font-semibold text-violet-800 dark:text-violet-300 mb-2 flex items-center gap-1.5">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    AI Summary
+                </h4>
+                <p class="text-sm text-violet-700 dark:text-violet-200 leading-relaxed">{{ $summary->content }}</p>
+            </div>
+        @endif
+
+        {{-- AI Decisions --}}
+        @if($decisions && !empty($decisions->structured_data))
+            <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4">
+                <h4 class="text-sm font-semibold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center gap-1.5">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Key Decisions
+                </h4>
+                <ul class="space-y-2">
+                    @foreach($decisions->structured_data as $decision)
+                        <li class="text-sm text-emerald-700 dark:text-emerald-200 flex items-start gap-2">
+                            <span class="text-emerald-500 mt-0.5">•</span>
+                            <div>
+                                <p>{{ $decision['decision'] ?? '' }}</p>
+                                @if(!empty($decision['made_by']))
+                                    <p class="text-xs text-emerald-600/70 dark:text-emerald-400/70 mt-0.5">— {{ $decision['made_by'] }}</p>
+                                @endif
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        {{-- Re-extract Button --}}
+        @if($isEditable)
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <form method="POST" action="{{ route('meetings.generate', $meeting) }}" x-data="{ reExtracting: false }"
+                      @submit.prevent="
+                        reExtracting = true;
+                        fetch('{{ route('meetings.generate', $meeting) }}', {
+                            method: 'POST',
+                            headers: { 'X-CSRF-TOKEN': csrfToken(), 'Accept': 'application/json' },
+                        }).then(r => r.json()).then(data => {
+                            if (data.success) { window.location.href = data.redirect_url; }
+                            else { reExtracting = false; alert(data.message); }
+                        }).catch(() => { reExtracting = false; });
+                      ">
+                    <button type="submit" :disabled="reExtracting"
+                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-70">
+                        <svg class="h-4 w-4" :class="reExtracting && 'animate-spin'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span x-text="reExtracting ? 'Re-extracting...' : 'Extract Action Items with AI'"></span>
+                    </button>
+                    <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">Clear existing items to extract again.</span>
+                </form>
+            </div>
+        @endif
+    </div>
+    @endif
+
     {{-- Stats Row --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
