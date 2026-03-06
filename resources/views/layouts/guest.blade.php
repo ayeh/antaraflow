@@ -14,7 +14,16 @@
 <body class="bg-gray-50 min-h-screen flex items-center justify-center">
     <div class="w-full max-w-md">
         <div class="text-center mb-8">
+            @php $resellerOrg = request()->attributes->get('reseller_organization'); @endphp
+            @if($resellerOrg && $resellerOrg->logo_path)
+                <img src="{{ Storage::url($resellerOrg->logo_path) }}" alt="{{ $branding->appName() }}" class="mx-auto h-12 mb-3">
+            @elseif($branding->get('logo_url'))
+                <img src="{{ $branding->get('logo_url') }}" alt="{{ $branding->appName() }}" class="mx-auto h-12 mb-3">
+            @endif
             <h1 class="text-2xl font-bold text-gray-900">{{ $branding->appName() }}</h1>
+            @if($resellerOrg)
+                <p class="mt-1 text-sm text-gray-500">Powered by {{ config('app.name', 'antaraFLOW') }}</p>
+            @endif
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
             @yield('content')

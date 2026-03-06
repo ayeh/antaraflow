@@ -11,6 +11,7 @@ use App\Domain\Meeting\Events\MeetingApproved;
 use App\Domain\Meeting\Events\MeetingFinalized;
 use App\Domain\Meeting\Models\BoardSetting;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Events\MeetingStatusChanged;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
 use App\Support\Enums\MeetingType;
@@ -141,6 +142,7 @@ class MeetingService
         $this->auditService->log('finalized', $mom);
 
         MeetingFinalized::dispatch($mom, $user);
+        MeetingStatusChanged::dispatch($mom, MeetingStatus::Finalized, $user->name);
 
         return $mom->fresh();
     }
@@ -155,6 +157,7 @@ class MeetingService
         $this->auditService->log('approved', $mom);
 
         MeetingApproved::dispatch($mom, $user);
+        MeetingStatusChanged::dispatch($mom, MeetingStatus::Approved, $user->name);
 
         return $mom->fresh();
     }
@@ -169,6 +172,8 @@ class MeetingService
 
         $mom->update(['status' => MeetingStatus::Draft]);
         $this->auditService->log('reverted_to_draft', $mom);
+
+        MeetingStatusChanged::dispatch($mom, MeetingStatus::Draft, $user->name);
 
         return $mom->fresh();
     }

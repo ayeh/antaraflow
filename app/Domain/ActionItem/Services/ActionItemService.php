@@ -7,6 +7,7 @@ namespace App\Domain\ActionItem\Services;
 use App\Domain\Account\Services\AuditService;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Events\ActionItemUpdated;
 use App\Models\User;
 use App\Support\Enums\ActionItemStatus;
 use Illuminate\Database\Eloquent\Collection;
@@ -48,7 +49,10 @@ class ActionItemService
 
         $item->update($data);
 
-        return $item->fresh();
+        $item = $item->fresh();
+        ActionItemUpdated::dispatch($item);
+
+        return $item;
     }
 
     public function changeStatus(ActionItem $item, ActionItemStatus $status, User $user, ?string $comment = null): ActionItem
@@ -68,7 +72,10 @@ class ActionItemService
 
         $item->update($updateData);
 
-        return $item->fresh();
+        $item = $item->fresh();
+        ActionItemUpdated::dispatch($item);
+
+        return $item;
     }
 
     public function carryForward(ActionItem $item, MinutesOfMeeting $newMom, User $user): ActionItem

@@ -27,6 +27,9 @@
             @include('layouts.partials.flyout-panel')
         </div>
 
+        {{-- Offline Indicator --}}
+        <x-offline-indicator />
+
         {{-- Main content area: offset by rail width (48px) + left margin (12px) + gap (12px) = 72px --}}
         <div class="md:ml-[72px] flex flex-col min-h-screen">
             @include('layouts.partials.header')

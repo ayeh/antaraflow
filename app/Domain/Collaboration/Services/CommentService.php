@@ -6,6 +6,8 @@ namespace App\Domain\Collaboration\Services;
 
 use App\Domain\Account\Services\AuditService;
 use App\Domain\Collaboration\Models\Comment;
+use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Events\CommentAdded;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -29,7 +31,13 @@ class CommentService
 
         $this->auditService->log('created', $comment);
 
-        return $comment->refresh();
+        $comment = $comment->refresh();
+
+        if ($commentable instanceof MinutesOfMeeting) {
+            CommentAdded::dispatch($comment, (int) $commentable->getKey());
+        }
+
+        return $comment;
     }
 
     public function updateComment(Comment $comment, string $body): Comment

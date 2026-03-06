@@ -10,6 +10,7 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
         health: '/up',
         then: function () {
             Route::middleware('web')
@@ -20,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../app/Domain',
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            \App\Http\Middleware\ResolveSubdomain::class,
+        ]);
+
         $middleware->alias([
             'org.context' => \App\Infrastructure\Tenancy\SetOrganizationContext::class,
             'org.suspended' => \App\Domain\Admin\Middleware\CheckOrganizationSuspended::class,

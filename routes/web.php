@@ -8,6 +8,7 @@ use App\Domain\Account\Controllers\OnboardingController;
 use App\Domain\Account\Controllers\OrganizationController;
 use App\Domain\Account\Controllers\OrganizationSettingsController;
 use App\Domain\Account\Controllers\ProfileController;
+use App\Domain\Account\Controllers\ResellerController;
 use App\Domain\Account\Controllers\SocialAuthController;
 use App\Domain\ActionItem\Controllers\ActionItemController;
 use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
@@ -23,6 +24,7 @@ use App\Domain\Meeting\Controllers\BoardSettingController;
 use App\Domain\Meeting\Controllers\DocumentController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
+use App\Domain\Meeting\Controllers\OfflineDataController;
 use App\Domain\Meeting\Controllers\ResolutionController;
 use App\Domain\Meeting\Controllers\VoteController;
 use App\Domain\Project\Controllers\ProjectController;
@@ -223,6 +225,9 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         Route::get('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'generate'])->name('prepare-agenda.generate');
         Route::post('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'apply'])->name('prepare-agenda.apply');
 
+        // Offline Data
+        Route::get('offline-data', [OfflineDataController::class, 'show'])->name('offline-data');
+
         // Resolutions & Voting (Board Compliance)
         Route::post('resolutions', [ResolutionController::class, 'store'])->name('resolutions.store');
         Route::put('resolutions/{resolution}', [ResolutionController::class, 'update'])->name('resolutions.update');
@@ -242,4 +247,15 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     // Webhooks
     Route::resource('webhooks', \App\Domain\Webhook\Controllers\WebhookEndpointController::class);
     Route::post('webhooks/{webhook}/ping', [\App\Domain\Webhook\Controllers\WebhookEndpointController::class, 'ping'])->name('webhooks.ping');
+
+    // Offline Sync
+    Route::post('offline/sync', [OfflineDataController::class, 'sync'])->name('offline.sync');
+
+    // Reseller
+    Route::prefix('reseller')->name('reseller.')->group(function () {
+        Route::get('/', [ResellerController::class, 'dashboard'])->name('dashboard');
+        Route::get('sub-organizations', [ResellerController::class, 'subOrganizations'])->name('sub-organizations');
+        Route::get('sub-organizations/create', [ResellerController::class, 'createSubOrg'])->name('sub-organizations.create');
+        Route::post('sub-organizations', [ResellerController::class, 'storeSubOrg'])->name('sub-organizations.store');
+    });
 });

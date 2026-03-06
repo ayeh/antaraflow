@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Admin\Services;
 
+use App\Domain\Account\Models\Organization;
 use App\Domain\Admin\Models\PlatformSetting;
 use Illuminate\Support\Facades\Cache;
 
@@ -34,8 +35,15 @@ class BrandingService
         'custom_themes' => '[]',
     ];
 
+    /** @var array<string, mixed>|null */
+    private ?array $organizationOverrides = null;
+
     public function get(string $key, mixed $default = null): mixed
     {
+        if ($this->organizationOverrides && array_key_exists($key, $this->organizationOverrides)) {
+            return $this->organizationOverrides[$key];
+        }
+
         return Cache::remember(
             "branding.{$key}",
             now()->addHours(1),
@@ -58,6 +66,39 @@ class BrandingService
         }
 
         return $result;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $overrides
+     */
+    public function setOrganizationOverrides(?array $overrides): void
+    {
+        $this->organizationOverrides = $overrides;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getForOrganization(?Organization $organization): array
+    {
+        $platformDefaults = $this->all();
+
+        if (! $organization) {
+            return $platformDefaults;
+        }
+
+        $overrides = $organization->resellerSetting?->branding_overrides;
+
+        if (! $overrides || ! is_array($overrides)) {
+            return $platformDefaults;
+        }
+
+        return array_merge($platformDefaults, $overrides);
+    }
+
+    public function hasOrganizationOverrides(): bool
+    {
+        return $this->organizationOverrides !== null && $this->organizationOverrides !== [];
     }
 
     public function clearCache(): void

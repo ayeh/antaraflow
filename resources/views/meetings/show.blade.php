@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-6xl mx-auto"
-     x-data="{
+<div class="max-w-6xl mx-auto" x-data="meetingLive({{ $meeting->id }})">
+<div x-data="{
         activeStep: {{ (int) request('step', 1) }},
         isEditable: @json($isEditable),
      }">
@@ -18,13 +18,27 @@
             <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">{{ $meeting->mom_number }}</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
+            {{-- Live Presence Avatars --}}
+            <div x-show="viewerCount > 0" x-cloak class="flex items-center gap-1">
+                <div class="flex -space-x-2">
+                    <template x-for="(initials, index) in viewerInitials.slice(0, 5)" :key="index">
+                        <div class="w-7 h-7 rounded-full bg-indigo-500 text-white text-xs font-medium flex items-center justify-center ring-2 ring-white dark:ring-gray-900"
+                             x-text="initials"></div>
+                    </template>
+                    <div x-show="viewerCount > 5" class="w-7 h-7 rounded-full bg-gray-400 text-white text-xs font-medium flex items-center justify-center ring-2 ring-white dark:ring-gray-900"
+                         x-text="'+' + (viewerCount - 5)"></div>
+                </div>
+                <span class="text-xs text-gray-500 dark:text-gray-400 ml-1" x-text="viewerCount + ' online'"></span>
+            </div>
+
             {{-- Status Badge --}}
             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
                 @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft) bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
                 @elseif($meeting->status === \App\Support\Enums\MeetingStatus::InProgress) bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
                 @elseif($meeting->status === \App\Support\Enums\MeetingStatus::Finalized) bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300
                 @elseif($meeting->status === \App\Support\Enums\MeetingStatus::Approved) bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
-                @endif">
+                @endif"
+                data-meeting-status="{{ $meeting->status->value }}">
                 {{ ucfirst(str_replace('_', ' ', $meeting->status->value)) }}
             </span>
 
@@ -117,4 +131,18 @@
         @include('meetings.wizard.step-finalize')
     </div>
 </div>
+</div>
+
+<script>
+    window.currentUserId = {{ auth()->id() }};
+    window.currentUserName = @json(auth()->user()->name);
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.__offlineStore) {
+            window.__offlineStore.cacheMeetingFromUrl('{{ route('meetings.offline-data', $meeting) }}');
+        }
+    });
+</script>
 @endsection
