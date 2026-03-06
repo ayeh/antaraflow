@@ -19,6 +19,11 @@
         </div>
     @endif
 
+    {{-- Board Compliance (only for Board Meetings) --}}
+    @if($meeting->meeting_type === \App\Support\Enums\MeetingType::BoardMeeting)
+        @include('meetings.partials.board-compliance')
+    @endif
+
     {{-- Two-Column Layout --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 

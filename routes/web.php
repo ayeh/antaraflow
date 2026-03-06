@@ -19,10 +19,15 @@ use App\Domain\Attendee\Controllers\AttendeeController;
 use App\Domain\Attendee\Controllers\QrRegistrationController;
 use App\Domain\Calendar\Controllers\CalendarConnectionController;
 use App\Domain\Calendar\Controllers\CalendarWebhookController;
+use App\Domain\Meeting\Controllers\BoardSettingController;
 use App\Domain\Meeting\Controllers\DocumentController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
+use App\Domain\Meeting\Controllers\ResolutionController;
+use App\Domain\Meeting\Controllers\VoteController;
 use App\Domain\Project\Controllers\ProjectController;
+use App\Domain\Report\Controllers\GeneratedReportController;
+use App\Domain\Report\Controllers\ReportTemplateController;
 use App\Domain\Search\Controllers\SearchController;
 use App\Domain\Transcription\Controllers\AudioChunkController;
 use App\Domain\Transcription\Controllers\TranscriptionController;
@@ -159,6 +164,10 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     // AI Provider Configs
     Route::resource('ai-provider-configs', \App\Domain\Account\Controllers\AiProviderConfigController::class);
 
+    // Board Settings
+    Route::get('settings/board', [BoardSettingController::class, 'edit'])->name('settings.board.edit');
+    Route::put('settings/board', [BoardSettingController::class, 'update'])->name('settings.board.update');
+
     // Extraction Templates
     Route::resource('extraction-templates', ExtractionTemplateController::class)->except(['show']);
 
@@ -213,10 +222,22 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         // Meeting Preparation
         Route::get('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'generate'])->name('prepare-agenda.generate');
         Route::post('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'apply'])->name('prepare-agenda.apply');
+
+        // Resolutions & Voting (Board Compliance)
+        Route::post('resolutions', [ResolutionController::class, 'store'])->name('resolutions.store');
+        Route::put('resolutions/{resolution}', [ResolutionController::class, 'update'])->name('resolutions.update');
+        Route::delete('resolutions/{resolution}', [ResolutionController::class, 'destroy'])->name('resolutions.destroy');
+        Route::post('resolutions/{resolution}/vote', [VoteController::class, 'store'])->name('resolutions.vote');
     });
 
     Route::put('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'update'])->name('comments.update');
     Route::delete('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
+
+    // Reports
+    Route::get('reports/generated', [GeneratedReportController::class, 'index'])->name('reports.generated.index');
+    Route::get('reports/generated/{report}/download', [GeneratedReportController::class, 'download'])->name('reports.generated.download');
+    Route::resource('reports', ReportTemplateController::class);
+    Route::post('reports/{report}/generate', [ReportTemplateController::class, 'generate'])->name('reports.generate');
 
     // Webhooks
     Route::resource('webhooks', \App\Domain\Webhook\Controllers\WebhookEndpointController::class);

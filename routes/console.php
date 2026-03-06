@@ -12,3 +12,5 @@ Artisan::command('inspire', function () {
 Schedule::job(new CheckOverdueActionItemsJob)->dailyAt('08:00');
 
 Schedule::command('transcription:cleanup-chunks')->hourly();
+
+Schedule::command('reports:generate-scheduled')->hourly();

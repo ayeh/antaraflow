@@ -141,4 +141,9 @@ class MinutesOfMeeting extends Model
     {
         return $this->hasMany(QrRegistrationToken::class);
     }
+
+    public function resolutions(): HasMany
+    {
+        return $this->hasMany(MeetingResolution::class, 'meeting_id');
+    }
 }

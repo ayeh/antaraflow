@@ -9,9 +9,11 @@ use App\Domain\Account\Services\AuditService;
 use App\Domain\Account\Services\SubscriptionService;
 use App\Domain\Meeting\Events\MeetingApproved;
 use App\Domain\Meeting\Events\MeetingFinalized;
+use App\Domain\Meeting\Models\BoardSetting;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
+use App\Support\Enums\MeetingType;
 use Illuminate\Support\Facades\DB;
 
 class MeetingService
@@ -118,6 +120,19 @@ class MeetingService
     {
         if (! in_array($mom->status, [MeetingStatus::Draft, MeetingStatus::InProgress])) {
             throw new \DomainException('Only draft or in-progress meetings can be finalized.');
+        }
+
+        // Board meeting quorum check
+        if ($mom->meeting_type === MeetingType::BoardMeeting) {
+            $boardSetting = BoardSetting::where('organization_id', $mom->organization_id)->first();
+
+            if ($boardSetting && $boardSetting->block_finalization_without_quorum) {
+                $quorumService = app(QuorumService::class);
+
+                if (! $quorumService->isQuorumMet($mom)) {
+                    throw new \DomainException('Cannot finalize: quorum is not met for this board meeting.');
+                }
+            }
         }
 
         $this->versionService->createVersion($mom, $user, 'Meeting finalized');

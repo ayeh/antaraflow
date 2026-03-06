@@ -25,6 +25,7 @@ use App\Domain\Meeting\Events\MeetingApproved;
 use App\Domain\Meeting\Events\MeetingFinalized;
 use App\Domain\Meeting\Listeners\NotifyMeetingApproved;
 use App\Domain\Meeting\Listeners\NotifyMeetingFinalized;
+use App\Domain\Meeting\Models\MeetingResolution;
 use App\Domain\Meeting\Models\MeetingSeries;
 use App\Domain\Meeting\Models\MeetingTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
@@ -33,8 +34,11 @@ use App\Domain\Meeting\Policies\MeetingSeriesPolicy;
 use App\Domain\Meeting\Policies\MeetingTemplatePolicy;
 use App\Domain\Meeting\Policies\MinutesOfMeetingPolicy;
 use App\Domain\Meeting\Policies\MomTagPolicy;
+use App\Domain\Meeting\Policies\ResolutionPolicy;
 use App\Domain\Project\Models\Project;
 use App\Domain\Project\Policies\ProjectPolicy;
+use App\Domain\Report\Models\ReportTemplate;
+use App\Domain\Report\Policies\ReportTemplatePolicy;
 use App\Domain\Transcription\Events\TranscriptionCompleted;
 use App\Domain\Transcription\Events\TranscriptionFailed;
 use App\Domain\Transcription\Listeners\NotifyTranscriptionComplete;
@@ -76,6 +80,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Comment::class, CommentPolicy::class);
         Gate::policy(Project::class, ProjectPolicy::class);
         Gate::policy(ExtractionTemplate::class, ExtractionTemplatePolicy::class);
+        Gate::policy(MeetingResolution::class, ResolutionPolicy::class);
+        Gate::policy(ReportTemplate::class, ReportTemplatePolicy::class);
         Gate::policy(WebhookEndpoint::class, WebhookEndpointPolicy::class);
 
         View::composer('layouts.app', function ($view) {

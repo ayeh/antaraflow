@@ -122,6 +122,7 @@ class MeetingController extends Controller
             'attendees.user', 'actionItems.assignedTo',
             'inputs', 'transcriptions', 'manualNotes', 'documents',
             'extractions', 'topics', 'aiConversations',
+            'resolutions.votes', 'resolutions.mover', 'resolutions.seconder',
         ]);
 
         $isEditable = in_array($meeting->status, [MeetingStatus::Draft, MeetingStatus::InProgress]);
