@@ -240,7 +240,7 @@ export default function liveMeetingDashboard(config) {
                 return this.speakerColors[0];
             }
 
-            if (!this.speakerColorMap[speaker]) {
+            if (this.speakerColorMap[speaker] === undefined) {
                 this.speakerColorMap[speaker] = this.speakerColorIndex;
                 this.speakerColorIndex =
                     (this.speakerColorIndex + 1) % this.speakerColors.length;
@@ -254,13 +254,11 @@ export default function liveMeetingDashboard(config) {
                 return this.speakerBgColors[0];
             }
 
-            if (!this.speakerColorMap[speaker]) {
-                this.speakerColorMap[speaker] = this.speakerColorIndex;
-                this.speakerColorIndex =
-                    (this.speakerColorIndex + 1) % this.speakerBgColors.length;
-            }
+            // Ensure assignment via speakerColor's logic
+            this.speakerColor(speaker);
+            const idx = this.speakerColorMap[speaker] ?? 0;
 
-            return this.speakerBgColors[this.speakerColorMap[speaker]];
+            return this.speakerBgColors[idx % this.speakerBgColors.length];
         },
 
         // -- Extraction Helpers --

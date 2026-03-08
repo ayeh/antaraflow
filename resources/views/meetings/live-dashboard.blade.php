@@ -57,7 +57,7 @@
 
         {{-- Panel 1: Live Transcript Feed --}}
         <div class="lg:col-span-5">
-            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col" style="height: 70vh;">
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col h-[70vh]">
                 {{-- Panel Header --}}
                 <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-slate-700">
                     <div class="flex items-center gap-2">
@@ -131,7 +131,7 @@
 
         {{-- Panel 2: AI Extractions --}}
         <div class="lg:col-span-4">
-            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col" style="height: 70vh;">
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col h-[70vh]">
                 {{-- Panel Header --}}
                 <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-slate-700">
                     <div class="flex items-center gap-2">

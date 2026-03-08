@@ -347,7 +347,11 @@ export default function audioRecorder(config) {
 
                 this.mediaRecorder.ondataavailable = (e) => {
                     if (e.data.size > 0) {
-                        this.uploadChunk(e.data, this.chunkIndex);
+                        if (this.liveMode) {
+                            this.uploadLiveChunk(e.data);
+                        } else {
+                            this.uploadChunk(e.data, this.chunkIndex);
+                        }
                         this.chunkIndex++;
                     }
                 };
@@ -357,7 +361,11 @@ export default function audioRecorder(config) {
                 };
 
                 const initialBlob = new Blob(this.chunks, { type: this.mimeType });
-                this.uploadChunk(initialBlob, 0);
+                if (this.liveMode) {
+                    this.uploadLiveChunk(initialBlob);
+                } else {
+                    this.uploadChunk(initialBlob, 0);
+                }
                 this.chunkIndex = 1;
                 this.chunks = [];
 
@@ -403,13 +411,13 @@ export default function audioRecorder(config) {
                 }
             }, 3000);
 
-            this.mediaRecorder._stopTimeout = stopTimeout;
+            this._stopTimeout = stopTimeout;
             this.mediaRecorder.stop();
         },
 
         async handleRecordingStop() {
-            if (this.mediaRecorder?._stopTimeout) {
-                clearTimeout(this.mediaRecorder._stopTimeout);
+            if (this._stopTimeout) {
+                clearTimeout(this._stopTimeout);
             }
 
             if (this.state !== 'stopping') return;
@@ -739,6 +747,7 @@ export default function audioRecorder(config) {
                 oscillator.start();
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration / 1000);
                 oscillator.stop(ctx.currentTime + duration / 1000);
+                oscillator.onended = () => ctx.close();
             } catch {
                 // Audio feedback is optional
             }
