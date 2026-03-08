@@ -15,6 +15,7 @@ use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
 use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\AI\Controllers\ExtractionTemplateController;
+use App\Domain\AI\Controllers\PrepBriefController;
 use App\Domain\Analytics\Controllers\GovernanceAnalyticsController;
 use App\Domain\Attendee\Controllers\AttendeeController;
 use App\Domain\Attendee\Controllers\QrRegistrationController;
@@ -225,8 +226,10 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         Route::get('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'generate'])->name('prepare-agenda.generate');
         Route::post('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'apply'])->name('prepare-agenda.apply');
 
-        // Prep Brief (controller will be created in Task 6)
-        Route::get('prep-brief', fn () => abort(501))->name('prep-brief');
+        // Prep Brief
+        Route::get('prep-brief', [PrepBriefController::class, 'show'])->name('prep-brief');
+        Route::post('prep-brief/generate', [PrepBriefController::class, 'generate'])->name('prep-brief.generate');
+        Route::post('prep-brief/{brief}/section-read', [PrepBriefController::class, 'markSectionRead'])->name('prep-brief.section-read');
 
         // Offline Data
         Route::get('offline-data', [OfflineDataController::class, 'show'])->name('offline-data');
