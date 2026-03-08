@@ -1,11 +1,18 @@
 export default function audioRecorder(config) {
     return {
         // Config (passed from blade)
+        config: config,
         uploadUrl: config.uploadUrl,
         chunkUrl: config.chunkUrl,
         finalizeUrl: config.finalizeUrl,
         cancelUrl: config.cancelUrl,
         meetingId: config.meetingId,
+
+        // Live mode
+        liveMode: config.liveMode || false,
+        liveChunkUrl: config.liveChunkUrl || '',
+        liveSessionId: config.liveSessionId || null,
+        liveChunkNumber: 0,
 
         // State machine
         state: 'idle', // idle, requesting_permission, ready, countdown, recording, paused, stopping, processing, uploading, complete, error
@@ -272,6 +279,7 @@ export default function audioRecorder(config) {
             this.uploadedChunks = 0;
             this.timer = 0;
             this.isLongRecording = false;
+            this.liveChunkNumber = 0;
             this.sessionId = crypto.randomUUID();
             this.errorMessage = '';
 
@@ -284,7 +292,11 @@ export default function audioRecorder(config) {
                     this.chunks.push(e.data);
 
                     if (this.isLongRecording) {
-                        this.uploadChunk(e.data, this.chunkIndex);
+                        if (this.liveMode) {
+                            this.uploadLiveChunk(e.data);
+                        } else {
+                            this.uploadChunk(e.data, this.chunkIndex);
+                        }
                         this.chunkIndex++;
                     }
                 }
@@ -308,10 +320,17 @@ export default function audioRecorder(config) {
             this.timerInterval = setInterval(() => {
                 this.timer++;
 
-                if (this.timer === 300 && !this.isLongRecording) {
+                if (this.timer === 300 && !this.isLongRecording && !this.liveMode) {
                     this.switchToChunkedMode();
                 }
             }, 1000);
+
+            // In live mode, switch to chunked mode immediately with 30-second intervals
+            if (this.liveMode) {
+                this.$nextTick(() => {
+                    this.switchToChunkedMode();
+                });
+            }
 
             this.drawWaveform();
         },
@@ -397,6 +416,13 @@ export default function audioRecorder(config) {
 
             this.state = 'processing';
 
+            // In live mode, chunks are already uploaded via the live endpoint
+            if (this.liveMode && this.isLongRecording) {
+                this.state = 'complete';
+                this.successMessage = 'Recording stopped. Audio chunks have been sent for transcription.';
+                return;
+            }
+
             if (this.isLongRecording) {
                 await this.finalizeChunkedUpload();
             } else {
@@ -441,6 +467,39 @@ export default function audioRecorder(config) {
                 }
             } catch (err) {
                 console.error('Chunk upload failed:', err);
+            }
+        },
+
+        async uploadLiveChunk(blob) {
+            const chunkNumber = this.liveChunkNumber;
+            const chunkDuration = 30;
+            const startTime = chunkNumber * chunkDuration;
+            const endTime = startTime + chunkDuration;
+
+            this.liveChunkNumber++;
+
+            const formData = new FormData();
+            const ext = this.mimeType.includes('mp4') ? 'mp4' : 'webm';
+            formData.append('audio', blob, `live_chunk_${chunkNumber}.${ext}`);
+            formData.append('chunk_number', String(chunkNumber));
+            formData.append('start_time', String(startTime));
+            formData.append('end_time', String(endTime));
+
+            try {
+                const response = await fetch(this.liveChunkUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken(),
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    this.uploadedChunks++;
+                }
+            } catch (err) {
+                console.error('Live chunk upload failed:', err);
             }
         },
 
