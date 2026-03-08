@@ -225,6 +225,9 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         Route::get('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'generate'])->name('prepare-agenda.generate');
         Route::post('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'apply'])->name('prepare-agenda.apply');
 
+        // Prep Brief (controller will be created in Task 6)
+        Route::get('prep-brief', fn () => abort(501))->name('prep-brief');
+
         // Offline Data
         Route::get('offline-data', [OfflineDataController::class, 'show'])->name('offline-data');
 
