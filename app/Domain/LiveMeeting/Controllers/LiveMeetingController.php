@@ -42,6 +42,7 @@ class LiveMeetingController extends Controller
     public function show(Request $request, MinutesOfMeeting $meeting, LiveMeetingSession $session): View
     {
         $this->authorize('view', $meeting);
+        abort_if($session->minutes_of_meeting_id !== $meeting->id, 404);
 
         $state = $this->liveMeetingService->getSessionState($session);
 
@@ -55,6 +56,8 @@ class LiveMeetingController extends Controller
     public function chunk(Request $request, MinutesOfMeeting $meeting, LiveMeetingSession $session): JsonResponse
     {
         $this->authorize('update', $meeting);
+        abort_if($session->minutes_of_meeting_id !== $meeting->id, 404);
+        abort_if(! $session->isActive(), 409, 'Session is not active.');
 
         $request->validate([
             'audio' => ['required', 'file', 'mimetypes:audio/*'],
@@ -77,6 +80,8 @@ class LiveMeetingController extends Controller
     public function end(Request $request, MinutesOfMeeting $meeting, LiveMeetingSession $session): JsonResponse
     {
         $this->authorize('update', $meeting);
+        abort_if($session->minutes_of_meeting_id !== $meeting->id, 404);
+        abort_if(! $session->isActive(), 409, 'Session is not active.');
 
         $this->liveMeetingService->endSession($session);
 
@@ -86,6 +91,7 @@ class LiveMeetingController extends Controller
     public function state(Request $request, MinutesOfMeeting $meeting, LiveMeetingSession $session): JsonResponse
     {
         $this->authorize('view', $meeting);
+        abort_if($session->minutes_of_meeting_id !== $meeting->id, 404);
 
         $state = $this->liveMeetingService->getSessionState($session);
 

@@ -40,7 +40,7 @@ class LiveMeetingService
             'minutes_of_meeting_id' => $meeting->id,
             'started_by' => $user->id,
             'status' => LiveSessionStatus::Active,
-            'config' => $config ?: $defaultConfig,
+            'config' => array_merge($defaultConfig, $config),
             'started_at' => now(),
         ]);
     }

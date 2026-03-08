@@ -190,6 +190,57 @@ test('it can get session state as JSON', function () {
     $response->assertJsonStructure(['session', 'chunks', 'extractions']);
 });
 
+test('it returns 404 when session belongs to a different meeting', function () {
+    $otherMeeting = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $otherMeeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $this->actingAs($this->user)
+        ->get(route('meetings.live.show', [$this->meeting, $session]))
+        ->assertNotFound();
+
+    $this->actingAs($this->user)
+        ->postJson(route('meetings.live.end', [$this->meeting, $session]))
+        ->assertNotFound();
+
+    $this->actingAs($this->user)
+        ->getJson(route('meetings.live.state', [$this->meeting, $session]))
+        ->assertNotFound();
+});
+
+test('it returns 409 when chunking or ending a non-active session', function () {
+    Queue::fake();
+    Storage::fake('local');
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Ended,
+    ]);
+
+    $audioFile = UploadedFile::fake()->create('chunk.webm', 100, 'audio/webm');
+
+    $this->actingAs($this->user)
+        ->postJson(route('meetings.live.chunk', [$this->meeting, $session]), [
+            'audio' => $audioFile,
+            'chunk_number' => 0,
+            'start_time' => 0.0,
+            'end_time' => 30.0,
+        ])
+        ->assertConflict();
+
+    $this->actingAs($this->user)
+        ->postJson(route('meetings.live.end', [$this->meeting, $session]))
+        ->assertConflict();
+});
+
 test('it requires authentication', function () {
     $response = $this->postJson(route('meetings.live.start', $this->meeting));
 
