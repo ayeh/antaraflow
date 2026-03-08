@@ -27,3 +27,9 @@ Broadcast::channel('meeting.{meetingId}.presence', function (User $user, int $me
 Broadcast::channel('organization.{orgId}', function (User $user, int $orgId) {
     return $user->current_organization_id === $orgId;
 });
+
+Broadcast::channel('live-meeting.{sessionId}', function (User $user, int $sessionId) {
+    $session = \App\Domain\LiveMeeting\Models\LiveMeetingSession::find($sessionId);
+
+    return $session && $session->meeting->organization_id === $user->current_organization_id;
+});
