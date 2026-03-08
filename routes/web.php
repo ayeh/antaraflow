@@ -231,6 +231,13 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         Route::post('prep-brief/generate', [PrepBriefController::class, 'generate'])->name('prep-brief.generate');
         Route::post('prep-brief/{brief}/section-read', [PrepBriefController::class, 'markSectionRead'])->name('prep-brief.section-read');
 
+        // Live Meeting
+        Route::post('live/start', [\App\Domain\LiveMeeting\Controllers\LiveMeetingController::class, 'start'])->name('live.start');
+        Route::get('live/{session}', [\App\Domain\LiveMeeting\Controllers\LiveMeetingController::class, 'show'])->name('live.show');
+        Route::post('live/{session}/chunk', [\App\Domain\LiveMeeting\Controllers\LiveMeetingController::class, 'chunk'])->name('live.chunk');
+        Route::post('live/{session}/end', [\App\Domain\LiveMeeting\Controllers\LiveMeetingController::class, 'end'])->name('live.end');
+        Route::get('live/{session}/state', [\App\Domain\LiveMeeting\Controllers\LiveMeetingController::class, 'state'])->name('live.state');
+
         // Offline Data
         Route::get('offline-data', [OfflineDataController::class, 'show'])->name('offline-data');
 
