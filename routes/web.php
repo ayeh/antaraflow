@@ -10,6 +10,7 @@ use App\Domain\Account\Controllers\OrganizationSettingsController;
 use App\Domain\Account\Controllers\ProfileController;
 use App\Domain\Account\Controllers\ResellerController;
 use App\Domain\Account\Controllers\SocialAuthController;
+use App\Domain\ActionItem\Controllers\ActionItemBulkController;
 use App\Domain\ActionItem\Controllers\ActionItemController;
 use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
 use App\Domain\ActionItem\Controllers\ActionItemStatusController;
@@ -177,6 +178,7 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
 
     // Cross-meeting dashboards
     Route::get('action-items', [ActionItemDashboardController::class, 'index'])->name('action-items.dashboard');
+    Route::post('action-items/bulk', ActionItemBulkController::class)->name('action-items.bulk');
 
     // QR Registration token generation & management
     Route::post('meetings/{meeting}/qr-registration', [QrRegistrationController::class, 'generate'])
