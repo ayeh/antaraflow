@@ -17,7 +17,7 @@
                 const res = await fetch(`/meetings/${meetingId}/action-items/${itemId}`, {
                     headers: {
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content ?? '',
                     },
                 });
                 if (!res.ok) { throw new Error('Failed'); }
@@ -44,13 +44,14 @@
         async save() {
             if (!this.item || this.saving) { return; }
             this.saving = true;
+            const originalStatus = this.item.status;
             try {
                 const res = await fetch(this.item.update_url, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content ?? '',
                     },
                     body: JSON.stringify({
                         ...this.form,
@@ -61,7 +62,9 @@
                 if (!res.ok) { throw new Error('Failed'); }
                 const data = await res.json();
                 this.$dispatch('action-item-updated', { id: this.item.id, ...data });
-                this.$dispatch('action-item-status-changed', { id: this.item.id, status: data.status });
+                if (data.status !== originalStatus) {
+                    this.$dispatch('action-item-status-changed', { id: this.item.id, status: data.status });
+                }
                 this.close();
             } catch {
                 alert('Failed to save. Please try again.');
@@ -245,7 +248,7 @@
                                     <p
                                         x-show="entry.comment"
                                         class="text-xs text-gray-500 dark:text-gray-400 italic bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2 mt-1"
-                                        x-text="'&quot;' + entry.comment + '&quot;'"
+                                        x-text="'\u201c' + entry.comment + '\u201d'"
                                     ></p>
                                     <time
                                         class="text-xs text-gray-400 dark:text-gray-500"

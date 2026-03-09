@@ -40,7 +40,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content ?? '',
                     },
                     body: JSON.stringify({ status: newStatus }),
                 });
@@ -67,6 +67,8 @@
                         const itemId = parseInt(evt.item.dataset.id);
                         const newStatus = evt.to.dataset.status;
                         const statusUrl = evt.item.dataset.statusUrl;
+                        // Revert Sortable's DOM move so Alpine manages re-rendering
+                        evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] ?? null);
                         this.moveItem(itemId, newStatus, statusUrl);
                     }
                 });
