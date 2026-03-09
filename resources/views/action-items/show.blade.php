@@ -54,5 +54,53 @@
             </div>
         </div>
     </div>
+
+    {{-- Activity / History --}}
+    @if($actionItem->histories->isNotEmpty())
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Activity</h2>
+            <ol class="relative border-l border-gray-200 dark:border-slate-600 space-y-5 ml-2">
+                @foreach($actionItem->histories->sortByDesc('created_at') as $history)
+                    <li class="ml-4">
+                        {{-- Timeline dot --}}
+                        <div class="absolute -left-1.5 mt-1 w-3 h-3 rounded-full border-2 border-white dark:border-slate-800
+                            {{ $history->comment ? 'bg-violet-500' : 'bg-gray-300 dark:bg-slate-500' }}">
+                        </div>
+
+                        <div class="flex flex-col gap-0.5">
+                            {{-- Status change line --}}
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                <span class="font-medium">{{ $history->changedBy?->name ?? 'Someone' }}</span>
+                                @if($history->old_value !== $history->new_value)
+                                    changed status from
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-gray-400">
+                                        {{ \App\Support\Enums\ActionItemStatus::tryFrom($history->old_value)?->label() ?? $history->old_value }}
+                                    </span>
+                                    <span class="text-gray-400 mx-0.5">→</span>
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ \App\Support\Enums\ActionItemStatus::tryFrom($history->new_value)?->colorClass() ?? 'bg-gray-100 text-gray-600' }}">
+                                        {{ \App\Support\Enums\ActionItemStatus::tryFrom($history->new_value)?->label() ?? $history->new_value }}
+                                    </span>
+                                @else
+                                    added a note
+                                @endif
+                            </p>
+
+                            {{-- Note/comment --}}
+                            @if($history->comment)
+                                <p class="text-sm text-gray-500 dark:text-gray-400 italic bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2 mt-1">
+                                    "{{ $history->comment }}"
+                                </p>
+                            @endif
+
+                            {{-- Timestamp --}}
+                            <time class="text-xs text-gray-400 dark:text-gray-500">
+                                {{ $history->created_at->diffForHumans() }} &middot; {{ $history->created_at->format('M j, Y H:i') }}
+                            </time>
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+        </div>
+    @endif
 </div>
 @endsection
