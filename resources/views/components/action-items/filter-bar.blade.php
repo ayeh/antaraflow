@@ -10,9 +10,7 @@
     $hasActiveFilters = ! empty($activeStatusValues) || ! empty($activePriorityValues) || $assigneeFilter === 'me';
 @endphp
 
-<form
-    method="GET"
-    action="{{ route('action-items.dashboard') }}"
+<div
     x-data="{
         statuses: @js($activeStatusValues),
         priorities: @js($activePriorityValues),
@@ -21,19 +19,24 @@
             this.statuses.includes(val)
                 ? this.statuses = this.statuses.filter(s => s !== val)
                 : this.statuses.push(val);
-            this.$nextTick(() => this.$el.submit());
+            this.$nextTick(() => this.$refs.filterForm.submit());
         },
         togglePriority(val) {
             this.priorities.includes(val)
                 ? this.priorities = this.priorities.filter(p => p !== val)
                 : this.priorities.push(val);
-            this.$nextTick(() => this.$el.submit());
+            this.$nextTick(() => this.$refs.filterForm.submit());
         },
         toggleAssignee() {
             this.assignee = this.assignee === 'me' ? '' : 'me';
-            this.$nextTick(() => this.$el.submit());
+            this.$nextTick(() => this.$refs.filterForm.submit());
         },
     }"
+>
+<form
+    x-ref="filterForm"
+    method="GET"
+    action="{{ route('action-items.dashboard') }}"
 >
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
         <div class="flex flex-wrap items-center gap-4">
@@ -52,7 +55,7 @@
                     >
                         {{ $status->label() }}
                     </button>
-                    <input type="hidden" name="status[]" value="{{ $status->value }}" x-show="statuses.includes('{{ $status->value }}')">
+                    <input type="hidden" name="status[]" value="{{ $status->value }}" :disabled="!statuses.includes('{{ $status->value }}')">
                 @endforeach
             </div>
 
@@ -72,7 +75,7 @@
                     >
                         {{ $priority->label() }}
                     </button>
-                    <input type="hidden" name="priority[]" value="{{ $priority->value }}" x-show="priorities.includes('{{ $priority->value }}')">
+                    <input type="hidden" name="priority[]" value="{{ $priority->value }}" :disabled="!priorities.includes('{{ $priority->value }}')">
                 @endforeach
             </div>
 
@@ -89,7 +92,7 @@
                 >
                     Assigned to me
                 </button>
-                <input type="hidden" name="assignee" value="me" x-show="assignee === 'me'">
+                <input type="hidden" name="assignee" value="me" :disabled="assignee !== 'me'">
             </div>
 
             {{-- Clear All --}}
@@ -102,3 +105,4 @@
         </div>
     </div>
 </form>
+</div>

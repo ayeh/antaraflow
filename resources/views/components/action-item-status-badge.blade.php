@@ -56,6 +56,7 @@
     }"
     class="relative inline-block"
     @keydown.escape.window="close()"
+    @action-item-status-changed.window="if ($event.detail.id === {{ $item->id }}) { selectedStatus = $event.detail.status; close(); }"
 >
     {{-- Badge button --}}
     <button

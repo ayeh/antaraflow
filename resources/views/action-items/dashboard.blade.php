@@ -42,6 +42,7 @@
                                     :checked="completed"
                                     @change="
                                         completed = !completed;
+                                        const newStatus = completed ? 'completed' : 'open';
                                         fetch('{{ route('meetings.action-items.status', [$item->meeting, $item]) }}', {
                                             method: 'PATCH',
                                             headers: {
@@ -49,7 +50,14 @@
                                                 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
                                                 'Accept': 'application/json',
                                             },
-                                            body: JSON.stringify({ status: completed ? 'completed' : 'open' }),
+                                            body: JSON.stringify({ status: newStatus }),
+                                        }).then(res => {
+                                            if (res.ok) {
+                                                $dispatch('action-item-status-changed', { id: {{ $item->id }}, status: newStatus });
+                                            } else {
+                                                completed = !completed;
+                                                alert('Failed to update. Please try again.');
+                                            }
                                         }).catch(() => { completed = !completed; alert('Failed to update. Please try again.'); })
                                     "
                                     class="w-4 h-4 rounded border-gray-300 text-violet-600 cursor-pointer focus:ring-violet-500 dark:border-slate-500 dark:bg-slate-700"
