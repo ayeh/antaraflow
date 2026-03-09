@@ -12,6 +12,7 @@ use App\Domain\Account\Controllers\ResellerController;
 use App\Domain\Account\Controllers\SocialAuthController;
 use App\Domain\ActionItem\Controllers\ActionItemController;
 use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
+use App\Domain\ActionItem\Controllers\ActionItemStatusController;
 use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\AI\Controllers\ExtractionTemplateController;
@@ -196,6 +197,7 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         Route::post('action-items/create-all-tasks', [ActionItemController::class, 'createAllTasks'])->name('action-items.create-all-tasks');
         Route::resource('action-items', ActionItemController::class);
         Route::post('action-items/{actionItem}/carry-forward', [ActionItemController::class, 'carryForward'])->name('action-items.carry-forward');
+        Route::patch('action-items/{actionItem}/status', [ActionItemStatusController::class, 'update'])->name('action-items.status');
 
         Route::resource('attendees', AttendeeController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::post('attendees/bulk-invite', [AttendeeController::class, 'bulkInvite'])->name('attendees.bulk-invite');
