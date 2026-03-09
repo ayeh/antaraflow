@@ -47,7 +47,21 @@ class ActionItemService
             }
         }
 
-        $item->update($data);
+        $updateData = $data;
+
+        if (array_key_exists('status', $data)) {
+            $newStatus = $data['status'] instanceof ActionItemStatus
+                ? $data['status']
+                : ActionItemStatus::tryFrom((string) $data['status']);
+
+            if ($newStatus === ActionItemStatus::Completed && $item->status !== ActionItemStatus::Completed) {
+                $updateData['completed_at'] = now();
+            } elseif ($newStatus !== null && $newStatus !== ActionItemStatus::Completed) {
+                $updateData['completed_at'] = null;
+            }
+        }
+
+        $item->update($updateData);
 
         $item = $item->fresh();
         ActionItemUpdated::dispatch($item);

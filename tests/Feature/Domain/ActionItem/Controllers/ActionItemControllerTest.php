@@ -170,3 +170,83 @@ test('user can delete action item', function () {
 
     $this->assertSoftDeleted('action_items', ['id' => $item->id]);
 });
+
+test('show returns json when requested with accept header', function () {
+    $item = ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->getJson(route('meetings.action-items.show', [$this->meeting, $item]));
+
+    $response->assertOk()
+        ->assertJsonStructure([
+            'id', 'title', 'description', 'status', 'priority',
+            'due_date', 'assigned_to', 'meeting_id',
+            'show_url', 'update_url', 'status_url',
+            'users' => [['id', 'name']],
+            'history',
+        ]);
+
+    expect($response->json('id'))->toBe($item->id);
+});
+
+test('update returns json when requested with accept header', function () {
+    $item = ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'status' => ActionItemStatus::Open,
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->putJson(route('meetings.action-items.update', [$this->meeting, $item]), [
+            'title' => 'Updated Title',
+            'priority' => 'high',
+        ]);
+
+    $response->assertOk()
+        ->assertJsonStructure([
+            'id', 'title', 'status', 'priority', 'priority_label',
+            'priority_color_class', 'due_date', 'due_date_formatted',
+            'assigned_to', 'assigned_to_name',
+        ]);
+
+    expect($response->json('title'))->toBe('Updated Title')
+        ->and($response->json('priority'))->toBe('high');
+});
+
+test('update sets completed_at when status changes to completed', function () {
+    $item = ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'status' => ActionItemStatus::Open,
+    ]);
+
+    $this->actingAs($this->user)
+        ->putJson(route('meetings.action-items.update', [$this->meeting, $item]), [
+            'status' => 'completed',
+        ]);
+
+    expect(ActionItem::find($item->id)->completed_at)->not->toBeNull();
+});
+
+test('update clears completed_at when status changes away from completed', function () {
+    $item = ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'status' => ActionItemStatus::Completed,
+        'completed_at' => now(),
+    ]);
+
+    $this->actingAs($this->user)
+        ->putJson(route('meetings.action-items.update', [$this->meeting, $item]), [
+            'status' => 'open',
+        ]);
+
+    expect(ActionItem::find($item->id)->completed_at)->toBeNull();
+});
