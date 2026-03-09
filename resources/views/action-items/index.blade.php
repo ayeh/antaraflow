@@ -33,7 +33,11 @@
                 totalItems: {{ $actionItems->count() }},
                 get allSelected() { return this.selected.length === this.totalItems && this.totalItems > 0; },
                 toggleAll() {
-                    this.selected = this.allSelected ? [] : [{{ $actionItems->pluck('id')->join(', ') }}];
+                    if (this.allSelected) {
+                        this.selected = [];
+                    } else {
+                        this.selected = [{{ $actionItems->pluck('id')->join(', ') }}];
+                    }
                 },
                 toggle(id) {
                     this.selected.includes(id)
