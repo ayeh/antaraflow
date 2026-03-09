@@ -23,13 +23,13 @@ class BulkActionItemRequest extends FormRequest
             'ids' => ['required', 'array', 'min:1'],
             'ids.*' => ['required', 'integer'],
             'action' => ['required', 'in:status,priority,delete'],
-            'value' => [
+            'value' => array_filter([
                 Rule::requiredIf(fn () => $this->input('action') !== 'delete'),
                 'nullable',
                 'string',
-                $this->input('action') === 'status' ? Rule::enum(ActionItemStatus::class) : 'nullable',
-                $this->input('action') === 'priority' ? Rule::enum(ActionItemPriority::class) : 'nullable',
-            ],
+                $this->input('action') === 'status' ? Rule::enum(ActionItemStatus::class) : null,
+                $this->input('action') === 'priority' ? Rule::enum(ActionItemPriority::class) : null,
+            ]),
         ];
     }
 

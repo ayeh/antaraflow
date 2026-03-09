@@ -36,11 +36,12 @@ class ActionItemBulkController extends Controller
         }
 
         $policyAbility = $action === 'delete' ? 'delete' : 'update';
-        $this->authorize($policyAbility, $items->first());
 
         $updated = 0;
 
         foreach ($items as $item) {
+            $this->authorize($policyAbility, $item);
+
             if ($action === 'status') {
                 $this->actionItemService->changeStatus(
                     $item,
@@ -48,7 +49,11 @@ class ActionItemBulkController extends Controller
                     $user,
                 );
             } elseif ($action === 'priority') {
-                $item->update(['priority' => ActionItemPriority::from($request->validated('value'))]);
+                $this->actionItemService->update(
+                    $item,
+                    ['priority' => ActionItemPriority::from($request->validated('value'))],
+                    $user,
+                );
             } elseif ($action === 'delete') {
                 $item->delete();
             }

@@ -98,10 +98,15 @@ test('bulk delete removes all selected items', function () {
 
 test('bulk action ignores ids from other organizations', function () {
     $otherOrg = Organization::factory()->create();
+    $otherUser = User::factory()->create(['current_organization_id' => $otherOrg->id]);
+    $otherMeeting = MinutesOfMeeting::factory()->create([
+        'organization_id' => $otherOrg->id,
+        'created_by' => $otherUser->id,
+    ]);
     $otherItem = ActionItem::factory()->create([
         'organization_id' => $otherOrg->id,
-        'minutes_of_meeting_id' => $this->meeting->id,
-        'created_by' => $this->user->id,
+        'minutes_of_meeting_id' => $otherMeeting->id,
+        'created_by' => $otherUser->id,
     ]);
 
     $response = $this->actingAs($this->user)
