@@ -45,7 +45,7 @@
                     body: JSON.stringify({ status: newStatus }),
                 });
                 if (!res.ok) { throw new Error('Failed'); }
-                $dispatch('action-item-status-changed', { id: itemId, status: newStatus });
+                this.$dispatch('action-item-status-changed', { id: itemId, status: newStatus });
             } catch {
                 item.status = prev;
                 alert('Failed to update status. Please try again.');
@@ -67,7 +67,7 @@
                         const itemId = parseInt(evt.item.dataset.id);
                         const newStatus = evt.to.dataset.status;
                         const statusUrl = evt.item.dataset.statusUrl;
-                        moveItem(itemId, newStatus, statusUrl);
+                        this.moveItem(itemId, newStatus, statusUrl);
                     }
                 });
             });

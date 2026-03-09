@@ -60,8 +60,8 @@
                 });
                 if (!res.ok) { throw new Error('Failed'); }
                 const data = await res.json();
-                $dispatch('action-item-updated', { id: this.item.id, ...data });
-                $dispatch('action-item-status-changed', { id: this.item.id, status: data.status });
+                this.$dispatch('action-item-updated', { id: this.item.id, ...data });
+                this.$dispatch('action-item-status-changed', { id: this.item.id, status: data.status });
                 this.close();
             } catch {
                 alert('Failed to save. Please try again.');
