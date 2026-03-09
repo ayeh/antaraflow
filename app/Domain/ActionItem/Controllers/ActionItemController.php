@@ -24,13 +24,15 @@ class ActionItemController extends Controller
         private ActionItemService $actionItemService,
     ) {}
 
-    public function index(MinutesOfMeeting $meeting): View
+    public function index(Request $request, MinutesOfMeeting $meeting): View
     {
         $this->authorize('viewAny', ActionItem::class);
 
         $actionItems = $meeting->actionItems()->with(['assignedTo', 'createdBy'])->get();
 
-        return view('action-items.index', compact('meeting', 'actionItems'));
+        $currentView = in_array($request->query('view'), ['table', 'kanban']) ? $request->query('view') : 'table';
+
+        return view('action-items.index', compact('meeting', 'actionItems', 'currentView'));
     }
 
     public function create(MinutesOfMeeting $meeting): View
