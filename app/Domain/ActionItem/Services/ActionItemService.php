@@ -131,15 +131,32 @@ class ActionItemService
         return $items->count();
     }
 
-    public function getDashboard(int $organizationId, ?int $userId = null): Collection
-    {
+    /**
+     * @param  array<int, ActionItemStatus>  $statuses
+     * @param  array<int, \App\Support\Enums\ActionItemPriority>  $priorities
+     */
+    public function getDashboard(
+        int $organizationId,
+        ?int $userId = null,
+        array $statuses = [],
+        array $priorities = [],
+    ): Collection {
         $query = ActionItem::query()
             ->where('organization_id', $organizationId)
-            ->whereNotIn('status', [ActionItemStatus::Cancelled, ActionItemStatus::CarriedForward])
             ->with(['assignedTo', 'meeting', 'createdBy']);
 
         if ($userId) {
             $query->where('assigned_to', $userId);
+        }
+
+        if (! empty($statuses)) {
+            $query->whereIn('status', $statuses);
+        } else {
+            $query->whereNotIn('status', [ActionItemStatus::Cancelled, ActionItemStatus::CarriedForward]);
+        }
+
+        if (! empty($priorities)) {
+            $query->whereIn('priority', $priorities);
         }
 
         return $query->orderByRaw('CASE WHEN due_date IS NOT NULL AND due_date < ? THEN 0 ELSE 1 END', [now()])

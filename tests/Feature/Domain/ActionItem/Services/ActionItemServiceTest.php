@@ -251,3 +251,102 @@ test('dashboard filters by assignee', function () {
     expect($myItems)->toHaveCount(1)
         ->and($allItems)->toHaveCount(2);
 });
+
+test('getDashboard filters by status', function () {
+    $service = app(ActionItemService::class);
+
+    ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'status' => ActionItemStatus::Open,
+    ]);
+
+    ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'status' => ActionItemStatus::InProgress,
+    ]);
+
+    $results = $service->getDashboard(
+        $this->org->id,
+        statuses: [ActionItemStatus::Open],
+    );
+
+    expect($results)->toHaveCount(1)
+        ->and($results->first()->status)->toBe(ActionItemStatus::Open);
+});
+
+test('getDashboard filters by priority', function () {
+    $service = app(ActionItemService::class);
+
+    ActionItem::factory()->highPriority()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'priority' => \App\Support\Enums\ActionItemPriority::Low,
+    ]);
+
+    $results = $service->getDashboard(
+        $this->org->id,
+        priorities: [\App\Support\Enums\ActionItemPriority::High],
+    );
+
+    expect($results)->toHaveCount(1)
+        ->and($results->first()->priority)->toBe(\App\Support\Enums\ActionItemPriority::High);
+});
+
+test('getDashboard with no filters excludes cancelled and carried forward', function () {
+    $service = app(ActionItemService::class);
+
+    ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'status' => ActionItemStatus::Open,
+    ]);
+
+    ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'status' => ActionItemStatus::Cancelled,
+    ]);
+
+    ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'status' => ActionItemStatus::CarriedForward,
+    ]);
+
+    $results = $service->getDashboard($this->org->id);
+
+    expect($results)->toHaveCount(1)
+        ->and($results->first()->status)->toBe(ActionItemStatus::Open);
+});
+
+test('getDashboard with explicit cancelled filter shows cancelled items', function () {
+    $service = app(ActionItemService::class);
+
+    ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'status' => ActionItemStatus::Cancelled,
+    ]);
+
+    $results = $service->getDashboard(
+        $this->org->id,
+        statuses: [ActionItemStatus::Cancelled],
+    );
+
+    expect($results)->toHaveCount(1);
+});
