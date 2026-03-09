@@ -27,7 +27,7 @@
             this.showComment = false;
         },
         async save(newStatus) {
-            if (newStatus === this.selectedStatus) { this.close(); return; }
+            if (newStatus === this.selectedStatus && !this.comment) { this.close(); return; }
             this.loading = true;
             const prev = this.selectedStatus;
             this.selectedStatus = newStatus;
@@ -112,13 +112,21 @@
             >
                 <span x-text="showComment ? 'Hide note' : 'Add a note?'"></span>
             </button>
-            <div x-show="showComment" x-transition class="px-2 pb-2">
+            <div x-show="showComment" x-transition class="px-2 pb-2 space-y-1.5">
                 <textarea
                     x-model="comment"
                     placeholder="Optional note..."
                     rows="2"
                     class="w-full text-xs rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 px-2 py-1.5 resize-none focus:outline-none focus:ring-1 focus:ring-violet-500"
                 ></textarea>
+                <button
+                    type="button"
+                    @click="save(selectedStatus)"
+                    :disabled="!comment.trim() || loading"
+                    class="w-full text-xs font-medium px-2 py-1 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                    Save note
+                </button>
             </div>
         </div>
     </div>
