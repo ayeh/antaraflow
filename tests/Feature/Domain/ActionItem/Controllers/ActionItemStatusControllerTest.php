@@ -113,3 +113,21 @@ test('guest cannot update action item status', function () {
 
     $response->assertUnauthorized();
 });
+
+test('changing status away from completed via status endpoint clears completed_at', function () {
+    $this->item->update(['status' => \App\Support\Enums\ActionItemStatus::Completed, 'completed_at' => now()]);
+
+    $response = $this->actingAs($this->user)
+        ->patchJson(route('meetings.action-items.status', [$this->meeting, $this->item]), [
+            'status' => 'open',
+        ]);
+
+    $response->assertOk();
+    expect($response->json('completed_at'))->toBeNull();
+
+    $this->assertDatabaseHas('action_items', [
+        'id' => $this->item->id,
+        'status' => 'open',
+        'completed_at' => null,
+    ]);
+});

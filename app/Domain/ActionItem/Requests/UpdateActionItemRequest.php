@@ -24,7 +24,7 @@ class UpdateActionItemRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'priority' => ['sometimes', Rule::enum(ActionItemPriority::class)],
             'status' => ['sometimes', Rule::enum(ActionItemStatus::class)],
-            'assigned_to' => ['nullable', 'exists:users,id'],
+            'assigned_to' => ['nullable', Rule::exists('organization_user', 'user_id')->where('organization_id', $this->user()->current_organization_id)],
             'due_date' => ['nullable', 'date'],
         ];
     }

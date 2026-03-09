@@ -82,6 +82,8 @@ class ActionItemService
         $updateData = ['status' => $status];
         if ($status === ActionItemStatus::Completed) {
             $updateData['completed_at'] = now();
+        } elseif ($item->status === ActionItemStatus::Completed) {
+            $updateData['completed_at'] = null;
         }
 
         $item->update($updateData);

@@ -242,7 +242,7 @@
                                             </span>
                                         </template>
                                         <template x-if="!entry.status_changed">
-                                            <span> added a note</span>
+                                            <span x-text="(entry.field_changed === 'status' || !entry.field_changed) ? ' added a note' : ' updated ' + entry.field_changed.replace(/_/g, ' ')"></span>
                                         </template>
                                     </p>
                                     <p
