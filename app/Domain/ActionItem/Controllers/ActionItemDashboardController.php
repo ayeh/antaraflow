@@ -51,11 +51,14 @@ class ActionItemDashboardController extends Controller
             $selectedPriorities,
         );
 
+        $currentView = in_array($request->query('view'), ['table', 'kanban']) ? $request->query('view') : 'table';
+
         return view('action-items.dashboard', compact(
             'actionItems',
             'selectedStatuses',
             'selectedPriorities',
             'assigneeFilter',
+            'currentView',
         ));
     }
 }
