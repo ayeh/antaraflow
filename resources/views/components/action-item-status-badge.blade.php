@@ -86,7 +86,7 @@
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
         @click.outside="close()"
-        class="absolute left-0 top-full mt-1 z-50 w-56 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-lg p-2"
+        class="absolute left-0 top-full mt-1 z-50 w-64 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-lg p-2"
         style="display: none;"
     >
         {{-- Status options --}}
@@ -96,7 +96,7 @@
                 @click="save(option.value)"
                 class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700/50 text-left"
             >
-                <span :class="option.colorClass" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" x-text="option.label"></span>
+                <span :class="option.colorClass" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap" x-text="option.label"></span>
                 <svg x-show="option.value === selectedStatus" class="w-4 h-4 text-violet-500 ml-auto shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
