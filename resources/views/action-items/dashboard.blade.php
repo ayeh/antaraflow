@@ -91,12 +91,12 @@
                                 <tr
                                     class="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors"
                                     x-data="{
-                                        completed: {{ $item->status === \App\Support\Enums\ActionItemStatus::Completed ? 'true' : 'false' }},
+                                        completed: @js($item->status === \App\Support\Enums\ActionItemStatus::Completed),
                                         priorityLabel: @js($item->priority->label()),
                                         priorityColorClass: @js($item->priority->colorClass()),
                                         assigneeName: @js($item->assignedTo?->name ?? '—'),
                                         dueDateFormatted: @js($item->due_date?->format('M j, Y') ?? '—'),
-                                        dueDatePast: {{ $item->due_date?->isPast() && $item->status !== \App\Support\Enums\ActionItemStatus::Completed ? 'true' : 'false' }},
+                                        dueDatePast: @js($item->due_date?->isPast() && $item->status !== \App\Support\Enums\ActionItemStatus::Completed),
                                     }"
                                     :class="completed ? 'opacity-60' : ''"
                                     @action-item-updated.window="
