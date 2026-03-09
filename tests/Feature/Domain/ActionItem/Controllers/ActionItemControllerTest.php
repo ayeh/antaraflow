@@ -209,9 +209,9 @@ test('update returns json when requested with accept header', function () {
 
     $response->assertOk()
         ->assertJsonStructure([
-            'id', 'title', 'status', 'priority', 'priority_label',
-            'priority_color_class', 'due_date', 'due_date_formatted',
-            'assigned_to', 'assigned_to_name',
+            'id', 'title', 'status', 'status_label', 'status_color_class',
+            'priority', 'priority_label', 'priority_color_class',
+            'due_date', 'due_date_formatted', 'assigned_to', 'assigned_to_name',
         ]);
 
     expect($response->json('title'))->toBe('Updated Title')

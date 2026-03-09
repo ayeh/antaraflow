@@ -50,14 +50,14 @@ class ActionItemController extends Controller
             ->with('success', 'Action item created successfully.');
     }
 
-    public function show(MinutesOfMeeting $meeting, ActionItem $actionItem): \Illuminate\View\View|\Illuminate\Http\JsonResponse
+    public function show(\Illuminate\Http\Request $request, MinutesOfMeeting $meeting, ActionItem $actionItem): \Illuminate\View\View|\Illuminate\Http\JsonResponse
     {
         $this->authorize('view', $actionItem);
 
         $actionItem->load(['assignedTo', 'createdBy', 'histories.changedBy', 'carriedFrom', 'carriedTo']);
 
-        if (request()->wantsJson()) {
-            $users = User::where('current_organization_id', auth()->user()->current_organization_id)
+        if ($request->wantsJson()) {
+            $users = User::where('current_organization_id', $request->user()->current_organization_id)
                 ->orderBy('name')
                 ->get(['id', 'name']);
 
@@ -87,7 +87,7 @@ class ActionItemController extends Controller
                     'old_label' => \App\Support\Enums\ActionItemStatus::tryFrom($h->old_value)?->label() ?? $h->old_value,
                     'new_label' => \App\Support\Enums\ActionItemStatus::tryFrom($h->new_value)?->label() ?? $h->new_value,
                     'new_color_class' => \App\Support\Enums\ActionItemStatus::tryFrom($h->new_value)?->colorClass() ?? 'bg-gray-100 text-gray-600',
-                    'status_changed' => $h->old_value !== $h->new_value,
+                    'status_changed' => $h->field_changed === 'status' && $h->old_value !== $h->new_value,
                 ])->values(),
             ]);
         }
