@@ -2,6 +2,8 @@ import './bootstrap';
 import './sw-register';
 import './offline-store';
 import Alpine from 'alpinejs';
+import Sortable from 'sortablejs';
+window.Sortable = Sortable;
 import appState from './navigation';
 import audioRecorder from './audio-recorder';
 import meetingLive from './meeting-live';
