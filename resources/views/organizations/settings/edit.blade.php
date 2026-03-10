@@ -160,6 +160,7 @@
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Cost Analytics</h2>
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure hourly rates per role for meeting cost calculations.</p>
         <div class="border-t border-gray-200 dark:border-slate-700 mt-4 pt-4">
+            @php $hourlyRates = $organization->settings['hourly_rates'] ?? []; @endphp
             <form method="POST" action="{{ route('organizations.settings.update', $organization) }}" class="space-y-4">
                 @csrf
                 @method('PUT')
@@ -172,7 +173,7 @@
                         <label for="hourly_rate_admin" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Admin Rate ($/hr)</label>
                         <input type="number" name="settings[hourly_rates][admin]" id="hourly_rate_admin"
                             min="0" step="0.01"
-                            value="{{ old('settings.hourly_rates.admin', $organization->settings['hourly_rates']['admin'] ?? '') }}"
+                            value="{{ old('settings.hourly_rates.admin', $hourlyRates['admin'] ?? '') }}"
                             placeholder="e.g. 150"
                             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                         @error('settings.hourly_rates.admin')
@@ -184,7 +185,7 @@
                         <label for="hourly_rate_manager" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Manager Rate ($/hr)</label>
                         <input type="number" name="settings[hourly_rates][manager]" id="hourly_rate_manager"
                             min="0" step="0.01"
-                            value="{{ old('settings.hourly_rates.manager', $organization->settings['hourly_rates']['manager'] ?? '') }}"
+                            value="{{ old('settings.hourly_rates.manager', $hourlyRates['manager'] ?? '') }}"
                             placeholder="e.g. 100"
                             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                         @error('settings.hourly_rates.manager')
@@ -196,7 +197,7 @@
                         <label for="hourly_rate_member" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Member Rate ($/hr)</label>
                         <input type="number" name="settings[hourly_rates][member]" id="hourly_rate_member"
                             min="0" step="0.01"
-                            value="{{ old('settings.hourly_rates.member', $organization->settings['hourly_rates']['member'] ?? '') }}"
+                            value="{{ old('settings.hourly_rates.member', $hourlyRates['member'] ?? '') }}"
                             placeholder="e.g. 75"
                             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                         @error('settings.hourly_rates.member')
