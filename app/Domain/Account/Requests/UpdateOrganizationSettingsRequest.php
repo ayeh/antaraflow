@@ -13,6 +13,22 @@ class UpdateOrganizationSettingsRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $hourlyRates = $this->input('settings.hourly_rates', []);
+
+        if (is_array($hourlyRates)) {
+            $casted = [];
+            foreach ($hourlyRates as $role => $rate) {
+                $casted[$role] = is_numeric($rate) ? (float) $rate : $rate;
+            }
+
+            $this->merge([
+                'settings' => array_merge($this->input('settings', []), ['hourly_rates' => $casted]),
+            ]);
+        }
+    }
+
     /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
@@ -23,6 +39,10 @@ class UpdateOrganizationSettingsRequest extends FormRequest
             'language' => ['required', 'string', 'max:10'],
             'teams_webhook_url' => ['nullable', 'url', 'max:2048'],
             'settings' => ['nullable', 'array'],
+            'settings.hourly_rates' => ['nullable', 'array'],
+            'settings.hourly_rates.admin' => ['nullable', 'numeric', 'min:0'],
+            'settings.hourly_rates.manager' => ['nullable', 'numeric', 'min:0'],
+            'settings.hourly_rates.member' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 

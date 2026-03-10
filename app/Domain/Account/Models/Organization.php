@@ -67,6 +67,17 @@ class Organization extends Model
         return $this->hasOne(ResellerSetting::class);
     }
 
+    protected function getJsonCastFlags($key): int
+    {
+        $flags = parent::getJsonCastFlags($key);
+
+        if ($key === 'settings') {
+            $flags |= JSON_PRESERVE_ZERO_FRACTION;
+        }
+
+        return $flags;
+    }
+
     public function isReseller(): bool
     {
         return (bool) $this->resellerSetting?->is_reseller;

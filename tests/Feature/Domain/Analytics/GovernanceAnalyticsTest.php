@@ -208,3 +208,49 @@ test('csv export returns downloadable file', function () {
     $response->assertSuccessful();
     $response->assertDownload();
 });
+
+test('hourly rates are validated when saving org settings', function () {
+    $org = $this->org;
+
+    $this->actingAs($this->user)
+        ->put(route('organizations.settings.update', $org), [
+            'name' => $org->name,
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'settings' => [
+                'hourly_rates' => [
+                    'admin' => -10,
+                    'manager' => 'not-a-number',
+                    'member' => null,
+                ],
+            ],
+        ])
+        ->assertSessionHasErrors([
+            'settings.hourly_rates.admin',
+            'settings.hourly_rates.manager',
+        ]);
+});
+
+test('valid hourly rates are accepted', function () {
+    $org = $this->org;
+
+    $this->actingAs($this->user)
+        ->put(route('organizations.settings.update', $org), [
+            'name' => $org->name,
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'settings' => [
+                'hourly_rates' => [
+                    'admin' => 150,
+                    'manager' => 100,
+                    'member' => 75,
+                ],
+            ],
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    expect($org->fresh()->settings['hourly_rates']['admin'])->toBe(150.0);
+    expect($org->fresh()->settings['hourly_rates']['manager'])->toBe(100.0);
+    expect($org->fresh()->settings['hourly_rates']['member'])->toBe(75.0);
+});
