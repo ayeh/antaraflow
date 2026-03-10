@@ -343,3 +343,36 @@ test('cost falls back to $50/hr default when org has no hourly rates configured'
     // 1 hour * $50 (default) * 2 attendees = $100
     expect((float) $response->json('cost_estimate.total_cost'))->toBe(100.0);
 });
+
+test('analytics data endpoint uses org configured rates', function () {
+    $this->org->update([
+        'settings' => [
+            'hourly_rates' => ['admin' => 300.0, 'manager' => 200.0, 'member' => 100.0],
+        ],
+    ]);
+
+    // $this->user is attached as Owner in beforeEach — owner maps to admin rate
+    // Confirm the role is 'owner'
+    $this->org->members()->syncWithoutDetaching([$this->user->id => ['role' => 'owner']]);
+
+    $meeting = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'duration_minutes' => 60,
+        'meeting_date' => now()->subDays(3),
+    ]);
+
+    MomAttendee::factory()->create([
+        'minutes_of_meeting_id' => $meeting->id,
+        'user_id' => $this->user->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('analytics.governance.data', [
+        'start_date' => now()->subMonth()->toDateString(),
+        'end_date' => now()->toDateString(),
+    ]));
+
+    $response->assertSuccessful();
+    // owner → admin → 300/hr * 1 hour = $300
+    expect((float) $response->json('cost_estimate.total_cost'))->toBe(300.0);
+});
