@@ -93,12 +93,13 @@ class OrganizationService
     {
         $oldSettings = $organization->settings;
 
-        $organization->update(['settings' => $settings]);
+        $merged = array_replace_recursive($organization->settings ?? [], $settings);
+        $organization->update(['settings' => $merged]);
 
         $this->auditService->log('settings_updated', $organization, [
             'settings' => $oldSettings,
         ], [
-            'settings' => $settings,
+            'settings' => $merged,
         ]);
 
         return $organization->fresh();

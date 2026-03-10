@@ -253,7 +253,7 @@
         </div>
     </div>
 
-    {{-- Section 4: Subscription --}}
+    {{-- Section 5: Subscription --}}
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Subscription</h2>
         <div class="border-t border-gray-200 dark:border-slate-700 mt-4 pt-4">

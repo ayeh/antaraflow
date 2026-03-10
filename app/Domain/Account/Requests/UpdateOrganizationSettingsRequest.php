@@ -20,7 +20,7 @@ class UpdateOrganizationSettingsRequest extends FormRequest
         if (is_array($hourlyRates)) {
             $casted = [];
             foreach ($hourlyRates as $role => $rate) {
-                $casted[$role] = is_numeric($rate) ? (float) $rate : $rate;
+                $casted[$role] = is_numeric($rate) ? (float) $rate : null;
             }
 
             $this->merge([

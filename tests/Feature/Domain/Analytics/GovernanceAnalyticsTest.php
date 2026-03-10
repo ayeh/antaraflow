@@ -220,7 +220,7 @@ test('hourly rates are validated when saving org settings', function () {
             'settings' => [
                 'hourly_rates' => [
                     'admin' => -10,
-                    'manager' => 'not-a-number',
+                    'manager' => -5,
                     'member' => null,
                 ],
             ],
