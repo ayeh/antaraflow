@@ -31,7 +31,7 @@ class GovernanceAnalyticsController extends Controller
 
         $org = auth()->user()->currentOrganization;
         $orgId = (int) $org->id;
-        $hourlyRates = (array) ($org->settings['hourly_rates'] ?? []);
+        $hourlyRates = $org->settings['hourly_rates'] ?? [];
         $startDate = $request->date('start_date') ?? now()->subMonths(6)->startOfMonth();
         $endDate = $request->date('end_date') ?? now()->endOfMonth();
 
@@ -47,7 +47,7 @@ class GovernanceAnalyticsController extends Controller
 
         $org = auth()->user()->currentOrganization;
         $orgId = (int) $org->id;
-        $hourlyRates = (array) ($org->settings['hourly_rates'] ?? []);
+        $hourlyRates = $org->settings['hourly_rates'] ?? [];
         $startDate = $request->date('start_date') ?? now()->subMonths(6)->startOfMonth();
         $endDate = $request->date('end_date') ?? now()->endOfMonth();
 

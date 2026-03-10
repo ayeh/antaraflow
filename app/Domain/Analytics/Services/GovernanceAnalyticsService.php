@@ -40,11 +40,14 @@ class GovernanceAnalyticsService
         $totalCost = 0.0;
 
         // Pre-load org member roles once for all attendee user_ids
-        $userIds = $meetings->flatMap(fn ($m) => $m->attendees->pluck('user_id'))->filter()->unique()->values();
-        $roleMap = DB::table('organization_user')
-            ->where('organization_id', $organizationId)
-            ->whereIn('user_id', $userIds)
-            ->pluck('role', 'user_id');
+        $roleMap = collect();
+        if (! $useDefault) {
+            $userIds = $meetings->flatMap(fn ($m) => $m->attendees->pluck('user_id'))->filter()->unique()->values();
+            $roleMap = DB::table('organization_user')
+                ->where('organization_id', $organizationId)
+                ->whereIn('user_id', $userIds)
+                ->pluck('role', 'user_id');
+        }
 
         foreach ($meetings as $meeting) {
             $hours = $meeting->duration_minutes / 60;
