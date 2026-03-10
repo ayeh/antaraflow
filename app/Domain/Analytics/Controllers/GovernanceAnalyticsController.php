@@ -29,11 +29,13 @@ class GovernanceAnalyticsController extends Controller
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
         ]);
 
-        $orgId = (int) auth()->user()->current_organization_id;
+        $org = auth()->user()->currentOrganization;
+        $orgId = (int) $org->id;
+        $hourlyRates = (array) ($org->settings['hourly_rates'] ?? []);
         $startDate = $request->date('start_date') ?? now()->subMonths(6)->startOfMonth();
         $endDate = $request->date('end_date') ?? now()->endOfMonth();
 
-        return response()->json($this->governanceService->getAllMetrics($orgId, $startDate, $endDate));
+        return response()->json($this->governanceService->getAllMetrics($orgId, $startDate, $endDate, $hourlyRates));
     }
 
     public function export(Request $request): StreamedResponse
@@ -43,11 +45,13 @@ class GovernanceAnalyticsController extends Controller
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
         ]);
 
-        $orgId = (int) auth()->user()->current_organization_id;
+        $org = auth()->user()->currentOrganization;
+        $orgId = (int) $org->id;
+        $hourlyRates = (array) ($org->settings['hourly_rates'] ?? []);
         $startDate = $request->date('start_date') ?? now()->subMonths(6)->startOfMonth();
         $endDate = $request->date('end_date') ?? now()->endOfMonth();
 
-        $metrics = $this->governanceService->getAllMetrics($orgId, $startDate, $endDate);
+        $metrics = $this->governanceService->getAllMetrics($orgId, $startDate, $endDate, $hourlyRates);
 
         $filename = 'governance-analytics-'.now()->format('Y-m-d').'.csv';
 

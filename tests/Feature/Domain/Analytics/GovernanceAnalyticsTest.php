@@ -254,3 +254,92 @@ test('valid hourly rates are accepted', function () {
     expect($org->fresh()->settings['hourly_rates']['manager'])->toBe(100.0);
     expect($org->fresh()->settings['hourly_rates']['member'])->toBe(75.0);
 });
+
+test('cost uses admin rate for admin attendees when org rates are configured', function () {
+    // Set org rates
+    $this->org->update([
+        'settings' => [
+            'hourly_rates' => ['admin' => 200.0, 'manager' => 100.0, 'member' => 50.0],
+        ],
+    ]);
+
+    $adminUser = User::factory()->create(['current_organization_id' => $this->org->id]);
+    $this->org->members()->attach($adminUser, ['role' => 'admin']);
+
+    $meeting = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'duration_minutes' => 60,
+        'meeting_date' => now()->subDays(5),
+    ]);
+
+    // 1 admin attendee linked to $adminUser
+    MomAttendee::factory()->create([
+        'minutes_of_meeting_id' => $meeting->id,
+        'user_id' => $adminUser->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('analytics.governance.data', [
+        'start_date' => now()->subMonth()->toDateString(),
+        'end_date' => now()->toDateString(),
+    ]));
+
+    $response->assertSuccessful();
+    // 1 hour * $200 admin rate * 1 attendee = $200
+    expect((float) $response->json('cost_estimate.total_cost'))->toBe(200.0);
+});
+
+test('cost falls back to member rate for external attendees without user_id', function () {
+    $this->org->update([
+        'settings' => [
+            'hourly_rates' => ['admin' => 200.0, 'manager' => 100.0, 'member' => 50.0],
+        ],
+    ]);
+
+    $meeting = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'duration_minutes' => 60,
+        'meeting_date' => now()->subDays(5),
+    ]);
+
+    // External attendee (no user_id)
+    MomAttendee::factory()->create([
+        'minutes_of_meeting_id' => $meeting->id,
+        'user_id' => null,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('analytics.governance.data', [
+        'start_date' => now()->subMonth()->toDateString(),
+        'end_date' => now()->toDateString(),
+    ]));
+
+    $response->assertSuccessful();
+    // 1 hour * $50 member rate (fallback) * 1 attendee = $50
+    expect((float) $response->json('cost_estimate.total_cost'))->toBe(50.0);
+});
+
+test('cost falls back to $50/hr default when org has no hourly rates configured', function () {
+    // org->settings has no 'hourly_rates' key
+
+    $meeting = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'duration_minutes' => 60,
+        'meeting_date' => now()->subDays(5),
+    ]);
+
+    MomAttendee::factory()->count(2)->create([
+        'minutes_of_meeting_id' => $meeting->id,
+        'user_id' => $this->user->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('analytics.governance.data', [
+        'start_date' => now()->subMonth()->toDateString(),
+        'end_date' => now()->toDateString(),
+    ]));
+
+    $response->assertSuccessful();
+    // 1 hour * $50 (default) * 2 attendees = $100
+    expect((float) $response->json('cost_estimate.total_cost'))->toBe(100.0);
+});

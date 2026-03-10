@@ -11,10 +11,12 @@ use App\Support\Enums\ActionItemStatus;
 use App\Support\Enums\MeetingStatus;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class GovernanceAnalyticsService
 {
     /**
+     * @param  array<string, float>  $hourlyRates  Keys: admin, manager, member. Empty = use $50 default.
      * @return array{
      *   total_cost: float,
      *   avg_cost_per_meeting: float,
@@ -25,18 +27,47 @@ class GovernanceAnalyticsService
         int $organizationId,
         ?Carbon $startDate = null,
         ?Carbon $endDate = null,
-        float $hourlyRate = 50.0,
+        array $hourlyRates = [],
     ): array {
+        $defaultRate = 50.0;
+        $useDefault = empty($hourlyRates);
+
         $meetings = $this->baseMeetingQuery($organizationId, $startDate, $endDate)
             ->whereNotNull('duration_minutes')
-            ->withCount('attendees')
+            ->with(['attendees' => fn ($q) => $q->select('id', 'minutes_of_meeting_id', 'user_id')])
             ->get(['id', 'duration_minutes']);
 
         $totalCost = 0.0;
 
+        // Pre-load org member roles once for all attendee user_ids
+        $userIds = $meetings->flatMap(fn ($m) => $m->attendees->pluck('user_id'))->filter()->unique()->values();
+        $roleMap = DB::table('organization_user')
+            ->where('organization_id', $organizationId)
+            ->whereIn('user_id', $userIds)
+            ->pluck('role', 'user_id');
+
         foreach ($meetings as $meeting) {
             $hours = $meeting->duration_minutes / 60;
-            $totalCost += $hours * $hourlyRate * $meeting->attendees_count;
+
+            foreach ($meeting->attendees as $attendee) {
+                if ($useDefault) {
+                    $totalCost += $hours * $defaultRate;
+
+                    continue;
+                }
+
+                if ($attendee->user_id === null) {
+                    // External attendee → member rate fallback
+                    $rate = $hourlyRates['member'] ?? $defaultRate;
+                } else {
+                    $orgRole = $roleMap[$attendee->user_id] ?? 'member';
+                    // Owner maps to admin rate
+                    $rateKey = $orgRole === 'owner' ? 'admin' : $orgRole;
+                    $rate = $hourlyRates[$rateKey] ?? $hourlyRates['member'] ?? $defaultRate;
+                }
+
+                $totalCost += $hours * $rate;
+            }
         }
 
         $meetingCount = $meetings->count();
@@ -268,16 +299,17 @@ class GovernanceAnalyticsService
     }
 
     /**
+     * @param  array<string, float>  $hourlyRates  Keys: admin, manager, member. Empty = use $50 default.
      * @return array<string, array<string, mixed>>
      */
     public function getAllMetrics(
         int $organizationId,
         ?Carbon $startDate = null,
         ?Carbon $endDate = null,
-        float $hourlyRate = 50.0,
+        array $hourlyRates = [],
     ): array {
         return [
-            'cost_estimate' => $this->getMeetingCostEstimate($organizationId, $startDate, $endDate, $hourlyRate),
+            'cost_estimate' => $this->getMeetingCostEstimate($organizationId, $startDate, $endDate, $hourlyRates),
             'attendance_trends' => $this->getAttendanceRateTrends($organizationId, $startDate, $endDate),
             'action_item_trends' => $this->getActionItemCompletionTrends($organizationId, $startDate, $endDate),
             'meeting_type_distribution' => $this->getMeetingTypeDistribution($organizationId, $startDate, $endDate),
