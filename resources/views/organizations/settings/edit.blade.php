@@ -155,6 +155,63 @@
         </div>
     </div>
 
+    {{-- Section: Cost Analytics --}}
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Cost Analytics</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure hourly rates per role for meeting cost calculations.</p>
+        <div class="border-t border-gray-200 dark:border-slate-700 mt-4 pt-4">
+            <form method="POST" action="{{ route('organizations.settings.update', $organization) }}" class="space-y-4">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="name" value="{{ $organization->name }}">
+                <input type="hidden" name="timezone" value="{{ $organization->timezone ?? 'UTC' }}">
+                <input type="hidden" name="language" value="{{ $organization->language ?? 'en' }}">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="hourly_rate_admin" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Admin Rate ($/hr)</label>
+                        <input type="number" name="settings[hourly_rates][admin]" id="hourly_rate_admin"
+                            min="0" step="0.01"
+                            value="{{ old('settings.hourly_rates.admin', $organization->settings['hourly_rates']['admin'] ?? '') }}"
+                            placeholder="e.g. 150"
+                            class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        @error('settings.hourly_rates.admin')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="hourly_rate_manager" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Manager Rate ($/hr)</label>
+                        <input type="number" name="settings[hourly_rates][manager]" id="hourly_rate_manager"
+                            min="0" step="0.01"
+                            value="{{ old('settings.hourly_rates.manager', $organization->settings['hourly_rates']['manager'] ?? '') }}"
+                            placeholder="e.g. 100"
+                            class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        @error('settings.hourly_rates.manager')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="hourly_rate_member" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Member Rate ($/hr)</label>
+                        <input type="number" name="settings[hourly_rates][member]" id="hourly_rate_member"
+                            min="0" step="0.01"
+                            value="{{ old('settings.hourly_rates.member', $organization->settings['hourly_rates']['member'] ?? '') }}"
+                            placeholder="e.g. 75"
+                            class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        @error('settings.hourly_rates.member')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end pt-4 border-t border-gray-200 dark:border-slate-700">
+                    <button type="submit" class="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">Save Rates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Section 4: Team Members --}}
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
         <div class="flex items-center justify-between">
