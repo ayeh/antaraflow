@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>antaraFlow Design System v1.0</title>
+    <title>antaraFlow Design System</title>
+    <meta name="description" content="Complete interactive design system for antaraFlow — foundations, components, patterns, and tokens.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -182,6 +183,40 @@
 
     <!-- Main Content Area -->
     <main class="ml-60 flex-1 px-12 py-10 max-w-5xl mt-14">
+        <!-- ===== HERO INTRO ===== -->
+        <div class="mb-16 pb-12 border-b border-gray-200 dark:border-slate-700">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">antaraFlow Design System</h1>
+              <p class="text-sm text-gray-500 dark:text-gray-400">v1.0 · March 2026 · Publish-ready</p>
+            </div>
+          </div>
+          <p class="text-base text-gray-600 dark:text-gray-300 max-w-2xl leading-relaxed mb-6">
+            A complete, interactive design system for antaraFlow — covering foundations, 30+ components, patterns, design tokens, and developer guidance. Built with Tailwind CSS and Instrument Sans.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <div class="flex items-center gap-2 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-xl px-4 py-2.5">
+              <span class="text-violet-600 dark:text-violet-400 font-bold text-lg">5</span>
+              <span class="text-xs text-violet-700 dark:text-violet-300 font-medium">Foundations</span>
+            </div>
+            <div class="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl px-4 py-2.5">
+              <span class="text-blue-600 dark:text-blue-400 font-bold text-lg">30+</span>
+              <span class="text-xs text-blue-700 dark:text-blue-300 font-medium">Components</span>
+            </div>
+            <div class="flex items-center gap-2 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-xl px-4 py-2.5">
+              <span class="text-teal-600 dark:text-teal-400 font-bold text-lg">5</span>
+              <span class="text-xs text-teal-700 dark:text-teal-300 font-medium">Patterns</span>
+            </div>
+            <div class="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-2.5">
+              <span class="text-amber-600 dark:text-amber-400 font-bold text-lg">4</span>
+              <span class="text-xs text-amber-700 dark:text-amber-300 font-medium">Token categories</span>
+            </div>
+          </div>
+        </div>
+
         <!-- ===== COLORS ===== -->
         <section id="colors" class="mb-20">
             <div class="mb-8">
@@ -746,6 +781,13 @@
                 </div>
             </div>
         </section>
+
+        <!-- ===== COMPONENTS DIVIDER ===== -->
+        <div class="flex items-center gap-4 mb-12 mt-4">
+          <div class="h-px flex-1 bg-gray-200 dark:bg-slate-700"></div>
+          <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Components</span>
+          <div class="h-px flex-1 bg-gray-200 dark:bg-slate-700"></div>
+        </div>
 
         <!-- ==================== TASK 5: BUTTON ==================== -->
         <section id="buttons" class="mb-20">
@@ -3202,6 +3244,13 @@
           </div>
         </section>
 
+        <!-- ===== SYSTEM DIVIDER ===== -->
+        <div class="flex items-center gap-4 mb-12 mt-4">
+          <div class="h-px flex-1 bg-gray-200 dark:bg-slate-700"></div>
+          <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest">System</span>
+          <div class="h-px flex-1 bg-gray-200 dark:bg-slate-700"></div>
+        </div>
+
         <section id="patterns" class="mb-20">
           <div class="mb-8">
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Patterns</h2>
@@ -3823,6 +3872,16 @@ localStorage.setItem('ds-dark', document.documentElement.classList.contains('dar
           </div>
         </section>
 
+        <!-- ===== FOOTER ===== -->
+        <div class="border-t border-gray-200 dark:border-slate-700 pt-12 pb-8 mt-8 text-center">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center mx-auto mb-4 shadow-md">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+          </div>
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">antaraFlow Design System</h3>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">v1.0 · March 2026</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500">Built with Tailwind CSS v4 · Instrument Sans · Heroicons</p>
+        </div>
+
     </main>
 
     <!-- Command Palette Overlay -->
@@ -4054,6 +4113,11 @@ localStorage.setItem('ds-dark', document.documentElement.classList.contains('dar
             sections.forEach(function (section) {
                 observer.observe(section);
             });
+
+            // Set first link active on load as fallback
+            if (sidebarLinks.length > 0) {
+                sidebarLinks[0].classList.add('active');
+            }
         });
     </script>
 
