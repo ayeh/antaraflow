@@ -3202,6 +3202,627 @@
           </div>
         </section>
 
+        <section id="patterns" class="mb-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Patterns</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Repeatable UI solutions for common application scenarios in antaraFlow.</p>
+          </div>
+          <div class="space-y-8">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Form Layout</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Stacked fields, 2-column grid, and section dividers</p>
+              </div>
+              <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Stacked -->
+                <div>
+                  <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Stacked (default)</p>
+                  <div class="space-y-3">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Meeting title</label>
+                      <input type="text" placeholder="Q1 Planning..." class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Date & time</label>
+                      <input type="datetime-local" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                      <input type="text" placeholder="Conference room or URL..." class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                    </div>
+                  </div>
+                </div>
+                <!-- 2-col grid -->
+                <div>
+                  <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">2-column grid</p>
+                  <div class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">First name</label>
+                        <input type="text" placeholder="Ahmad" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Last name</label>
+                        <input type="text" placeholder="Yeh" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                      <input type="email" placeholder="ahmad@antaraflow.com" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                    </div>
+                    <div class="border-t border-gray-100 dark:border-slate-700 pt-3">
+                      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Section divider</p>
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                        <input type="text" placeholder="Engineering lead..." class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Page Layout</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Full sidebar + content, with optional subheader strip</p>
+              </div>
+              <div class="p-6">
+                <!-- Mini layout mockup -->
+                <div class="border border-gray-200 dark:border-slate-600 rounded-xl overflow-hidden text-xs font-mono">
+                  <div class="bg-slate-800 text-gray-300 px-3 py-1.5 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                    <span class="ml-2 text-gray-500">Page structure</span>
+                  </div>
+                  <div class="grid" style="grid-template-columns:160px 1fr;grid-template-rows:40px 1fr;height:180px">
+                    <!-- Header -->
+                    <div class="col-span-2 bg-white dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600 flex items-center px-4 gap-3">
+                      <div class="w-4 h-4 rounded bg-violet-500"></div>
+                      <span class="text-xs text-gray-600 dark:text-gray-300 font-medium">Header (h-14, fixed, z-50)</span>
+                    </div>
+                    <!-- Sidebar -->
+                    <div class="bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-3">
+                      <div class="space-y-1">
+                        <div class="h-2.5 bg-violet-200 dark:bg-violet-900/50 rounded w-full"></div>
+                        <div class="h-2.5 bg-gray-200 dark:bg-slate-600 rounded w-4/5"></div>
+                        <div class="h-2.5 bg-gray-200 dark:bg-slate-600 rounded w-full"></div>
+                        <div class="h-2.5 bg-gray-200 dark:bg-slate-600 rounded w-3/4"></div>
+                        <div class="h-2.5 bg-gray-200 dark:bg-slate-600 rounded w-full"></div>
+                      </div>
+                      <p class="text-[9px] text-gray-400 mt-2">Sidebar (w-60)</p>
+                    </div>
+                    <!-- Content -->
+                    <div class="bg-white dark:bg-slate-900 p-4">
+                      <div class="space-y-2">
+                        <div class="h-3 bg-gray-200 dark:bg-slate-700 rounded w-1/2"></div>
+                        <div class="h-2 bg-gray-100 dark:bg-slate-700 rounded w-full"></div>
+                        <div class="grid grid-cols-3 gap-2 mt-3">
+                          <div class="h-10 bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800 rounded-lg"></div>
+                          <div class="h-10 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg"></div>
+                          <div class="h-10 bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800 rounded-lg"></div>
+                        </div>
+                      </div>
+                      <p class="text-[9px] text-gray-400 mt-2">Content (ml-60, max-w-5xl, px-12 py-10)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Meeting Workflow</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Status flow: Draft → In Progress → Finalized → Approved</p>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center flex-wrap gap-0">
+                  <!-- Draft -->
+                  <div class="flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-700 border-2 border-gray-300 dark:border-slate-500 flex items-center justify-center">
+                      <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Draft</span>
+                  </div>
+                  <div class="h-0.5 w-8 bg-gray-300 dark:bg-slate-600 mx-1"></div>
+                  <!-- In Progress -->
+                  <div class="flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-400 dark:border-blue-500 flex items-center justify-center">
+                      <svg class="w-5 h-5 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.867V15.133a1 1 0 01-1.447.902L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    </div>
+                    <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">In Progress</span>
+                  </div>
+                  <div class="h-0.5 w-8 bg-gray-300 dark:bg-slate-600 mx-1"></div>
+                  <!-- Finalized -->
+                  <div class="flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-900/30 border-2 border-green-400 dark:border-green-500 flex items-center justify-center">
+                      <svg class="w-5 h-5 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <span class="text-xs font-semibold text-green-600 dark:text-green-400">Finalized</span>
+                  </div>
+                  <div class="h-0.5 w-8 bg-gray-300 dark:bg-slate-600 mx-1"></div>
+                  <!-- Approved -->
+                  <div class="flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 border-2 border-amber-400 dark:border-amber-500 flex items-center justify-center">
+                      <svg class="w-5 h-5 text-amber-500 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                    </div>
+                    <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">Approved</span>
+                  </div>
+                </div>
+                <div class="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-gray-500 dark:text-gray-400">
+                  <div class="bg-gray-50 dark:bg-slate-700 rounded-lg p-3"><strong class="text-gray-700 dark:text-gray-300 block mb-1">Draft</strong>Created, attendees invited, agenda set. Editable.</div>
+                  <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3"><strong class="text-blue-700 dark:text-blue-400 block mb-1">In Progress</strong>Meeting running, AI transcribing. Read-only to attendees.</div>
+                  <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3"><strong class="text-green-700 dark:text-green-400 block mb-1">Finalized</strong>AI summary done, action items extracted. Owner can approve.</div>
+                  <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3"><strong class="text-amber-700 dark:text-amber-400 block mb-1">Approved</strong>Locked. Shared with stakeholders. Immutable record.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Loading & Empty State Pattern</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Skeleton-first loading, then real content or empty state</p>
+              </div>
+              <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <!-- Step 1: Loading -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">① Loading (skeleton)</p>
+                    <div class="border border-gray-200 dark:border-slate-600 rounded-xl p-4 space-y-3">
+                      <div class="flex items-center gap-3">
+                        <div class="skeleton w-9 h-9 rounded-full shrink-0"></div>
+                        <div class="space-y-2 flex-1"><div class="skeleton h-3 rounded w-3/4"></div><div class="skeleton h-2.5 rounded w-1/2"></div></div>
+                      </div>
+                      <div class="skeleton h-2.5 rounded w-full"></div>
+                      <div class="skeleton h-2.5 rounded w-4/5"></div>
+                      <div class="skeleton h-7 rounded-lg w-1/2 mt-1"></div>
+                    </div>
+                  </div>
+                  <!-- Step 2: Content loaded -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">② Content loaded</p>
+                    <div class="border border-gray-200 dark:border-slate-600 rounded-xl p-4 space-y-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-violet-500 flex items-center justify-center text-white text-xs font-semibold shrink-0">AY</div>
+                        <div><p class="text-sm font-medium text-gray-900 dark:text-white">Ahmad Yeh</p><p class="text-xs text-gray-400">Admin</p></div>
+                      </div>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Q1 Planning Session · 2 hours ago</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">3 action items · 7 attendees</p>
+                      <button class="text-xs text-violet-600 dark:text-violet-400 font-medium hover:underline mt-1" onclick="return false">View meeting →</button>
+                    </div>
+                  </div>
+                  <!-- Step 3: Empty -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">③ Empty state</p>
+                    <div class="border border-dashed border-gray-200 dark:border-slate-600 rounded-xl p-4 flex flex-col items-center justify-center text-center h-[calc(100%-28px)]">
+                      <svg class="w-8 h-8 text-gray-300 dark:text-slate-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">No meetings found</p>
+                      <button class="text-xs bg-violet-600 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-violet-700 transition-colors" onclick="return false">New Meeting</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Responsive Behavior</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">How layout adapts across breakpoints</p>
+              </div>
+              <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <!-- Mobile -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Mobile (&lt;768px)</p>
+                    <div class="border border-gray-200 dark:border-slate-600 rounded-xl overflow-hidden">
+                      <div class="bg-gray-50 dark:bg-slate-700 h-5 flex items-center px-3"><div class="text-[9px] text-gray-400">Header</div></div>
+                      <div class="bg-white dark:bg-slate-800 p-3 space-y-1.5 min-h-[80px]">
+                        <div class="h-2.5 bg-gray-100 dark:bg-slate-700 rounded w-full"></div>
+                        <div class="h-2.5 bg-gray-100 dark:bg-slate-700 rounded w-full"></div>
+                        <div class="h-2.5 bg-gray-100 dark:bg-slate-700 rounded w-3/4"></div>
+                      </div>
+                      <div class="bg-gray-50 dark:bg-slate-700 h-8 flex items-center justify-around px-3">
+                        <div class="w-4 h-4 bg-violet-500 rounded-full"></div>
+                        <div class="w-4 h-4 bg-gray-300 dark:bg-slate-600 rounded-full"></div>
+                        <div class="w-4 h-4 bg-gray-300 dark:bg-slate-600 rounded-full"></div>
+                        <div class="w-4 h-4 bg-gray-300 dark:bg-slate-600 rounded-full"></div>
+                      </div>
+                    </div>
+                    <ul class="text-xs text-gray-500 dark:text-gray-400 mt-2 space-y-1 list-disc list-inside">
+                      <li>Bottom nav replaces sidebar</li>
+                      <li>Single column layout</li>
+                      <li>FAB for primary action</li>
+                    </ul>
+                  </div>
+                  <!-- Tablet -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Tablet (768–1024px)</p>
+                    <div class="border border-gray-200 dark:border-slate-600 rounded-xl overflow-hidden">
+                      <div class="bg-gray-50 dark:bg-slate-700 h-5 flex items-center px-3 col-span-2"><div class="text-[9px] text-gray-400">Header</div></div>
+                      <div class="grid" style="grid-template-columns:50px 1fr">
+                        <div class="bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-1.5 space-y-2 min-h-[80px]">
+                          <div class="w-5 h-5 bg-violet-200 dark:bg-violet-900/50 rounded mx-auto"></div>
+                          <div class="w-5 h-5 bg-gray-200 dark:bg-slate-600 rounded mx-auto"></div>
+                          <div class="w-5 h-5 bg-gray-200 dark:bg-slate-600 rounded mx-auto"></div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-2 space-y-1.5">
+                          <div class="h-2.5 bg-gray-100 dark:bg-slate-700 rounded w-full"></div>
+                          <div class="h-2.5 bg-gray-100 dark:bg-slate-700 rounded w-4/5"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <ul class="text-xs text-gray-500 dark:text-gray-400 mt-2 space-y-1 list-disc list-inside">
+                      <li>Icon-only rail sidebar</li>
+                      <li>2-column content grid</li>
+                      <li>Tooltips on sidebar icons</li>
+                    </ul>
+                  </div>
+                  <!-- Desktop -->
+                  <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Desktop (1024px+)</p>
+                    <div class="border border-gray-200 dark:border-slate-600 rounded-xl overflow-hidden">
+                      <div class="bg-gray-50 dark:bg-slate-700 h-5 flex items-center px-3"><div class="text-[9px] text-gray-400">Header</div></div>
+                      <div class="grid" style="grid-template-columns:80px 1fr">
+                        <div class="bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 p-2 space-y-1.5 min-h-[80px]">
+                          <div class="h-2 bg-violet-200 dark:bg-violet-900/50 rounded w-full"></div>
+                          <div class="h-2 bg-gray-200 dark:bg-slate-600 rounded w-full"></div>
+                          <div class="h-2 bg-gray-200 dark:bg-slate-600 rounded w-full"></div>
+                          <div class="h-2 bg-gray-200 dark:bg-slate-600 rounded w-4/5"></div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-2 space-y-1.5">
+                          <div class="h-2.5 bg-gray-100 dark:bg-slate-700 rounded w-full"></div>
+                          <div class="grid grid-cols-3 gap-1 mt-1">
+                            <div class="h-7 bg-violet-50 dark:bg-violet-900/20 rounded"></div>
+                            <div class="h-7 bg-blue-50 dark:bg-blue-900/20 rounded"></div>
+                            <div class="h-7 bg-teal-50 dark:bg-teal-900/20 rounded"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <ul class="text-xs text-gray-500 dark:text-gray-400 mt-2 space-y-1 list-disc list-inside">
+                      <li>Full w-60 sidebar with labels</li>
+                      <li>12-column content grid</li>
+                      <li>Sidebar always visible</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="tokens" class="mb-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Design Tokens</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Single source of truth for all design decisions. Compatible with Style Dictionary JSON format.</p>
+          </div>
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+            <!-- Tab bar -->
+            <div class="flex border-b border-gray-200 dark:border-slate-700 overflow-x-auto">
+              <button onclick="showTokenTab('colors',this)" class="token-tab-btn px-5 py-3 text-sm font-medium text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400 -mb-px whitespace-nowrap">Colors</button>
+              <button onclick="showTokenTab('typography',this)" class="token-tab-btn px-5 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent whitespace-nowrap">Typography</button>
+              <button onclick="showTokenTab('spacing',this)" class="token-tab-btn px-5 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent whitespace-nowrap">Spacing</button>
+              <button onclick="showTokenTab('shadows',this)" class="token-tab-btn px-5 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent whitespace-nowrap">Shadows</button>
+            </div>
+            <!-- Token panels -->
+            <div id="token-panel-colors" class="token-panel">
+              <div class="code-block relative bg-slate-900 p-5">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre class="text-xs text-slate-300 font-mono leading-relaxed overflow-auto max-h-96">{
+  "color": {
+    "primary": {
+      "50":  { "value": "#F5F3FF" },
+      "100": { "value": "#EDE9FE" },
+      "200": { "value": "#DDD6FE" },
+      "300": { "value": "#C4B5FD" },
+      "400": { "value": "#A78BFA" },
+      "500": { "value": "#8B5CF6" },
+      "600": { "value": "#7C3AED" },
+      "700": { "value": "#6D28D9" },
+      "800": { "value": "#5B21B6" },
+      "900": { "value": "#4C1D95" }
+    },
+    "secondary": {
+      "500": { "value": "#3B82F6" },
+      "600": { "value": "#2563EB" }
+    },
+    "accent": {
+      "500": { "value": "#2DD4BF" },
+      "600": { "value": "#0D9488" }
+    },
+    "semantic": {
+      "success": { "value": "#16A34A" },
+      "warning": { "value": "#D97706" },
+      "danger":  { "value": "#DC2626" },
+      "info":    { "value": "#2563EB" }
+    }
+  }
+}</pre>
+              </div>
+            </div>
+            <div id="token-panel-typography" class="token-panel hidden">
+              <div class="code-block relative bg-slate-900 p-5">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre class="text-xs text-slate-300 font-mono leading-relaxed overflow-auto max-h-96">{
+  "typography": {
+    "fontFamily": {
+      "base": { "value": "'Instrument Sans', ui-sans-serif, system-ui, sans-serif" }
+    },
+    "fontSize": {
+      "display":  { "value": "3rem",     "attributes": { "weight": 700, "lineHeight": 1.1, "letterSpacing": "-0.02em" } },
+      "h1":       { "value": "2.25rem",  "attributes": { "weight": 700, "lineHeight": 1.2, "letterSpacing": "-0.01em" } },
+      "h2":       { "value": "1.875rem", "attributes": { "weight": 600, "lineHeight": 1.3 } },
+      "h3":       { "value": "1.5rem",   "attributes": { "weight": 600, "lineHeight": 1.4 } },
+      "h4":       { "value": "1.25rem",  "attributes": { "weight": 600, "lineHeight": 1.4 } },
+      "body-lg":  { "value": "1.125rem", "attributes": { "weight": 400, "lineHeight": 1.6 } },
+      "body":     { "value": "1rem",     "attributes": { "weight": 400, "lineHeight": 1.6 } },
+      "body-sm":  { "value": "0.875rem", "attributes": { "weight": 400, "lineHeight": 1.5 } },
+      "caption":  { "value": "0.75rem",  "attributes": { "weight": 500, "lineHeight": 1.4, "letterSpacing": "0.05em" } }
+    }
+  }
+}</pre>
+              </div>
+            </div>
+            <div id="token-panel-spacing" class="token-panel hidden">
+              <div class="code-block relative bg-slate-900 p-5">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre class="text-xs text-slate-300 font-mono leading-relaxed overflow-auto max-h-96">{
+  "spacing": {
+    "1":  { "value": "4px",   "comment": "Micro gap" },
+    "2":  { "value": "8px",   "comment": "Base unit" },
+    "3":  { "value": "12px"  },
+    "4":  { "value": "16px",  "comment": "Default padding" },
+    "6":  { "value": "24px",  "comment": "Section gap" },
+    "8":  { "value": "32px"  },
+    "10": { "value": "40px"  },
+    "12": { "value": "48px"  },
+    "16": { "value": "64px"  },
+    "20": { "value": "80px"  },
+    "24": { "value": "96px"  },
+    "32": { "value": "128px", "comment": "Page max margin" }
+  },
+  "borderRadius": {
+    "sm":  { "value": "6px"  },
+    "md":  { "value": "8px"  },
+    "lg":  { "value": "12px" },
+    "xl":  { "value": "16px" },
+    "2xl": { "value": "24px" },
+    "full": { "value": "9999px" }
+  }
+}</pre>
+              </div>
+            </div>
+            <div id="token-panel-shadows" class="token-panel hidden">
+              <div class="code-block relative bg-slate-900 p-5">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre class="text-xs text-slate-300 font-mono leading-relaxed overflow-auto max-h-96">{
+  "shadow": {
+    "flat": { "value": "0 0 0 1px rgba(0,0,0,0.05)",             "comment": "Dividers, hairlines" },
+    "sm":   { "value": "0 1px 2px 0 rgba(0,0,0,0.05)",           "comment": "Subtle lift" },
+    "md":   { "value": "0 4px 6px -1px rgba(0,0,0,0.10)",        "comment": "Cards" },
+    "lg":   { "value": "0 10px 15px -3px rgba(0,0,0,0.10)",      "comment": "Dropdowns" },
+    "xl":   { "value": "0 20px 25px -5px rgba(0,0,0,0.10)",      "comment": "Modals" }
+  },
+  "zIndex": {
+    "base":    { "value": "0"    },
+    "sticky":  { "value": "10"   },
+    "dropdown":{ "value": "20"   },
+    "modal":   { "value": "9990" },
+    "toast":   { "value": "9999" }
+  }
+}</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="principles" class="mb-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Principles</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">The five design values that guide every decision in antaraFlow.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Clarity -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+              <div class="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center mb-4 text-lg">✦</div>
+              <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Clarity</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Every element earns its place. Remove ambiguity through clear hierarchy, consistent labeling, and generous whitespace.</p>
+              <div class="space-y-2">
+                <div class="flex items-start gap-2"><span class="text-green-500 text-xs font-bold mt-0.5 shrink-0">✓</span><span class="text-xs text-gray-600 dark:text-gray-400">Use descriptive action labels — "Finalize Meeting" not "Submit"</span></div>
+                <div class="flex items-start gap-2"><span class="text-red-500 text-xs font-bold mt-0.5 shrink-0">✗</span><span class="text-xs text-gray-600 dark:text-gray-400">Don't use icon-only buttons without tooltips or labels</span></div>
+              </div>
+            </div>
+            <!-- Efficiency -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+              <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4 text-lg">⚡</div>
+              <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Efficiency</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Reduce time to insight. Surface the most relevant information first and make common actions accessible in ≤2 clicks.</p>
+              <div class="space-y-2">
+                <div class="flex items-start gap-2"><span class="text-green-500 text-xs font-bold mt-0.5 shrink-0">✓</span><span class="text-xs text-gray-600 dark:text-gray-400">Use ⌘K command palette for power users</span></div>
+                <div class="flex items-start gap-2"><span class="text-red-500 text-xs font-bold mt-0.5 shrink-0">✗</span><span class="text-xs text-gray-600 dark:text-gray-400">Don't bury key actions in dropdown menus</span></div>
+              </div>
+            </div>
+            <!-- Hierarchy -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+              <div class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center mb-4 text-lg">◈</div>
+              <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Hierarchy</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Guide attention with visual weight. One primary action per view, supported by secondary and tertiary options.</p>
+              <div class="space-y-2">
+                <div class="flex items-start gap-2"><span class="text-green-500 text-xs font-bold mt-0.5 shrink-0">✓</span><span class="text-xs text-gray-600 dark:text-gray-400">One primary (violet) button per screen</span></div>
+                <div class="flex items-start gap-2"><span class="text-red-500 text-xs font-bold mt-0.5 shrink-0">✗</span><span class="text-xs text-gray-600 dark:text-gray-400">Don't show 3+ primary actions at equal visual weight</span></div>
+              </div>
+            </div>
+            <!-- Accessibility -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+              <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-4 text-lg">◎</div>
+              <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Accessibility</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Build for everyone. WCAG 2.1 AA compliance is the baseline — not a feature. Every interaction must work without a mouse.</p>
+              <div class="space-y-2">
+                <div class="flex items-start gap-2"><span class="text-green-500 text-xs font-bold mt-0.5 shrink-0">✓</span><span class="text-xs text-gray-600 dark:text-gray-400">Test keyboard navigation on every new component</span></div>
+                <div class="flex items-start gap-2"><span class="text-red-500 text-xs font-bold mt-0.5 shrink-0">✗</span><span class="text-xs text-gray-600 dark:text-gray-400">Don't convey status by color alone</span></div>
+              </div>
+            </div>
+            <!-- Consistency -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+              <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-4 text-lg">▣</div>
+              <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Consistency</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Predictability builds trust. Reuse components and patterns before inventing new ones. Consistent patterns lower cognitive load.</p>
+              <div class="space-y-2">
+                <div class="flex items-start gap-2"><span class="text-green-500 text-xs font-bold mt-0.5 shrink-0">✓</span><span class="text-xs text-gray-600 dark:text-gray-400">Check this design system before building anything new</span></div>
+                <div class="flex items-start gap-2"><span class="text-red-500 text-xs font-bold mt-0.5 shrink-0">✗</span><span class="text-xs text-gray-600 dark:text-gray-400">Don't invent custom colors or font sizes outside the scale</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="dev-guide" class="mb-20">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Developer Guide</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">How to use this design system in the antaraFlow Laravel codebase.</p>
+          </div>
+          <div class="space-y-6">
+            <!-- Dark mode -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Dark Mode Pattern</h3>
+              </div>
+              <div class="p-6">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Toggle the <code class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-violet-600 dark:text-violet-400">dark</code> class on <code class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-violet-600 dark:text-violet-400">&lt;html&gt;</code>. Always pair Tailwind light + dark variants:</p>
+                <div class="code-block relative bg-slate-900 rounded-xl p-4">
+                  <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                  <pre class="text-xs text-slate-300 font-mono leading-relaxed">&lt;!-- In app.css --&gt;
+@layer base {
+  :root { color-scheme: light; }
+  html.dark { color-scheme: dark; }
+}
+
+&lt;!-- In Blade templates --&gt;
+&lt;div class="bg-white dark:bg-slate-800 text-gray-900 dark:text-white"&gt;
+  &lt;!-- Always pair light and dark --&gt;
+&lt;/div&gt;
+
+&lt;!-- Toggle in JS --&gt;
+document.documentElement.classList.toggle('dark');
+localStorage.setItem('ds-dark', document.documentElement.classList.contains('dark'));</pre>
+                </div>
+              </div>
+            </div>
+            <!-- New component conventions -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Adding a New Component</h3>
+              </div>
+              <div class="p-6">
+                <ol class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                  <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 font-semibold text-xs flex items-center justify-center shrink-0">1</span>Check this design system first — the component may already exist.</li>
+                  <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 font-semibold text-xs flex items-center justify-center shrink-0">2</span>Create a Blade partial: <code class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono">resources/views/components/[name].blade.php</code></li>
+                  <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 font-semibold text-xs flex items-center justify-center shrink-0">3</span>Use Tailwind classes only. Never write custom CSS unless adding to app.css token layer.</li>
+                  <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 font-semibold text-xs flex items-center justify-center shrink-0">4</span>Always add <code class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono">dark:</code> variants for every color class.</li>
+                  <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 font-semibold text-xs flex items-center justify-center shrink-0">5</span>Add to design-system.html with preview, Do/Don't, accessibility notes, and code snippet.</li>
+                </ol>
+              </div>
+            </div>
+            <!-- Icon system -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Icon System — Heroicons</h3>
+              </div>
+              <div class="p-6">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Use Heroicons inline SVG. Always use <code class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-violet-600 dark:text-violet-400">stroke="currentColor"</code> so icons inherit color from the parent element.</p>
+                <div class="flex items-center gap-6 mb-4">
+                  <div class="flex flex-col items-center gap-2">
+                    <svg class="w-4 h-4 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span class="text-xs text-gray-400 font-mono">w-4 h-4</span>
+                  </div>
+                  <div class="flex flex-col items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span class="text-xs text-gray-400 font-mono">w-5 h-5</span>
+                  </div>
+                  <div class="flex flex-col items-center gap-2">
+                    <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span class="text-xs text-gray-400 font-mono">w-6 h-6</span>
+                  </div>
+                </div>
+                <div class="code-block relative bg-slate-900 rounded-xl p-4">
+                  <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                  <pre class="text-xs text-slate-300 font-mono leading-relaxed">&lt;!-- Standard usage: inherit color from parent --&gt;
+&lt;svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"&gt;
+  &lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="..." /&gt;
+&lt;/svg&gt;
+
+&lt;!-- Icon with explicit color --&gt;
+&lt;svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"&gt;
+  &lt;path ... /&gt;
+&lt;/svg&gt;</pre>
+                </div>
+              </div>
+            </div>
+            <!-- Tailwind v4 extension -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Tailwind v4 Theme Extension</h3>
+              </div>
+              <div class="p-6">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Extend the theme in <code class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-violet-600 dark:text-violet-400">resources/css/app.css</code> using the <code class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-violet-600 dark:text-violet-400">@theme</code> directive:</p>
+                <div class="code-block relative bg-slate-900 rounded-xl p-4">
+                  <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                  <pre class="text-xs text-slate-300 font-mono leading-relaxed">/* resources/css/app.css */
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #8B5CF6;
+  --color-primary-dark: #7C3AED;
+  --color-accent: #2DD4BF;
+}
+
+/* Custom component layer */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700
+           text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors
+           focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+}</pre>
+                </div>
+              </div>
+            </div>
+            <!-- Alpine.js pattern -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Alpine.js Interaction Pattern</h3>
+              </div>
+              <div class="p-6">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Use Alpine.js for lightweight interactivity — dropdowns, toggles, and accordions. Avoid Alpine for server-driven state (use Livewire instead).</p>
+                <div class="code-block relative bg-slate-900 rounded-xl p-4">
+                  <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                  <pre class="text-xs text-slate-300 font-mono leading-relaxed">&lt;!-- Dropdown example --&gt;
+&lt;div x-data="{ open: false }" class="relative"&gt;
+  &lt;button @click="open = !open" class="btn-primary"&gt;
+    Options
+  &lt;/button&gt;
+  &lt;div x-show="open" @click.outside="open = false"
+       x-transition
+       class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800
+              rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 p-1"&gt;
+    &lt;a href="#" class="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300
+                        hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg"&gt;
+      Edit
+    &lt;/a&gt;
+    &lt;a href="#" class="block px-3 py-2 text-sm text-red-600 dark:text-red-400
+                        hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"&gt;
+      Delete
+    &lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
     </main>
 
     <!-- Command Palette Overlay -->
@@ -3381,6 +4002,18 @@
             });
             var noResults = document.getElementById('cmd-no-results');
             if (noResults) { noResults.classList.toggle('hidden', found > 0); }
+        }
+
+        function showTokenTab(name, btn) {
+          document.querySelectorAll('.token-panel').forEach(function(p) { p.classList.add('hidden'); });
+          var panel = document.getElementById('token-panel-' + name);
+          if (panel) { panel.classList.remove('hidden'); }
+          document.querySelectorAll('.token-tab-btn').forEach(function(b) {
+            b.classList.remove('text-violet-600','dark:text-violet-400','border-violet-600','dark:border-violet-400');
+            b.classList.add('text-gray-500','dark:text-gray-400','border-transparent');
+          });
+          btn.classList.add('text-violet-600','dark:text-violet-400','border-violet-600','dark:border-violet-400');
+          btn.classList.remove('text-gray-500','dark:text-gray-400','border-transparent');
         }
 
         // IntersectionObserver for active sidebar state
