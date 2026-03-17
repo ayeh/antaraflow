@@ -1806,6 +1806,404 @@
 &lt;/button&gt;</code></pre>
             </div>
         </section>
+
+        <!-- ==================== TASK 10A: SIDEBAR NAV ==================== -->
+        <section id="sidebar-nav" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Sidebar Nav</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Primary navigation pattern. Fixed left rail with icon + label links and badge counts.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-0 overflow-hidden">
+                <div class="flex">
+                    <!-- Mini sidebar -->
+                    <div class="w-52 border-r border-gray-200 dark:border-slate-700 p-3 space-y-0.5">
+                        <div class="px-3 py-2 mb-2">
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Main Menu</span>
+                        </div>
+                        <!-- Active item -->
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 font-semibold text-sm" onclick="return false" aria-current="page">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            Overview
+                        </a>
+                        <!-- Normal items -->
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-sm transition-colors" onclick="return false">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            Meetings
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-sm transition-colors" onclick="return false">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            Action Items
+                        </a>
+                        <!-- Item with badge -->
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-sm transition-colors" onclick="return false">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                            Notifications
+                            <span class="ml-auto bg-violet-600 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full min-w-[20px] text-center" aria-label="3 unread notifications">3</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-sm transition-colors" onclick="return false">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Settings
+                        </a>
+                        <div class="border-t border-gray-200 dark:border-slate-700 pt-3 mt-3">
+                            <!-- Avatar + user -->
+                            <div class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer transition-colors">
+                                <div class="w-7 h-7 rounded-full bg-violet-600 flex items-center justify-center text-white text-xs font-semibold shrink-0">AY</div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-medium text-gray-900 dark:text-white truncate">Ahmad Yeh</p>
+                                    <p class="text-xs text-gray-400 truncate">Admin</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Anatomy labels panel -->
+                    <div class="flex-1 p-6">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Anatomy</p>
+                        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                            <li><span class="text-violet-600 dark:text-violet-400 font-semibold">①</span> Active link — violet bg + bold weight</li>
+                            <li><span class="text-violet-600 dark:text-violet-400 font-semibold">②</span> Default link — gray text, hover bg</li>
+                            <li><span class="text-violet-600 dark:text-violet-400 font-semibold">③</span> Badge count — violet pill, right-aligned</li>
+                            <li><span class="text-violet-600 dark:text-violet-400 font-semibold">④</span> Section divider — border-t with extra pt</li>
+                            <li><span class="text-violet-600 dark:text-violet-400 font-semibold">⑤</span> User footer — avatar + name + role</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Use the sidebar for primary app navigation only. Max 7–8 items.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Add secondary or contextual navigation to the sidebar — use tabs or breadcrumbs.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li><code>&lt;nav aria-label="Main navigation"&gt;</code> wrapper around the sidebar links.</li>
+                    <li>Current page link gets <code>aria-current="page"</code>.</li>
+                    <li>Badge counts need <code>aria-label</code> (e.g., <code>aria-label="3 unread notifications"</code>).</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;nav aria-label="Main navigation"&gt;
+  &lt;!-- Active item --&gt;
+  &lt;a href="/overview" aria-current="page"
+    class="flex items-center gap-3 px-3 py-2 rounded-xl
+           bg-violet-50 text-violet-700 font-semibold text-sm"&gt;
+    &lt;svg ...&gt;&lt;/svg&gt;
+    Overview
+  &lt;/a&gt;
+
+  &lt;!-- Item with badge count --&gt;
+  &lt;a href="/notifications"
+    class="flex items-center gap-3 px-3 py-2 rounded-xl
+           text-gray-600 hover:bg-gray-50 text-sm transition-colors"&gt;
+    &lt;svg ...&gt;&lt;/svg&gt;
+    Notifications
+    &lt;span class="ml-auto bg-violet-600 text-white text-xs
+                 font-semibold px-1.5 py-0.5 rounded-full"
+          aria-label="3 unread notifications"&gt;3&lt;/span&gt;
+  &lt;/a&gt;
+&lt;/nav&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 10B: BREADCRUMB ==================== -->
+        <section id="breadcrumb" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Breadcrumb</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Hierarchical location indicator. Always reflects the current page's path.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 space-y-4">
+                <!-- Standard -->
+                <nav aria-label="Breadcrumb">
+                    <ol class="flex items-center gap-1.5 text-sm flex-wrap">
+                        <li><a href="#" onclick="return false" class="text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">Home</a></li>
+                        <li class="text-gray-300 dark:text-slate-600">/</li>
+                        <li><a href="#" onclick="return false" class="text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">Meetings</a></li>
+                        <li class="text-gray-300 dark:text-slate-600">/</li>
+                        <li class="text-gray-900 dark:text-white font-medium" aria-current="page">Q1 Planning Session</li>
+                    </ol>
+                </nav>
+                <!-- With icons -->
+                <nav aria-label="Breadcrumb with icons">
+                    <ol class="flex items-center gap-1.5 text-sm flex-wrap">
+                        <li>
+                            <a href="#" onclick="return false" class="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                                Home
+                            </a>
+                        </li>
+                        <li class="text-gray-300 dark:text-slate-600">/</li>
+                        <li><a href="#" onclick="return false" class="text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">Action Items</a></li>
+                        <li class="text-gray-300 dark:text-slate-600">/</li>
+                        <li class="text-gray-900 dark:text-white font-medium" aria-current="page">Update onboarding flow</li>
+                    </ol>
+                </nav>
+                <!-- Truncated (long path) -->
+                <nav aria-label="Breadcrumb truncated">
+                    <ol class="flex items-center gap-1.5 text-sm flex-wrap">
+                        <li><a href="#" onclick="return false" class="text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">Home</a></li>
+                        <li class="text-gray-300 dark:text-slate-600">/</li>
+                        <li><span class="text-gray-400 dark:text-slate-500 cursor-default px-1">…</span></li>
+                        <li class="text-gray-300 dark:text-slate-600">/</li>
+                        <li><a href="#" onclick="return false" class="text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">Meetings</a></li>
+                        <li class="text-gray-300 dark:text-slate-600">/</li>
+                        <li class="text-gray-900 dark:text-white font-medium" aria-current="page">Transcript</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Always show the current page as the last item, non-linked.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Show more than 4 levels without truncation — collapse middle segments to "…".</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Wrap in <code>&lt;nav aria-label="Breadcrumb"&gt;</code>.</li>
+                    <li>Use <code>&lt;ol&gt;</code> for proper list semantics.</li>
+                    <li>Last item gets <code>aria-current="page"</code>.</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;nav aria-label="Breadcrumb"&gt;
+  &lt;ol class="flex items-center gap-1.5 text-sm"&gt;
+    &lt;li&gt;
+      &lt;a href="/" class="text-gray-500 hover:text-violet-600 transition-colors"&gt;
+        Home
+      &lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li class="text-gray-300"&gt;/&lt;/li&gt;
+    &lt;li&gt;
+      &lt;a href="/meetings" class="text-gray-500 hover:text-violet-600 transition-colors"&gt;
+        Meetings
+      &lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li class="text-gray-300"&gt;/&lt;/li&gt;
+    &lt;li class="text-gray-900 font-medium" aria-current="page"&gt;
+      Q1 Planning Session
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/nav&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 10C: TABS ==================== -->
+        <section id="tabs" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Tabs</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Secondary navigation for switching between views of the same content.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 space-y-8">
+                <!-- Underline variant -->
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Underline</p>
+                    <div class="border-b border-gray-200 dark:border-slate-700">
+                        <nav class="flex gap-0" id="tabs-underline" role="tablist">
+                            <button onclick="switchTab('underline','overview',this)" role="tab" aria-selected="true" class="tab-ul-btn px-5 py-2.5 text-sm font-medium text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400 -mb-px transition-colors">Overview</button>
+                            <button onclick="switchTab('underline','transcript',this)" role="tab" aria-selected="false" class="tab-ul-btn px-5 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-slate-600 -mb-px transition-colors">Transcript</button>
+                            <button onclick="switchTab('underline','actions',this)" role="tab" aria-selected="false" class="tab-ul-btn px-5 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-slate-600 -mb-px transition-colors">Action Items <span class="ml-1.5 bg-gray-200 dark:bg-slate-600 text-gray-600 dark:text-gray-300 text-xs px-1.5 py-0.5 rounded-full">5</span></button>
+                            <button onclick="switchTab('underline','attendees',this)" role="tab" aria-selected="false" class="tab-ul-btn px-5 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-slate-600 -mb-px transition-colors">Attendees</button>
+                        </nav>
+                    </div>
+                    <div class="pt-4 text-sm text-gray-500 dark:text-gray-400" id="tab-content-underline" role="tabpanel">
+                        Overview content — summary, key decisions, next meeting.
+                    </div>
+                </div>
+                <!-- Pill variant -->
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Pill</p>
+                    <div class="flex gap-1.5 bg-gray-100 dark:bg-slate-700 p-1 rounded-xl w-fit" role="tablist">
+                        <button onclick="switchTab('pill','week',this)" role="tab" aria-selected="true" class="tab-pill-btn px-4 py-1.5 text-sm font-medium rounded-lg bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm transition-all">Week</button>
+                        <button onclick="switchTab('pill','month',this)" role="tab" aria-selected="false" class="tab-pill-btn px-4 py-1.5 text-sm font-medium rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all">Month</button>
+                        <button onclick="switchTab('pill','quarter',this)" role="tab" aria-selected="false" class="tab-pill-btn px-4 py-1.5 text-sm font-medium rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all">Quarter</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Use tabs to switch views of the same content object (e.g., meeting overview vs. transcript).</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Use tabs for primary navigation between different sections of the app — use the sidebar.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li><code>role="tablist"</code> on the nav container, <code>role="tab"</code> on each button.</li>
+                    <li>Active tab gets <code>aria-selected="true"</code>; inactive tabs get <code>aria-selected="false"</code>.</li>
+                    <li>Content panel gets <code>role="tabpanel"</code>.</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;!-- Underline tabs --&gt;
+&lt;div class="border-b border-gray-200"&gt;
+  &lt;nav class="flex" role="tablist"&gt;
+    &lt;button role="tab" aria-selected="true"
+      class="px-5 py-2.5 text-sm font-medium text-violet-600
+             border-b-2 border-violet-600 -mb-px transition-colors"&gt;
+      Overview
+    &lt;/button&gt;
+    &lt;button role="tab" aria-selected="false"
+      class="px-5 py-2.5 text-sm font-medium text-gray-500
+             border-b-2 border-transparent -mb-px transition-colors"&gt;
+      Transcript
+    &lt;/button&gt;
+  &lt;/nav&gt;
+&lt;/div&gt;
+&lt;div role="tabpanel" class="pt-4 text-sm text-gray-500"&gt;
+  Tab content here.
+&lt;/div&gt;
+
+&lt;!-- Pill tabs --&gt;
+&lt;div class="flex gap-1.5 bg-gray-100 p-1 rounded-xl w-fit" role="tablist"&gt;
+  &lt;button role="tab" aria-selected="true"
+    class="px-4 py-1.5 text-sm font-medium rounded-lg
+           bg-white text-gray-900 shadow-sm transition-all"&gt;
+    Week
+  &lt;/button&gt;
+  &lt;button role="tab" aria-selected="false"
+    class="px-4 py-1.5 text-sm font-medium rounded-lg
+           text-gray-500 transition-all"&gt;
+    Month
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 10D: MOBILE BOTTOM NAV ==================== -->
+        <section id="mobile-nav" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Mobile Bottom Nav</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Bottom navigation bar for mobile breakpoints. Max 5 items.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 flex justify-center">
+                <div class="w-72 border-2 border-gray-900 dark:border-slate-400 rounded-3xl overflow-hidden shadow-xl">
+                    <!-- Phone screen -->
+                    <div class="bg-gray-50 dark:bg-slate-900 h-48 flex items-center justify-center">
+                        <p class="text-xs text-gray-400 dark:text-slate-500">App content area</p>
+                    </div>
+                    <!-- Bottom nav -->
+                    <nav aria-label="Mobile navigation">
+                        <div class="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 flex">
+                            <button class="flex-1 flex flex-col items-center gap-1 py-3 text-violet-600 dark:text-violet-400" onclick="return false" aria-current="page" aria-label="Home">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                                <span class="text-xs font-medium">Home</span>
+                            </button>
+                            <button class="flex-1 flex flex-col items-center gap-1 py-3 text-gray-400 dark:text-gray-500" onclick="return false" aria-label="Meetings">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span class="text-xs">Meetings</span>
+                            </button>
+                            <button class="flex-1 flex flex-col items-center gap-1 py-3 text-gray-400 dark:text-gray-500 relative" onclick="return false" aria-label="Alerts, 2 unread">
+                                <div class="relative">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                    <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center font-bold" aria-hidden="true">2</span>
+                                </div>
+                                <span class="text-xs">Alerts</span>
+                            </button>
+                            <button class="flex-1 flex flex-col items-center gap-1 py-3 text-gray-400 dark:text-gray-500" onclick="return false" aria-label="Profile">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                <span class="text-xs">Profile</span>
+                            </button>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Keep to 4–5 items. Label every icon. Highlight the active item clearly.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Use bottom nav on desktop — it's a mobile-only pattern. Use sidebar instead.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li><code>&lt;nav aria-label="Mobile navigation"&gt;</code> wrapper around the bottom bar.</li>
+                    <li>Active item gets <code>aria-current="page"</code>.</li>
+                    <li>Each button needs <code>aria-label</code> describing its destination (and badge count if present).</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;nav aria-label="Mobile navigation"
+  class="fixed bottom-0 left-0 right-0 bg-white border-t
+         border-gray-200 flex sm:hidden"&gt;
+  &lt;!-- Active item --&gt;
+  &lt;button aria-current="page" aria-label="Home"
+    class="flex-1 flex flex-col items-center gap-1 py-3
+           text-violet-600"&gt;
+    &lt;svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"&gt;
+      &lt;path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/&gt;
+    &lt;/svg&gt;
+    &lt;span class="text-xs font-medium"&gt;Home&lt;/span&gt;
+  &lt;/button&gt;
+
+  &lt;!-- Item with badge --&gt;
+  &lt;button aria-label="Alerts, 2 unread"
+    class="flex-1 flex flex-col items-center gap-1 py-3
+           text-gray-400"&gt;
+    &lt;div class="relative"&gt;
+      &lt;svg class="w-5 h-5" ...&gt;&lt;/svg&gt;
+      &lt;span class="absolute -top-1 -right-1 w-3.5 h-3.5
+                   bg-red-500 rounded-full text-white text-[8px]
+                   flex items-center justify-center font-bold"
+            aria-hidden="true"&gt;2&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;span class="text-xs"&gt;Alerts&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/nav&gt;</code></pre>
+            </div>
+        </section>
     </main>
 
     <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
@@ -1872,6 +2270,34 @@
             const isDark = html.classList.toggle('dark');
             localStorage.setItem('ds-dark', isDark ? 'true' : 'false');
             updateDarkModeUI(isDark);
+        }
+
+        // Tab switching function
+        function switchTab(variant, name, btn) {
+            if (variant === 'underline') {
+                var btns = document.querySelectorAll('.tab-ul-btn');
+                btns.forEach(function (b) {
+                    b.classList.remove('text-violet-600', 'dark:text-violet-400', 'border-violet-600', 'dark:border-violet-400');
+                    b.classList.add('text-gray-500', 'dark:text-gray-400', 'border-transparent');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                btn.classList.add('text-violet-600', 'dark:text-violet-400', 'border-violet-600', 'dark:border-violet-400');
+                btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-transparent');
+                btn.setAttribute('aria-selected', 'true');
+                var content = document.getElementById('tab-content-underline');
+                var texts = { overview: 'Overview content — summary, key decisions, next meeting.', transcript: 'Full AI-generated transcript with speaker labels and timestamps.', actions: '5 action items: 3 pending, 1 in review, 1 done.', attendees: '6 attendees — 4 present, 2 absent.' };
+                if (content) { content.textContent = texts[name] || ''; }
+            } else if (variant === 'pill') {
+                var btns = document.querySelectorAll('.tab-pill-btn');
+                btns.forEach(function (b) {
+                    b.classList.remove('bg-white', 'dark:bg-slate-600', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+                    b.classList.add('text-gray-500', 'dark:text-gray-400');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                btn.classList.add('bg-white', 'dark:bg-slate-600', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+                btn.classList.remove('text-gray-500', 'dark:text-gray-400');
+                btn.setAttribute('aria-selected', 'true');
+            }
         }
 
         // Copy code function
