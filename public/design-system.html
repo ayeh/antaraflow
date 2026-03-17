@@ -715,6 +715,488 @@
                 </div>
             </div>
         </section>
+
+        <!-- ==================== TASK 5: BUTTON ==================== -->
+        <section id="buttons" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Button</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Interactive controls that trigger actions. Use the right variant for the right context.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Variants</p>
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <button class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2">Primary</button>
+                    <button class="inline-flex items-center gap-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2">Secondary</button>
+                    <button class="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500">Ghost</button>
+                    <button class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Danger</button>
+                    <button disabled class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-40 cursor-not-allowed">Disabled</button>
+                    <button disabled class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-75 cursor-not-allowed">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        Loading...
+                    </button>
+                </div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Sizes</p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <button class="bg-violet-600 text-white px-3 py-1.5 rounded-md text-xs font-medium">Small</button>
+                    <button class="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Medium</button>
+                    <button class="bg-violet-600 text-white px-6 py-3 rounded-xl text-base font-semibold">Large</button>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Use primary for the single most important action on a page.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Use multiple primary buttons on the same page — only one per view.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Icon-only buttons must have <code>aria-label</code></li>
+                    <li>Minimum touch target: 44×44px on mobile</li>
+                    <li><code>disabled</code> attribute for disabled state, not just opacity</li>
+                    <li>Focus ring: <code>focus:ring-2 focus:ring-violet-500 focus:ring-offset-2</code></li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;button class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed"&gt;
+  Save Meeting
+&lt;/button&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 6: INPUT ==================== -->
+        <section id="inputs" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Input</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Text fields for capturing user data. Always pair with a visible label.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 space-y-4">
+                <!-- Default -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Default</label>
+                    <input type="text" placeholder="Meeting title..." class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors" />
+                </div>
+                <!-- With prefix icon -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">With icon</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <input type="text" placeholder="Search meetings..." class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors" />
+                    </div>
+                </div>
+                <!-- Error state -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Error</label>
+                    <input type="text" value="invalid@" class="w-full bg-white dark:bg-slate-700 border border-red-500 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
+                    <p class="mt-1.5 text-xs text-red-600 dark:text-red-400">Please enter a valid email address.</p>
+                </div>
+                <!-- Success state -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Success</label>
+                    <input type="text" value="ahmad@antaraflow.com" class="w-full bg-white dark:bg-slate-700 border border-green-500 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                    <p class="mt-1.5 text-xs text-green-600 dark:text-green-400">Email address verified.</p>
+                </div>
+                <!-- Disabled -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Disabled</label>
+                    <input type="text" disabled value="Read-only value" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-gray-400 dark:text-gray-500 cursor-not-allowed" />
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Always pair inputs with visible labels (not just placeholder text).</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Use placeholder as the only label — it disappears when typing.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Labels must be associated with <code>for</code>/<code>id</code></li>
+                    <li>Use <code>aria-invalid="true"</code> on error state</li>
+                    <li>Use <code>aria-describedby</code> for helper text and error messages</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;div&gt;
+  &lt;label for="meeting-title" class="block text-xs font-medium text-gray-700 mb-1.5"&gt;Meeting title&lt;/label&gt;
+  &lt;input id="meeting-title" type="text" placeholder="Meeting title..."
+    class="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm
+           focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors" /&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 6: TEXTAREA ==================== -->
+        <section id="textarea" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Textarea</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Multi-line text input for longer content like notes and descriptions.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 space-y-4">
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-medium text-gray-700 dark:text-gray-300">Meeting notes</label>
+                        <span id="char-count" class="text-xs text-gray-400">0 / 500</span>
+                    </div>
+                    <textarea id="demo-textarea" rows="4" maxlength="500" placeholder="Add notes, context, or pre-reads for attendees..."
+                        oninput="document.getElementById('char-count').textContent = this.value.length + ' / 500'"
+                        class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none transition-colors"></textarea>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Use <code>resize-none</code> and set an appropriate <code>rows</code> attribute.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Let textarea resize horizontally — it breaks layout.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Same label rules as input — always associate with <code>for</code>/<code>id</code></li>
+                    <li>Use <code>aria-describedby</code> to link the character count to the textarea</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;div&gt;
+  &lt;div class="flex items-center justify-between mb-1.5"&gt;
+    &lt;label for="notes" class="text-xs font-medium text-gray-700"&gt;Meeting notes&lt;/label&gt;
+    &lt;span id="notes-count" class="text-xs text-gray-400"&gt;0 / 500&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;textarea id="notes" rows="4" maxlength="500" aria-describedby="notes-count"
+    placeholder="Add notes, context, or pre-reads for attendees..."
+    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+           focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"&gt;&lt;/textarea&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 6: SELECT ==================== -->
+        <section id="select" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Select</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Native dropdown for choosing from a list of predefined options.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Meeting status</label>
+                    <div class="relative">
+                        <select class="w-full appearance-none bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 pr-9 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors cursor-pointer">
+                            <option>Draft</option>
+                            <option>In Progress</option>
+                            <option selected>Finalized</option>
+                            <option>Approved</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Use native <code>&lt;select&gt;</code> for simple lists.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Build a custom dropdown for basic selection — native is more accessible.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Native <code>&lt;select&gt;</code> is keyboard-navigable by default</li>
+                    <li>Always provide a visible label associated via <code>for</code>/<code>id</code></li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;div&gt;
+  &lt;label for="status" class="block text-xs font-medium text-gray-700 mb-1.5"&gt;Meeting status&lt;/label&gt;
+  &lt;div class="relative"&gt;
+    &lt;select id="status"
+      class="w-full appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-9 text-sm
+             focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent cursor-pointer"&gt;
+      &lt;option&gt;Draft&lt;/option&gt;
+      &lt;option&gt;In Progress&lt;/option&gt;
+      &lt;option selected&gt;Finalized&lt;/option&gt;
+      &lt;option&gt;Approved&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"&gt;
+      &lt;!-- chevron icon --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 7: CHECKBOX & RADIO ==================== -->
+        <section id="checkbox" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Checkbox &amp; Radio</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Selection controls. Checkboxes for multi-select; radios for exclusive choice.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Checkboxes</p>
+                <div class="space-y-3 mb-6">
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" checked class="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500 focus:ring-offset-0" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Send follow-up email</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="indeterminate-demo" class="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500 focus:ring-offset-0" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Select all attendees <span class="text-xs text-gray-400">(indeterminate)</span></span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-not-allowed opacity-50">
+                        <input type="checkbox" disabled class="w-4 h-4 rounded border-gray-300 dark:border-slate-600" />
+                        <span class="text-sm text-gray-500 dark:text-gray-500">Disabled option</span>
+                    </label>
+                </div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Radio</p>
+                <div class="space-y-3">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="radio" name="priority" checked class="w-4 h-4 border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500 focus:ring-offset-0" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">High priority</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="radio" name="priority" class="w-4 h-4 border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500 focus:ring-offset-0" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Medium priority</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="radio" name="priority" class="w-4 h-4 border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500 focus:ring-offset-0" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Low priority</span>
+                    </label>
+                </div>
+            </div>
+            <script>document.getElementById('indeterminate-demo').indeterminate = true;</script>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Use checkboxes for multi-select; radio for single-select from a group.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Use checkboxes as toggles for settings — use a Toggle/Switch instead.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Group related radios in <code>&lt;fieldset&gt;</code> with <code>&lt;legend&gt;</code></li>
+                    <li>All inputs need associated labels</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;!-- Checkbox --&gt;
+&lt;label class="flex items-center gap-3 cursor-pointer"&gt;
+  &lt;input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500" /&gt;
+  &lt;span class="text-sm text-gray-700"&gt;Send follow-up email&lt;/span&gt;
+&lt;/label&gt;
+
+&lt;!-- Radio group --&gt;
+&lt;fieldset&gt;
+  &lt;legend class="text-xs font-medium text-gray-700 mb-2"&gt;Priority&lt;/legend&gt;
+  &lt;label class="flex items-center gap-3 cursor-pointer"&gt;
+    &lt;input type="radio" name="priority" class="w-4 h-4 border-gray-300 text-violet-600 focus:ring-violet-500" /&gt;
+    &lt;span class="text-sm text-gray-700"&gt;High priority&lt;/span&gt;
+  &lt;/label&gt;
+&lt;/fieldset&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 7: TOGGLE ==================== -->
+        <section id="toggle" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Toggle</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Switch control for immediate on/off settings that take effect without form submission.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 space-y-4">
+                <!-- Off -->
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <div class="relative">
+                        <input type="checkbox" class="sr-only peer" />
+                        <div class="w-11 h-6 bg-gray-200 dark:bg-slate-600 peer-checked:bg-violet-600 rounded-full transition-colors duration-200"></div>
+                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 peer-checked:translate-x-5"></div>
+                    </div>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Email notifications</span>
+                </label>
+                <!-- On -->
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <div class="relative">
+                        <input type="checkbox" checked class="sr-only peer" />
+                        <div class="w-11 h-6 bg-gray-200 dark:bg-slate-600 peer-checked:bg-violet-600 rounded-full transition-colors duration-200"></div>
+                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 peer-checked:translate-x-5"></div>
+                    </div>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">AI transcription <span class="text-xs text-green-600 dark:text-green-400 font-medium">On</span></span>
+                </label>
+                <!-- Disabled -->
+                <label class="flex items-center gap-3 cursor-not-allowed opacity-50">
+                    <div class="relative">
+                        <input type="checkbox" disabled class="sr-only peer" />
+                        <div class="w-11 h-6 bg-gray-200 dark:bg-slate-600 peer-checked:bg-violet-600 rounded-full"></div>
+                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm"></div>
+                    </div>
+                    <span class="text-sm text-gray-500 dark:text-gray-500">Disabled setting</span>
+                </label>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Use for immediate on/off settings (no form submit needed).</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Use a toggle where the action requires confirmation — use a button + modal.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Add <code>role="switch"</code> and <code>aria-checked</code> for assistive technology</li>
+                    <li>Label must describe the setting, not just say "Toggle"</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;label class="flex items-center gap-3 cursor-pointer"&gt;
+  &lt;div class="relative"&gt;
+    &lt;input type="checkbox" role="switch" class="sr-only peer" /&gt;
+    &lt;div class="w-11 h-6 bg-gray-200 peer-checked:bg-violet-600 rounded-full transition-colors duration-200"&gt;&lt;/div&gt;
+    &lt;div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 peer-checked:translate-x-5"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;span class="text-sm text-gray-700"&gt;Email notifications&lt;/span&gt;
+&lt;/label&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 7: FILE UPLOAD ==================== -->
+        <section id="fileupload" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">File Upload</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Drag-and-drop zone with a click-to-browse fallback for uploading documents and media.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+                <div id="drop-zone"
+                     tabindex="0"
+                     role="button"
+                     aria-label="Upload files — click or drag and drop"
+                     class="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl p-10 text-center hover:border-violet-400 dark:hover:border-violet-500 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+                     ondragover="event.preventDefault();this.classList.add('border-violet-500','bg-violet-50','dark:bg-violet-900/10')"
+                     ondragleave="this.classList.remove('border-violet-500','bg-violet-50','dark:bg-violet-900/10')"
+                     ondrop="event.preventDefault();this.classList.remove('border-violet-500','bg-violet-50','dark:bg-violet-900/10')"
+                     onclick="document.getElementById('file-input').click()"
+                     onkeydown="if(event.key==='Enter'||event.key===' ')document.getElementById('file-input').click()">
+                    <input type="file" id="file-input" class="hidden" />
+                    <svg class="w-10 h-10 text-gray-300 dark:text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Drop files here or <span class="text-violet-600 dark:text-violet-400 underline">browse</span></p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">PDF, DOCX, MP3 — up to 50MB</p>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Show allowed file types and size limits in the drop zone.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Only support drag-and-drop — always include a click-to-browse fallback.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>The clickable zone must have <code>tabindex="0"</code> and <code>role="button"</code> to be keyboard-focusable</li>
+                    <li>Show accepted file types in visible text, not just via <code>accept</code> attribute</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;div tabindex="0" role="button" aria-label="Upload files"
+  class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center
+         hover:border-violet-400 transition-colors cursor-pointer
+         focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+  onclick="document.getElementById('file-input').click()"
+  onkeydown="if(event.key==='Enter'||event.key===' ')document.getElementById('file-input').click()"&gt;
+  &lt;input type="file" id="file-input" class="hidden" /&gt;
+  &lt;p class="text-sm font-medium text-gray-700"&gt;Drop files here or &lt;span class="text-violet-600 underline"&gt;browse&lt;/span&gt;&lt;/p&gt;
+  &lt;p class="text-xs text-gray-400 mt-1.5"&gt;PDF, DOCX, MP3 — up to 50MB&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </section>
     </main>
 
     <script>
