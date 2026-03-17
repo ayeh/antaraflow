@@ -70,6 +70,10 @@
         .tooltip-tip.bottom { bottom: auto; top: calc(100% + 8px); transform: translateX(-50%) translateY(-4px); }
         .tooltip-wrap:hover .tooltip-tip.bottom { transform: translateX(-50%) translateY(0); }
 
+        /* Command palette overlay */
+        #cmd-palette-overlay { display:none; }
+        #cmd-palette-overlay.open { display:flex; }
+
         /* Skeleton shimmer */
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         .skeleton { background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
@@ -2614,7 +2618,626 @@
           </div>
         </section>
 
+        <!-- ===== 12A: TABLE ===== -->
+        <section id="table" class="mb-20">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Table</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Data table with sortable headers, striped rows, and empty state.</p>
+          </div>
+          <!-- Preview -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden mb-4">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+              <div>
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Recent Meetings</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Showing 4 of 48 meetings</p>
+              </div>
+              <button class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg transition-colors" onclick="return false">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                Filter
+              </button>
+            </div>
+            <table class="w-full text-sm" role="grid">
+              <thead>
+                <tr class="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
+                  <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-900 dark:hover:text-white select-none">
+                    <div class="flex items-center gap-1">Title <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg></div>
+                  </th>
+                  <th scope="col" aria-sort="ascending" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-900 dark:hover:text-white select-none">
+                    <div class="flex items-center gap-1">Date <svg class="w-3 h-3 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg></div>
+                  </th>
+                  <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Attendees</th>
+                  <th scope="col" class="px-6 py-3"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
+                <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">Q1 Planning Session</td>
+                  <td class="px-6 py-4 text-gray-500 dark:text-gray-400">Mar 14, 2026</td>
+                  <td class="px-6 py-4"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Finalized</span></td>
+                  <td class="px-6 py-4 text-gray-500 dark:text-gray-400">7</td>
+                  <td class="px-6 py-4 text-right"><a href="#" onclick="return false" class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">View</a></td>
+                </tr>
+                <tr class="bg-gray-50/50 dark:bg-slate-700/10 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">Engineering Standup</td>
+                  <td class="px-6 py-4 text-gray-500 dark:text-gray-400">Mar 17, 2026</td>
+                  <td class="px-6 py-4"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>Live</span></td>
+                  <td class="px-6 py-4 text-gray-500 dark:text-gray-400">4</td>
+                  <td class="px-6 py-4 text-right"><a href="#" onclick="return false" class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">View</a></td>
+                </tr>
+                <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">Product Roadmap Review</td>
+                  <td class="px-6 py-4 text-gray-500 dark:text-gray-400">Mar 17, 2026</td>
+                  <td class="px-6 py-4"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-600 text-gray-600 dark:text-gray-300">Draft</span></td>
+                  <td class="px-6 py-4 text-gray-500 dark:text-gray-400">5</td>
+                  <td class="px-6 py-4 text-right"><a href="#" onclick="return false" class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">View</a></td>
+                </tr>
+                <tr class="bg-gray-50/50 dark:bg-slate-700/10 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">Board Meeting</td>
+                  <td class="px-6 py-4 text-gray-500 dark:text-gray-400">Mar 10, 2026</td>
+                  <td class="px-6 py-4"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">Approved</span></td>
+                  <td class="px-6 py-4 text-gray-500 dark:text-gray-400">12</td>
+                  <td class="px-6 py-4 text-right"><a href="#" onclick="return false" class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">View</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Do / Don't -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-5">
+              <p class="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide mb-2">Do</p>
+              <p class="text-sm text-green-900 dark:text-green-200">Use <code class="font-mono bg-green-100 dark:bg-green-900/40 px-1 rounded">scope="col"</code> on <code class="font-mono bg-green-100 dark:bg-green-900/40 px-1 rounded">&lt;th&gt;</code> elements and striped rows for readability.</p>
+            </div>
+            <div class="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-5">
+              <p class="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wide mb-2">Don't</p>
+              <p class="text-sm text-red-900 dark:text-red-200">Show more than 10 rows without pagination — tables become hard to scan.</p>
+            </div>
+          </div>
+          <!-- Accessibility -->
+          <div class="rounded-2xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-5 mb-4">
+            <p class="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-2">Accessibility</p>
+            <p class="text-sm text-blue-900 dark:text-blue-200"><code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">&lt;table&gt;</code> with <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">role="grid"</code> for interactive tables. <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">aria-sort="ascending"</code> on the active sort column header. <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">scope="col"</code> on all <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">&lt;th&gt;</code>.</p>
+          </div>
+          <!-- Code -->
+          <div class="relative rounded-2xl bg-slate-900 p-5">
+            <button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)" class="absolute top-4 right-4 text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded border border-slate-700 hover:border-slate-500">Copy</button>
+            <pre class="text-sm text-slate-300 overflow-x-auto"><code>&lt;table class="w-full text-sm" role="grid"&gt;
+  &lt;thead&gt;
+    &lt;tr class="bg-gray-50 dark:bg-slate-700/50"&gt;
+      &lt;th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"&gt;Title&lt;/th&gt;
+      &lt;th scope="col" aria-sort="ascending" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"&gt;Date&lt;/th&gt;
+      &lt;th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"&gt;Status&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody class="divide-y divide-gray-100 dark:divide-slate-700"&gt;
+    &lt;tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors"&gt;
+      &lt;td class="px-6 py-4 font-medium text-gray-900 dark:text-white"&gt;Q1 Planning Session&lt;/td&gt;
+      &lt;td class="px-6 py-4 text-gray-500 dark:text-gray-400"&gt;Mar 14, 2026&lt;/td&gt;
+      &lt;td class="px-6 py-4"&gt;&lt;span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"&gt;Finalized&lt;/span&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr class="bg-gray-50/50 dark:bg-slate-700/10 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors"&gt;
+      &lt;td class="px-6 py-4 font-medium text-gray-900 dark:text-white"&gt;Engineering Standup&lt;/td&gt;
+      &lt;td class="px-6 py-4 text-gray-500 dark:text-gray-400"&gt;Mar 17, 2026&lt;/td&gt;
+      &lt;td class="px-6 py-4"&gt;&lt;span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700"&gt;Live&lt;/span&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+          </div>
+        </section>
+
+        <!-- ===== 12B: BADGE / TAG ===== -->
+        <section id="badge" class="mb-20">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Badge / Tag</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Compact label for status, categories, and counts. Available as pill and square variants.</p>
+          </div>
+          <!-- Preview -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 space-y-6 mb-4">
+            <!-- Status badges -->
+            <div>
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Status — pill</p>
+              <div class="flex flex-wrap gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300">Draft</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>Live</span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Finalized</span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">Approved</span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">Cancelled</span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400">AI Draft</span>
+              </div>
+            </div>
+            <!-- Priority badges -->
+            <div>
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Priority — square</p>
+              <div class="flex flex-wrap gap-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">High</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">Medium</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 dark:bg-slate-600 text-gray-600 dark:text-gray-400">Low</span>
+              </div>
+            </div>
+            <!-- Dismissible tags -->
+            <div>
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Dismissible tags</p>
+              <div class="flex flex-wrap gap-2" id="tag-group">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400">Product <button onclick="this.closest('span').remove()" aria-label="Remove Product tag" class="hover:text-violet-900 dark:hover:text-violet-200 leading-none ml-0.5">×</button></span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">Engineering <button onclick="this.closest('span').remove()" aria-label="Remove Engineering tag" class="hover:text-blue-900 dark:hover:text-blue-200 leading-none ml-0.5">×</button></span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400">Q1 2026 <button onclick="this.closest('span').remove()" aria-label="Remove Q1 2026 tag" class="hover:text-teal-900 dark:hover:text-teal-200 leading-none ml-0.5">×</button></span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400">Urgent <button onclick="this.closest('span').remove()" aria-label="Remove Urgent tag" class="hover:text-rose-900 dark:hover:text-rose-200 leading-none ml-0.5">×</button></span>
+              </div>
+            </div>
+            <!-- Count badge -->
+            <div>
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Count badge</p>
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">Notifications <span class="bg-violet-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">3</span></div>
+                <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">Action items <span class="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">12</span></div>
+              </div>
+            </div>
+          </div>
+          <!-- Do / Don't -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-5">
+              <p class="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide mb-2">Do</p>
+              <p class="text-sm text-green-900 dark:text-green-200">Use consistent color semantics (red=danger, green=success, amber=warning) across all badge types.</p>
+            </div>
+            <div class="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-5">
+              <p class="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wide mb-2">Don't</p>
+              <p class="text-sm text-red-900 dark:text-red-200">Use more than 3 different badge colors per screen — it becomes noisy.</p>
+            </div>
+          </div>
+          <!-- Accessibility -->
+          <div class="rounded-2xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-5 mb-4">
+            <p class="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-2">Accessibility</p>
+            <p class="text-sm text-blue-900 dark:text-blue-200">Never rely on color alone to convey status. Always include a text label. Dismissible buttons need <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">aria-label="Remove [tag name] tag"</code>.</p>
+          </div>
+          <!-- Code -->
+          <div class="relative rounded-2xl bg-slate-900 p-5">
+            <button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)" class="absolute top-4 right-4 text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded border border-slate-700 hover:border-slate-500">Copy</button>
+            <pre class="text-sm text-slate-300 overflow-x-auto"><code>&lt;!-- Status pill --&gt;
+&lt;span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"&gt;Finalized&lt;/span&gt;
+
+&lt;!-- Priority square --&gt;
+&lt;span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"&gt;High&lt;/span&gt;
+
+&lt;!-- Dismissible tag --&gt;
+&lt;span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400"&gt;
+  Product
+  &lt;button onclick="this.closest('span').remove()" aria-label="Remove Product tag" class="hover:text-violet-900 leading-none ml-0.5"&gt;×&lt;/button&gt;
+&lt;/span&gt;
+
+&lt;!-- Count badge --&gt;
+&lt;span class="bg-violet-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center"&gt;3&lt;/span&gt;</code></pre>
+          </div>
+        </section>
+
+        <!-- ===== 12C: AVATAR ===== -->
+        <section id="avatar" class="mb-20">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Avatar</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">User identity display in 3 sizes with initials fallback and group stacking.</p>
+          </div>
+          <!-- Preview -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 space-y-6 mb-4">
+            <!-- Sizes -->
+            <div>
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Sizes</p>
+              <div class="flex items-end gap-6">
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center text-white text-xs font-semibold" aria-label="AY">AY</div>
+                  <span class="text-xs text-gray-400 font-mono">sm / w-8</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-semibold" aria-label="MR">MR</div>
+                  <span class="text-xs text-gray-400 font-mono">md / w-10</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-14 h-14 rounded-full bg-teal-500 flex items-center justify-center text-white text-lg font-semibold" aria-label="SL">SL</div>
+                  <span class="text-xs text-gray-400 font-mono">lg / w-14</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-20 h-20 rounded-full bg-amber-500 flex items-center justify-center text-white text-2xl font-semibold" aria-label="JK">JK</div>
+                  <span class="text-xs text-gray-400 font-mono">xl / w-20</span>
+                </div>
+                <!-- With status dot -->
+                <div class="flex flex-col items-center gap-2">
+                  <div class="relative">
+                    <div class="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center text-white text-sm font-semibold" aria-label="AP">AP</div>
+                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></span>
+                  </div>
+                  <span class="text-xs text-gray-400 font-mono">w/ status</span>
+                </div>
+              </div>
+            </div>
+            <!-- Group stack -->
+            <div>
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Group stack</p>
+              <div class="flex items-center gap-6">
+                <div class="flex -space-x-2">
+                  <div class="w-9 h-9 rounded-full bg-violet-500 border-2 border-white dark:border-slate-800 flex items-center justify-center text-white text-xs font-semibold" aria-label="AY">AY</div>
+                  <div class="w-9 h-9 rounded-full bg-blue-500 border-2 border-white dark:border-slate-800 flex items-center justify-center text-white text-xs font-semibold" aria-label="MR">MR</div>
+                  <div class="w-9 h-9 rounded-full bg-teal-500 border-2 border-white dark:border-slate-800 flex items-center justify-center text-white text-xs font-semibold" aria-label="SL">SL</div>
+                  <div class="w-9 h-9 rounded-full bg-gray-200 dark:bg-slate-600 border-2 border-white dark:border-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-300 text-xs font-semibold">+4</div>
+                </div>
+                <span class="text-sm text-gray-500 dark:text-gray-400">7 attendees</span>
+              </div>
+            </div>
+          </div>
+          <!-- Do / Don't -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-5">
+              <p class="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide mb-2">Do</p>
+              <p class="text-sm text-green-900 dark:text-green-200">Use initials as fallback when no photo is available. Generate consistent background colors from user name hash.</p>
+            </div>
+            <div class="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-5">
+              <p class="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wide mb-2">Don't</p>
+              <p class="text-sm text-red-900 dark:text-red-200">Stack more than 5 avatars without a "+N" overflow indicator.</p>
+            </div>
+          </div>
+          <!-- Accessibility -->
+          <div class="rounded-2xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-5 mb-4">
+            <p class="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-2">Accessibility</p>
+            <p class="text-sm text-blue-900 dark:text-blue-200">Avatar <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">img</code> needs <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">alt="[User full name]"</code>. Initials-only avatars need <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">aria-label="[User full name]"</code> on their wrapper.</p>
+          </div>
+          <!-- Code -->
+          <div class="relative rounded-2xl bg-slate-900 p-5">
+            <button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)" class="absolute top-4 right-4 text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded border border-slate-700 hover:border-slate-500">Copy</button>
+            <pre class="text-sm text-slate-300 overflow-x-auto"><code>&lt;!-- Initials avatar --&gt;
+&lt;div class="w-10 h-10 rounded-full bg-violet-500 flex items-center justify-center text-white text-sm font-semibold" aria-label="Alex Yeh"&gt;AY&lt;/div&gt;
+
+&lt;!-- With online status dot --&gt;
+&lt;div class="relative"&gt;
+  &lt;div class="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center text-white text-sm font-semibold" aria-label="Alice Park"&gt;AP&lt;/div&gt;
+  &lt;span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- Group stack --&gt;
+&lt;div class="flex -space-x-2"&gt;
+  &lt;div class="w-9 h-9 rounded-full bg-violet-500 border-2 border-white dark:border-slate-800 flex items-center justify-center text-white text-xs font-semibold" aria-label="Alex Yeh"&gt;AY&lt;/div&gt;
+  &lt;div class="w-9 h-9 rounded-full bg-gray-200 dark:bg-slate-600 border-2 border-white dark:border-slate-800 flex items-center justify-center text-gray-600 text-xs font-semibold"&gt;+4&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+          </div>
+        </section>
+
+        <!-- ===== 12D: EMPTY STATE ===== -->
+        <section id="empty-state" class="mb-20">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Empty State</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Shown when a list or view has no content. Always include an actionable CTA.</p>
+          </div>
+          <!-- Preview -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- No meetings -->
+              <div role="status" class="flex flex-col items-center justify-center py-10 px-6 text-center border border-dashed border-gray-200 dark:border-slate-600 rounded-xl">
+                <div class="w-14 h-14 rounded-2xl bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center mb-4">
+                  <svg class="w-7 h-7 text-violet-400 dark:text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">No meetings yet</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-[200px]">Schedule your first meeting to get started with AI transcription.</p>
+                <button class="inline-flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors" onclick="return false">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                  New Meeting
+                </button>
+              </div>
+              <!-- No results -->
+              <div role="status" class="flex flex-col items-center justify-center py-10 px-6 text-center border border-dashed border-gray-200 dark:border-slate-600 rounded-xl">
+                <div class="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-slate-700 flex items-center justify-center mb-4">
+                  <svg class="w-7 h-7 text-gray-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">No results found</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-[200px]">Try adjusting your search or filters to find what you're looking for.</p>
+                <button class="inline-flex items-center gap-1.5 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 px-4 py-2 rounded-lg text-xs font-medium transition-colors" onclick="return false">
+                  Clear filters
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Do / Don't -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-5">
+              <p class="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide mb-2">Do</p>
+              <p class="text-sm text-green-900 dark:text-green-200">Always include a clear CTA that helps users create content or adjust their view.</p>
+            </div>
+            <div class="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-5">
+              <p class="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wide mb-2">Don't</p>
+              <p class="text-sm text-red-900 dark:text-red-200">Show a generic "No data" message — explain what's missing and what to do.</p>
+            </div>
+          </div>
+          <!-- Accessibility -->
+          <div class="rounded-2xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-5 mb-4">
+            <p class="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-2">Accessibility</p>
+            <p class="text-sm text-blue-900 dark:text-blue-200">The empty state container should have <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">role="status"</code> to announce to screen readers when content appears/disappears.</p>
+          </div>
+          <!-- Code -->
+          <div class="relative rounded-2xl bg-slate-900 p-5">
+            <button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)" class="absolute top-4 right-4 text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded border border-slate-700 hover:border-slate-500">Copy</button>
+            <pre class="text-sm text-slate-300 overflow-x-auto"><code>&lt;div role="status" class="flex flex-col items-center justify-center py-10 px-6 text-center border border-dashed border-gray-200 dark:border-slate-600 rounded-xl"&gt;
+  &lt;div class="w-14 h-14 rounded-2xl bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center mb-4"&gt;
+    &lt;svg class="w-7 h-7 text-violet-400" ...&gt;&lt;/svg&gt;
+  &lt;/div&gt;
+  &lt;h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-1"&gt;No meetings yet&lt;/h4&gt;
+  &lt;p class="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-[200px]"&gt;
+    Schedule your first meeting to get started with AI transcription.
+  &lt;/p&gt;
+  &lt;button class="inline-flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors"&gt;
+    New Meeting
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre>
+          </div>
+        </section>
+
+        <!-- ===== 12E: PROGRESS BAR ===== -->
+        <section id="progress" class="mb-20">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Progress Bar</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Linear progress indicator for uploads, onboarding steps, and multi-step flows.</p>
+          </div>
+          <!-- Preview -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 space-y-6 mb-4">
+            <!-- Default -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Uploading transcript...</span>
+                <span class="text-xs font-semibold text-gray-900 dark:text-white">68%</span>
+              </div>
+              <div class="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="Uploading transcript: 68%">
+                <div class="bg-violet-600 h-2 rounded-full transition-all duration-500" style="width:68%"></div>
+              </div>
+            </div>
+            <!-- Success state -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">AI processing complete</span>
+                <span class="text-xs font-semibold text-green-600 dark:text-green-400">100%</span>
+              </div>
+              <div class="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="AI processing complete: 100%">
+                <div class="bg-green-500 h-2 rounded-full" style="width:100%"></div>
+              </div>
+            </div>
+            <!-- Segmented (step progress) -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Onboarding — Step 2 of 4</span>
+              </div>
+              <div class="flex gap-1">
+                <div class="flex-1 h-2 bg-violet-600 rounded-full"></div>
+                <div class="flex-1 h-2 bg-violet-600 rounded-full"></div>
+                <div class="flex-1 h-2 bg-gray-200 dark:bg-slate-700 rounded-full"></div>
+                <div class="flex-1 h-2 bg-gray-200 dark:bg-slate-700 rounded-full"></div>
+              </div>
+            </div>
+            <!-- Thin accent -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Action items resolved</span>
+                <span class="text-xs font-semibold text-gray-900 dark:text-white">15 / 23</span>
+              </div>
+              <div class="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-1.5" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="Action items resolved: 15 of 23">
+                <div class="bg-teal-500 h-1.5 rounded-full" style="width:65%"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Do / Don't -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-5">
+              <p class="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide mb-2">Do</p>
+              <p class="text-sm text-green-900 dark:text-green-200">Always label progress bars with a percentage or step count.</p>
+            </div>
+            <div class="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-5">
+              <p class="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wide mb-2">Don't</p>
+              <p class="text-sm text-red-900 dark:text-red-200">Use a spinner when progress can be tracked — show a progress bar instead.</p>
+            </div>
+          </div>
+          <!-- Accessibility -->
+          <div class="rounded-2xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-5 mb-4">
+            <p class="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-2">Accessibility</p>
+            <p class="text-sm text-blue-900 dark:text-blue-200"><code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">role="progressbar"</code>, <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">aria-valuenow</code>, <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">aria-valuemin="0"</code>, <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">aria-valuemax="100"</code>, <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">aria-label</code> describing what is loading.</p>
+          </div>
+          <!-- Code -->
+          <div class="relative rounded-2xl bg-slate-900 p-5">
+            <button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)" class="absolute top-4 right-4 text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded border border-slate-700 hover:border-slate-500">Copy</button>
+            <pre class="text-sm text-slate-300 overflow-x-auto"><code>&lt;div class="flex items-center justify-between mb-2"&gt;
+  &lt;span class="text-xs font-medium text-gray-700 dark:text-gray-300"&gt;Uploading transcript...&lt;/span&gt;
+  &lt;span class="text-xs font-semibold text-gray-900 dark:text-white"&gt;68%&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-2"
+     role="progressbar"
+     aria-valuenow="68"
+     aria-valuemin="0"
+     aria-valuemax="100"
+     aria-label="Uploading transcript: 68%"&gt;
+  &lt;div class="bg-violet-600 h-2 rounded-full transition-all duration-500" style="width:68%"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+          </div>
+        </section>
+
+        <!-- ===== 12F: COMMAND PALETTE ===== -->
+        <section id="command-palette" class="mb-20">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Command Palette</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Keyboard-first quick search and action launcher. Triggered by ⌘K.</p>
+          </div>
+          <!-- Preview -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 mb-4">
+            <div class="flex items-center gap-3 mb-6">
+              <button onclick="document.getElementById('cmd-palette-overlay').classList.add('open')" class="inline-flex items-center gap-2 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                Open command palette
+                <kbd class="ml-1 text-xs bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 rounded px-1.5 py-0.5 font-mono">⌘K</kbd>
+              </button>
+            </div>
+            <!-- Static mockup showing the palette UI -->
+            <div class="relative bg-gray-100 dark:bg-slate-900/60 rounded-xl p-4 border border-gray-200 dark:border-slate-700">
+              <p class="text-xs text-gray-400 mb-3">Preview (non-interactive)</p>
+              <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-600 overflow-hidden">
+                <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+                  <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                  <span class="text-sm text-gray-400">Search commands...</span>
+                </div>
+                <div class="p-2 max-h-64 overflow-auto">
+                  <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5">Recent</p>
+                  <div class="flex items-center gap-3 px-2 py-2 rounded-lg bg-violet-50 dark:bg-violet-900/30 cursor-pointer">
+                    <svg class="w-4 h-4 text-violet-500 dark:text-violet-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span class="text-sm text-gray-900 dark:text-white flex-1">New Meeting</span>
+                    <kbd class="text-xs bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded px-1.5 py-0.5 font-mono text-gray-500">⌘N</kbd>
+                  </div>
+                  <div class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer">
+                    <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="text-sm text-gray-700 dark:text-gray-300 flex-1">Settings</span>
+                  </div>
+                  <div class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer">
+                    <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    <span class="text-sm text-gray-700 dark:text-gray-300 flex-1">Notifications</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Do / Don't -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-5">
+              <p class="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide mb-2">Do</p>
+              <p class="text-sm text-green-900 dark:text-green-200">Trigger with ⌘K (Mac) / Ctrl+K (Windows). Always focus the input on open.</p>
+            </div>
+            <div class="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-5">
+              <p class="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wide mb-2">Don't</p>
+              <p class="text-sm text-red-900 dark:text-red-200">Put destructive actions (delete, archive) directly in the command palette without a confirmation step.</p>
+            </div>
+          </div>
+          <!-- Accessibility -->
+          <div class="rounded-2xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-5 mb-4">
+            <p class="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-2">Accessibility</p>
+            <p class="text-sm text-blue-900 dark:text-blue-200"><code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">role="dialog"</code>, <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">aria-modal="true"</code>, <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">aria-label="Command palette"</code>. Input has <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">role="combobox"</code>. Results list uses <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">role="listbox"</code>.</p>
+          </div>
+          <!-- Code -->
+          <div class="relative rounded-2xl bg-slate-900 p-5">
+            <button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)" class="absolute top-4 right-4 text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded border border-slate-700 hover:border-slate-500">Copy</button>
+            <pre class="text-sm text-slate-300 overflow-x-auto"><code>&lt;div role="dialog" aria-modal="true" aria-label="Command palette" class="fixed inset-0 z-[9980] flex items-start justify-center pt-[15vh] p-4 bg-black/50 backdrop-blur-sm"&gt;
+  &lt;div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-slate-600 overflow-hidden"&gt;
+    &lt;div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-slate-700"&gt;
+      &lt;input type="text" role="combobox" aria-expanded="true" aria-haspopup="listbox"
+             placeholder="Search commands..."
+             class="flex-1 bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none" /&gt;
+    &lt;/div&gt;
+    &lt;div role="listbox" class="p-2 max-h-80 overflow-auto"&gt;
+      &lt;div role="option" class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-violet-50 cursor-pointer"&gt;
+        &lt;span class="text-sm text-gray-700 dark:text-gray-300"&gt;New Meeting&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+          </div>
+        </section>
+
+        <!-- ===== 12G: FAB ===== -->
+        <section id="fab" class="mb-20">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">FAB</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Floating Action Button for the primary action on mobile. One per screen.</p>
+          </div>
+          <!-- Preview -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 mb-4">
+            <div class="flex flex-wrap items-end gap-8">
+              <!-- Standard round FAB -->
+              <div class="flex flex-col items-center gap-2">
+                <button class="w-14 h-14 rounded-full bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all" aria-label="New meeting">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                </button>
+                <span class="text-xs text-gray-400 font-mono">standard</span>
+              </div>
+              <!-- Extended FAB (label) -->
+              <div class="flex flex-col items-center gap-2">
+                <button class="inline-flex items-center gap-2 px-5 h-14 rounded-full bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white shadow-lg hover:shadow-xl font-medium transition-all" aria-label="New meeting">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                  New Meeting
+                </button>
+                <span class="text-xs text-gray-400 font-mono">extended</span>
+              </div>
+              <!-- Small FAB -->
+              <div class="flex flex-col items-center gap-2">
+                <button class="w-10 h-10 rounded-full bg-violet-600 hover:bg-violet-700 text-white shadow-md hover:shadow-lg flex items-center justify-center transition-all" aria-label="Add action item">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                </button>
+                <span class="text-xs text-gray-400 font-mono">small</span>
+              </div>
+              <!-- FAB on dark bg -->
+              <div class="flex flex-col items-center gap-2">
+                <div class="bg-slate-800 rounded-2xl p-4 flex items-center justify-center">
+                  <button class="w-14 h-14 rounded-full bg-white hover:bg-gray-100 text-violet-600 shadow-lg flex items-center justify-center transition-all" aria-label="New meeting">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                  </button>
+                </div>
+                <span class="text-xs text-gray-400 font-mono">on dark</span>
+              </div>
+            </div>
+          </div>
+          <!-- Do / Don't -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-5">
+              <p class="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide mb-2">Do</p>
+              <p class="text-sm text-green-900 dark:text-green-200">Use one FAB per screen for the single most common action.</p>
+            </div>
+            <div class="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-5">
+              <p class="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wide mb-2">Don't</p>
+              <p class="text-sm text-red-900 dark:text-red-200">Use FAB on desktop — use a prominent button in the header or toolbar instead.</p>
+            </div>
+          </div>
+          <!-- Accessibility -->
+          <div class="rounded-2xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-5 mb-4">
+            <p class="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-2">Accessibility</p>
+            <p class="text-sm text-blue-900 dark:text-blue-200">Always provide <code class="font-mono bg-blue-100 dark:bg-blue-900/40 px-1 rounded">aria-label</code> since FABs are usually icon-only. Minimum 56×56px touch target. Positioned above all content in the z-stack.</p>
+          </div>
+          <!-- Code -->
+          <div class="relative rounded-2xl bg-slate-900 p-5">
+            <button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText)" class="absolute top-4 right-4 text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded border border-slate-700 hover:border-slate-500">Copy</button>
+            <pre class="text-sm text-slate-300 overflow-x-auto"><code>&lt;!-- Standard FAB --&gt;
+&lt;button class="w-14 h-14 rounded-full bg-violet-600 hover:bg-violet-700 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all" aria-label="New meeting"&gt;
+  &lt;svg class="w-6 h-6" ...&gt;&lt;/svg&gt;
+&lt;/button&gt;
+
+&lt;!-- Extended FAB --&gt;
+&lt;button class="inline-flex items-center gap-2 px-5 h-14 rounded-full bg-violet-600 hover:bg-violet-700 text-white shadow-lg font-medium transition-all" aria-label="New meeting"&gt;
+  &lt;svg class="w-5 h-5" ...&gt;&lt;/svg&gt;
+  New Meeting
+&lt;/button&gt;</code></pre>
+          </div>
+        </section>
+
     </main>
+
+    <!-- Command Palette Overlay -->
+    <div id="cmd-palette-overlay" role="dialog" aria-modal="true" aria-label="Command palette" class="fixed inset-0 z-[9980] items-start justify-center pt-[15vh] p-4 bg-black/50 backdrop-blur-sm" onclick="if(event.target===this)this.classList.remove('open')">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-slate-600 overflow-hidden" onclick="event.stopPropagation()">
+        <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+          <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" role="combobox" aria-expanded="true" aria-haspopup="listbox" placeholder="Search commands, meetings, actions..." class="flex-1 bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none" id="cmd-input" oninput="filterCommands(this.value)" />
+          <kbd class="text-xs bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded px-1.5 py-0.5 font-mono text-gray-500 cursor-pointer" onclick="document.getElementById('cmd-palette-overlay').classList.remove('open')">Esc</kbd>
+        </div>
+        <div role="listbox" class="p-2 max-h-80 overflow-auto" id="cmd-results">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-1">Actions</p>
+          <div class="cmd-item flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/20 cursor-pointer group" onclick="document.getElementById('cmd-palette-overlay').classList.remove('open');showToast('New meeting created','success')">
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-violet-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-violet-700 dark:group-hover:text-violet-400 flex-1">New Meeting</span>
+            <kbd class="text-xs bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded px-1.5 py-0.5 font-mono text-gray-400">⌘N</kbd>
+          </div>
+          <div class="cmd-item flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/20 cursor-pointer group" onclick="document.getElementById('cmd-palette-overlay').classList.remove('open')">
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-violet-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-violet-700 dark:group-hover:text-violet-400 flex-1">Add Action Item</span>
+          </div>
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-2">Navigate</p>
+          <div class="cmd-item flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/20 cursor-pointer group" onclick="document.getElementById('cmd-palette-overlay').classList.remove('open')">
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-violet-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-violet-700 dark:group-hover:text-violet-400 flex-1">Go to Dashboard</span>
+            <kbd class="text-xs bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded px-1.5 py-0.5 font-mono text-gray-400">⌘H</kbd>
+          </div>
+          <div class="cmd-item flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/20 cursor-pointer group" onclick="document.getElementById('cmd-palette-overlay').classList.remove('open')">
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-violet-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-violet-700 dark:group-hover:text-violet-400 flex-1">Settings</span>
+            <kbd class="text-xs bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded px-1.5 py-0.5 font-mono text-gray-400">⌘,</kbd>
+          </div>
+          <div id="cmd-no-results" class="hidden text-center py-8 text-sm text-gray-400">No commands found</div>
+        </div>
+      </div>
+    </div>
 
     <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
 
@@ -2732,6 +3355,32 @@
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
             });
+        }
+
+        // Command palette
+        document.addEventListener('keydown', function(e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                var overlay = document.getElementById('cmd-palette-overlay');
+                overlay.classList.toggle('open');
+                if (overlay.classList.contains('open')) {
+                    setTimeout(function() { var input = document.getElementById('cmd-input'); if (input) { input.focus(); } }, 50);
+                }
+            }
+            if (e.key === 'Escape') {
+                document.getElementById('cmd-palette-overlay').classList.remove('open');
+            }
+        });
+        function filterCommands(q) {
+            var items = document.querySelectorAll('.cmd-item');
+            var found = 0;
+            items.forEach(function(item) {
+                var text = item.querySelector('span') ? item.querySelector('span').textContent.toLowerCase() : '';
+                if (!q || text.includes(q.toLowerCase())) { item.style.display = ''; found++; }
+                else { item.style.display = 'none'; }
+            });
+            var noResults = document.getElementById('cmd-no-results');
+            if (noResults) { noResults.classList.toggle('hidden', found > 0); }
         }
 
         // IntersectionObserver for active sidebar state
