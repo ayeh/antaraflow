@@ -31,6 +31,7 @@
 
         html {
             scroll-behavior: smooth;
+            scroll-padding-top: 56px;
         }
 
         .sidebar-link.active {
@@ -77,6 +78,10 @@
 
         /* Skeleton shimmer */
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
         .skeleton { background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
         html.dark .skeleton { background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
     </style>
@@ -3875,7 +3880,7 @@ localStorage.setItem('ds-dark', document.documentElement.classList.contains('dar
           </div>
           <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">antaraFlow Design System</h3>
           <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">v1.0 · March 2026</p>
-          <p class="text-xs text-gray-400 dark:text-gray-500">Built with Tailwind CSS v4 · Instrument Sans · Heroicons</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500">Built with Tailwind CSS (Play CDN) · Instrument Sans · Heroicons</p>
         </div>
 
     </main>
