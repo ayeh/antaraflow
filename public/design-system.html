@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>antaraFlow Design System v1.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+        }
+
+        :root {
+            --color-primary-50: #F5F3FF;
+            --color-primary-100: #EDE9FE;
+            --color-primary-200: #DDD6FE;
+            --color-primary-300: #C4B5FD;
+            --color-primary-400: #A78BFA;
+            --color-primary-500: #8B5CF6;
+            --color-primary-600: #7C3AED;
+            --color-primary-700: #6D28D9;
+            --color-secondary-500: #3B82F6;
+            --color-secondary-600: #2563EB;
+            --color-accent-500: #2DD4BF;
+            --color-accent-600: #0D9488;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .sidebar-link.active {
+            background: #EDE9FE;
+            color: #7C3AED;
+            font-weight: 600;
+        }
+
+        .dark .sidebar-link.active {
+            background: #4C1D95;
+            color: #C4B5FD;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+
+    <!-- Fixed Top Header -->
+    <header class="fixed top-0 left-0 right-0 h-14 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6">
+        <!-- Left: Logo + Title -->
+        <div class="flex items-center gap-3">
+            <!-- Violet logo icon -->
+            <div class="w-8 h-8 rounded-lg bg-violet-500 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <span class="font-bold text-gray-900 dark:text-white text-sm">antaraFlow</span>
+            <span class="text-gray-400 dark:text-gray-500 text-sm">/</span>
+            <span class="text-gray-500 dark:text-gray-400 text-sm">Design System</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300">v1.0</span>
+        </div>
+
+        <!-- Right: Dark mode toggle -->
+        <button
+            id="dark-mode-toggle"
+            onclick="toggleDarkMode()"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            aria-label="Toggle dark mode"
+        >
+            <!-- Moon icon (shown in light mode) -->
+            <svg id="icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+            </svg>
+            <!-- Sun icon (shown in dark mode) -->
+            <svg id="icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+            </svg>
+            <span id="dark-mode-label">Dark mode</span>
+        </button>
+    </header>
+
+    <!-- Fixed Left Sidebar -->
+    <aside class="fixed left-0 top-14 bottom-0 w-60 z-40 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 overflow-y-auto">
+        <nav class="py-4 px-3">
+
+            <!-- Foundations Group -->
+            <div class="mb-4">
+                <p class="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Foundations</p>
+                <a href="#colors" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Colors</a>
+                <a href="#typography" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Typography</a>
+                <a href="#spacing" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Spacing</a>
+                <a href="#grid" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Grid</a>
+                <a href="#elevation" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Elevation</a>
+            </div>
+
+            <!-- Components Group -->
+            <div class="mb-4">
+                <p class="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">Components</p>
+                <a href="#buttons" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Button</a>
+                <a href="#inputs" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Input</a>
+                <a href="#textarea" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Textarea</a>
+                <a href="#select" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Select</a>
+                <a href="#checkbox" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Checkbox &amp; Radio</a>
+                <a href="#toggle" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Toggle</a>
+                <a href="#fileupload" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">File Upload</a>
+                <a href="#alerts" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Alert</a>
+                <a href="#toast" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Toast</a>
+                <a href="#modal" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Modal</a>
+                <a href="#tooltip" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Tooltip</a>
+                <a href="#skeleton" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Skeleton</a>
+                <a href="#spinner" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Spinner</a>
+                <a href="#sidebar-nav" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Sidebar Nav</a>
+                <a href="#breadcrumb" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Breadcrumb</a>
+                <a href="#tabs" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Tabs</a>
+                <a href="#mobile-nav" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Mobile Nav</a>
+                <a href="#card" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Card</a>
+                <a href="#stat-card" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Stat Card</a>
+                <a href="#meeting-card" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Meeting Card</a>
+                <a href="#action-item" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Action Item</a>
+                <a href="#table" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Table</a>
+                <a href="#badge" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Badge</a>
+                <a href="#avatar" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Avatar</a>
+                <a href="#empty-state" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Empty State</a>
+                <a href="#progress" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Progress Bar</a>
+                <a href="#command-palette" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Command Palette</a>
+                <a href="#fab" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">FAB</a>
+            </div>
+
+            <!-- System Group -->
+            <div class="mb-4">
+                <p class="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">System</p>
+                <a href="#patterns" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Patterns</a>
+                <a href="#tokens" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Design Tokens</a>
+                <a href="#principles" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Principles</a>
+                <a href="#dev-guide" class="sidebar-link flex items-center px-3 py-1.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-0.5">Dev Guide</a>
+            </div>
+
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="ml-60 flex-1 px-12 py-10 max-w-5xl mt-14">
+        <!-- Section content will be added in subsequent tasks -->
+    </main>
+
+    <script>
+        // Dark mode toggle logic
+        (function () {
+            const stored = localStorage.getItem('ds-dark');
+            if (stored === 'true' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                updateDarkModeUI(true);
+            }
+        })();
+
+        function updateDarkModeUI(isDark) {
+            const moonIcon = document.getElementById('icon-moon');
+            const sunIcon = document.getElementById('icon-sun');
+            const label = document.getElementById('dark-mode-label');
+
+            if (!moonIcon || !sunIcon || !label) {
+                return;
+            }
+
+            if (isDark) {
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+                label.textContent = 'Light mode';
+            } else {
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+                label.textContent = 'Dark mode';
+            }
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('ds-dark', isDark ? 'true' : 'false');
+            updateDarkModeUI(isDark);
+        }
+
+        // Copy code function
+        function copyCode(btn) {
+            const pre = btn.closest('.code-block')?.querySelector('pre') || btn.previousElementSibling;
+            const text = pre ? pre.textContent : '';
+
+            navigator.clipboard.writeText(text).then(function () {
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(function () {
+                    btn.textContent = original;
+                }, 2000);
+            }).catch(function () {
+                // Fallback for clipboard API failure
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            });
+        }
+
+        // IntersectionObserver for active sidebar state
+        (function () {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const sections = document.querySelectorAll('section[id]');
+
+            if (sections.length === 0 || sidebarLinks.length === 0) {
+                return;
+            }
+
+            const linkMap = {};
+            sidebarLinks.forEach(function (link) {
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    linkMap[href.slice(1)] = link;
+                }
+            });
+
+            const observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    const id = entry.target.id;
+                    const link = linkMap[id];
+                    if (!link) {
+                        return;
+                    }
+
+                    if (entry.isIntersecting) {
+                        // Remove active from all links first
+                        sidebarLinks.forEach(function (l) {
+                            l.classList.remove('active');
+                        });
+                        link.classList.add('active');
+                    }
+                });
+            }, {
+                rootMargin: '-20% 0px -70% 0px',
+            });
+
+            sections.forEach(function (section) {
+                observer.observe(section);
+            });
+        })();
+    </script>
+
+</body>
+</html>
