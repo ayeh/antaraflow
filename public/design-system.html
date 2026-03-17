@@ -216,7 +216,7 @@
         }
 
         // IntersectionObserver for active sidebar state
-        (function () {
+        document.addEventListener('DOMContentLoaded', function () {
             const sidebarLinks = document.querySelectorAll('.sidebar-link');
             const sections = document.querySelectorAll('section[id]');
 
@@ -233,21 +233,19 @@
             });
 
             const observer = new IntersectionObserver(function (entries) {
+                let topEntry = null;
                 entries.forEach(function (entry) {
-                    const id = entry.target.id;
-                    const link = linkMap[id];
-                    if (!link) {
-                        return;
-                    }
-
                     if (entry.isIntersecting) {
-                        // Remove active from all links first
-                        sidebarLinks.forEach(function (l) {
-                            l.classList.remove('active');
-                        });
-                        link.classList.add('active');
+                        if (!topEntry || entry.boundingClientRect.top < topEntry.boundingClientRect.top) {
+                            topEntry = entry;
+                        }
                     }
                 });
+                if (topEntry) {
+                    sidebarLinks.forEach(function (l) { l.classList.remove('active'); });
+                    const link = linkMap[topEntry.target.id];
+                    if (link) { link.classList.add('active'); }
+                }
             }, {
                 rootMargin: '-20% 0px -70% 0px',
             });
@@ -255,7 +253,7 @@
             sections.forEach(function (section) {
                 observer.observe(section);
             });
-        })();
+        });
     </script>
 
 </body>
