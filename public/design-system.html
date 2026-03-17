@@ -54,6 +54,26 @@
 
         .drop-active { border-color: #8B5CF6 !important; background-color: #F5F3FF; }
         html.dark .drop-active { background-color: rgba(139,92,246,0.1); }
+
+        /* Tooltip */
+        .tooltip-wrap { position: relative; display: inline-block; }
+        .tooltip-tip {
+          position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(4px);
+          background: #1e293b; color: #f1f5f9; font-size: 12px; font-weight: 500;
+          padding: 5px 10px; border-radius: 6px; white-space: nowrap;
+          opacity: 0; pointer-events: none; transition: opacity 0.15s, transform 0.15s;
+          z-index: 100;
+        }
+        .tooltip-wrap:hover .tooltip-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .tooltip-tip.right { bottom: auto; left: calc(100% + 8px); top: 50%; transform: translateY(-50%) translateX(4px); }
+        .tooltip-wrap:hover .tooltip-tip.right { transform: translateY(-50%) translateX(0); }
+        .tooltip-tip.bottom { bottom: auto; top: calc(100% + 8px); transform: translateX(-50%) translateY(-4px); }
+        .tooltip-wrap:hover .tooltip-tip.bottom { transform: translateX(-50%) translateY(0); }
+
+        /* Skeleton shimmer */
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .skeleton { background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+        html.dark .skeleton { background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
     </style>
 </head>
 <body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
@@ -1204,9 +1224,620 @@
 &lt;/div&gt;</code></pre>
             </div>
         </section>
+
+        <!-- ==================== TASK 8A: ALERTS ==================== -->
+        <section id="alerts" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Alert</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Inline messages for system feedback. Always contextual to the content around them.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 space-y-3">
+                <!-- Info -->
+                <div class="flex gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                    <svg class="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-blue-800 dark:text-blue-300">Transcription in progress</p>
+                        <p class="text-xs text-blue-700 dark:text-blue-400 mt-0.5">AI is processing your recording. This usually takes 2–3 minutes.</p>
+                    </div>
+                    <button onclick="this.closest('.flex').remove()" class="text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 shrink-0 text-lg leading-none">&times;</button>
+                </div>
+                <!-- Success -->
+                <div class="flex gap-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
+                    <svg class="w-5 h-5 text-green-500 dark:text-green-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-green-800 dark:text-green-300">Meeting finalized successfully</p>
+                        <p class="text-xs text-green-700 dark:text-green-400 mt-0.5">All attendees have been notified and the minutes are locked.</p>
+                    </div>
+                    <button onclick="this.closest('.flex').remove()" class="text-green-400 hover:text-green-600 dark:hover:text-green-300 shrink-0 text-lg leading-none">&times;</button>
+                </div>
+                <!-- Warning -->
+                <div class="flex gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+                    <svg class="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">3 action items overdue</p>
+                        <p class="text-xs text-amber-700 dark:text-amber-400 mt-0.5">Review and reassign overdue items to keep the project on track.</p>
+                    </div>
+                    <button onclick="this.closest('.flex').remove()" class="text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 shrink-0 text-lg leading-none">&times;</button>
+                </div>
+                <!-- Danger -->
+                <div class="flex gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+                    <svg class="w-5 h-5 text-red-500 dark:text-red-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-red-800 dark:text-red-300">Failed to save changes</p>
+                        <p class="text-xs text-red-700 dark:text-red-400 mt-0.5">Your changes could not be saved. Please check your connection and try again.</p>
+                    </div>
+                    <button onclick="this.closest('.flex').remove()" class="text-red-400 hover:text-red-600 dark:hover:text-red-300 shrink-0 text-lg leading-none">&times;</button>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Place alerts inline near the content they relate to, not always at the top of the page.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Use alerts for every action result — use Toast for transient confirmations.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Use <code>role="alert"</code> for errors and important warnings so screen readers announce them immediately.</li>
+                    <li>Info/success can use <code>role="status"</code> for polite announcements.</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;!-- Info alert (role="status" for polite announcement) --&gt;
+&lt;div role="status" class="flex gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4"&gt;
+  &lt;svg class="w-5 h-5 text-blue-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"&gt;...&lt;/svg&gt;
+  &lt;div class="flex-1 min-w-0"&gt;
+    &lt;p class="text-sm font-semibold text-blue-800"&gt;Transcription in progress&lt;/p&gt;
+    &lt;p class="text-xs text-blue-700 mt-0.5"&gt;AI is processing your recording.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;button onclick="this.closest('.flex').remove()" class="text-blue-400 hover:text-blue-600 text-lg leading-none"&gt;&amp;times;&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Error alert (role="alert" for immediate announcement) --&gt;
+&lt;div role="alert" class="flex gap-3 bg-red-50 border border-red-200 rounded-xl p-4"&gt;
+  &lt;svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"&gt;...&lt;/svg&gt;
+  &lt;div class="flex-1 min-w-0"&gt;
+    &lt;p class="text-sm font-semibold text-red-800"&gt;Failed to save changes&lt;/p&gt;
+    &lt;p class="text-xs text-red-700 mt-0.5"&gt;Please check your connection and try again.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 8B: TOAST ==================== -->
+        <section id="toast" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Toast</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Transient notifications for action confirmations. Auto-dismiss after 4 seconds.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Variants (static preview)</p>
+                <div class="space-y-2 mb-6 max-w-sm">
+                    <div class="flex items-center gap-3 bg-green-600 text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium">
+                        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        Meeting saved successfully
+                    </div>
+                    <div class="flex items-center gap-3 bg-red-600 text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium">
+                        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                        Failed to delete action item
+                    </div>
+                    <div class="flex items-center gap-3 bg-amber-500 text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium">
+                        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        Unsaved changes will be lost
+                    </div>
+                    <div class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium">
+                        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                        Transcription ready to review
+                    </div>
+                </div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Live demo</p>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="showToast('Meeting saved successfully!','success')" class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors">Fire success</button>
+                    <button onclick="showToast('Failed to delete item','error')" class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">Fire error</button>
+                    <button onclick="showToast('Unsaved changes will be lost','warning')" class="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors">Fire warning</button>
+                    <button onclick="showToast('Transcription is ready','info')" class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">Fire info</button>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Use toasts for confirmations of completed actions (save, delete, copy).</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Use toasts for errors that require user action — use an inline Alert instead.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li><code>role="alert"</code> on each toast so screen readers announce it immediately.</li>
+                    <li>Keep messages under 80 characters. Never require interaction to dismiss.</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">function showToast(msg, type) {
+  var colors = { success: 'bg-green-600', error: 'bg-red-600', warning: 'bg-amber-500', info: 'bg-blue-600' };
+  var t = type || 'info';
+  var toast = document.createElement('div');
+  toast.className = 'pointer-events-auto flex items-center gap-3 ' + (colors[t] || colors.info)
+    + ' text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium'
+    + ' opacity-0 translate-y-2 transition-all duration-300';
+  toast.setAttribute('role', 'alert');
+  toast.innerHTML = '&lt;span&gt;' + msg + '&lt;/span&gt;';
+  var container = document.getElementById('toast-container');
+  container.appendChild(toast);
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      toast.classList.remove('opacity-0', 'translate-y-2');
+    });
+  });
+  setTimeout(function() {
+    toast.classList.add('opacity-0', 'translate-y-2');
+    setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+  }, 4000);
+}</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 8C: MODAL ==================== -->
+        <section id="modal" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Modal</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Dialogs for confirmations, forms, and contextual detail. Always trap focus inside.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Variants</p>
+                <div class="flex gap-3 flex-wrap mb-6">
+                    <button onclick="document.getElementById('modal-confirm').classList.remove('hidden')" class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Confirmation modal</button>
+                    <button onclick="document.getElementById('modal-form').classList.remove('hidden')" class="inline-flex items-center gap-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Form modal</button>
+                </div>
+                <!-- anatomy labels -->
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Anatomy</p>
+                <div class="relative bg-gray-50 dark:bg-slate-900/50 rounded-xl p-4 border border-gray-200 dark:border-slate-700">
+                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-sm mx-auto p-5 border border-gray-100 dark:border-slate-700">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white">Modal title</span>
+                            <span class="text-gray-400 text-sm">✕</span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Modal body content. Keep it brief and focused on a single task.</p>
+                        <div class="flex gap-2 justify-end">
+                            <span class="px-3 py-1.5 text-xs bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-lg">Cancel</span>
+                            <span class="px-3 py-1.5 text-xs bg-violet-600 text-white rounded-lg">Confirm</span>
+                        </div>
+                    </div>
+                    <!-- anatomy callouts -->
+                    <div class="absolute top-2 left-2 text-xs text-gray-400">① Backdrop</div>
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 px-2 py-0.5 rounded font-medium">② Dialog container</div>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Use modals for actions that need explicit confirmation or a focused form.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Open modals from modals — keep to a single level of overlay.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li><code>role="dialog"</code>, <code>aria-modal="true"</code>, <code>aria-labelledby</code> pointing to the title.</li>
+                    <li>Trap focus inside when open. Close on Escape key.</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;div role="dialog" aria-modal="true" aria-labelledby="modal-title"
+  class="fixed inset-0 z-[9990] flex items-center justify-center p-4"&gt;
+  &lt;div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+    onclick="closeModal()"&gt;&lt;/div&gt;
+  &lt;div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6"&gt;
+    &lt;div class="flex items-center justify-between mb-4"&gt;
+      &lt;h3 id="modal-title" class="text-base font-semibold text-gray-900"&gt;Finalize meeting?&lt;/h3&gt;
+      &lt;button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none"&gt;&amp;times;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;p class="text-sm text-gray-600 mb-6"&gt;This action cannot be undone.&lt;/p&gt;
+    &lt;div class="flex gap-3 justify-end"&gt;
+      &lt;button onclick="closeModal()" class="px-4 py-2 text-sm font-medium bg-gray-100 rounded-lg"&gt;Cancel&lt;/button&gt;
+      &lt;button class="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg"&gt;Confirm&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- Confirmation Modal -->
+        <div id="modal-confirm" class="hidden fixed inset-0 z-[9990] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="this.parentElement.classList.add('hidden')"></div>
+            <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 animate-[fadeUp_0.2s_ease]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Finalize meeting?</h3>
+                    <button onclick="document.getElementById('modal-confirm').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">&times;</button>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">This will lock the minutes and notify all 5 attendees. This action cannot be undone.</p>
+                <div class="flex gap-3 justify-end">
+                    <button onclick="document.getElementById('modal-confirm').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">Cancel</button>
+                    <button onclick="document.getElementById('modal-confirm').classList.add('hidden');showToast('Meeting finalized successfully!','success')" class="px-4 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-lg transition-colors">Finalize</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Modal -->
+        <div id="modal-form" class="hidden fixed inset-0 z-[9990] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="this.parentElement.classList.add('hidden')"></div>
+            <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Add action item</h3>
+                    <button onclick="document.getElementById('modal-form').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">&times;</button>
+                </div>
+                <div class="px-6 py-5 space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Title</label>
+                        <input type="text" placeholder="What needs to be done?" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Due date</label>
+                        <input type="date" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                    </div>
+                </div>
+                <div class="flex gap-3 justify-end px-6 py-4 border-t border-gray-200 dark:border-slate-700">
+                    <button onclick="document.getElementById('modal-form').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">Cancel</button>
+                    <button onclick="document.getElementById('modal-form').classList.add('hidden');showToast('Action item created!','success')" class="px-4 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-lg transition-colors">Create</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TASK 9A: TOOLTIP ==================== -->
+        <section id="tooltip" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Tooltip</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Contextual hints for icons, truncated text, and keyboard shortcuts.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-8">
+                <div class="flex flex-wrap gap-8 items-center justify-center">
+                    <!-- Top -->
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-xs text-gray-400 mb-1">Top</span>
+                        <div class="tooltip-wrap">
+                            <button class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">Hover me</button>
+                            <div class="tooltip-tip">Keyboard: ⌘S to save</div>
+                        </div>
+                    </div>
+                    <!-- Right -->
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-xs text-gray-400 mb-1">Right</span>
+                        <div class="tooltip-wrap">
+                            <button class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">Hover me</button>
+                            <div class="tooltip-tip right">Opens in new tab</div>
+                        </div>
+                    </div>
+                    <!-- Bottom -->
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-xs text-gray-400 mb-1">Bottom</span>
+                        <div class="tooltip-wrap">
+                            <button class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">Hover me</button>
+                            <div class="tooltip-tip bottom">Delete this item</div>
+                        </div>
+                    </div>
+                    <!-- Icon button example -->
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-xs text-gray-400 mb-1">Icon button</span>
+                        <div class="tooltip-wrap">
+                            <button class="w-9 h-9 flex items-center justify-center bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors" aria-label="Download transcript">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            </button>
+                            <div class="tooltip-tip">Download transcript</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Use tooltips for icon-only buttons and keyboard shortcut hints.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Put essential information only in a tooltip — it's inaccessible on mobile and for keyboard users.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Tooltip content must also be in <code>aria-label</code> or <code>aria-describedby</code>.</li>
+                    <li>Never put interactive content inside a tooltip.</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;!-- CSS-only tooltip (top placement) --&gt;
+&lt;div class="tooltip-wrap"&gt;
+  &lt;button aria-label="Download transcript"&gt;
+    &lt;svg ...&gt;&lt;/svg&gt;
+  &lt;/button&gt;
+  &lt;div class="tooltip-tip"&gt;Download transcript&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Right placement --&gt;
+&lt;div class="tooltip-wrap"&gt;
+  &lt;button&gt;Hover me&lt;/button&gt;
+  &lt;div class="tooltip-tip right"&gt;Opens in new tab&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Bottom placement --&gt;
+&lt;div class="tooltip-wrap"&gt;
+  &lt;button&gt;Hover me&lt;/button&gt;
+  &lt;div class="tooltip-tip bottom"&gt;Delete this item&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 9B: SKELETON LOADER ==================== -->
+        <section id="skeleton" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Skeleton Loader</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Placeholder content shown while data loads. Reduces perceived wait time.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Text skeleton -->
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Text</p>
+                        <div class="space-y-2.5" aria-busy="true" aria-label="Loading...">
+                            <div class="skeleton h-4 rounded w-full"></div>
+                            <div class="skeleton h-4 rounded w-5/6"></div>
+                            <div class="skeleton h-4 rounded w-4/6"></div>
+                            <div class="skeleton h-4 rounded w-full"></div>
+                            <div class="skeleton h-4 rounded w-3/6"></div>
+                        </div>
+                    </div>
+                    <!-- Card skeleton -->
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Card</p>
+                        <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-4 space-y-3" aria-busy="true" aria-label="Loading...">
+                            <div class="flex items-center gap-3">
+                                <div class="skeleton w-10 h-10 rounded-full shrink-0"></div>
+                                <div class="space-y-2 flex-1">
+                                    <div class="skeleton h-3.5 rounded w-3/4"></div>
+                                    <div class="skeleton h-3 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton h-3 rounded w-full"></div>
+                            <div class="skeleton h-3 rounded w-5/6"></div>
+                            <div class="skeleton h-8 rounded-lg w-full mt-2"></div>
+                        </div>
+                    </div>
+                    <!-- Avatar skeleton -->
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Avatar group</p>
+                        <div class="space-y-3" aria-busy="true" aria-label="Loading...">
+                            <div class="flex items-center gap-3">
+                                <div class="skeleton w-10 h-10 rounded-full shrink-0"></div>
+                                <div class="space-y-2 flex-1">
+                                    <div class="skeleton h-3.5 rounded w-2/3"></div>
+                                    <div class="skeleton h-3 rounded w-1/3"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="skeleton w-10 h-10 rounded-full shrink-0"></div>
+                                <div class="space-y-2 flex-1">
+                                    <div class="skeleton h-3.5 rounded w-3/4"></div>
+                                    <div class="skeleton h-3 rounded w-2/5"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="skeleton w-10 h-10 rounded-full shrink-0"></div>
+                                <div class="space-y-2 flex-1">
+                                    <div class="skeleton h-3.5 rounded w-1/2"></div>
+                                    <div class="skeleton h-3 rounded w-1/4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Match skeleton shapes to the real content they replace.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Show skeletons for less than 300ms — use a simple spinner for fast operations.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li>Add <code>aria-busy="true"</code> on the container so screen readers know content is loading.</li>
+                    <li>Add <code>aria-label="Loading..."</code> to announce the loading state.</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;!-- Card skeleton --&gt;
+&lt;div class="border rounded-xl p-4 space-y-3" aria-busy="true" aria-label="Loading..."&gt;
+  &lt;div class="flex items-center gap-3"&gt;
+    &lt;div class="skeleton w-10 h-10 rounded-full"&gt;&lt;/div&gt;
+    &lt;div class="space-y-2 flex-1"&gt;
+      &lt;div class="skeleton h-3.5 rounded w-3/4"&gt;&lt;/div&gt;
+      &lt;div class="skeleton h-3 rounded w-1/2"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="skeleton h-3 rounded w-full"&gt;&lt;/div&gt;
+  &lt;div class="skeleton h-3 rounded w-5/6"&gt;&lt;/div&gt;
+  &lt;div class="skeleton h-8 rounded-lg w-full"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== TASK 9C: SPINNER ==================== -->
+        <section id="spinner" class="mb-20">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Spinner</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Inline loading indicator for buttons, data tables, and page transitions.</p>
+            </div>
+
+            <!-- Preview panel -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6">
+                <div class="flex items-end gap-8 flex-wrap">
+                    <!-- sm -->
+                    <div class="flex flex-col items-center gap-2">
+                        <svg class="w-4 h-4 animate-spin text-violet-600" role="status" aria-label="Loading" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        <span class="text-xs text-gray-400 font-mono">sm / w-4</span>
+                    </div>
+                    <!-- md -->
+                    <div class="flex flex-col items-center gap-2">
+                        <svg class="w-6 h-6 animate-spin text-violet-600" role="status" aria-label="Loading" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        <span class="text-xs text-gray-400 font-mono">md / w-6</span>
+                    </div>
+                    <!-- lg -->
+                    <div class="flex flex-col items-center gap-2">
+                        <svg class="w-10 h-10 animate-spin text-violet-600" role="status" aria-label="Loading" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        <span class="text-xs text-gray-400 font-mono">lg / w-10</span>
+                    </div>
+                    <!-- On dark bg -->
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="bg-violet-600 w-12 h-12 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 animate-spin text-white" role="status" aria-label="Loading" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        </div>
+                        <span class="text-xs text-gray-400 font-mono">on color</span>
+                    </div>
+                    <!-- In button -->
+                    <div class="flex flex-col items-center gap-2">
+                        <button disabled class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-75 cursor-not-allowed" aria-busy="true">
+                            <svg class="w-4 h-4 animate-spin" role="status" aria-label="Loading" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            Saving...
+                        </button>
+                        <span class="text-xs text-gray-400 font-mono">in button</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Do/Don't panel -->
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">✓ Do</div>
+                    <p class="text-sm text-green-800 dark:text-green-300">Always pair the spinner with a text label like "Saving..." or "Loading..." for context.</p>
+                </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+                    <div class="text-xs font-semibold text-red-700 dark:text-red-400 mb-2">✗ Don't</div>
+                    <p class="text-sm text-red-800 dark:text-red-300">Use a spinner for operations longer than ~5s — show a progress bar with percentage instead.</p>
+                </div>
+            </div>
+
+            <!-- Accessibility panel -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mt-4">
+                <div class="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">Accessibility</div>
+                <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li><code>role="status"</code> and <code>aria-label="Loading"</code> on the spinner SVG.</li>
+                    <li><code>aria-busy="true"</code> on the container being loaded.</li>
+                </ul>
+            </div>
+
+            <!-- Code panel -->
+            <div class="code-block relative bg-slate-900 rounded-2xl p-5 mt-4">
+                <button onclick="copyCode(this)" class="copy-btn absolute top-3 right-3 text-xs bg-slate-700 hover:bg-slate-600 text-gray-300 px-3 py-1.5 rounded-lg transition-colors">Copy</button>
+                <pre><code class="text-xs text-slate-300 font-mono leading-relaxed">&lt;!-- Standalone spinner --&gt;
+&lt;svg class="w-6 h-6 animate-spin text-violet-600"
+  role="status" aria-label="Loading"
+  fill="none" viewBox="0 0 24 24"&gt;
+  &lt;circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/&gt;
+  &lt;path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/&gt;
+&lt;/svg&gt;
+
+&lt;!-- In a button --&gt;
+&lt;button disabled aria-busy="true"
+  class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-75 cursor-not-allowed"&gt;
+  &lt;svg class="w-4 h-4 animate-spin" role="status" aria-label="Loading" fill="none" viewBox="0 0 24 24"&gt;
+    &lt;circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/&gt;
+    &lt;path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/&gt;
+  &lt;/svg&gt;
+  Saving...
+&lt;/button&gt;</code></pre>
+            </div>
+        </section>
     </main>
 
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+
     <script>
+        // Toast notification
+        function showToast(msg, type) {
+            var colors = { success: 'bg-green-600', error: 'bg-red-600', warning: 'bg-amber-500', info: 'bg-blue-600' };
+            var icons = {
+                success: '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>',
+                error: '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>',
+                warning: '<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>',
+                info: '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>'
+            };
+            var t = type || 'info';
+            var toast = document.createElement('div');
+            toast.className = 'pointer-events-auto flex items-center gap-3 ' + (colors[t] || colors.info) + ' text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium opacity-0 translate-y-2 transition-all duration-300';
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = '<svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">' + (icons[t] || icons.info) + '</svg><span>' + msg + '</span>';
+            var container = document.getElementById('toast-container');
+            container.appendChild(toast);
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    toast.classList.remove('opacity-0', 'translate-y-2');
+                });
+            });
+            setTimeout(function () {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(function () { if (toast.parentNode) { toast.parentNode.removeChild(toast); } }, 300);
+            }, 4000);
+        }
+
         // Dark mode toggle logic
         (function () {
             const stored = localStorage.getItem('ds-dark');
