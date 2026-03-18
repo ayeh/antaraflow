@@ -17,21 +17,16 @@
         x-init="recentMeetings = {!! \Illuminate\Support\Js::from($recentMeetings ?? []) !!}"
         class="min-h-full"
     >
-        {{-- Icon Rail (desktop only) --}}
+        {{-- Sidebar (desktop only) --}}
         <div class="hidden md:block">
-            @include('layouts.partials.icon-rail')
-        </div>
-
-        {{-- Flyout Panel (desktop only) --}}
-        <div class="hidden md:block">
-            @include('layouts.partials.flyout-panel')
+            @include('layouts.partials.sidebar')
+            @include('layouts.partials.settings-flyout')
         </div>
 
         {{-- Offline Indicator --}}
         <x-offline-indicator />
 
-        {{-- Main content area: offset by rail width (48px) + left margin (12px) + gap (12px) = 72px --}}
-        <div class="md:ml-[72px] flex flex-col min-h-screen">
+        <div :class="sidebarCollapsed ? 'md:ml-14' : 'md:ml-56'" class="flex flex-col min-h-screen transition-all duration-300 ease-in-out">
             @include('layouts.partials.header')
 
             @if(session('success'))
