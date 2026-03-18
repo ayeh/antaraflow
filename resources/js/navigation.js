@@ -57,6 +57,7 @@ export default function appState() {
         toggleSidebar() {
             this.sidebarCollapsed = !this.sidebarCollapsed;
             localStorage.setItem('sidebar_collapsed', this.sidebarCollapsed);
+            this.activeFlyout = null;
         },
 
         searchGlobal() {

@@ -77,7 +77,7 @@ $isSettingsActive = request()->routeIs(
             >antaraFLOW</span>
         </a>
         <button
-            @click="toggleSidebar()"
+            @click.stop="toggleSidebar()"
             class="shrink-0 p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200
                    hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
             :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
