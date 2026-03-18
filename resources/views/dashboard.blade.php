@@ -141,6 +141,7 @@
                 </div>
                 @forelse($thisWeekMeetings as $meeting)
                     <a href="{{ route('meetings.show', $meeting) }}"
+                       aria-label="{{ $meeting->title }}"
                        class="flex items-start gap-4 px-5 py-4 hover:bg-gray-50 dark:hover:bg-slate-700/40 transition-colors border-b border-gray-100 dark:border-slate-700/50 last:border-0">
                         {{-- Date badge --}}
                         <div class="shrink-0 w-11 text-center">
