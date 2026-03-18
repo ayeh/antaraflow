@@ -156,7 +156,7 @@ $isSettingsActive = request()->routeIs(
         {{-- Settings --}}
         <div class="relative group">
             <button
-                @click="activeFlyout = activeFlyout === 'settings' ? null : 'settings'"
+                @click.stop="activeFlyout = activeFlyout === 'settings' ? null : 'settings'"
                 :aria-expanded="activeFlyout === 'settings'"
                 class="flex items-center gap-3 w-full px-2.5 py-2.5 rounded-xl transition-all duration-150
                        {{ $isSettingsActive
@@ -208,7 +208,7 @@ $isSettingsActive = request()->routeIs(
     {{-- Avatar / Profile (bottom) --}}
     <div class="shrink-0 px-2 py-3 border-t border-slate-200 dark:border-slate-700">
         <button
-            @click="activeFlyout = activeFlyout === 'profile' ? null : 'profile'"
+            @click.stop="activeFlyout = activeFlyout === 'profile' ? null : 'profile'"
             :aria-expanded="activeFlyout === 'profile'"
             class="relative group/profile flex items-center gap-3 w-full px-2 py-2 rounded-xl
                    hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all duration-150"
