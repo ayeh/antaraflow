@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Account\Models\AuditLog;
 use App\Domain\Account\Services\AuthorizationService;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Support\Enums\ActionItemStatus;
+use App\Support\Enums\MeetingStatus;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
@@ -20,13 +22,58 @@ class DashboardController extends Controller
         $user = auth()->user();
         $orgId = $user->current_organization_id;
 
-        $recentMeetings = MinutesOfMeeting::query()
+        // Personalized stat card data
+        $myActionsCount = ActionItem::query()
             ->where('organization_id', $orgId)
-            ->with('createdBy')
-            ->latest()
-            ->take(5)
+            ->where('assigned_to', $user->id)
+            ->whereIn('status', [ActionItemStatus::Open, ActionItemStatus::InProgress])
+            ->count();
+
+        $myOverdueCount = ActionItem::query()
+            ->where('organization_id', $orgId)
+            ->where('assigned_to', $user->id)
+            ->whereNotIn('status', [ActionItemStatus::Completed, ActionItemStatus::Cancelled, ActionItemStatus::CarriedForward])
+            ->where('due_date', '<', now())
+            ->count();
+
+        $meetingsThisWeek = MinutesOfMeeting::query()
+            ->where('organization_id', $orgId)
+            ->whereBetween('meeting_date', [now()->startOfWeek(), now()->endOfWeek()])
+            ->count();
+
+        $pendingApproval = MinutesOfMeeting::query()
+            ->where('organization_id', $orgId)
+            ->where('status', MeetingStatus::Finalized)
+            ->count();
+
+        $myTotal = ActionItem::query()
+            ->where('organization_id', $orgId)
+            ->where('assigned_to', $user->id)
+            ->count();
+
+        $myCompleted = ActionItem::query()
+            ->where('organization_id', $orgId)
+            ->where('assigned_to', $user->id)
+            ->where('status', ActionItemStatus::Completed)
+            ->count();
+
+        $stats = [
+            'my_actions' => $myActionsCount,
+            'my_overdue' => $myOverdueCount,
+            'meetings_this_week' => $meetingsThisWeek,
+            'pending_approval' => $pendingApproval,
+            'my_completion_rate' => $myTotal > 0 ? (int) round(($myCompleted / $myTotal) * 100) : 0,
+        ];
+
+        // This week's meetings for the left column
+        $thisWeekMeetings = MinutesOfMeeting::query()
+            ->where('organization_id', $orgId)
+            ->whereBetween('meeting_date', [now()->startOfWeek(), now()->endOfWeek()])
+            ->with(['project'])
+            ->orderBy('meeting_date')
             ->get();
 
+        // My upcoming action items (assigned to me, not done)
         $upcomingActions = ActionItem::query()
             ->where('organization_id', $orgId)
             ->where('assigned_to', $user->id)
@@ -35,27 +82,26 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $totalActions = ActionItem::query()->where('organization_id', $orgId)->count();
-        $completedActions = ActionItem::query()->where('organization_id', $orgId)->where('status', ActionItemStatus::Completed)->count();
-        $completionRate = $totalActions > 0 ? (int) round(($completedActions / $totalActions) * 100) : 0;
-
-        $stats = [
-            'total_meetings' => MinutesOfMeeting::query()->where('organization_id', $orgId)->count(),
-            'pending_actions' => ActionItem::query()->where('organization_id', $orgId)->whereIn('status', [ActionItemStatus::Open, ActionItemStatus::InProgress])->count(),
-            'overdue_actions' => ActionItem::query()->where('organization_id', $orgId)->whereNotIn('status', [ActionItemStatus::Completed, ActionItemStatus::Cancelled, ActionItemStatus::CarriedForward])->where('due_date', '<', now())->count(),
-            'meetings_this_week' => MinutesOfMeeting::query()->where('organization_id', $orgId)->where('created_at', '>=', now()->startOfWeek())->count(),
-            'completion_rate' => $completionRate,
-        ];
-
-        $upcomingMeetings = MinutesOfMeeting::query()
+        // Recent org-wide MOM audit activity
+        $recentActivity = AuditLog::query()
             ->where('organization_id', $orgId)
-            ->where('meeting_date', '>=', now()->startOfDay())
-            ->orderBy('meeting_date')
-            ->limit(5)
+            ->where('auditable_type', MinutesOfMeeting::class)
+            ->whereIn('action', ['created', 'finalized', 'approved', 'reverted_to_draft'])
+            ->with(['user', 'auditable'])
+            ->latest()
+            ->take(8)
             ->get();
 
         $canCreateMeeting = $this->authorizationService->hasPermission($user, $user->currentOrganization, 'create_meeting');
 
-        return view('dashboard', compact('recentMeetings', 'upcomingActions', 'stats', 'upcomingMeetings', 'canCreateMeeting'));
+        return view('dashboard', compact(
+            'stats',
+            'myOverdueCount',
+            'pendingApproval',
+            'thisWeekMeetings',
+            'upcomingActions',
+            'recentActivity',
+            'canCreateMeeting',
+        ));
     }
 }
