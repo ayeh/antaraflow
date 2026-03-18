@@ -245,9 +245,58 @@
 
         </div>
 
-        {{-- RIGHT COLUMN placeholder --}}
+        {{-- RIGHT COLUMN: Recent Activity --}}
         <div class="w-full lg:w-80 shrink-0">
-            <div class="text-gray-400 text-sm">Right column coming next…</div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recent Activity</h2>
+                    <a href="{{ route('meetings.index') }}"
+                       class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">View all →</a>
+                </div>
+                @forelse($recentActivity as $log)
+                    @php
+                        $actionLabel = match($log->action) {
+                            'created'           => 'created',
+                            'finalized'         => 'finalized',
+                            'approved'          => 'approved',
+                            'reverted_to_draft' => 'reverted to draft',
+                            default             => $log->action,
+                        };
+                        $meetingTitle = $log->auditable?->title ?? 'a meeting';
+                        $initials = $log->user
+                            ? collect(explode(' ', $log->user->name))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->join('')
+                            : '?';
+                        $actionColor = match($log->action) {
+                            'approved'  => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+                            'finalized' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+                            'created'   => 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
+                            default     => 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+                        };
+                    @endphp
+                    <div class="flex items-start gap-3 px-5 py-3.5 border-b border-gray-100 dark:border-slate-700/50 last:border-0">
+                        {{-- Avatar --}}
+                        <div class="w-7 h-7 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                            {{ $initials }}
+                        </div>
+                        {{-- Content --}}
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-gray-700 dark:text-gray-300 leading-snug">
+                                <span class="font-medium">{{ $log->user?->name ?? 'System' }}</span>
+                                <span class="inline-flex items-center mx-1 px-1.5 py-0.5 rounded text-[10px] font-semibold {{ $actionColor }}">{{ $actionLabel }}</span>
+                                <span class="truncate">{{ Str::limit($meetingTitle, 30) }}</span>
+                            </p>
+                            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{{ $log->created_at->diffForHumans() }}</p>
+                        </div>
+                    </div>
+                @empty
+                    <div class="px-5 py-10 text-center">
+                        <svg class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-sm text-gray-400 dark:text-gray-500">No recent activity</p>
+                    </div>
+                @endforelse
+            </div>
         </div>
 
     </div>
