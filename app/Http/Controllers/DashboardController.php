@@ -21,6 +21,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $orgId = $user->current_organization_id;
+        $now = now();
 
         // Personalized stat card data
         $myActionsCount = ActionItem::query()
@@ -33,12 +34,12 @@ class DashboardController extends Controller
             ->where('organization_id', $orgId)
             ->where('assigned_to', $user->id)
             ->whereNotIn('status', [ActionItemStatus::Completed, ActionItemStatus::Cancelled, ActionItemStatus::CarriedForward])
-            ->where('due_date', '<', now())
+            ->where('due_date', '<', $now->copy())
             ->count();
 
         $meetingsThisWeek = MinutesOfMeeting::query()
             ->where('organization_id', $orgId)
-            ->whereBetween('meeting_date', [now()->startOfWeek(), now()->endOfWeek()])
+            ->whereBetween('meeting_date', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()])
             ->count();
 
         $pendingApproval = MinutesOfMeeting::query()
@@ -46,16 +47,15 @@ class DashboardController extends Controller
             ->where('status', MeetingStatus::Finalized)
             ->count();
 
-        $myTotal = ActionItem::query()
+        $myActionCounts = ActionItem::query()
             ->where('organization_id', $orgId)
             ->where('assigned_to', $user->id)
-            ->count();
+            ->toBase()
+            ->selectRaw('COUNT(*) as total, SUM(status = ?) as completed', [ActionItemStatus::Completed->value])
+            ->first();
 
-        $myCompleted = ActionItem::query()
-            ->where('organization_id', $orgId)
-            ->where('assigned_to', $user->id)
-            ->where('status', ActionItemStatus::Completed)
-            ->count();
+        $myTotal = (int) $myActionCounts->total;
+        $myCompleted = (int) $myActionCounts->completed;
 
         $stats = [
             'my_actions' => $myActionsCount,
@@ -68,7 +68,7 @@ class DashboardController extends Controller
         // This week's meetings for the left column
         $thisWeekMeetings = MinutesOfMeeting::query()
             ->where('organization_id', $orgId)
-            ->whereBetween('meeting_date', [now()->startOfWeek(), now()->endOfWeek()])
+            ->whereBetween('meeting_date', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()])
             ->with(['project'])
             ->orderBy('meeting_date')
             ->get();
