@@ -6,6 +6,7 @@ export default function appState() {
         commandSelectedIndex: 0,
         fabExpanded: false,
         theme: localStorage.getItem('theme') || 'system',
+        sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true',
         bottomSheetOpen: false,
         recentMeetings: [],
         searchResults: { meetings: [], action_items: [], projects: [] },
@@ -51,6 +52,11 @@ export default function appState() {
             const themes = ['light', 'dark', 'system'];
             const next = themes[(themes.indexOf(this.theme) + 1) % 3];
             this.applyTheme(next);
+        },
+
+        toggleSidebar() {
+            this.sidebarCollapsed = !this.sidebarCollapsed;
+            localStorage.setItem('sidebar_collapsed', this.sidebarCollapsed);
         },
 
         searchGlobal() {
