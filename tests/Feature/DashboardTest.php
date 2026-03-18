@@ -7,7 +7,6 @@ use App\Domain\Account\Models\Organization;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Models\User;
-use App\Support\Enums\MeetingStatus;
 use App\Support\Enums\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -60,11 +59,10 @@ test('needs attention banner shows when user has overdue actions', function () {
         'created_by' => $this->user->id,
     ]);
 
-    ActionItem::factory()->open()->create([
+    ActionItem::factory()->overdue()->create([
         'organization_id' => $this->org->id,
         'assigned_to' => $this->user->id,
         'minutes_of_meeting_id' => $meeting->id,
-        'due_date' => now()->subDays(3),
     ]);
 
     $response = $this->actingAs($this->user)->get(route('dashboard'));
@@ -80,10 +78,9 @@ test('needs attention banner hidden when no urgent items', function () {
 });
 
 test('needs attention banner shows pending approval when finalized moms exist', function () {
-    MinutesOfMeeting::factory()->create([
+    MinutesOfMeeting::factory()->finalized()->create([
         'organization_id' => $this->org->id,
         'created_by' => $this->user->id,
-        'status' => MeetingStatus::Finalized,
     ]);
 
     $response = $this->actingAs($this->user)->get(route('dashboard'));
@@ -144,4 +141,5 @@ test('recent activity shows mom audit log entries', function () {
     $response = $this->actingAs($this->user)->get(route('dashboard'));
 
     $response->assertSee('Recent Activity');
+    $response->assertSee('Board Meeting');
 });
