@@ -1,203 +1,195 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6" x-data="{ statusFilter: '{{ request('status') }}' }">
-    {{-- Header --}}
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Meetings</h1>
-        <div class="flex items-center gap-3">
-            {{-- View Toggle --}}
-            <div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-sm font-medium">
-                <a href="{{ route('meetings.index', array_merge(request()->except('view'), ['view' => 'list'])) }}"
-                   class="px-4 py-2 transition-colors {{ request('view', 'list') !== 'calendar' ? 'bg-violet-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+@php
+    $activeFilterCount = collect(['search', 'status', 'project_id', 'date_from', 'date_to'])
+        ->filter(fn($k) => request()->filled($k))
+        ->count();
+    $isCalendar = request('view') === 'calendar';
+    $isDense    = false; // stored in localStorage client-side
+@endphp
+
+<div class="space-y-6"
+     x-data="{
+         filterOpen: false,
+         dense: JSON.parse(localStorage.getItem('meetings-dense') ?? 'false'),
+     }"
+     x-init="$watch('dense', v => localStorage.setItem('meetings-dense', v))">
+
+    {{-- Filter Drawer --}}
+    @include('meetings.partials._filter-drawer', ['projects' => $projects])
+
+    {{-- ── Page Header ── --}}
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Meetings</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ number_format($stats['total']) }} total</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+            {{-- Filter button --}}
+            <button @click="filterOpen = true"
+                    class="inline-flex items-center gap-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 px-4 py-2 rounded-xl text-sm font-medium transition-colors relative"
+                    aria-label="Open filters">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                Filters
+                @if($activeFilterCount > 0)
+                    <span class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-violet-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                        {{ $activeFilterCount }}
+                    </span>
+                @endif
+            </button>
+
+            {{-- Dense/grid toggle (list view only) --}}
+            @if(!$isCalendar)
+                <div class="flex rounded-xl border border-gray-200 dark:border-slate-600 overflow-hidden">
+                    <button @click="dense = false"
+                            :class="!dense ? 'bg-violet-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-600'"
+                            class="p-2 transition-colors" aria-label="Card grid view" :aria-pressed="!dense">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                    </button>
+                    <button @click="dense = true"
+                            :class="dense ? 'bg-violet-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-600'"
+                            class="p-2 border-l border-gray-200 dark:border-slate-600 transition-colors" aria-label="Table view" :aria-pressed="dense">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            @endif
+
+            {{-- View toggle: List / Calendar --}}
+            <div class="flex rounded-xl border border-gray-200 dark:border-slate-600 overflow-hidden text-sm font-medium">
+                <a href="{{ route('meetings.index', array_merge(request()->except(['view', 'page']), ['view' => 'list'])) }}"
+                   class="px-4 py-2 transition-colors {{ !$isCalendar ? 'bg-violet-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-600' }}"
+                   aria-pressed="{{ !$isCalendar ? 'true' : 'false' }}">
                     List
                 </a>
-                <a href="{{ route('meetings.index', array_merge(request()->except('view'), ['view' => 'calendar'])) }}"
-                   class="px-4 py-2 border-l border-gray-200 dark:border-gray-700 transition-colors {{ request('view') === 'calendar' ? 'bg-violet-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+                <a href="{{ route('meetings.index', array_merge(request()->except(['view', 'page']), ['view' => 'calendar'])) }}"
+                   class="px-4 py-2 border-l border-gray-200 dark:border-slate-600 transition-colors {{ $isCalendar ? 'bg-violet-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-600' }}"
+                   aria-pressed="{{ $isCalendar ? 'true' : 'false' }}">
                     Calendar
                 </a>
             </div>
+
+            {{-- New MOM button --}}
             @can('create', \App\Domain\Meeting\Models\MinutesOfMeeting::class)
-            <a href="{{ route('meetings.create') }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                + New MOM
-            </a>
+                <a href="{{ route('meetings.create') }}"
+                   class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New MOM
+                </a>
             @endcan
         </div>
     </div>
 
-    @if(request('view') !== 'calendar')
-        {{-- Stat Cards --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button type="button"
-                @click="statusFilter = ''; $refs.statusSelect.value = ''; $refs.filterForm.submit()"
-                class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 text-left transition-all hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 {{ !request('status') ? 'ring-2 ring-gray-900 dark:ring-white' : '' }}">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Total</div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $stats['total'] }}</div>
-            </button>
+    @if(!$isCalendar)
+        {{-- ── Stat Cards ── --}}
+        @include('meetings.partials._stat-cards', ['stats' => $stats])
 
-            <button type="button"
-                @click="statusFilter = 'draft'; $refs.statusSelect.value = 'draft'; $refs.filterForm.submit()"
-                class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 text-left transition-all hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 {{ request('status') === 'draft' ? 'ring-2 ring-blue-500' : '' }}">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Draft</div>
-                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ $stats['draft'] }}</div>
-            </button>
-
-            <button type="button"
-                @click="statusFilter = 'finalized'; $refs.statusSelect.value = 'finalized'; $refs.filterForm.submit()"
-                class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 text-left transition-all hover:shadow-md hover:border-orange-300 dark:hover:border-orange-600 {{ request('status') === 'finalized' ? 'ring-2 ring-orange-500' : '' }}">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Finalized</div>
-                <div class="text-3xl font-bold text-orange-600 dark:text-orange-400 mt-1">{{ $stats['finalized'] }}</div>
-            </button>
-
-            <button type="button"
-                @click="statusFilter = 'approved'; $refs.statusSelect.value = 'approved'; $refs.filterForm.submit()"
-                class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 text-left transition-all hover:shadow-md hover:border-green-300 dark:hover:border-green-600 {{ request('status') === 'approved' ? 'ring-2 ring-green-500' : '' }}">
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Approved</div>
-                <div class="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">{{ $stats['approved'] }}</div>
-            </button>
-        </div>
-
-        {{-- Search & Filter Bar --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div class="px-6 py-4">
-                <form x-ref="filterForm" method="GET" action="{{ route('meetings.index') }}" class="flex flex-col sm:flex-row gap-3">
-                    <div class="flex-1">
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by title or MOM number..."
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+        {{-- ── Card Grid (default) / Table (dense) ── --}}
+        <div>
+            {{-- Card Grid --}}
+            <div x-show="!dense" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                @forelse($meetings as $meeting)
+                    @include('meetings.partials._meeting-card', ['meeting' => $meeting])
+                @empty
+                    <div class="col-span-full">
+                        @include('meetings.partials._empty-state')
                     </div>
-                    <select name="project_id" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm text-gray-900 dark:text-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
-                        <option value="">All Projects</option>
-                        @foreach($projects as $project)
-                            <option value="{{ $project->id }}" {{ request('project_id') == $project->id ? 'selected' : '' }}>{{ $project->name }} ({{ $project->code }})</option>
-                        @endforeach
-                    </select>
-                    <select x-ref="statusSelect" name="status" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm text-gray-900 dark:text-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
-                        <option value="">All Statuses</option>
-                        @foreach(\App\Support\Enums\MeetingStatus::cases() as $status)
-                            <option value="{{ $status->value }}" {{ request('status') === $status->value ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $status->value)) }}</option>
-                        @endforeach
-                    </select>
-                    <button type="submit" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        Search
-                    </button>
-                    @if(request()->hasAny(['search', 'status', 'project_id']))
-                        <a href="{{ route('meetings.index') }}" class="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            Clear
-                        </a>
-                    @endif
-                </form>
+                @endforelse
             </div>
 
-            {{-- Data Table --}}
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 dark:bg-slate-700/50 border-y border-gray-200 dark:border-gray-700">
-                        <tr>
-                            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">MOM No.</th>
-                            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Meeting Title</th>
-                            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Project</th>
-                            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Meeting Date</th>
-                            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action Items</th>
-                            <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse($meetings as $meeting)
-                            @php
-                                $totalActions = $meeting->actionItems->count();
-                                $completedActions = $meeting->actionItems->where('status', \App\Support\Enums\ActionItemStatus::Completed)->count();
-                            @endphp
-                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30">
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 font-mono">
-                                    {{ $meeting->mom_number ?? '—' }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    <a href="{{ route('meetings.show', $meeting) }}" class="text-sm font-medium text-gray-900 dark:text-white hover:text-violet-600 dark:hover:text-violet-400">{{ $meeting->title }}</a>
-                                    @if($meeting->createdBy)
-                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">by {{ $meeting->createdBy->name }}</div>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4">
-                                    @if($meeting->project)
-                                        <div class="text-sm text-gray-900 dark:text-white">{{ $meeting->project->name }}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ $meeting->project->code }}</div>
-                                    @else
-                                        <span class="text-sm text-gray-400 dark:text-gray-500">—</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $meeting->meeting_date ? $meeting->meeting_date->format('M j, Y') : 'Not set' }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                            @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft) bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300
-                                            @elseif($meeting->status === \App\Support\Enums\MeetingStatus::InProgress) bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300
-                                            @elseif($meeting->status === \App\Support\Enums\MeetingStatus::Finalized) bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300
-                                            @elseif($meeting->status === \App\Support\Enums\MeetingStatus::Approved) bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300
-                                            @endif">
-                                            {{ ucfirst(str_replace('_', ' ', $meeting->status->value)) }}
-                                        </span>
-                                        @if($meeting->share_with_client)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-                                                Shared
-                                            </span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @if($totalActions > 0)
-                                        <span class="text-sm font-medium {{ $completedActions === $totalActions ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300' }}">
-                                            {{ $completedActions }}/{{ $totalActions }}
-                                        </span>
-                                    @else
-                                        <span class="text-sm text-gray-400 dark:text-gray-500">—</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('meetings.show', $meeting) }}" class="text-sm text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300 font-medium">View</a>
-                                        @can('update', $meeting)
-                                        @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft)
-                                            <a href="{{ route('meetings.edit', $meeting) }}" class="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 font-medium">Edit</a>
-                                        @endif
-                                        @endcan
-                                    </div>
-                                </td>
+            {{-- Dense Table --}}
+            <div x-show="dense" x-cloak class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm" role="grid">
+                        <thead>
+                            <tr class="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
+                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">MOM No.</th>
+                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
+                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">Project</th>
+                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">Date</th>
+                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">Items</th>
+                                <th scope="col" class="px-6 py-3"></th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-6 py-16 text-center">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No meetings found</h3>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating your first meeting.</p>
-                                    @can('create', \App\Domain\Meeting\Models\MinutesOfMeeting::class)
-                                    <div class="mt-6">
-                                        <a href="{{ route('meetings.create') }}" class="inline-flex items-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500">
-                                            + New MOM
-                                        </a>
-                                    </div>
-                                    @endcan
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if($meetings->hasPages())
-                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                    {{ $meetings->withQueryString()->links() }}
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
+                            @forelse($meetings as $meeting)
+                                @php
+                                    $total = $meeting->actionItems->count();
+                                    $done  = $meeting->actionItems->where('status', \App\Support\Enums\ActionItemStatus::Completed)->count();
+                                @endphp
+                                <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
+                                    <td class="px-6 py-4 font-mono text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{{ $meeting->mom_number ?? '—' }}</td>
+                                    <td class="px-6 py-4">
+                                        <a href="{{ route('meetings.show', $meeting) }}" class="font-medium text-gray-900 dark:text-white hover:text-violet-600 dark:hover:text-violet-400 transition-colors">{{ $meeting->title }}</a>
+                                        @if($meeting->createdBy)
+                                            <div class="text-xs text-gray-400 mt-0.5">{{ $meeting->createdBy->name }}</div>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 hidden md:table-cell text-gray-500 dark:text-gray-400">
+                                        {{ $meeting->project?->name ?? '—' }}
+                                    </td>
+                                    <td class="px-6 py-4 hidden sm:table-cell text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                                        {{ $meeting->meeting_date?->format('j M Y') ?? 'Not set' }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            @include('meetings.partials._status-badge', ['status' => $meeting->status])
+                                            @if($meeting->share_with_client)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">Shared</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 hidden lg:table-cell">
+                                        @if($total > 0)
+                                            <span class="text-sm {{ $done === $total ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-300' }} font-medium">{{ $done }}/{{ $total }}</span>
+                                        @else
+                                            <span class="text-gray-400">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-3">
+                                            <a href="{{ route('meetings.show', $meeting) }}" class="text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline">View</a>
+                                            @can('update', $meeting)
+                                                @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft)
+                                                    <a href="{{ route('meetings.edit', $meeting) }}" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:underline">Edit</a>
+                                                @endif
+                                            @endcan
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7">
+                                        @include('meetings.partials._empty-state')
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-            @endif
+            </div>
         </div>
+
+        {{-- Pagination --}}
+        @if($meetings->hasPages())
+            <div class="pt-2">
+                {{ $meetings->withQueryString()->links() }}
+            </div>
+        @endif
+
     @else
+        {{-- ── Calendar View ── --}}
         @include('meetings.partials.calendar-view')
     @endif
+
 </div>
 @endsection
