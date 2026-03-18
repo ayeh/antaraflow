@@ -11,7 +11,7 @@ class MeetingSearchService
 {
     public function search(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = MinutesOfMeeting::query()->with(['createdBy', 'series', 'tags', 'project', 'actionItems']);
+        $query = MinutesOfMeeting::query()->with(['createdBy', 'series', 'tags', 'project', 'actionItems', 'attendees']);
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
