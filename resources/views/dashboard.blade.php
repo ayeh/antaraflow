@@ -126,7 +126,130 @@
         </div>
     @endif
 
-    {{-- Main content — added in Tasks 4 & 5 --}}
+    {{-- Main Content: Two Column --}}
+    <div class="flex flex-col lg:flex-row gap-6">
+
+        {{-- LEFT COLUMN --}}
+        <div class="flex-1 min-w-0 space-y-6">
+
+            {{-- This Week's Meetings --}}
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">This Week's Meetings</h2>
+                    <a href="{{ route('meetings.index', ['view' => 'calendar']) }}"
+                       class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">View calendar →</a>
+                </div>
+                @forelse($thisWeekMeetings as $meeting)
+                    <a href="{{ route('meetings.show', $meeting) }}"
+                       class="flex items-start gap-4 px-5 py-4 hover:bg-gray-50 dark:hover:bg-slate-700/40 transition-colors border-b border-gray-100 dark:border-slate-700/50 last:border-0">
+                        {{-- Date badge --}}
+                        <div class="shrink-0 w-11 text-center">
+                            <div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase leading-none">
+                                {{ $meeting->meeting_date?->format('M') ?? '' }}
+                            </div>
+                            <div class="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                                {{ $meeting->meeting_date?->format('j') ?? '—' }}
+                            </div>
+                        </div>
+                        {{-- Details --}}
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $meeting->title }}</span>
+                                @include('meetings.partials._status-badge', ['status' => $meeting->status])
+                            </div>
+                            <div class="mt-1 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
+                                @if($meeting->meeting_date)
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        {{ $meeting->meeting_date->format('g:i A') }}
+                                        @if($meeting->end_time)
+                                            – {{ \Carbon\Carbon::parse($meeting->end_time)->format('g:i A') }}
+                                        @endif
+                                    </span>
+                                @endif
+                                @if($meeting->location)
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        </svg>
+                                        {{ $meeting->location }}
+                                    </span>
+                                @endif
+                                @if($meeting->project)
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                        </svg>
+                                        {{ $meeting->project->name }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    </a>
+                @empty
+                    <div class="px-5 py-10 text-center">
+                        <svg class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-sm text-gray-400 dark:text-gray-500">No meetings scheduled this week</p>
+                    </div>
+                @endforelse
+            </div>
+
+            {{-- My Action Items --}}
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">My Action Items</h2>
+                    <a href="{{ route('action-items.dashboard') }}"
+                       class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">View all →</a>
+                </div>
+                @forelse($upcomingActions as $action)
+                    @php
+                        $isOverdue = $action->due_date?->isPast();
+                        $priorityDot = match($action->priority) {
+                            \App\Support\Enums\ActionItemPriority::Critical => 'bg-red-500',
+                            \App\Support\Enums\ActionItemPriority::High     => 'bg-orange-500',
+                            \App\Support\Enums\ActionItemPriority::Medium   => 'bg-blue-500',
+                            default                                          => 'bg-gray-400',
+                        };
+                    @endphp
+                    <div class="flex items-start gap-3 px-5 py-4 border-b border-gray-100 dark:border-slate-700/50 last:border-0">
+                        <span class="mt-1.5 w-2 h-2 rounded-full {{ $priorityDot }} shrink-0"></span>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $action->title }}</div>
+                            <div class="mt-0.5 flex items-center gap-2 text-xs flex-wrap">
+                                @if($action->due_date)
+                                    <span class="{{ $isOverdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-500 dark:text-gray-400' }}">
+                                        {{ $isOverdue ? 'Overdue · ' : 'Due · ' }}{{ $action->due_date->format('j M Y') }}
+                                    </span>
+                                @else
+                                    <span class="text-gray-400 dark:text-gray-500">No due date</span>
+                                @endif
+                                <span class="text-gray-300 dark:text-gray-600">·</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ $action->priority->label() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="px-5 py-10 text-center">
+                        <svg class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        <p class="text-sm text-gray-400 dark:text-gray-500">No pending action items</p>
+                    </div>
+                @endforelse
+            </div>
+
+        </div>
+
+        {{-- RIGHT COLUMN placeholder --}}
+        <div class="w-full lg:w-80 shrink-0">
+            <div class="text-gray-400 text-sm">Right column coming next…</div>
+        </div>
+
+    </div>
 
 </div>
 @endsection
