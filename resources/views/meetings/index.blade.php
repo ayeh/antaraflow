@@ -95,7 +95,7 @@
         {{-- ── Card Grid (default) / Table (dense) ── --}}
         <div>
             {{-- Card Grid --}}
-            <div x-show="!dense" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div x-show="!dense" x-cloak class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @forelse($meetings as $meeting)
                     @include('meetings.partials._meeting-card', ['meeting' => $meeting])
                 @empty

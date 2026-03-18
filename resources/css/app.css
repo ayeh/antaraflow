@@ -28,6 +28,9 @@
     --color-accent-600: #0D9488;
 }
 
+/* Alpine.js: hide elements until Alpine initialises */
+[x-cloak] { display: none !important; }
+
 /* Rich text editor placeholder */
 [contenteditable=true]:empty:before {
     content: attr(data-placeholder);
