@@ -57,9 +57,9 @@ $isSettingsActive = request()->routeIs(
     aria-label="Main navigation"
     :class="sidebarCollapsed ? 'w-14' : 'w-56'"
     class="fixed left-3 top-3 bottom-3 z-50 flex flex-col
-           bg-white dark:bg-slate-800
-           shadow-lg rounded-2xl
-           transition-all duration-300 ease-in-out overflow-hidden"
+           bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl
+           shadow-xl ring-1 ring-black/5 dark:ring-white/10 rounded-2xl
+           transition-all duration-500 ease-in-out [transition-timing-function:cubic-bezier(0.25,0.46,0.45,0.94)] overflow-hidden"
 >
     {{-- Brand + Toggle --}}
     <div class="flex items-center justify-between px-3 py-4 shrink-0">
@@ -98,7 +98,7 @@ $isSettingsActive = request()->routeIs(
                 href="{{ $item['href'] }}"
                 class="flex items-center gap-3 w-full px-2.5 py-2.5 rounded-xl transition-all duration-150
                        {{ $item['active']
-                           ? 'bg-white dark:bg-slate-700 shadow-sm text-violet-600 dark:text-violet-400 font-medium'
+                           ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 font-medium'
                            : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm hover:text-slate-800 dark:hover:text-slate-100' }}"
             >
                 @if($item['active'])
@@ -153,9 +153,9 @@ $isSettingsActive = request()->routeIs(
                 :aria-expanded="activeFlyout === 'settings'"
                 class="flex items-center gap-3 w-full px-2.5 py-2.5 rounded-xl transition-all duration-150
                        {{ $isSettingsActive
-                           ? 'bg-white dark:bg-slate-700 shadow-sm text-violet-600 dark:text-violet-400 font-medium'
+                           ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 font-medium'
                            : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm hover:text-slate-800 dark:hover:text-slate-100' }}"
-                :class="activeFlyout === 'settings' ? 'bg-white dark:bg-slate-700 shadow-sm' : ''"
+                :class="activeFlyout === 'settings' ? 'bg-violet-50 dark:bg-violet-900/20' : ''"
             >
                 @if($isSettingsActive)
                 <span class="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-violet-600 dark:bg-violet-400"></span>
