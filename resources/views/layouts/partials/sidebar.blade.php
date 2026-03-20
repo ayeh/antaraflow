@@ -56,9 +56,9 @@ $isSettingsActive = request()->routeIs(
 <nav
     aria-label="Main navigation"
     :class="sidebarCollapsed ? 'w-14' : 'w-56'"
-    class="fixed left-0 top-0 z-50 flex flex-col h-screen
-           bg-slate-100 dark:bg-slate-800/60
-           border-r border-slate-200 dark:border-slate-700
+    class="fixed left-3 top-3 bottom-3 z-50 flex flex-col
+           bg-white dark:bg-slate-800
+           shadow-lg rounded-2xl
            transition-all duration-300 ease-in-out overflow-hidden"
 >
     {{-- Brand + Toggle --}}
@@ -78,13 +78,13 @@ $isSettingsActive = request()->routeIs(
         </a>
         <button
             @click.stop="toggleSidebar()"
-            class="shrink-0 p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200
-                   hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            class="shrink-0 flex items-center justify-center w-7 h-7 rounded-xl
+                   bg-violet-600 hover:bg-violet-700 text-white transition-colors"
             :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
             :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
         >
-            <svg class="w-4 h-4 transition-transform duration-300" :class="sidebarCollapsed ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+            <svg class="w-3.5 h-3.5 transition-transform duration-300" :class="sidebarCollapsed ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
             </svg>
         </button>
     </div>
