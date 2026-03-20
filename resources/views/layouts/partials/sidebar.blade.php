@@ -140,13 +140,6 @@ $isSettingsActive = request()->routeIs(
             </div>
             @endif
 
-            {{-- Tooltip (collapsed only) --}}
-            <span
-                x-show="sidebarCollapsed"
-                class="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2
-                       rounded-md bg-slate-900 dark:bg-slate-700 text-white text-xs px-2 py-1
-                       whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg"
-            >{{ $item['label'] }}</span>
         </div>
         @endforeach
 
@@ -195,13 +188,6 @@ $isSettingsActive = request()->routeIs(
                 </svg>
             </button>
 
-            {{-- Tooltip (collapsed only) --}}
-            <span
-                x-show="sidebarCollapsed"
-                class="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2
-                       rounded-md bg-slate-900 dark:bg-slate-700 text-white text-xs px-2 py-1
-                       whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg"
-            >Settings</span>
         </div>
     </div>
 
@@ -236,13 +222,6 @@ $isSettingsActive = request()->routeIs(
                 <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ auth()->user()->email }}</p>
             </div>
 
-            {{-- Tooltip (collapsed only) --}}
-            <span
-                x-show="sidebarCollapsed"
-                class="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2
-                       rounded-md bg-slate-900 dark:bg-slate-700 text-white text-xs px-2 py-1
-                       whitespace-nowrap opacity-0 group-hover/profile:opacity-100 transition-opacity z-50 shadow-lg"
-            >{{ auth()->user()->name }}</span>
         </button>
 
     </div>
