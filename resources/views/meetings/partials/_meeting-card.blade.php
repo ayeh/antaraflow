@@ -30,7 +30,7 @@
         <div class="flex items-start justify-between gap-2 mb-2">
             @include('meetings.partials._status-badge', ['status' => $meeting->status])
             @if($meeting->share_with_client)
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
                     Shared
                 </span>
             @endif
