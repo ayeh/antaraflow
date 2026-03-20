@@ -23,7 +23,7 @@ $settingsItems = [
     x-transition:leave-start="opacity-100 translate-x-0"
     x-transition:leave-end="opacity-0 -translate-x-2"
     @click.outside="activeFlyout = null"
-    :style="{ left: sidebarCollapsed ? '56px' : '224px', top: '12px', maxHeight: 'calc(100vh - 24px)' }"
+    :style="{ left: sidebarCollapsed ? '68px' : '236px', top: '12px', maxHeight: 'calc(100vh - 24px)' }"
     class="fixed z-40 w-60 rounded-2xl
            bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
            shadow-xl py-3 overflow-y-auto"
