@@ -11,7 +11,7 @@
     <style>{!! $branding->get('custom_css') !!}</style>
     @endif
 </head>
-<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors">
+<body class="h-full bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
     <div
         x-data="appState"
         x-init="recentMeetings = {!! \Illuminate\Support\Js::from($recentMeetings ?? []) !!}"
@@ -26,7 +26,7 @@
         {{-- Offline Indicator --}}
         <x-offline-indicator />
 
-        <div :class="sidebarCollapsed ? 'md:ml-14' : 'md:ml-56'" class="flex flex-col min-h-screen transition-all duration-300 ease-in-out">
+        <div :class="sidebarCollapsed ? 'md:ml-[4.25rem]' : 'md:ml-[14.75rem]'" class="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 md:rounded-tl-2xl transition-all duration-300 ease-in-out">
             @include('layouts.partials.header')
 
             @if(session('success'))
