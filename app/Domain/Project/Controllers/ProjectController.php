@@ -32,7 +32,14 @@ class ProjectController extends Controller
             ->latest()
             ->paginate(20);
 
-        return view('projects.index', compact('projects'));
+        $stats = [
+            'total' => Project::count(),
+            'active' => Project::where('is_active', true)->count(),
+            'members' => Project::withCount('members')->get()->sum('members_count'),
+            'meetings' => Project::withCount('meetings')->get()->sum('meetings_count'),
+        ];
+
+        return view('projects.index', compact('projects', 'stats'));
     }
 
     public function create(): View
