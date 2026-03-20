@@ -90,7 +90,7 @@
 
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-slate-700">
             <a href="{{ route('meetings.action-items.show', [$meeting, $actionItem]) }}" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Cancel</a>
-            <button type="submit" class="bg-violet-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">Update Action Item</button>
+            <button type="submit" class="bg-violet-600 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">Update Action Item</button>
         </div>
     </form>
 </div>

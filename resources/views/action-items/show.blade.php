@@ -21,13 +21,13 @@
                 @if($actionItem->status === \App\Support\Enums\ActionItemStatus::Open) bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300
                 @elseif($actionItem->status === \App\Support\Enums\ActionItemStatus::InProgress) bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300
                 @elseif($actionItem->status === \App\Support\Enums\ActionItemStatus::Completed) bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300
-                @elseif($actionItem->status === \App\Support\Enums\ActionItemStatus::Cancelled) bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300
-                @elseif($actionItem->status === \App\Support\Enums\ActionItemStatus::CarriedForward) bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300
+                @elseif($actionItem->status === \App\Support\Enums\ActionItemStatus::Cancelled) bg-gray-100 text-gray-700 dark:bg-slate-900/30 dark:text-gray-300
+                @elseif($actionItem->status === \App\Support\Enums\ActionItemStatus::CarriedForward) bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300
                 @endif">
                 {{ ucfirst(str_replace('_', ' ', $actionItem->status->value)) }}
             </span>
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                @if($actionItem->priority === \App\Support\Enums\ActionItemPriority::Low) bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300
+                @if($actionItem->priority === \App\Support\Enums\ActionItemPriority::Low) bg-gray-100 text-gray-700 dark:bg-slate-900/30 dark:text-gray-300
                 @elseif($actionItem->priority === \App\Support\Enums\ActionItemPriority::Medium) bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300
                 @elseif($actionItem->priority === \App\Support\Enums\ActionItemPriority::High) bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300
                 @elseif($actionItem->priority === \App\Support\Enums\ActionItemPriority::Critical) bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300
