@@ -30,7 +30,7 @@
         {{-- Left Panel: MOM Preview (2/3 width) --}}
         <div class="lg:col-span-2 space-y-4">
             {{-- Summary --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Summary</h2>
                 @php
                     $summary = $meeting->extractions->firstWhere('type', 'summary');
@@ -49,7 +49,7 @@
             </div>
 
             {{-- Action Items --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Action Items</h2>
                     <span class="text-sm text-gray-500 dark:text-gray-400">
@@ -63,7 +63,7 @@
                     <ol class="space-y-2">
                         @foreach($meeting->actionItems as $index => $actionItem)
                             <li class="flex items-start gap-3 p-2 rounded-lg {{ $actionItem->status === \App\Support\Enums\ActionItemStatus::Completed ? 'bg-green-50 dark:bg-green-900/10' : '' }}">
-                                <span class="flex-shrink-0 h-6 w-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-400">{{ $index + 1 }}</span>
+                                <span class="flex-shrink-0 h-6 w-6 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-400">{{ $index + 1 }}</span>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-sm text-gray-900 dark:text-white {{ $actionItem->status === \App\Support\Enums\ActionItemStatus::Completed ? 'line-through text-gray-400 dark:text-gray-500' : '' }}">
                                         {{ $actionItem->title }}
@@ -81,7 +81,7 @@
                                             @if($actionItem->priority === \App\Support\Enums\ActionItemPriority::Critical) bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300
                                             @elseif($actionItem->priority === \App\Support\Enums\ActionItemPriority::High) bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300
                                             @elseif($actionItem->priority === \App\Support\Enums\ActionItemPriority::Medium) bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
-                                            @else bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                                            @else bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300
                                             @endif">
                                             {{ ucfirst($actionItem->priority?->value ?? 'medium') }}
                                         </span>
@@ -94,7 +94,7 @@
             </div>
 
             {{-- Decisions --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Decisions</h2>
                 @php
                     $decisions = $meeting->extractions->firstWhere('type', 'decisions');
@@ -120,7 +120,7 @@
             </div>
 
             {{-- Issues --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Issues</h2>
                 @php
                     $issues = $meeting->extractions->firstWhere('type', 'issues');
@@ -146,7 +146,7 @@
         {{-- Right Panel: Sidebars (1/3 width) --}}
         <div class="lg:col-span-1 space-y-4">
             {{-- Meeting Info --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Meeting Info</h3>
                 <div class="space-y-3">
                     <div class="flex justify-between">
@@ -166,7 +166,7 @@
                     <div class="flex justify-between">
                         <span class="text-sm text-gray-500 dark:text-gray-400">Status</span>
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                            @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft) bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                            @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft) bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300
                             @elseif($meeting->status === \App\Support\Enums\MeetingStatus::InProgress) bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
                             @elseif($meeting->status === \App\Support\Enums\MeetingStatus::Finalized) bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300
                             @elseif($meeting->status === \App\Support\Enums\MeetingStatus::Approved) bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
@@ -192,13 +192,13 @@
             </div>
 
             {{-- AI Assistant --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">AI Assistant</h3>
 
                 <div class="space-y-3">
                     <form method="POST" action="{{ route('meetings.extract', $meeting) }}">
                         @csrf
-                        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 transition-all">
+                        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 transition-all">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
@@ -207,7 +207,7 @@
                     </form>
 
                     {{-- AI Chat Link --}}
-                    <a href="{{ route('meetings.chat.index', $meeting) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    <a href="{{ route('meetings.chat.index', $meeting) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                         </svg>
@@ -216,7 +216,7 @@
 
                     {{-- Usage Stats --}}
                     @if($meeting->aiConversations->isNotEmpty())
-                        <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div class="pt-3 border-t border-gray-200 dark:border-slate-700">
                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                 {{ $meeting->aiConversations->count() }} AI conversation(s)
                             </p>
@@ -226,18 +226,18 @@
             </div>
 
             {{-- Export Options --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Export</h3>
                 <div class="space-y-2">
-                    <a href="{{ route('meetings.export.pdf', $meeting) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    <a href="{{ route('meetings.export.pdf', $meeting) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                         <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                         Download PDF
                     </a>
-                    <a href="{{ route('meetings.export.word', $meeting) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    <a href="{{ route('meetings.export.word', $meeting) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                         <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                         Download Word
                     </a>
-                    <a href="{{ route('meetings.export.csv', $meeting) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    <a href="{{ route('meetings.export.csv', $meeting) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                         <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                         Download CSV (Action Items)
                     </a>
@@ -248,7 +248,7 @@
 
     {{-- Finalize Bar --}}
     @if($isEditable)
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-amber-200 dark:border-amber-800 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-amber-200 dark:border-amber-800 p-4">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <svg class="h-5 w-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -275,7 +275,7 @@
             <div class="flex items-center justify-center min-h-screen px-4">
                 <div x-show="showFinalizeModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/50" @click="showFinalizeModal = false"></div>
 
-                <div x-show="showFinalizeModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
+                <div x-show="showFinalizeModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full p-6">
                     <div class="text-center">
                         <div class="mx-auto h-12 w-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-4">
                             <svg class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,7 +290,7 @@
                             <button
                                 type="button"
                                 @click="showFinalizeModal = false"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                             >
                                 Cancel
                             </button>
@@ -309,7 +309,7 @@
 
     {{-- Post-Finalize Actions --}}
     @if($meeting->status === \App\Support\Enums\MeetingStatus::Finalized)
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-green-200 dark:border-green-800 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-green-200 dark:border-green-800 p-4">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <svg class="h-5 w-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -330,7 +330,7 @@
                     </form>
                     <form method="POST" action="{{ route('meetings.revert', $meeting) }}" class="inline">
                         @csrf
-                        <button type="submit" class="inline-flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <button type="submit" class="inline-flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
                             Revert to Draft
                         </button>
@@ -342,7 +342,7 @@
 
     {{-- Approved State --}}
     @if($meeting->status === \App\Support\Enums\MeetingStatus::Approved)
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-green-200 dark:border-green-800 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-green-200 dark:border-green-800 p-4">
             <div class="flex items-center gap-3">
                 <svg class="h-5 w-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />

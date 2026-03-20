@@ -14,7 +14,7 @@
         @csrf
 
         {{-- Basic Information --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-5">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Basic Information</h2>
 
             {{-- Meeting Title --}}
@@ -22,7 +22,7 @@
                 <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meeting Title <span class="text-red-500">*</span></label>
                 <input type="text" name="title" id="title" value="{{ old('title') }}" required
                     placeholder="e.g. Weekly Project Sync"
-                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                 @error('title')
                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                 @enderror
@@ -33,7 +33,7 @@
                 <div>
                     <label for="project_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project</label>
                     <select name="project_id" id="project_id"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                         <option value="">— Select Project —</option>
                         @foreach($projects as $project)
                             <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>{{ $project->name }} ({{ $project->code }})</option>
@@ -47,7 +47,7 @@
                 <div>
                     <label for="meeting_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meeting Date <span class="text-red-500">*</span></label>
                     <input type="date" name="meeting_date" id="meeting_date" value="{{ old('meeting_date', now()->format('Y-m-d')) }}" required
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                     @error('meeting_date')
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -59,7 +59,7 @@
                 <div>
                     <label for="start_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
                     <input type="time" name="start_time" id="start_time" value="{{ old('start_time') }}"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                     @error('start_time')
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -68,7 +68,7 @@
                 <div>
                     <label for="end_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
                     <input type="time" name="end_time" id="end_time" value="{{ old('end_time') }}"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                     @error('end_time')
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -80,7 +80,7 @@
                 <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
                 <input type="text" name="location" id="location" value="{{ old('location') }}"
                     placeholder="e.g. Conference Room A / Zoom"
-                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                 @error('location')
                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                 @enderror
@@ -101,14 +101,14 @@
                 <div class="relative">
                     <input type="url" name="meeting_link" id="meeting_link" x-model="link"
                         placeholder="e.g. https://zoom.us/j/123456789"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 px-4 py-2 pr-28 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 px-4 py-2 pr-28 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                     <span x-show="platform" x-cloak
                         class="absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
                         :class="{
                             'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300': platform?.color === 'blue',
                             'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300': platform?.color === 'green',
                             'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300': platform?.color === 'violet',
-                            'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300': platform?.color === 'gray',
+                            'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300': platform?.color === 'gray',
                         }"
                         x-text="platform?.name">
                     </span>
@@ -121,14 +121,14 @@
         </div>
 
         {{-- Settings --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-5">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Settings</h2>
 
             {{-- Language --}}
             <div>
                 <label for="language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
                 <select name="language" id="language"
-                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                     <option value="ms" {{ old('language', auth()->user()->currentOrganization?->language ?? 'en') === 'ms' ? 'selected' : '' }}>Bahasa Melayu</option>
                     <option value="en" {{ old('language', auth()->user()->currentOrganization?->language ?? 'en') === 'en' ? 'selected' : '' }}>English</option>
                 </select>
@@ -140,14 +140,14 @@
         </div>
 
         {{-- Additional Information --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-5">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-5">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Additional Information</h2>
 
             {{-- Prepared By --}}
             <div>
                 <label for="prepared_by" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prepared By <span class="text-red-500">*</span></label>
                 <input type="text" name="prepared_by" id="prepared_by" value="{{ old('prepared_by', auth()->user()->name) }}" required
-                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                 @error('prepared_by')
                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                 @enderror
@@ -159,7 +159,7 @@
                     <input type="hidden" name="share_with_client" value="0">
                     <input type="checkbox" name="share_with_client" value="1"
                         {{ old('share_with_client') ? 'checked' : '' }}
-                        class="rounded border-gray-300 dark:border-gray-600 text-violet-600 focus:ring-violet-500">
+                        class="rounded border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500">
                     <div>
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Share with Client</span>
                         <p class="text-xs text-gray-500 dark:text-gray-400">Allow the client to view this meeting's minutes.</p>

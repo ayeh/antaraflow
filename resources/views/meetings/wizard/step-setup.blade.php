@@ -1,6 +1,6 @@
 {{-- Step 1: Setup - Meeting Information --}}
 <div class="space-y-6">
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Meeting Information</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -84,7 +84,7 @@
                                 @if($meeting->meeting_platform === \App\Support\Enums\MeetingPlatform::Zoom) bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300
                                 @elseif($meeting->meeting_platform === \App\Support\Enums\MeetingPlatform::GoogleMeet) bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300
                                 @elseif($meeting->meeting_platform === \App\Support\Enums\MeetingPlatform::MicrosoftTeams) bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300
-                                @else bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300
+                                @else bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300
                                 @endif">
                                 {{ $meeting->meeting_platform->label() }}
                             </span>
@@ -106,7 +106,7 @@
 
     {{-- Tags --}}
     @if($meeting->tags->isNotEmpty())
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Tags</h2>
             <div class="flex flex-wrap gap-2">
                 @foreach($meeting->tags as $tag)
@@ -120,22 +120,22 @@
 
     {{-- Quick Stats --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Attendees</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $attendeeStats['total'] }}</p>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $attendeeStats['present'] }} present</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Action Items</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $actionItemStats['total'] }}</p>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $actionItemStats['completed'] }} completed</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">In Progress</p>
             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ $actionItemStats['in_progress'] }}</p>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">action items</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Overdue</p>
             <p class="text-2xl font-bold {{ $actionItemStats['overdue'] > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} mt-1">{{ $actionItemStats['overdue'] }}</p>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">action items</p>

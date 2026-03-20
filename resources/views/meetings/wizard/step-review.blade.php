@@ -34,7 +34,7 @@
 
         priorityClasses(priority) {
             const map = {
-                low: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+                low: 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300',
                 medium: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
                 high: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
                 critical: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
@@ -44,11 +44,11 @@
 
         statusClasses(status) {
             const map = {
-                open: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+                open: 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300',
                 in_progress: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
                 completed: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
-                cancelled: 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 line-through',
-                carried_forward: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
+                cancelled: 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 line-through',
+                carried_forward: 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300',
             };
             return map[status] || map.open;
         },
@@ -338,7 +338,7 @@
     @endphp
 
     @if($summary || $fullText)
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6" x-data="{ expanded: false }">
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6" x-data="{ expanded: false }">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
                 <div class="h-10 w-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
@@ -380,7 +380,7 @@
 
         {{-- Full Transcript (Collapsible) --}}
         @if($fullText)
-            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4" :class="expanded ? '' : 'max-h-40 overflow-hidden relative'">
+            <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4 mb-4" :class="expanded ? '' : 'max-h-40 overflow-hidden relative'">
                 <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ $fullText }}</p>
                 <div x-show="!expanded" class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 dark:from-gray-700/50 to-transparent"></div>
             </div>
@@ -426,7 +426,7 @@
 
         {{-- Re-extract Button --}}
         @if($isEditable)
-            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
                 <form method="POST" action="{{ route('meetings.generate', $meeting) }}" x-data="{ reExtracting: false }"
                       @submit.prevent="
                         reExtracting = true;
@@ -439,7 +439,7 @@
                         }).catch(() => { reExtracting = false; });
                       ">
                     <button type="submit" :disabled="reExtracting"
-                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-70">
+                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 transition-all disabled:opacity-70">
                         <svg class="h-4 w-4" :class="reExtracting && 'animate-spin'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
@@ -454,20 +454,20 @@
 
     {{-- Stats Row --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="stats.total"></p>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">action items</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Completed</p>
             <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1" x-text="stats.completed"></p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">In Progress</p>
             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1" x-text="stats.inProgress"></p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Overdue</p>
             <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1" x-text="stats.overdue"></p>
         </div>
@@ -477,7 +477,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- Left Panel: Action Items List (2/3 width) --}}
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
             <div class="p-6 pb-4">
                 <div class="flex items-center justify-between mb-2">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Action Items</h2>
@@ -516,7 +516,7 @@
                                 type="text"
                                 x-model="newItem.title"
                                 placeholder="Action item title *"
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             />
                         </div>
                         <div>
@@ -524,13 +524,13 @@
                                 x-model="newItem.description"
                                 rows="2"
                                 placeholder="Description (optional)"
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
                             ></textarea>
                         </div>
                         <div class="grid grid-cols-3 gap-3">
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Assignee</label>
-                                <select x-model="newItem.assigned_to" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                                <select x-model="newItem.assigned_to" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                                     <option value="">Unassigned</option>
                                     <template x-for="member in orgMembers" :key="member.id">
                                         <option :value="member.id" x-text="member.name"></option>
@@ -539,11 +539,11 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Due Date</label>
-                                <input type="date" x-model="newItem.due_date" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                                <input type="date" x-model="newItem.due_date" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Priority</label>
-                                <select x-model="newItem.priority" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                                <select x-model="newItem.priority" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                                     <option value="low">Low</option>
                                     <option value="medium">Medium</option>
                                     <option value="high">High</option>
@@ -575,12 +575,12 @@
                         <template x-for="item in actionItems" :key="item.id">
                             <div>
                                 {{-- View Mode --}}
-                                <div x-show="editingItemId !== item.id" class="flex items-start justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <div x-show="editingItemId !== item.id" class="flex items-start justify-between p-3 rounded-lg border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                     <div class="flex items-start gap-3 min-w-0 flex-1">
                                         {{-- Status icon --}}
                                         <div class="flex-shrink-0 mt-0.5">
                                             <div class="h-5 w-5 rounded border-2 flex items-center justify-center"
-                                                :class="item.status === 'completed' ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-gray-600'">
+                                                :class="item.status === 'completed' ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-slate-600'">
                                                 <svg x-show="item.status === 'completed'" class="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                                 </svg>
@@ -637,12 +637,12 @@
                                 @if($isEditable)
                                     <div x-show="editingItemId === item.id" x-cloak class="p-4 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/10">
                                         <div class="space-y-3">
-                                            <input type="text" x-model="editItem.title" placeholder="Title *" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
-                                            <textarea x-model="editItem.description" rows="2" placeholder="Description" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"></textarea>
+                                            <input type="text" x-model="editItem.title" placeholder="Title *" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                                            <textarea x-model="editItem.description" rows="2" placeholder="Description" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"></textarea>
                                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                                 <div>
                                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Assignee</label>
-                                                    <select x-model="editItem.assigned_to" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                                                    <select x-model="editItem.assigned_to" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                                                         <option value="">Unassigned</option>
                                                         <template x-for="member in orgMembers" :key="member.id">
                                                             <option :value="member.id" x-text="member.name"></option>
@@ -651,11 +651,11 @@
                                                 </div>
                                                 <div>
                                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Due Date</label>
-                                                    <input type="date" x-model="editItem.due_date" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                                                    <input type="date" x-model="editItem.due_date" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
                                                 </div>
                                                 <div>
                                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Priority</label>
-                                                    <select x-model="editItem.priority" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                                                    <select x-model="editItem.priority" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                                                         <option value="low">Low</option>
                                                         <option value="medium">Medium</option>
                                                         <option value="high">High</option>
@@ -664,7 +664,7 @@
                                                 </div>
                                                 <div>
                                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Status</label>
-                                                    <select x-model="editItem.status" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                                                    <select x-model="editItem.status" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                                                         <option value="open">Open</option>
                                                         <option value="in_progress">In Progress</option>
                                                         <option value="completed">Completed</option>
@@ -700,7 +700,7 @@
         {{-- Right Panel: Comments (1/3 width) --}}
         <div class="lg:col-span-1 space-y-4">
             {{-- Comments Section --}}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">
                     Comments & Feedback
                     <span class="text-sm font-normal text-gray-500 dark:text-gray-400" x-text="'(' + comments.length + ')'"></span>
@@ -718,7 +718,7 @@
                     </template>
 
                     <template x-for="comment in comments" :key="comment.id">
-                        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                        <div class="p-3 rounded-lg bg-gray-50 dark:bg-slate-700/50">
                             <div class="flex items-center gap-2 mb-1">
                                 <div class="h-6 w-6 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
                                     <span class="text-xs font-semibold text-violet-700 dark:text-violet-300" x-text="comment.user?.name?.charAt(0) || '?'"></span>
@@ -730,7 +730,7 @@
 
                             {{-- Replies --}}
                             <template x-if="comment.replies && comment.replies.length > 0">
-                                <div class="ml-8 mt-2 space-y-2 border-l-2 border-gray-200 dark:border-gray-600 pl-3">
+                                <div class="ml-8 mt-2 space-y-2 border-l-2 border-gray-200 dark:border-slate-600 pl-3">
                                     <template x-for="reply in comment.replies" :key="reply.id">
                                         <div class="py-1">
                                             <div class="flex items-center gap-1.5 mb-0.5">
@@ -747,12 +747,12 @@
                 </div>
 
                 {{-- Add Comment Form --}}
-                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div class="border-t border-gray-200 dark:border-slate-700 pt-4">
                     <textarea
                         x-model="commentBody"
                         rows="3"
                         placeholder="Add a comment..."
-                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
                     ></textarea>
                     <button
                         type="button"

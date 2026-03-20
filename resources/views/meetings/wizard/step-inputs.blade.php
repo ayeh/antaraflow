@@ -69,7 +69,7 @@
 
         statusClasses(status) {
             const map = {
-                pending: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+                pending: 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300',
                 processing: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
                 completed: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
                 processed: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
@@ -339,23 +339,23 @@
 
     {{-- Stats Row --}}
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Total Inputs</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="stats.total"></p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Processed</p>
             <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1" x-text="stats.processed"></p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Audio Files</p>
             <p class="text-2xl font-bold text-violet-600 dark:text-violet-400 mt-1" x-text="stats.audio"></p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Documents</p>
             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1" x-text="stats.documents"></p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Notes</p>
             <p class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1" x-text="stats.notes"></p>
         </div>
@@ -365,7 +365,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- Left Panel: Input List (2/3 width) --}}
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
             {{-- Header --}}
             <div class="p-6 pb-4">
                 <div class="flex items-center justify-between mb-4">
@@ -374,13 +374,13 @@
                 </div>
 
                 {{-- Filter Tabs --}}
-                <div class="flex gap-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg p-1">
+                <div class="flex gap-1 bg-gray-100 dark:bg-slate-700/50 rounded-lg p-1">
                     <template x-for="tab in [{key: 'all', label: 'All'}, {key: 'audio', label: 'Audio'}, {key: 'documents', label: 'Documents'}, {key: 'notes', label: 'Notes'}]" :key="tab.key">
                         <button
                             type="button"
                             @click="activeTab = tab.key"
                             :class="activeTab === tab.key
-                                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                                ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
                             class="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
                             x-text="tab.label"
@@ -407,7 +407,7 @@
                     <div class="space-y-2">
                         {{-- Audio items --}}
                         <template x-for="item in (activeTab === 'audio' || activeTab === 'all') ? transcriptions : []" :key="'t-' + item.id">
-                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <div class="flex items-center gap-3 min-w-0">
                                     <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
                                         <svg class="h-5 w-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -441,7 +441,7 @@
 
                         {{-- Document items --}}
                         <template x-for="item in (activeTab === 'documents' || activeTab === 'all') ? documents : []" :key="'d-' + item.id">
-                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <div class="flex items-center gap-3 min-w-0">
                                     <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                                         <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -475,7 +475,7 @@
 
                         {{-- Manual note items --}}
                         <template x-for="item in (activeTab === 'notes' || activeTab === 'all') ? manualNotes : []" :key="'n-' + item.id">
-                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <div class="flex items-center gap-3 min-w-0 flex-1">
                                     <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
                                         <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -510,7 +510,7 @@
         {{-- Right Panel: Add Input (1/3 width) --}}
         @if($isEditable)
             <div class="lg:col-span-1 space-y-4">
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                     <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Add Input</h3>
 
                     {{-- Mode Toggle Pills --}}
@@ -521,7 +521,7 @@
                                 @click="addMode = mode.key"
                                 :class="addMode === mode.key
                                     ? 'bg-violet-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                    : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
                                 class="flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors text-center"
                                 x-text="mode.label"
                             ></button>
@@ -530,7 +530,7 @@
 
                     {{-- Upload Audio --}}
                     <div x-show="addMode === 'audio'">
-                        <div class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-violet-400 dark:hover:border-violet-500 transition-colors">
+                        <div class="relative border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-violet-400 dark:hover:border-violet-500 transition-colors">
                             <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                             </svg>
@@ -554,7 +554,7 @@
                                 cancelUrl: '{{ route('meetings.audio-chunks.destroy', $meeting) }}',
                                 meetingId: {{ $meeting->id }},
                             })"
-                            class="mt-4 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden"
+                            class="mt-4 rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden"
                         >
                             {{-- Recovery Banner --}}
                             <template x-if="hasPendingRecovery">
@@ -580,7 +580,7 @@
                                     <div class="flex items-center gap-2">
                                         <div class="h-6 w-6 rounded-full flex items-center justify-center"
                                              :class="{
-                                                 'bg-gray-100 dark:bg-gray-700': state === 'idle',
+                                                 'bg-gray-100 dark:bg-slate-700': state === 'idle',
                                                  'bg-green-100 dark:bg-green-900/30': state === 'ready',
                                                  'bg-red-100 dark:bg-red-900/30': ['recording', 'countdown'].includes(state),
                                                  'bg-amber-100 dark:bg-amber-900/30': state === 'paused',
@@ -615,7 +615,7 @@
                                 {{-- Waveform Canvas --}}
                                 <div x-show="!['idle', 'complete'].includes(state)"
                                      x-cloak
-                                     class="relative mb-3 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-700/50"
+                                     class="relative mb-3 rounded-lg overflow-hidden bg-gray-50 dark:bg-slate-700/50"
                                      style="height: 64px;">
 
                                     <canvas x-ref="waveformCanvas"
@@ -649,7 +649,7 @@
                                     <template x-if="state === 'recording'">
                                         <div class="flex items-center gap-2">
                                             <button @click="pauseRecording()"
-                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                                     <rect x="6" y="4" width="4" height="16" />
                                                     <rect x="14" y="4" width="4" height="16" />
@@ -657,7 +657,7 @@
                                                 Pause
                                             </button>
                                             <button @click="stopRecording()"
-                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-gray-600 hover:bg-gray-900 dark:hover:bg-gray-500 transition-colors">
+                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-slate-600 hover:bg-gray-900 dark:hover:bg-gray-500 transition-colors">
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                                     <rect x="6" y="6" width="12" height="12" rx="1" />
                                                 </svg>
@@ -677,7 +677,7 @@
                                                 Resume
                                             </button>
                                             <button @click="stopRecording()"
-                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-gray-600 hover:bg-gray-900 dark:hover:bg-gray-500 transition-colors">
+                                                    class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-slate-600 hover:bg-gray-900 dark:hover:bg-gray-500 transition-colors">
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                                     <rect x="6" y="6" width="12" height="12" rx="1" />
                                                 </svg>
@@ -714,7 +714,7 @@
                                                 <span>Uploading...</span>
                                                 <span x-text="uploadProgress + '%'"></span>
                                             </div>
-                                            <div class="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                                            <div class="h-1.5 rounded-full bg-gray-200 dark:bg-slate-700 overflow-hidden">
                                                 <div class="h-full rounded-full bg-blue-500 transition-all duration-300"
                                                      :style="{ width: uploadProgress + '%' }"></div>
                                             </div>
@@ -786,7 +786,7 @@
 
                     {{-- Upload Document --}}
                     <div x-show="addMode === 'document'" x-cloak>
-                        <div class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-violet-400 dark:hover:border-violet-500 transition-colors">
+                        <div class="relative border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-violet-400 dark:hover:border-violet-500 transition-colors">
                             <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
@@ -907,7 +907,7 @@
                          }"
                          @keydown.escape.window="if(isFullscreen) { toggleFullscreen(); }"
                     >
-                        <div :class="isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col p-6' : 'space-y-3'">
+                        <div :class="isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-slate-900 flex flex-col p-6' : 'space-y-3'">
                             {{-- Fullscreen Header --}}
                             <div x-show="isFullscreen" class="flex items-center justify-between mb-4" x-cloak>
                                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Note Editor</h2>
@@ -917,7 +917,7 @@
                             </div>
 
                             {{-- Toolbar --}}
-                            <div class="flex flex-wrap items-center gap-0.5 p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                            <div class="flex flex-wrap items-center gap-0.5 p-1.5 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600">
                                 <button type="button" @click="execCmd('bold')" :class="isActive('bold') ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'" class="p-1.5 rounded" title="Bold">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z"/><path d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z"/></svg>
                                 </button>
@@ -928,7 +928,7 @@
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v7a6 6 0 006 6 6 6 0 006-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
                                 </button>
 
-                                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                                <div class="w-px h-5 bg-gray-300 dark:bg-slate-600 mx-1"></div>
 
                                 <button type="button" @click="execCmd('justifyLeft')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="Align Left">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
@@ -940,7 +940,7 @@
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
                                 </button>
 
-                                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                                <div class="w-px h-5 bg-gray-300 dark:bg-slate-600 mx-1"></div>
 
                                 <button type="button" @click="execCmd('insertUnorderedList')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="Bullet List">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
@@ -968,14 +968,14 @@
                                     @input="handleEditorInput()"
                                     @keydown="handleEditorKeydown($event)"
                                     :class="isFullscreen ? 'flex-1 min-h-[300px]' : 'min-h-[150px]'"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none overflow-y-auto prose prose-sm dark:prose-invert max-w-none [&_blockquote]:border-l-4 [&_blockquote]:border-violet-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:dark:text-gray-400"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none overflow-y-auto prose prose-sm dark:prose-invert max-w-none [&_blockquote]:border-l-4 [&_blockquote]:border-violet-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:dark:text-gray-400"
                                     data-placeholder="Type your meeting notes... Use @ to mention team members"
                                     style="empty-cells:show"
                                 ></div>
 
                                 {{-- @Mention Dropdown --}}
                                 <div x-show="showMentions" x-cloak
-                                     class="absolute left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto"
+                                     class="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto"
                                 >
                                     <template x-for="(member, idx) in filteredMembers" :key="member.id">
                                         <button type="button"
@@ -1015,7 +1015,7 @@
                 </div>
 
                 {{-- Generate MOM Button --}}
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4"
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
                      x-data="{
                         generating: false,
                         generationProgress: 0,
@@ -1084,7 +1084,7 @@
                         type="button"
                         @click="generateMom()"
                         :disabled="generating"
-                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         <template x-if="!generating">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1101,13 +1101,13 @@
                     </button>
 
                     {{-- Progress Bar --}}
-                    <div x-show="generating" x-cloak class="mt-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                    <div x-show="generating" x-cloak class="mt-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
                         <div class="flex items-center justify-between mb-1.5">
                             <span class="text-xs font-medium text-violet-700 dark:text-violet-300" x-text="generationStep"></span>
                             <span class="text-xs font-medium text-violet-700 dark:text-violet-300" x-text="Math.round(generationProgress) + '%'"></span>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 overflow-hidden">
-                            <div class="bg-gradient-to-r from-violet-500 to-purple-500 h-2 rounded-full transition-all duration-500 ease-out" :style="'width: ' + generationProgress + '%'"></div>
+                        <div class="w-full bg-gray-200 dark:bg-slate-600 rounded-full h-2 overflow-hidden">
+                            <div class="bg-gradient-to-r from-violet-500 to-violet-600 h-2 rounded-full transition-all duration-500 ease-out" :style="'width: ' + generationProgress + '%'"></div>
                         </div>
                     </div>
 
@@ -1124,7 +1124,7 @@
             </div>
         @else
             <div class="lg:col-span-1">
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                     <div class="text-center py-4">
                         <svg class="mx-auto h-8 w-8 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

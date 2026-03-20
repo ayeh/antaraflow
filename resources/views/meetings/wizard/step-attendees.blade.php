@@ -69,7 +69,7 @@
                 presenter: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
                 note_taker: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300',
                 participant: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-                observer: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+                observer: 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300',
             };
             return map[role] || map.participant;
         },
@@ -452,22 +452,22 @@
 
     {{-- Stats Row --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Total Attendees</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="stats.total"></p>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">registered</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Present</p>
             <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1" x-text="stats.present"></p>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">marked present</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Absent</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="stats.absent"></p>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">not present</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">Confirmed</p>
             <p class="text-2xl font-bold text-violet-600 dark:text-violet-400 mt-1" x-text="stats.confirmed"></p>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">RSVP accepted</p>
@@ -478,7 +478,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- Left Panel: Attendees List (2/3 width) --}}
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
             {{-- Header --}}
             <div class="p-6 pb-4">
                 <div class="flex items-center justify-between mb-4">
@@ -489,7 +489,7 @@
                                 type="button"
                                 @click="importProjectMembers()"
                                 :disabled="loading"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
                             >
                                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -502,13 +502,13 @@
                 </div>
 
                 {{-- Filter Tabs --}}
-                <div class="flex gap-1 bg-gray-100 dark:bg-gray-700/50 rounded-lg p-1">
+                <div class="flex gap-1 bg-gray-100 dark:bg-slate-700/50 rounded-lg p-1">
                     <template x-for="tab in [{key: 'all', label: 'All'}, {key: 'present', label: 'Present'}, {key: 'absent', label: 'Absent'}, {key: 'guests', label: 'Guests'}]" :key="tab.key">
                         <button
                             type="button"
                             @click="activeTab = tab.key"
                             :class="activeTab === tab.key
-                                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                                ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
                             class="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
                             x-text="tab.label"
@@ -539,7 +539,7 @@
                 <template x-if="filteredAttendees.length > 0">
                     <div class="space-y-2">
                         <template x-for="attendee in filteredAttendees" :key="attendee.id">
-                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <div class="flex items-center gap-3 min-w-0">
                                     {{-- Avatar --}}
                                     <div class="relative flex-shrink-0">
@@ -549,7 +549,7 @@
                                         {{-- Presence Indicator --}}
                                         <span
                                             class="absolute -bottom-0.5 -right-0.5 block h-3 w-3 rounded-full ring-2 ring-white dark:ring-gray-800"
-                                            :class="attendee.is_present ? 'bg-green-400' : 'bg-gray-300 dark:bg-gray-600'"
+                                            :class="attendee.is_present ? 'bg-green-400' : 'bg-gray-300 dark:bg-slate-600'"
                                         ></span>
                                     </div>
 
@@ -596,7 +596,7 @@
         {{-- Right Panel: Add Attendee Form (1/3 width) --}}
         @if($isEditable)
             <div class="lg:col-span-1 space-y-4">
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                     <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Add Attendee</h3>
 
                     {{-- Mode Toggle Pills --}}
@@ -607,7 +607,7 @@
                                 @click="addMode = mode.key; selectedMembers = []; searchQuery = ''"
                                 :class="addMode === mode.key
                                     ? 'bg-violet-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                                    : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
                                 class="flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors text-center"
                                 x-text="mode.label"
                             ></button>
@@ -633,12 +633,12 @@
                                 type="text"
                                 x-model="searchQuery"
                                 placeholder="Search members..."
-                                class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             />
                         </div>
 
                         {{-- Member Checklist --}}
-                        <div class="max-h-52 overflow-y-auto space-y-1 mb-4 border border-gray-200 dark:border-gray-700 rounded-lg p-2">
+                        <div class="max-h-52 overflow-y-auto space-y-1 mb-4 border border-gray-200 dark:border-slate-700 rounded-lg p-2">
                             <template x-if="filteredOrgMembers.length === 0">
                                 <p class="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
                                     <span x-show="availableOrgMembers.length === 0">All organization members have been added.</span>
@@ -651,7 +651,7 @@
                                         type="checkbox"
                                         :value="member.id"
                                         x-model.number="selectedMembers"
-                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-violet-600 focus:ring-violet-500 dark:bg-gray-700"
+                                        class="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500 dark:bg-slate-700"
                                     />
                                     <div class="min-w-0">
                                         <p class="text-sm text-gray-900 dark:text-white truncate" x-text="member.name"></p>
@@ -680,12 +680,12 @@
                                 type="text"
                                 x-model="searchQuery"
                                 placeholder="Search by name or email..."
-                                class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             />
                         </div>
 
                         {{-- Single Select List --}}
-                        <div class="max-h-52 overflow-y-auto space-y-1 mb-4 border border-gray-200 dark:border-gray-700 rounded-lg p-2">
+                        <div class="max-h-52 overflow-y-auto space-y-1 mb-4 border border-gray-200 dark:border-slate-700 rounded-lg p-2">
                             <template x-if="filteredOrgMembers.length === 0">
                                 <p class="text-xs text-gray-500 dark:text-gray-400 text-center py-4">No matching members found.</p>
                             </template>
@@ -697,7 +697,7 @@
                                         :value="member.id"
                                         x-model.number="selectedMembers[0]"
                                         @change="selectedMembers = [member.id]"
-                                        class="h-4 w-4 border-gray-300 dark:border-gray-600 text-violet-600 focus:ring-violet-500 dark:bg-gray-700"
+                                        class="h-4 w-4 border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500 dark:bg-slate-700"
                                     />
                                     <div class="min-w-0">
                                         <p class="text-sm text-gray-900 dark:text-white truncate" x-text="member.name"></p>
@@ -717,7 +717,7 @@
                                     type="text"
                                     x-model="guestName"
                                     placeholder="Attendee name"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                                 />
                             </div>
                             <div>
@@ -726,20 +726,20 @@
                                     type="email"
                                     x-model="guestEmail"
                                     placeholder="attendee@example.com"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                                 />
                             </div>
                         </div>
                     </div>
 
                     {{-- Shared Options: Mark Present + Role --}}
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4 space-y-3">
+                    <div class="border-t border-gray-200 dark:border-slate-700 pt-4 mt-4 space-y-3">
                         {{-- Mark as Present --}}
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="checkbox"
                                 x-model="markPresent"
-                                class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-violet-600 focus:ring-violet-500 dark:bg-gray-700"
+                                class="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500 dark:bg-slate-700"
                             />
                             <span class="text-sm text-gray-700 dark:text-gray-300">Mark as Present</span>
                         </label>
@@ -749,7 +749,7 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
                             <select
                                 x-model="role"
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             >
                                 <option value="participant">Participant</option>
                                 <option value="organizer">Organizer</option>
@@ -812,7 +812,7 @@
                 </div>
 
                 {{-- QR Registration --}}
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
                     <div class="flex items-center gap-3 text-sm mb-3">
                         <div class="flex-shrink-0 h-8 w-8 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center">
                             <svg class="h-4 w-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -852,7 +852,7 @@
                             <input
                                 type="datetime-local"
                                 x-model="qrSettings.expires_at"
-                                class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             />
                         </div>
 
@@ -864,7 +864,7 @@
                                 min="1"
                                 x-model="qrSettings.max_attendees"
                                 placeholder="Unlimited"
-                                class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                                class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             />
                         </div>
 
@@ -874,7 +874,7 @@
                             <div class="grid grid-cols-2 gap-2">
                                 <template x-for="field in [{key: 'name', label: 'Name'}, {key: 'email', label: 'Email'}, {key: 'phone', label: 'Phone'}, {key: 'company', label: 'Company'}]" :key="field.key">
                                     <label class="flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors"
-                                           :class="qrSettings.required_fields.includes(field.key) ? 'border-violet-300 dark:border-violet-600 bg-violet-50 dark:bg-violet-900/20' : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'">
+                                           :class="qrSettings.required_fields.includes(field.key) ? 'border-violet-300 dark:border-violet-600 bg-violet-50 dark:bg-violet-900/20' : 'border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-gray-700'">
                                         <input
                                             type="checkbox"
                                             :checked="qrSettings.required_fields.includes(field.key)"
@@ -895,7 +895,7 @@
                                 rows="3"
                                 maxlength="500"
                                 placeholder="Welcome to the meeting! Please register below."
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
                             ></textarea>
                             <p class="text-xs text-gray-400 mt-1 text-right" x-text="(qrSettings.welcome_message?.length || 0) + '/500'"></p>
                         </div>
@@ -905,7 +905,7 @@
                             <button
                                 type="button"
                                 @click="qrSetupMode = false"
-                                class="flex-1 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                class="flex-1 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                             >Cancel</button>
                             <button
                                 type="button"
@@ -925,12 +925,12 @@
                     {{-- Preview: QR Code & Details --}}
                     <div x-show="qrView === 'preview' && qrData" x-cloak class="space-y-3">
                         {{-- QR Code --}}
-                        <div class="flex items-center justify-center p-3 bg-white rounded-lg border border-gray-200 dark:border-gray-600">
+                        <div class="flex items-center justify-center p-3 bg-white rounded-lg border border-gray-200 dark:border-slate-600">
                             <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(qrUrl)" alt="QR Code" class="w-40 h-40" />
                         </div>
 
                         {{-- Join Code --}}
-                        <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
                             <div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Join Code</p>
                                 <p class="text-lg font-bold font-mono tracking-widest text-gray-900 dark:text-white" x-text="qrData?.join_code"></p>
@@ -942,7 +942,7 @@
 
                         {{-- Registration URL --}}
                         <div class="flex items-center gap-2">
-                            <input type="text" :value="qrUrl" readonly class="flex-1 px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 truncate" />
+                            <input type="text" :value="qrUrl" readonly class="flex-1 px-3 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-gray-300 truncate" />
                             <button type="button" @click="copyQrUrl()" class="flex-shrink-0 p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 rounded-md hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors" title="Copy link">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             </button>
@@ -964,7 +964,7 @@
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
                                 Telegram
                             </button>
-                            <button type="button" @click="shareVia('email')" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                            <button type="button" @click="shareVia('email')" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-50 dark:bg-slate-700/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                                 Email
                             </button>
@@ -972,11 +972,11 @@
 
                         {{-- Actions --}}
                         <div class="flex gap-2 pt-1">
-                            <a :href="'https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=png&download=1&data=' + encodeURIComponent(qrUrl)" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <a :href="'https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=png&download=1&data=' + encodeURIComponent(qrUrl)" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                                 Download QR
                             </a>
-                            <button type="button" @click="qrData = null; qrSetupMode = true; qrView = 'setup'" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <button type="button" @click="qrData = null; qrSetupMode = true; qrView = 'setup'" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                 Regenerate
                             </button>
@@ -990,7 +990,7 @@
         @else
             {{-- Read-only: show empty right panel --}}
             <div class="lg:col-span-1">
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                     <div class="text-center py-4">
                         <svg class="mx-auto h-8 w-8 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
