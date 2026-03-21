@@ -22,6 +22,64 @@
         </span>
     </div>
 
+    {{-- Speaker Timeline --}}
+    @if($transcription->segments->whereNotNull('speaker')->isNotEmpty() && $transcription->duration_seconds)
+        @php
+            $timelineColors = [
+                'bg-blue-400',
+                'bg-violet-400',
+                'bg-amber-400',
+                'bg-rose-400',
+                'bg-teal-400',
+                'bg-indigo-400',
+            ];
+            $uniqueSpeakers = $transcription->segments->pluck('speaker')->filter()->unique()->values();
+            $speakerTimelineColorMap = [];
+            foreach ($uniqueSpeakers as $idx => $spk) {
+                $speakerTimelineColorMap[$spk] = $timelineColors[$idx % count($timelineColors)];
+            }
+            $duration = $transcription->duration_seconds;
+        @endphp
+
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6" id="speaker-timeline">
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Speaker Timeline</h2>
+
+            {{-- Legend --}}
+            <div class="flex flex-wrap gap-3 mb-3">
+                @foreach($uniqueSpeakers as $spk)
+                    <div class="flex items-center gap-1.5">
+                        <span class="inline-block w-3 h-3 rounded-full {{ $speakerTimelineColorMap[$spk] }}"></span>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">{{ $spk }}</span>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Timeline bar --}}
+            <div class="relative w-full h-6 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                @foreach($transcription->segments->whereNotNull('speaker') as $seg)
+                    @php
+                        $left  = round(($seg->start_time / $duration) * 100, 2);
+                        $width = round((($seg->end_time - $seg->start_time) / $duration) * 100, 2);
+                        $color = $speakerTimelineColorMap[$seg->speaker] ?? 'bg-gray-400';
+                        $startFmt = sprintf('%02d:%02d', intdiv((int)$seg->start_time, 60), (int)$seg->start_time % 60);
+                        $endFmt   = sprintf('%02d:%02d', intdiv((int)$seg->end_time, 60), (int)$seg->end_time % 60);
+                    @endphp
+                    <div
+                        class="absolute h-full {{ $color }} opacity-80 hover:opacity-100 transition-opacity cursor-pointer group"
+                        style="left: {{ $left }}%; width: {{ max($width, 0.5) }}%"
+                        title="{{ $seg->speaker }}: {{ $startFmt }} – {{ $endFmt }}"
+                    >
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-10 pointer-events-none">
+                            <div class="bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow">
+                                {{ $seg->speaker }}: {{ $startFmt }}–{{ $endFmt }}
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     @if($transcription->full_text)
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Full Transcript</h2>
@@ -68,8 +126,66 @@
                         {{-- Main body --}}
                         <div class="flex-1 min-w-0 space-y-1">
                             @if($segment->speaker !== null)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $speakerColorMap[$segment->speaker] }}">
-                                    {{ $segment->speaker }}
+                                <span
+                                    x-data="{
+                                        editing: false,
+                                        value: @js($segment->speaker),
+                                        original: @js($segment->speaker),
+                                        save() {
+                                            if (this.value.trim() === '' || this.value.trim() === this.original) {
+                                                this.editing = false;
+                                                this.value = this.original;
+                                                return;
+                                            }
+                                            const newVal = this.value.trim();
+                                            fetch('{{ route('meetings.transcriptions.speakers.update', [$meeting, $transcription]) }}', {
+                                                method: 'PATCH',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                                    'Accept': 'application/json',
+                                                },
+                                                body: JSON.stringify({ old_speaker: this.original, new_speaker: newVal }),
+                                            }).then(r => {
+                                                if (r.ok) {
+                                                    document.querySelectorAll('[data-speaker]').forEach(el => {
+                                                        const data = Alpine.$data(el);
+                                                        if (data && data.original === this.original) {
+                                                            data.original = newVal;
+                                                            data.value = newVal;
+                                                        }
+                                                    });
+                                                    this.original = newVal;
+                                                }
+                                                this.editing = false;
+                                            });
+                                        }
+                                    }"
+                                    data-speaker="{{ $segment->speaker }}"
+                                >
+                                    <template x-if="!editing">
+                                        <button
+                                            @click="editing = true"
+                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium {{ $speakerColorMap[$segment->speaker] }} hover:ring-2 hover:ring-offset-1 hover:ring-blue-400 transition-all cursor-pointer"
+                                            title="Click to rename speaker"
+                                        >
+                                            <span x-text="value"></span>
+                                            <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                            </svg>
+                                        </button>
+                                    </template>
+                                    <template x-if="editing">
+                                        <input
+                                            x-model="value"
+                                            @keydown.enter="save()"
+                                            @keydown.escape="editing = false; value = original"
+                                            @blur="save()"
+                                            x-init="$nextTick(() => $el.focus())"
+                                            class="inline-flex px-2 py-0.5 rounded text-xs font-medium border border-blue-400 outline-none w-28 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                                            maxlength="100"
+                                        />
+                                    </template>
                                 </span>
                             @endif
                             <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ $segment->text }}</p>
