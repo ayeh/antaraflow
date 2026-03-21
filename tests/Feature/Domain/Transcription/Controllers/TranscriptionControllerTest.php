@@ -115,3 +115,12 @@ test('guest cannot upload audio', function () {
 
     $response->assertRedirect(route('login'));
 });
+
+it('transcription tab contains language selector', function (): void {
+    $this->actingAs($this->user)
+        ->get(route('meetings.show', $this->meeting))
+        ->assertOk()
+        ->assertSee('name="language"', false)
+        ->assertSee('value="en"', false)
+        ->assertSee('value="ms"', false);
+});

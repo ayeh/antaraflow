@@ -5,12 +5,15 @@
 
     <form method="POST" action="{{ route('meetings.transcriptions.store', $meeting) }}" enctype="multipart/form-data" class="bg-gray-50 rounded-lg p-4 border border-gray-200">
         @csrf
-        <div class="flex items-end gap-4">
-            <div class="flex-1">
-                <label for="audio_file" class="block text-sm font-medium text-gray-700 mb-1">Upload Audio File</label>
-                <input type="file" name="audio_file" id="audio_file" accept="audio/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+        <div class="space-y-3">
+            <div class="flex items-end gap-4">
+                <div class="flex-1">
+                    <label for="audio_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Upload Audio File</label>
+                    <input type="file" name="audio" id="audio_file" accept="audio/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap">Upload</button>
             </div>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap">Upload</button>
+            <x-language-select name="language" :selected="old('language', 'en')" />
         </div>
     </form>
 

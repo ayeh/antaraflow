@@ -530,19 +530,22 @@
 
                     {{-- Upload Audio --}}
                     <div x-show="addMode === 'audio'">
-                        <div class="relative border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-violet-400 dark:hover:border-violet-500 transition-colors">
-                            <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                            </svg>
-                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Drop audio file here or click to browse</p>
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">MP3, WAV, M4A, OGG, WebM (max 200MB)</p>
-                            <input
-                                type="file"
-                                accept=".mp3,.wav,.m4a,.ogg,.webm,audio/*"
-                                @change="uploadAudio($event)"
-                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                :disabled="loading"
-                            />
+                        <div class="space-y-3">
+                            <div class="relative border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-violet-400 dark:hover:border-violet-500 transition-colors">
+                                <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                </svg>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Drop audio file here or click to browse</p>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">MP3, WAV, M4A, OGG, WebM (max 200MB)</p>
+                                <input
+                                    type="file"
+                                    accept=".mp3,.wav,.m4a,.ogg,.webm,audio/*"
+                                    @change="uploadAudio($event)"
+                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    :disabled="loading"
+                                />
+                            </div>
+                            <x-language-select name="language" :selected="old('language', 'en')" />
                         </div>
 
                         {{-- Browser Recording --}}
