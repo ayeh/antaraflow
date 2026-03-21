@@ -778,7 +778,7 @@
                                 </div>
 
                                 {{-- Language selector --}}
-                                <div x-show="['idle', 'ready'].includes(state)" x-cloak class="mt-3">
+                                <div x-show="['idle', 'ready', 'countdown'].includes(state)" x-cloak class="mt-3">
                                     <select
                                         x-model="language"
                                         :disabled="state !== 'ready'"
