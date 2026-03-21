@@ -44,12 +44,21 @@ $navItems = [
         'active' => request()->routeIs('analytics.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
     ],
+    [
+        'key'    => 'reports',
+        'label'  => 'Reports',
+        'href'   => route('reports.index'),
+        'active' => request()->routeIs('reports.*'),
+        'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
+    ],
 ];
 
 $isSettingsActive = request()->routeIs(
+    'settings.*',
     'organizations.*', 'meeting-templates.*', 'meeting-series.*',
     'tags.*', 'attendee-groups.*', 'ai-provider-configs.*',
-    'api-keys.*', 'subscription.*', 'usage.*', 'audit-log.*', 'calendar.*'
+    'api-keys.*', 'subscription.*', 'usage.*', 'audit-log.*', 'calendar.*',
+    'extraction-templates.*', 'webhooks.*'
 );
 @endphp
 
@@ -62,19 +71,20 @@ $isSettingsActive = request()->routeIs(
            transition-all duration-500 ease-in-out [transition-timing-function:cubic-bezier(0.25,0.46,0.45,0.94)] overflow-hidden"
 >
     {{-- Brand + Toggle --}}
-    <div class="flex items-center justify-between px-3 py-4 shrink-0">
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-2 min-w-0">
+    <div class="flex items-center px-3 h-16 shrink-0" :class="sidebarCollapsed ? 'justify-center' : 'justify-between'">
+        <a
+            href="{{ route('dashboard') }}"
+            x-show="!sidebarCollapsed"
+            x-transition:enter="transition ease-out duration-200 delay-100"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="flex items-center gap-2 min-w-0"
+        >
             <span class="text-violet-600 dark:text-violet-400 font-black text-sm leading-none tracking-tighter shrink-0">aF</span>
-            <span
-                x-show="!sidebarCollapsed"
-                x-transition:enter="transition ease-out duration-200 delay-100"
-                x-transition:enter-start="opacity-0"
-                x-transition:enter-end="opacity-100"
-                x-transition:leave="transition ease-in duration-100"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate"
-            >antaraFLOW</span>
+            <span class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">antaraFLOW</span>
         </a>
         <button
             @click.stop="toggleSidebar()"
