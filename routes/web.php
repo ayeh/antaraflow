@@ -189,6 +189,7 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     // Meeting sub-resources (transcriptions, notes, attendees, actions, chat, extractions)
     Route::prefix('meetings/{meeting}')->as('meetings.')->group(function () {
         Route::resource('transcriptions', TranscriptionController::class)->only(['store', 'show', 'destroy']);
+        Route::patch('transcriptions/{transcription}/speakers', [\App\Domain\Transcription\Controllers\SpeakerController::class, 'update'])->name('transcriptions.speakers.update');
         Route::resource('documents', DocumentController::class)->only(['store', 'destroy']);
         Route::resource('manual-notes', ManualNoteController::class);
         Route::post('extract', [ExtractionController::class, 'extract'])->name('extract');
