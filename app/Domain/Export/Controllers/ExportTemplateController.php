@@ -43,8 +43,13 @@ class ExportTemplateController
         return redirect()->route('settings.export-templates.index')->with('success', 'Template created.');
     }
 
-    public function edit(ExportTemplate $exportTemplate): View
+    public function edit(Request $request, ExportTemplate $exportTemplate): View
     {
+        abort_unless(
+            $exportTemplate->organization_id === $request->user()->current_organization_id,
+            403
+        );
+
         return view('settings.export-templates.edit', ['template' => $exportTemplate]);
     }
 
@@ -67,8 +72,13 @@ class ExportTemplateController
         return redirect()->route('settings.export-templates.index')->with('success', 'Template updated.');
     }
 
-    public function destroy(ExportTemplate $exportTemplate): RedirectResponse
+    public function destroy(Request $request, ExportTemplate $exportTemplate): RedirectResponse
     {
+        abort_unless(
+            $exportTemplate->organization_id === $request->user()->current_organization_id,
+            403
+        );
+
         $exportTemplate->delete();
 
         return redirect()->route('settings.export-templates.index')->with('success', 'Template deleted.');

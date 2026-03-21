@@ -28,6 +28,10 @@ class SendMentionNotificationsJob implements ShouldQueue
             ->get();
 
         foreach ($mentions as $mention) {
+            if (! $mention->mentionedUser) {
+                continue;
+            }
+
             $mention->mentionedUser->notify(
                 new MentionedInCommentNotification($this->comment)
             );

@@ -32,6 +32,8 @@ class SendMomEmailJob implements ShouldQueue
                 'failed_at' => now(),
                 'error_message' => $e->getMessage(),
             ]);
+
+            throw $e;
         }
     }
 }
