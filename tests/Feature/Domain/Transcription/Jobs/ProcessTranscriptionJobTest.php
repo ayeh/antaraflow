@@ -65,6 +65,50 @@ test('job marks transcription as failed on error', function () {
     Event::assertDispatched(TranscriptionFailed::class);
 });
 
+it('assigns speaker labels based on time gap heuristic', function (): void {
+    $segments = [
+        new \App\Infrastructure\AI\DTOs\TranscriptionSegmentData(
+            text: 'Hello', speaker: null, startTime: 0.0, endTime: 2.0, confidence: 0.9
+        ),
+        new \App\Infrastructure\AI\DTOs\TranscriptionSegmentData(
+            text: 'How are you', speaker: null, startTime: 4.0, endTime: 6.0, confidence: 0.9
+        ),
+        new \App\Infrastructure\AI\DTOs\TranscriptionSegmentData(
+            text: 'I am fine', speaker: null, startTime: 8.0, endTime: 10.0, confidence: 0.9
+        ),
+    ];
+
+    $job = new \App\Domain\Transcription\Jobs\ProcessTranscriptionJob(
+        \App\Domain\Transcription\Models\AudioTranscription::factory()->make()
+    );
+
+    $result = $job->assignSpeakers($segments);
+
+    expect($result[0]->speaker)->toBe('Speaker 1');
+    expect($result[1]->speaker)->toBe('Speaker 2');
+    expect($result[2]->speaker)->toBe('Speaker 3');
+});
+
+it('keeps same speaker when time gap is below threshold', function (): void {
+    $segments = [
+        new \App\Infrastructure\AI\DTOs\TranscriptionSegmentData(
+            text: 'Hello', speaker: null, startTime: 0.0, endTime: 2.0, confidence: 0.9
+        ),
+        new \App\Infrastructure\AI\DTOs\TranscriptionSegmentData(
+            text: 'World', speaker: null, startTime: 2.5, endTime: 4.0, confidence: 0.9
+        ),
+    ];
+
+    $job = new \App\Domain\Transcription\Jobs\ProcessTranscriptionJob(
+        \App\Domain\Transcription\Models\AudioTranscription::factory()->make()
+    );
+
+    $result = $job->assignSpeakers($segments);
+
+    expect($result[0]->speaker)->toBe('Speaker 1');
+    expect($result[1]->speaker)->toBe('Speaker 1');
+});
+
 test('job sets processing status before transcribing', function () {
     $statuses = [];
 

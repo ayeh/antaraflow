@@ -8,6 +8,7 @@ use App\Domain\Transcription\Events\TranscriptionCompleted;
 use App\Domain\Transcription\Events\TranscriptionFailed;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
+use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
 use App\Support\Enums\TranscriptionStatus;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -62,7 +63,9 @@ class ProcessTranscriptionJob implements ShouldQueue
                 'completed_at' => now(),
             ]);
 
-            foreach ($result->segments as $i => $segment) {
+            $assignedSegments = $this->assignSpeakers($result->segments);
+
+            foreach ($assignedSegments as $i => $segment) {
                 $this->transcription->segments()->create([
                     'text' => $segment->text,
                     'speaker' => $segment->speaker,
@@ -87,6 +90,38 @@ class ProcessTranscriptionJob implements ShouldQueue
                 @unlink($compressedPath);
             }
         }
+    }
+
+    /**
+     * Assign speaker labels using time-gap heuristic.
+     * A gap of more than $gapThreshold seconds between segments indicates a new speaker.
+     *
+     * @param  array<TranscriptionSegmentData>  $segments
+     * @return array<TranscriptionSegmentData>
+     */
+    public function assignSpeakers(array $segments, float $gapThreshold = 1.5): array
+    {
+        $speakerIndex = 1;
+        $previousEndTime = null;
+        $result = [];
+
+        foreach ($segments as $segment) {
+            if ($previousEndTime !== null && ($segment->startTime - $previousEndTime) > $gapThreshold) {
+                $speakerIndex++;
+            }
+
+            $result[] = new TranscriptionSegmentData(
+                text: $segment->text,
+                startTime: $segment->startTime,
+                endTime: $segment->endTime,
+                speaker: 'Speaker '.$speakerIndex,
+                confidence: $segment->confidence,
+            );
+
+            $previousEndTime = $segment->endTime;
+        }
+
+        return $result;
     }
 
     /**
