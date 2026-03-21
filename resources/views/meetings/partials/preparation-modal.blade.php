@@ -114,7 +114,7 @@
             {{-- Background overlay --}}
             <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                class="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 transition-opacity" @click="open = false">
+                class="fixed inset-0 bg-gray-500 dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-75 transition-opacity" @click="open = false">
             </div>
 
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -123,9 +123,9 @@
             <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
 
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">AI Meeting Preparation</h3>
                     <button @click="open = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -166,9 +166,9 @@
                                     <label class="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors"
                                         :class="isSelected(item)
                                             ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-400'
-                                            : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'">
+                                            : 'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50'">
                                         <input type="checkbox" :checked="isSelected(item)" @change="toggleItem(item)"
-                                            class="mt-0.5 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500">
+                                            class="mt-0.5 rounded border-gray-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500">
                                         <span class="text-sm text-gray-700 dark:text-gray-300" x-text="item"></span>
                                     </label>
                                 </template>
@@ -199,9 +199,9 @@
                                     <label class="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors"
                                         :class="isSelected(topic)
                                             ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-400'
-                                            : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'">
+                                            : 'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50'">
                                         <input type="checkbox" :checked="isSelected(topic)" @change="toggleItem(topic)"
-                                            class="mt-0.5 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500">
+                                            class="mt-0.5 rounded border-gray-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500">
                                         <span class="text-sm text-gray-700 dark:text-gray-300" x-text="topic"></span>
                                     </label>
                                 </template>
@@ -211,12 +211,12 @@
                 </div>
 
                 {{-- Footer --}}
-                <div x-show="!loading && !error && suggestedAgenda.length > 0" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div x-show="!loading && !error && suggestedAgenda.length > 0" class="px-6 py-4 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
                     <span class="text-sm text-gray-500 dark:text-gray-400">
                         <span x-text="selectedItems.length"></span> item(s) selected
                     </span>
                     <div class="flex gap-3">
-                        <button @click="open = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        <button @click="open = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
                             Cancel
                         </button>
                         <button @click="applySelected()" :disabled="selectedItems.length === 0"

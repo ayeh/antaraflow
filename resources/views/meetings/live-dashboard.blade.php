@@ -108,9 +108,9 @@
                     {{-- Processing Indicator --}}
                     <div x-show="sessionStatus === 'active'" class="flex items-center gap-2 px-3 py-2 text-gray-400 dark:text-gray-500">
                         <div class="flex gap-1">
-                            <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
-                            <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
-                            <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+                            <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-slate-500 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
+                            <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-slate-500 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+                            <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-slate-500 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
                         </div>
                         <span class="text-xs">Listening...</span>
                     </div>
@@ -433,7 +433,7 @@
                             <div class="flex items-center justify-between py-1.5">
                                 <div class="flex items-center gap-2 min-w-0">
                                     <span class="w-2 h-2 rounded-full flex-shrink-0"
-                                          :class="attendee.is_present ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'">
+                                          :class="attendee.is_present ? 'bg-green-500' : 'bg-gray-300 dark:bg-slate-600'">
                                     </span>
                                     <span class="text-sm text-gray-700 dark:text-gray-300 truncate"
                                           x-text="attendee.user?.name || attendee.name || 'Unknown'">
@@ -442,7 +442,7 @@
                                 <span class="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
                                       :class="attendee.is_present
                                           ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                          : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'"
+                                          : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400'"
                                       x-text="attendee.is_present ? 'Present' : 'Absent'">
                                 </span>
                             </div>

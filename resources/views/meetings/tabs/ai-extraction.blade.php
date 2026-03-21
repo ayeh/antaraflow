@@ -3,7 +3,7 @@
         <h3 class="text-lg font-medium text-gray-900">AI Insights</h3>
         <form method="POST" action="{{ route('meetings.extract', $meeting) }}" class="inline">
             @csrf
-            <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">Run AI Extraction</button>
+            <button type="submit" class="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">Run AI Extraction</button>
         </form>
     </div>
 
@@ -16,7 +16,7 @@
             <div class="border border-gray-200 rounded-lg p-4 space-y-4">
                 <div class="flex items-center justify-between">
                     <span class="text-xs text-gray-500">{{ $extraction->created_at->format('M j, Y g:i A') }}</span>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">{{ ucfirst($extraction->type ?? 'extraction') }}</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">{{ ucfirst($extraction->type ?? 'extraction') }}</span>
                 </div>
 
                 @if($extraction->summary)

@@ -7,7 +7,7 @@
 
 <div class="space-y-4">
     {{-- Quorum Status --}}
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Board Compliance</h2>
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
@@ -47,7 +47,7 @@
     </div>
 
     {{-- Resolutions --}}
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Resolutions</h2>
             <span class="text-sm text-gray-500 dark:text-gray-400">{{ $meeting->resolutions->count() }} total</span>
@@ -77,14 +77,14 @@
                     <div>
                         <label for="resolution_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title <span class="text-red-500">*</span></label>
                         <input type="text" name="title" id="resolution_title" required
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
+                            class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
                             placeholder="Resolution title">
                     </div>
 
                     <div>
                         <label for="resolution_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                         <textarea name="description" id="resolution_description" rows="2"
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none resize-none"
+                            class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none resize-none"
                             placeholder="Optional description"></textarea>
                     </div>
 
@@ -92,7 +92,7 @@
                         <div>
                             <label for="mover_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mover</label>
                             <select name="mover_id" id="mover_id"
-                                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                                class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                                 <option value="">None</option>
                                 @foreach($meeting->attendees as $attendee)
                                     <option value="{{ $attendee->id }}">{{ $attendee->name }}</option>
@@ -102,7 +102,7 @@
                         <div>
                             <label for="seconder_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Seconder</label>
                             <select name="seconder_id" id="seconder_id"
-                                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                                class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                                 <option value="">None</option>
                                 @foreach($meeting->attendees as $attendee)
                                     <option value="{{ $attendee->id }}">{{ $attendee->name }}</option>

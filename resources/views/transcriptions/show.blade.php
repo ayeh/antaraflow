@@ -33,7 +33,7 @@
         @php
             $speakerColors = [
                 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-                'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
+                'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300',
                 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
                 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300',
                 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300',

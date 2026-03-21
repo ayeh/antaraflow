@@ -1,5 +1,5 @@
 {{-- Single Resolution Card with Voting --}}
-<div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+<div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
     <div class="flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2 mb-1">
@@ -9,7 +9,7 @@
                     @elseif($resolution->status === \App\Support\Enums\ResolutionStatus::Passed) bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
                     @elseif($resolution->status === \App\Support\Enums\ResolutionStatus::Failed) bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300
                     @elseif($resolution->status === \App\Support\Enums\ResolutionStatus::Tabled) bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300
-                    @elseif($resolution->status === \App\Support\Enums\ResolutionStatus::Withdrawn) bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                    @elseif($resolution->status === \App\Support\Enums\ResolutionStatus::Withdrawn) bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300
                     @endif">
                     {{ $resolution->status->label() }}
                 </span>
@@ -63,7 +63,7 @@
         $totalVotes = $resolution->votes->count();
     @endphp
 
-    <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+    <div class="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
         <div class="flex items-center gap-4 text-xs">
             <span class="text-green-600 dark:text-green-400 font-medium">For: {{ $forVotes }}</span>
             <span class="text-red-600 dark:text-red-400 font-medium">Against: {{ $againstVotes }}</span>
@@ -81,7 +81,7 @@
 
                 <div x-show="showVoteForm" x-cloak class="mt-2 space-y-2">
                     <select x-model="selectedAttendee"
-                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-1.5 text-xs focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-1.5 text-xs focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                         <option value="">Select Attendee</option>
                         @foreach($meeting->attendees->where('is_present', true) as $attendee)
                             <option value="{{ $attendee->id }}">{{ $attendee->name }}</option>
@@ -98,7 +98,7 @@
                                     class="px-3 py-1 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed
                                         @if($choice === \App\Support\Enums\VoteChoice::For) bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200
                                         @elseif($choice === \App\Support\Enums\VoteChoice::Against) bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200
-                                        @else bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200
+                                        @else bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200
                                         @endif">
                                     {{ $choice->label() }}
                                 </button>

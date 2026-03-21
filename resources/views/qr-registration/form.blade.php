@@ -6,9 +6,9 @@
     <title>Meeting Registration</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-50 dark:bg-slate-900 min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 p-8">
             {{-- Header --}}
             <div class="text-center mb-6">
                 <div class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-violet-100 dark:bg-violet-900/30 mb-3">
@@ -51,7 +51,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Name @if(in_array('name', $requiredFields))<span class="text-red-500">*</span>@endif
                     </label>
-                    <input type="text" name="name" {{ in_array('name', $requiredFields) ? 'required' : '' }} value="{{ old('name') }}" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="Your full name" />
+                    <input type="text" name="name" {{ in_array('name', $requiredFields) ? 'required' : '' }} value="{{ old('name') }}" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="Your full name" />
                     @error('name') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
 
@@ -60,7 +60,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Email @if(in_array('email', $requiredFields))<span class="text-red-500">*</span>@endif
                     </label>
-                    <input type="email" name="email" {{ in_array('email', $requiredFields) ? 'required' : '' }} value="{{ old('email') }}" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="your@email.com" />
+                    <input type="email" name="email" {{ in_array('email', $requiredFields) ? 'required' : '' }} value="{{ old('email') }}" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="your@email.com" />
                     @error('email') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
 
@@ -70,7 +70,7 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Phone @if(in_array('phone', $requiredFields))<span class="text-red-500">*</span>@endif
                         </label>
-                        <input type="tel" name="phone" {{ in_array('phone', $requiredFields) ? 'required' : '' }} value="{{ old('phone') }}" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="Your phone number" />
+                        <input type="tel" name="phone" {{ in_array('phone', $requiredFields) ? 'required' : '' }} value="{{ old('phone') }}" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="Your phone number" />
                         @error('phone') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                 @endif
@@ -81,7 +81,7 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Company @if(in_array('company', $requiredFields))<span class="text-red-500">*</span>@endif
                         </label>
-                        <input type="text" name="company" {{ in_array('company', $requiredFields) ? 'required' : '' }} value="{{ old('company') }}" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="Your company" />
+                        <input type="text" name="company" {{ in_array('company', $requiredFields) ? 'required' : '' }} value="{{ old('company') }}" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="Your company" />
                         @error('company') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                 @endif

@@ -6,9 +6,9 @@
     <title>Registration Successful</title>
     @vite(['resources/css/app.css'])
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-50 dark:bg-slate-900 min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 p-8 text-center">
             {{-- Success Icon --}}
             <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
                 <svg class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">You have been registered for the meeting.</p>
 
             {{-- Meeting Details Card --}}
-            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-5 mb-6 text-left">
+            <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-5 mb-6 text-left">
                 <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-3">{{ $meeting->title }}</h2>
 
                 <div class="space-y-2.5">
