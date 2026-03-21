@@ -15,7 +15,50 @@
                                     <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $comment->user->name }}</span>
                                     <span class="text-xs text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
                                 </div>
-                                <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $comment->body }}</p>
+                                <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{!! \Illuminate\Support\Str::of(e($comment->body))->replaceMatches('/@([\w-]+)/', '<span class="text-blue-600 dark:text-blue-400 font-medium">@$1</span>') !!}</p>
+
+                                {{-- Reaction bar --}}
+                                @php
+                                    $reactionCounts = $comment->reactionCountsByEmoji();
+                                    $userReactions = $comment->userReactionEmojis(auth()->id());
+                                @endphp
+                                <div class="flex items-center gap-1 mt-2 flex-wrap"
+                                     x-data="{
+                                         allReactions: @js($reactionCounts->map(fn($r) => ['emoji' => $r->emoji, 'count' => (int) $r->count])->toArray()),
+                                         userReactions: @js($userReactions->toArray()),
+                                         async toggleReaction(emoji) {
+                                             const response = await fetch('{{ route('comments.reactions.toggle', $comment) }}', {
+                                                 method: 'POST',
+                                                 headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content},
+                                                 body: JSON.stringify({emoji})
+                                             });
+                                             const data = await response.json();
+                                             if (data.action === 'added') {
+                                                 if (!this.userReactions.includes(emoji)) this.userReactions.push(emoji);
+                                                 this.allReactions[emoji] = {emoji, count: data.count};
+                                             } else {
+                                                 this.userReactions = this.userReactions.filter(e => e !== emoji);
+                                                 if (data.count === 0) delete this.allReactions[emoji];
+                                                 else this.allReactions[emoji] = {emoji, count: data.count};
+                                             }
+                                         },
+                                         countFor(emoji) {
+                                             return this.allReactions[emoji]?.count ?? 0;
+                                         }
+                                     }"
+                                >
+                                    @foreach(['👍', '❤️', '😂', '😮', '😢', '🎉'] as $emoji)
+                                    <button
+                                        @click="toggleReaction('{{ $emoji }}')"
+                                        :class="userReactions.includes('{{ $emoji }}') ? 'bg-blue-100 dark:bg-blue-900 border-blue-400' : 'border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700'"
+                                        class="text-xs px-1.5 py-0.5 rounded-full border transition-colors flex items-center gap-0.5"
+                                    >
+                                        <span>{{ $emoji }}</span>
+                                        <span x-text="countFor('{{ $emoji }}')" x-show="countFor('{{ $emoji }}') > 0" class="text-slate-600 dark:text-slate-400"></span>
+                                    </button>
+                                    @endforeach
+                                </div>
+
                                 <div class="mt-2 flex items-center gap-3">
                                     <button @click="showReply = !showReply" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Reply</button>
                                 </div>

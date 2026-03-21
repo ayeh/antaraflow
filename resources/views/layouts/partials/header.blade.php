@@ -1,5 +1,5 @@
-<header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm
-               border-b border-slate-200 dark:border-slate-700 px-6 py-3
+<header class="sticky top-3 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm
+               border-b border-slate-200 dark:border-slate-700 px-6 h-16
                flex items-center gap-3">
     {{-- Organization name + logo --}}
     <div class="flex-1 min-w-0 flex items-center gap-2">

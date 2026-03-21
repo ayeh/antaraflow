@@ -13,6 +13,15 @@ class SendEmailDistributionRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('recipients_raw')) {
+            $emails = preg_split('/[\n,]+/', $this->input('recipients_raw', ''));
+            $emails = array_filter(array_map('trim', $emails));
+            $this->merge(['recipients' => array_values($emails)]);
+        }
+    }
+
     /** @return array<string, array<int, string>> */
     public function rules(): array
     {

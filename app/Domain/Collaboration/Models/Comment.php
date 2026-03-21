@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Comment extends Model
 {
@@ -43,5 +44,26 @@ class Comment extends Model
     public function replies(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id');
+    }
+
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(MomReaction::class);
+    }
+
+    public function reactionCountsByEmoji(): Collection
+    {
+        return $this->reactions()
+            ->selectRaw('emoji, count(*) as count')
+            ->groupBy('emoji')
+            ->get()
+            ->keyBy('emoji');
+    }
+
+    public function userReactionEmojis(int $userId): Collection
+    {
+        return $this->reactions()
+            ->where('user_id', $userId)
+            ->pluck('emoji');
     }
 }
