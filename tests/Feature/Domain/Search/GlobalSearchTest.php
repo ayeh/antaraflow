@@ -87,3 +87,22 @@ it('rejects queries exceeding 100 characters', function () {
         ->getJson(route('search', ['q' => $longQuery]))
         ->assertUnprocessable();
 });
+
+it('renders the search page view on GET without query', function (): void {
+    $this->actingAs($this->user)
+        ->get(route('search'))
+        ->assertOk()
+        ->assertViewIs('search.index');
+});
+
+it('renders search results in view when query is provided', function (): void {
+    MinutesOfMeeting::factory()
+        ->for($this->org)
+        ->create(['title' => 'Budget Review 2026']);
+
+    $this->actingAs($this->user)
+        ->get(route('search', ['q' => 'budget']))
+        ->assertOk()
+        ->assertViewIs('search.index')
+        ->assertSee('Budget Review 2026');
+});
