@@ -777,6 +777,28 @@
                                     </template>
                                 </div>
 
+                                {{-- Language selector --}}
+                                <div x-show="['idle', 'ready'].includes(state)" x-cloak class="mt-3">
+                                    <select
+                                        x-model="language"
+                                        :disabled="state !== 'ready'"
+                                        class="w-full rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <option value="en">English</option>
+                                        <option value="ms">Bahasa Melayu</option>
+                                        <option value="zh">Chinese 中文</option>
+                                        <option value="ta">Tamil தமிழ்</option>
+                                        <option value="ja">Japanese 日本語</option>
+                                        <option value="ko">Korean 한국어</option>
+                                        <option value="fr">French Français</option>
+                                        <option value="de">German Deutsch</option>
+                                        <option value="es">Spanish Español</option>
+                                        <option value="pt">Portuguese Português</option>
+                                        <option value="ar">Arabic العربية</option>
+                                        <option value="hi">Hindi हिन्दी</option>
+                                    </select>
+                                </div>
+
                                 {{-- Long recording indicator --}}
                                 <div x-show="isLongRecording && state === 'recording'"
                                      x-cloak

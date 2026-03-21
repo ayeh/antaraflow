@@ -43,6 +43,9 @@ export default function audioRecorder(config) {
         chunkInterval: null,
         uploadedChunks: 0,
 
+        // Language
+        language: navigator.language ? navigator.language.split('-')[0] : 'en',
+
         // Recovery
         hasPendingRecovery: false,
         recoveryTimestamp: null,
@@ -361,10 +364,12 @@ export default function audioRecorder(config) {
                 };
 
                 const initialBlob = new Blob(this.chunks, { type: this.mimeType });
-                if (this.liveMode) {
-                    this.uploadLiveChunk(initialBlob);
-                } else {
-                    this.uploadChunk(initialBlob, 0);
+                if (initialBlob.size > 0) {
+                    if (this.liveMode) {
+                        this.uploadLiveChunk(initialBlob);
+                    } else {
+                        this.uploadChunk(initialBlob, 0);
+                    }
                 }
                 this.chunkIndex = 1;
                 this.chunks = [];
@@ -479,6 +484,8 @@ export default function audioRecorder(config) {
         },
 
         async uploadLiveChunk(blob) {
+            if (blob.size < 1024) return;
+
             const chunkNumber = this.liveChunkNumber;
             const chunkDuration = 30;
             const startTime = chunkNumber * chunkDuration;
@@ -505,6 +512,8 @@ export default function audioRecorder(config) {
 
                 if (response.ok) {
                     this.uploadedChunks++;
+                } else {
+                    console.error('Live chunk upload returned', response.status, await response.text().catch(() => ''));
                 }
             } catch (err) {
                 console.error('Live chunk upload failed:', err);
@@ -527,7 +536,7 @@ export default function audioRecorder(config) {
                         session_id: this.sessionId,
                         mime_type: this.mimeType,
                         duration_seconds: this.timer,
-                        language: 'en',
+                        language: this.language,
                     }),
                 });
 
@@ -553,7 +562,7 @@ export default function audioRecorder(config) {
             const formData = new FormData();
             const ext = this.mimeType.includes('mp4') ? 'mp4' : 'webm';
             formData.append('audio', blob, `recording_${Date.now()}.${ext}`);
-            formData.append('language', 'en');
+            formData.append('language', this.language);
 
             try {
                 const xhr = new XMLHttpRequest();
