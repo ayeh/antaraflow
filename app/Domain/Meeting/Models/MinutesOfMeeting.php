@@ -12,6 +12,7 @@ use App\Domain\AI\Models\MomTopic;
 use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Attendee\Models\MomJoinSetting;
 use App\Domain\Attendee\Models\QrRegistrationToken;
+use App\Domain\Export\Models\MomExport;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\Project\Models\Project;
 use App\Domain\Transcription\Models\AudioTranscription;
@@ -157,5 +158,10 @@ class MinutesOfMeeting extends Model
     public function liveSessions(): HasMany
     {
         return $this->hasMany(LiveMeetingSession::class, 'minutes_of_meeting_id');
+    }
+
+    public function exports(): HasMany
+    {
+        return $this->hasMany(MomExport::class, 'minutes_of_meeting_id');
     }
 }

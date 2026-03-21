@@ -174,6 +174,12 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     Route::get('settings/board', [BoardSettingController::class, 'edit'])->name('settings.board.edit');
     Route::put('settings/board', [BoardSettingController::class, 'update'])->name('settings.board.update');
 
+    // Export Templates
+    Route::resource('settings/export-templates', \App\Domain\Export\Controllers\ExportTemplateController::class)
+        ->names('settings.export-templates')
+        ->except(['show'])
+        ->parameters(['export-templates' => 'exportTemplate']);
+
     // Extraction Templates
     Route::resource('extraction-templates', ExtractionTemplateController::class)->except(['show']);
 
@@ -211,6 +217,7 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         Route::get('export/pdf', [\App\Domain\Export\Controllers\ExportController::class, 'pdf'])->name('export.pdf');
         Route::get('export/word', [\App\Domain\Export\Controllers\ExportController::class, 'word'])->name('export.word');
         Route::get('export/csv', [\App\Domain\Export\Controllers\ExportController::class, 'csv'])->name('export.csv');
+        Route::post('email-distribution', [\App\Domain\Export\Controllers\EmailDistributionController::class, 'store'])->name('email-distribution.store');
 
         Route::get('shares', [\App\Domain\Collaboration\Controllers\ShareController::class, 'index'])->name('shares.index');
         Route::post('shares', [\App\Domain\Collaboration\Controllers\ShareController::class, 'store'])->name('shares.store');

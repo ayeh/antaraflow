@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Export\Controllers;
 
+use App\Domain\Export\Models\MomExport;
 use App\Domain\Export\Services\CsvExportService;
 use App\Domain\Export\Services\PdfExportService;
 use App\Domain\Export\Services\WordExportService;
@@ -27,6 +28,12 @@ class ExportController extends Controller
     {
         $this->authorize('view', $meeting);
 
+        MomExport::create([
+            'minutes_of_meeting_id' => $meeting->id,
+            'user_id' => auth()->id(),
+            'format' => 'pdf',
+        ]);
+
         return $this->pdfExportService->export($meeting);
     }
 
@@ -34,12 +41,24 @@ class ExportController extends Controller
     {
         $this->authorize('view', $meeting);
 
+        MomExport::create([
+            'minutes_of_meeting_id' => $meeting->id,
+            'user_id' => auth()->id(),
+            'format' => 'docx',
+        ]);
+
         return $this->wordExportService->export($meeting);
     }
 
     public function csv(MinutesOfMeeting $meeting): StreamedResponse
     {
         $this->authorize('view', $meeting);
+
+        MomExport::create([
+            'minutes_of_meeting_id' => $meeting->id,
+            'user_id' => auth()->id(),
+            'format' => 'csv',
+        ]);
 
         return $this->csvExportService->export($meeting);
     }
