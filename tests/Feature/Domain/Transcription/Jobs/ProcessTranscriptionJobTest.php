@@ -66,15 +66,17 @@ test('job marks transcription as failed on error', function () {
 });
 
 it('assigns speaker labels based on time gap heuristic', function (): void {
+    // Segment 1 → 2: gap = 0.8s (below 1.5s threshold) → same speaker
+    // Segment 2 → 3: gap = 2.0s (above 1.5s threshold) → new speaker
     $segments = [
         new \App\Infrastructure\AI\DTOs\TranscriptionSegmentData(
-            text: 'Hello', speaker: null, startTime: 0.0, endTime: 2.0, confidence: 0.9
+            text: 'Hello everyone', speaker: null, startTime: 0.0, endTime: 3.0, confidence: 0.9
         ),
         new \App\Infrastructure\AI\DTOs\TranscriptionSegmentData(
-            text: 'How are you', speaker: null, startTime: 4.0, endTime: 6.0, confidence: 0.9
+            text: 'Good morning', speaker: null, startTime: 3.8, endTime: 5.0, confidence: 0.9
         ),
         new \App\Infrastructure\AI\DTOs\TranscriptionSegmentData(
-            text: 'I am fine', speaker: null, startTime: 8.0, endTime: 10.0, confidence: 0.9
+            text: 'Thank you', speaker: null, startTime: 7.0, endTime: 9.0, confidence: 0.9
         ),
     ];
 
@@ -84,9 +86,9 @@ it('assigns speaker labels based on time gap heuristic', function (): void {
 
     $result = $job->assignSpeakers($segments);
 
-    expect($result[0]->speaker)->toBe('Speaker 1');
-    expect($result[1]->speaker)->toBe('Speaker 2');
-    expect($result[2]->speaker)->toBe('Speaker 3');
+    expect($result[0]->speaker)->toBe('Speaker 1'); // start
+    expect($result[1]->speaker)->toBe('Speaker 1'); // gap 0.8s — same speaker
+    expect($result[2]->speaker)->toBe('Speaker 2'); // gap 2.0s — new speaker
 });
 
 it('keeps same speaker when time gap is below threshold', function (): void {
