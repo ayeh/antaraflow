@@ -6,23 +6,20 @@ namespace App\Domain\Transcription\Controllers;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Transcription\Models\AudioTranscription;
+use App\Domain\Transcription\Requests\RenameSpeakerRequest;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 class SpeakerController extends Controller
 {
     use AuthorizesRequests;
 
-    public function update(Request $request, MinutesOfMeeting $meeting, AudioTranscription $transcription): JsonResponse
+    public function update(RenameSpeakerRequest $request, MinutesOfMeeting $meeting, AudioTranscription $transcription): JsonResponse
     {
         $this->authorize('update', $meeting);
 
-        $validated = $request->validate([
-            'old_speaker' => ['required', 'string', 'max:100'],
-            'new_speaker' => ['required', 'string', 'max:100'],
-        ]);
+        $validated = $request->validated();
 
         $transcription->segments()
             ->where('speaker', $validated['old_speaker'])
