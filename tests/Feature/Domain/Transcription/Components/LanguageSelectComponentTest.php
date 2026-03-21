@@ -7,13 +7,14 @@ it('renders language select component with default english selected', function (
 
     $view->assertSee('English');
     $view->assertSee('Bahasa Melayu');
+    $view->assertSee('value="en" selected', false);
 });
 
 it('renders with specified language pre-selected', function (): void {
     $view = $this->blade('<x-language-select selected="ms" />');
 
     $view->assertSee('Bahasa Melayu');
-    $view->assertSee('value="ms"', false);
+    $view->assertSee('value="ms" selected', false);
 });
 
 it('renders with custom name attribute', function (): void {

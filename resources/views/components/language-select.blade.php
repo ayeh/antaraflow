@@ -18,7 +18,7 @@ $languages = [
 @endphp
 
 <div>
-    <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
         {{ __('Audio Language') }}
     </label>
     <select
