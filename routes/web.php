@@ -84,6 +84,7 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
 
     // Global Search
     Route::get('search', [SearchController::class, 'index'])->name('search');
+    Route::post('search/ai', \App\Domain\Search\Controllers\AiSearchController::class)->name('search.ai');
 
     // Profile
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
