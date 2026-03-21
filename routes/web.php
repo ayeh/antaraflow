@@ -256,6 +256,7 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
 
     Route::put('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'update'])->name('comments.update');
     Route::delete('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::post('comments/{comment}/reactions', [\App\Domain\Collaboration\Controllers\ReactionController::class, 'toggle'])->name('comments.reactions.toggle');
 
     // Reports
     Route::get('reports/generated', [GeneratedReportController::class, 'index'])->name('reports.generated.index');
