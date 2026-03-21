@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6" x-data="{
-    activeTab: '{{ isset($results) || request()->has('q') ? 'search' : 'search' }}',
+    activeTab: 'search',
     aiQuery: '',
     aiLoading: false,
     aiAnswer: '',
