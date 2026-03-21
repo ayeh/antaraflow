@@ -36,6 +36,12 @@ it('returns ai search results as json', function (): void {
         ->assertJsonPath('answer', 'The budget was approved.');
 });
 
+it('validates that query is required', function (): void {
+    $this->actingAs($this->user)
+        ->postJson(route('search.ai'), [])
+        ->assertUnprocessable();
+});
+
 it('validates that query must be at least 3 characters', function (): void {
     $this->actingAs($this->user)
         ->postJson(route('search.ai'), ['query' => 'ab'])

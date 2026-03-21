@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Search\Controllers;
 
+use App\Domain\Search\Requests\AiSearchRequest;
 use App\Domain\Search\Services\AiSearchService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 class AiSearchController extends Controller
@@ -15,11 +15,9 @@ class AiSearchController extends Controller
         private readonly AiSearchService $aiSearchService,
     ) {}
 
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(AiSearchRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'query' => ['required', 'string', 'min:3', 'max:500'],
-        ]);
+        $validated = $request->validated();
 
         $result = $this->aiSearchService->search(
             $validated['query'],
