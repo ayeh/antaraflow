@@ -157,6 +157,7 @@
     </div>
     <div x-show="activeStep === 3" x-cloak>
         @include('meetings.wizard.step-inputs')
+        @include('meetings.tabs.transcription')
     </div>
     <div x-show="activeStep === 4" x-cloak>
         @include('meetings.wizard.step-review')
