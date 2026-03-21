@@ -1,16 +1,22 @@
 @php
 $settingsItems = [
+    ['label' => 'Profile',             'route' => route('settings.profile'),           'active' => request()->routeIs('settings.profile')],
+    ['label' => 'Notifications',       'route' => route('settings.notifications'),     'active' => request()->routeIs('settings.notifications')],
+    ['label' => 'Security',            'route' => route('settings.security'),          'active' => request()->routeIs('settings.security')],
+    ['label' => 'Integrations',        'route' => route('settings.integrations'),      'active' => request()->routeIs('settings.integrations')],
+    ['label' => 'API Keys',            'route' => route('settings.api-keys'),          'active' => request()->routeIs('settings.api-keys*')],
     ['label' => 'Organizations',       'route' => route('organizations.index'),        'active' => request()->routeIs('organizations.index', 'organizations.create')],
     ['label' => 'Meeting Templates',   'route' => route('meeting-templates.index'),    'active' => request()->routeIs('meeting-templates.*')],
     ['label' => 'Meeting Series',      'route' => route('meeting-series.index'),       'active' => request()->routeIs('meeting-series.*')],
     ['label' => 'Tags',                'route' => route('tags.index'),                 'active' => request()->routeIs('tags.*')],
     ['label' => 'Attendee Groups',     'route' => route('attendee-groups.index'),      'active' => request()->routeIs('attendee-groups.*')],
     ['label' => 'AI Providers',        'route' => route('ai-provider-configs.index'),  'active' => request()->routeIs('ai-provider-configs.*')],
-    ['label' => 'API Keys',            'route' => route('api-keys.index'),             'active' => request()->routeIs('api-keys.*')],
     ['label' => 'Subscription',        'route' => route('subscription.index'),         'active' => request()->routeIs('subscription.*')],
     ['label' => 'Usage',               'route' => route('usage.index'),                'active' => request()->routeIs('usage.*')],
     ['label' => 'Audit Log',           'route' => route('audit-log.index'),            'active' => request()->routeIs('audit-log.*')],
     ['label' => 'Calendar Connections','route' => route('calendar.connections'),        'active' => request()->routeIs('calendar.*')],
+    ['label' => 'Extraction Templates','route' => route('extraction-templates.index'),  'active' => request()->routeIs('extraction-templates.*')],
+    ['label' => 'Webhooks',            'route' => route('webhooks.index'),             'active' => request()->routeIs('webhooks.*')],
 ];
 @endphp
 

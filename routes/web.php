@@ -1,14 +1,19 @@
 <?php
 
+use App\Domain\Account\Controllers\ApiKeySettingsController;
 use App\Domain\Account\Controllers\Auth\LoginController;
 use App\Domain\Account\Controllers\Auth\LogoutController;
 use App\Domain\Account\Controllers\Auth\RegisterController;
+use App\Domain\Account\Controllers\IntegrationSettingsController;
 use App\Domain\Account\Controllers\MemberController;
+use App\Domain\Account\Controllers\NotificationSettingsController;
 use App\Domain\Account\Controllers\OnboardingController;
 use App\Domain\Account\Controllers\OrganizationController;
 use App\Domain\Account\Controllers\OrganizationSettingsController;
 use App\Domain\Account\Controllers\ProfileController;
+use App\Domain\Account\Controllers\ProfileSettingsController;
 use App\Domain\Account\Controllers\ResellerController;
+use App\Domain\Account\Controllers\SecuritySettingsController;
 use App\Domain\Account\Controllers\SocialAuthController;
 use App\Domain\ActionItem\Controllers\ActionItemBulkController;
 use App\Domain\ActionItem\Controllers\ActionItemController;
@@ -169,6 +174,26 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
 
     // AI Provider Configs
     Route::resource('ai-provider-configs', \App\Domain\Account\Controllers\AiProviderConfigController::class);
+
+    // Profile Settings
+    Route::get('settings/profile', [ProfileSettingsController::class, 'edit'])->name('settings.profile');
+    Route::put('settings/profile', [ProfileSettingsController::class, 'update'])->name('settings.profile.update');
+
+    // Notification Settings
+    Route::get('settings/notifications', [NotificationSettingsController::class, 'edit'])->name('settings.notifications');
+    Route::put('settings/notifications', [NotificationSettingsController::class, 'update'])->name('settings.notifications.update');
+
+    // Security Settings
+    Route::get('settings/security', [SecuritySettingsController::class, 'edit'])->name('settings.security');
+    Route::put('settings/security/password', [SecuritySettingsController::class, 'updatePassword'])->name('settings.security.password');
+
+    // Integration Settings
+    Route::get('settings/integrations', [IntegrationSettingsController::class, 'index'])->name('settings.integrations');
+
+    // API Key Settings
+    Route::get('settings/api-keys', [ApiKeySettingsController::class, 'index'])->name('settings.api-keys');
+    Route::post('settings/api-keys', [ApiKeySettingsController::class, 'store'])->name('settings.api-keys.store');
+    Route::delete('settings/api-keys/{apiKey}', [ApiKeySettingsController::class, 'destroy'])->name('settings.api-keys.destroy');
 
     // Board Settings
     Route::get('settings/board', [BoardSettingController::class, 'edit'])->name('settings.board.edit');
