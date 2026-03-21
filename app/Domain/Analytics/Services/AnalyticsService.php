@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Analytics\Services;
 
 use App\Domain\ActionItem\Models\ActionItem;
+use App\Domain\Analytics\Models\AnalyticsDailySnapshot;
 use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Support\Enums\ActionItemStatus;
@@ -131,6 +132,19 @@ class AnalyticsService
             'top_attendees' => $topAttendees,
             'total_attendees' => $totalAttendees,
         ];
+    }
+
+    /**
+     * @return array<int, array{snapshot_date: string, total_meetings: int, total_action_items: int, completed_action_items: int}>
+     */
+    public function getTrendData(int $orgId, int $days = 30): array
+    {
+        return AnalyticsDailySnapshot::query()
+            ->where('organization_id', $orgId)
+            ->where('snapshot_date', '>=', now()->subDays($days)->toDateString())
+            ->orderBy('snapshot_date')
+            ->get(['snapshot_date', 'total_meetings', 'total_action_items', 'completed_action_items'])
+            ->toArray();
     }
 
     /**
