@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Export\Controllers;
 
+use App\Domain\Analytics\Services\AnalyticsEventService;
 use App\Domain\Export\Models\MomExport;
 use App\Domain\Export\Services\CsvExportService;
 use App\Domain\Export\Services\PdfExportService;
@@ -34,6 +35,8 @@ class ExportController extends Controller
             'format' => 'pdf',
         ]);
 
+        AnalyticsEventService::track('export.downloaded', $meeting, auth()->user(), ['format' => 'pdf']);
+
         return $this->pdfExportService->export($meeting);
     }
 
@@ -47,6 +50,8 @@ class ExportController extends Controller
             'format' => 'docx',
         ]);
 
+        AnalyticsEventService::track('export.downloaded', $meeting, auth()->user(), ['format' => 'docx']);
+
         return $this->wordExportService->export($meeting);
     }
 
@@ -59,6 +64,8 @@ class ExportController extends Controller
             'user_id' => auth()->id(),
             'format' => 'csv',
         ]);
+
+        AnalyticsEventService::track('export.downloaded', $meeting, auth()->user(), ['format' => 'csv']);
 
         return $this->csvExportService->export($meeting);
     }

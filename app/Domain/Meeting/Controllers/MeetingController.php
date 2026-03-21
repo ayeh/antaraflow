@@ -6,6 +6,7 @@ namespace App\Domain\Meeting\Controllers;
 
 use App\Domain\Account\Exceptions\LimitExceededException;
 use App\Domain\Account\Services\SubscriptionService;
+use App\Domain\Analytics\Services\AnalyticsEventService;
 use App\Domain\Collaboration\Services\CommentService;
 use App\Domain\Collaboration\Services\ShareService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
@@ -125,6 +126,8 @@ class MeetingController extends Controller
             'resolutions.votes', 'resolutions.mover', 'resolutions.seconder',
         ]);
 
+        $meeting->load(['exports' => fn ($q) => $q->with('user')->latest()->take(10)]);
+
         $isEditable = in_array($meeting->status, [MeetingStatus::Draft, MeetingStatus::InProgress]);
 
         $user = $request->user()->loadMissing('currentOrganization');
@@ -147,6 +150,8 @@ class MeetingController extends Controller
                 ! in_array($ai->status, [ActionItemStatus::Completed, ActionItemStatus::Cancelled])
             )->count(),
         ];
+
+        AnalyticsEventService::track('meeting.viewed', $meeting, $request->user());
 
         $comments = $this->commentService->getComments($meeting);
         $shares = $this->shareService->getSharesForMeeting($meeting);
