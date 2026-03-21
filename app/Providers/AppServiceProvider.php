@@ -66,7 +66,23 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             $apiKey = $request->attributes->get('api_key');
 
-            return Limit::perMinute(60)->by($apiKey?->id ?: $request->ip());
+            if ($apiKey) {
+                $orgId = $apiKey->organization_id;
+                // Check if org has an active paid plan (pro/enterprise tier gets higher rate limit)
+                $activeSubscription = \App\Domain\Account\Models\OrganizationSubscription::query()
+                    ->where('organization_id', $orgId)
+                    ->whereNotNull('starts_at')
+                    ->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', now()))
+                    ->with('subscriptionPlan')
+                    ->first();
+                $planSlug = $activeSubscription?->subscriptionPlan?->slug ?? '';
+                // Pro and enterprise plans get 300 req/min; free/starter get 60 req/min
+                $limit = str_contains($planSlug, 'pro') || str_contains($planSlug, 'enterprise') ? 300 : 60;
+
+                return Limit::perMinute($limit)->by($apiKey->id);
+            }
+
+            return Limit::perMinute(60)->by($request->ip());
         });
 
         Gate::policy(AttendeeGroup::class, AttendeeGroupPolicy::class);
