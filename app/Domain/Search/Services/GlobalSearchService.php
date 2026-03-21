@@ -15,7 +15,7 @@ class GlobalSearchService
     public function search(string $query, int $organizationId, int $limit = 20): array
     {
         return [
-            'meetings' => $this->searchMeetings($query, $organizationId, min($limit, 5)),
+            'meetings' => $this->searchMeetings($query, $organizationId, min($limit, 10)),
             'action_items' => $this->searchActionItems($query, $organizationId, min($limit, 5)),
             'projects' => $this->searchProjects($query, $organizationId, min($limit, 3)),
         ];

@@ -40,7 +40,7 @@ class AiSearchService
      */
     private function performSearch(string $query, int $organizationId): array
     {
-        $searchResults = $this->searchService->search($query, $organizationId);
+        $searchResults = $this->searchService->search($query, $organizationId, 10);
         $meetingIds = array_column($searchResults['meetings'], 'id');
 
         if (empty($meetingIds)) {
@@ -143,16 +143,20 @@ class AiSearchService
             return 'AI provider not configured. Please set up an AI provider in your organisation settings.';
         }
 
-        $provider = AIProviderFactory::make($providerConfig->provider, [
-            'api_key' => $providerConfig->api_key_encrypted,
-            'model' => $providerConfig->model,
-            'base_url' => $providerConfig->base_url,
-        ]);
-
         $systemPrompt = 'You are a meeting intelligence assistant. Answer the user\'s question based ONLY on the meeting records provided. Be concise and cite specific meeting details. If the answer cannot be found in the provided meetings, say so clearly.';
 
         $prompt = "Meeting records:\n\n{$context}\n\nQuestion: {$query}";
 
-        return $provider->chat($prompt, ['system' => $systemPrompt]);
+        try {
+            $provider = AIProviderFactory::make($providerConfig->provider, [
+                'api_key' => $providerConfig->api_key_encrypted,
+                'model' => $providerConfig->model,
+                'base_url' => $providerConfig->base_url,
+            ]);
+
+            return $provider->chat($prompt, ['system' => $systemPrompt]);
+        } catch (\Throwable $e) {
+            return 'Unable to process your query. Please check your AI provider configuration.';
+        }
     }
 }
