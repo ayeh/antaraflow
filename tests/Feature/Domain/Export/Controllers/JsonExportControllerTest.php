@@ -43,7 +43,7 @@ test('json export contains expected meeting fields', function () {
     $response->assertSuccessful();
     $data = json_decode($response->getContent(), true);
 
-    expect($data)->toHaveKeys(['id', 'mom_number', 'title', 'meeting_date', 'location', 'status', 'attendees', 'topics', 'action_items', 'decisions', 'exported_at']);
+    expect($data)->toHaveKeys(['id', 'mom_number', 'title', 'meeting_date', 'location', 'status', 'attendees', 'topics', 'action_items', 'decisions', 'summary', 'exported_at']);
     expect($data['title'])->toBe('Board Meeting');
     expect($data['mom_number'])->toBe('MOM-001');
 });

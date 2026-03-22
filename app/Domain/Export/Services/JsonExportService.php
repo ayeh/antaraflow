@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Domain\Export\Services;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
-use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 
 class JsonExportService
 {
-    public function export(MinutesOfMeeting $meeting): Response
+    public function export(MinutesOfMeeting $meeting): JsonResponse
     {
         $meeting->load(['attendees', 'topics', 'actionItems.assignedTo', 'resolutions']);
 
@@ -47,10 +47,9 @@ class JsonExportService
             'exported_at' => now()->toIso8601String(),
         ];
 
-        return response(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), 200, [
-            'Content-Type' => 'application/json',
+        return response()->json($data, 200, [
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ]);
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
     private function buildFilename(MinutesOfMeeting $meeting): string

@@ -12,6 +12,7 @@ use App\Domain\Export\Services\PdfExportService;
 use App\Domain\Export\Services\WordExportService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -72,7 +73,7 @@ class ExportController extends Controller
         return $this->csvExportService->export($meeting);
     }
 
-    public function json(MinutesOfMeeting $meeting): Response
+    public function json(MinutesOfMeeting $meeting): JsonResponse
     {
         $this->authorize('view', $meeting);
 
