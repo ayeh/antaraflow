@@ -97,9 +97,10 @@
         this.open = true;
         this.fetchPreparation();
     }
-}" x-cloak>
+}" x-cloak x-on:open-prep-modal.window="openModal()">
 
-    {{-- Trigger Button --}}
+    {{-- Trigger Button (hidden when rendered inside overflow dropdown) --}}
+    @unless(isset($inOverflow) && $inOverflow)
     <button @click="openModal()"
         class="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,6 +108,7 @@
         </svg>
         AI Prepare Agenda
     </button>
+    @endunless
 
     {{-- Modal Overlay --}}
     <div x-show="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">

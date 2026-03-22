@@ -17,9 +17,9 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $meeting->title }}</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">{{ $meeting->mom_number }}</p>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2">
             {{-- Live Presence Avatars --}}
-            <div x-show="viewerCount > 0" x-cloak class="flex items-center gap-1">
+            <div x-show="viewerCount > 0" x-cloak class="flex items-center gap-1 mr-1">
                 <div class="flex -space-x-2">
                     <template x-for="(initials, index) in viewerInitials.slice(0, 5)" :key="index">
                         <div class="w-7 h-7 rounded-full bg-indigo-500 text-white text-xs font-medium flex items-center justify-center ring-2 ring-white dark:ring-slate-900"
@@ -42,33 +42,100 @@
                 {{ ucfirst(str_replace('_', ' ', $meeting->status->value)) }}
             </span>
 
-            {{-- Duplicate --}}
-            <form action="{{ route('meetings.duplicate', $meeting) }}" method="POST" class="inline">
-                @csrf
-                <button type="submit"
-                        class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            {{-- [•••] Overflow Dropdown --}}
+            <div class="relative" x-data="{ moreOpen: false }">
+                <button @click="moreOpen = !moreOpen" @keydown.escape.window="moreOpen = false"
+                        title="More actions"
+                        class="inline-flex items-center justify-center w-9 h-9 text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <circle cx="4" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="16" cy="10" r="1.5"/>
                     </svg>
-                    Duplicate
                 </button>
-            </form>
+                <div x-show="moreOpen" @click.outside="moreOpen = false" x-cloak
+                     x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                     class="absolute right-0 mt-1 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 py-1 z-30">
 
-            {{-- Export dropdown --}}
-            <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    Export
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div x-show="open" @click.outside="open = false" x-cloak class="absolute right-0 mt-1 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 py-1 z-20">
-                    <a href="{{ route('meetings.export.pdf', $meeting) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">PDF</a>
-                    <a href="{{ route('meetings.export.word', $meeting) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">Word (.docx)</a>
-                    <a href="{{ route('meetings.export.csv', $meeting) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">CSV (Action Items)</a>
-                    <a href="{{ route('meetings.export.json', $meeting) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">JSON</a>
+                    {{-- Export section --}}
+                    <div class="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Export</div>
+                    <a href="{{ route('meetings.export.pdf', $meeting) }}" @click="moreOpen = false"
+                       class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="w-4 h-4 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        PDF
+                    </a>
+                    <a href="{{ route('meetings.export.word', $meeting) }}" @click="moreOpen = false"
+                       class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        Word (.docx)
+                    </a>
+                    <a href="{{ route('meetings.export.csv', $meeting) }}" @click="moreOpen = false"
+                       class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        CSV (Action Items)
+                    </a>
+                    <a href="{{ route('meetings.export.json', $meeting) }}" @click="moreOpen = false"
+                       class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                        JSON
+                    </a>
+
+                    <div class="my-1 border-t border-gray-100 dark:border-slate-700"></div>
+
+                    {{-- Duplicate --}}
+                    <form action="{{ route('meetings.duplicate', $meeting) }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                                class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 text-left">
+                            <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            Duplicate
+                        </button>
+                    </form>
+
+                    {{-- History --}}
+                    <a href="{{ route('meetings.versions.index', $meeting) }}" @click="moreOpen = false"
+                       class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        History
+                    </a>
+
+                    {{-- Follow-up Email (conditional) --}}
+                    @if($meeting->extractions()->exists())
+                        <a href="{{ route('meetings.follow-up-email.generate', $meeting) }}" @click="moreOpen = false"
+                           class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            <svg class="w-4 h-4 text-violet-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            Follow-up Email
+                        </a>
+                    @endif
+
+                    {{-- AI Prepare Agenda (conditional) — dispatches to preparation-modal component below --}}
+                    @if(($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress) && $meeting->project_id)
+                        <button @click="window.dispatchEvent(new CustomEvent('open-prep-modal')); moreOpen = false"
+                                class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 text-left">
+                            <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                            AI Prepare Agenda
+                        </button>
+                    @endif
+
+                    {{-- Revert to Draft (conditional — destructive, separated) --}}
+                    @if($meeting->status !== \App\Support\Enums\MeetingStatus::Draft)
+                        <div class="my-1 border-t border-gray-100 dark:border-slate-700"></div>
+                        <form method="POST" action="{{ route('meetings.revert', $meeting) }}">
+                            @csrf
+                            <button type="submit"
+                                    class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-left">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                                Revert to Draft
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
 
+            {{-- Primary CTAs --}}
+
+            {{-- Live Meeting: visible when status != Approved and user has permission --}}
             @can('startLive', $meeting)
                 @if($meeting->status !== \App\Support\Enums\MeetingStatus::Approved)
                     <button
@@ -103,6 +170,7 @@
                 @endif
             @endcan
 
+            {{-- Finalize: Draft or InProgress --}}
             @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress)
                 <form method="POST" action="{{ route('meetings.finalize', $meeting) }}" class="inline">
                     @csrf
@@ -110,37 +178,20 @@
                 </form>
             @endif
 
+            {{-- Approve: Finalized only --}}
             @if($meeting->status === \App\Support\Enums\MeetingStatus::Finalized)
                 <form method="POST" action="{{ route('meetings.approve', $meeting) }}" class="inline">
                     @csrf
                     <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-700 transition-colors">Approve</button>
                 </form>
             @endif
-
-            @if($meeting->status !== \App\Support\Enums\MeetingStatus::Draft)
-                <form method="POST" action="{{ route('meetings.revert', $meeting) }}" class="inline">
-                    @csrf
-                    <button type="submit" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Revert to Draft</button>
-                </form>
-            @endif
-
-            <a href="{{ route('meetings.versions.index', $meeting) }}" class="inline-flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                History
-            </a>
-
-            @if($meeting->extractions()->exists())
-                <a href="{{ route('meetings.follow-up-email.generate', $meeting) }}" class="inline-flex items-center gap-1.5 bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    Follow-up Email
-                </a>
-            @endif
-
-            @if(($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress) && $meeting->project_id)
-                @include('meetings.partials.preparation-modal')
-            @endif
         </div>
     </div>
+
+    {{-- AI Prepare Agenda modal (hidden trigger, opened via overflow dropdown dispatch) --}}
+    @if(($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress) && $meeting->project_id)
+        @include('meetings.partials.preparation-modal', ['inOverflow' => true])
+    @endif
 
     {{-- Stepper Bar --}}
     @include('meetings.wizard.stepper')
