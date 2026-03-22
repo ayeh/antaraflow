@@ -1,12 +1,4 @@
 @php
-$personalItems = [
-    ['label' => 'Profile',              'route' => route('settings.profile'),        'active' => request()->routeIs('settings.profile')],
-    ['label' => 'Notifications',        'route' => route('settings.notifications'),  'active' => request()->routeIs('settings.notifications')],
-    ['label' => 'Security',             'route' => route('settings.security'),       'active' => request()->routeIs('settings.security')],
-    ['label' => 'API Keys',             'route' => route('settings.api-keys'),       'active' => request()->routeIs('settings.api-keys*')],
-    ['label' => 'Calendar Connections', 'route' => route('calendar.connections'),    'active' => request()->routeIs('calendar.*')],
-];
-
 $organizationItems = [
     ['label' => 'Organizations',        'route' => route('organizations.index'),             'active' => request()->routeIs('organizations.index', 'organizations.create')],
     ['label' => 'Meeting Templates',    'route' => route('meeting-templates.index'),         'active' => request()->routeIs('meeting-templates.*')],
@@ -27,9 +19,8 @@ $accountItems = [
 ];
 
 $allSections = [
-    ['label' => 'Personal',      'items' => $personalItems],
-    ['label' => 'Organization',  'items' => $organizationItems],
-    ['label' => 'Account',       'items' => $accountItems],
+    ['label' => 'Organization', 'items' => $organizationItems],
+    ['label' => 'Account',      'items' => $accountItems],
 ];
 
 $globalIndex = 0;

@@ -259,17 +259,45 @@ $isSettingsActive = request()->routeIs(
         <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ auth()->user()->currentOrganization->name }}</p>
         @endif
     </div>
-    <div class="border-t border-slate-100 dark:border-slate-700 pt-2 mx-2 space-y-0.5">
-        <a
-            href="{{ route('profile.edit') }}"
-            class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
-                   text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-        >
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-            Edit Profile
+    {{-- Personal Settings --}}
+    <div class="px-4 pt-2 pb-1">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Personal</span>
+    </div>
+    <div class="mx-2 space-y-0.5">
+        <a href="{{ route('settings.profile') }}"
+           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
+                  {{ request()->routeIs('settings.profile') ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700' }} transition-colors">
+            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            Profile
         </a>
+        <a href="{{ route('settings.notifications') }}"
+           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
+                  {{ request()->routeIs('settings.notifications') ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700' }} transition-colors">
+            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            Notifications
+        </a>
+        <a href="{{ route('settings.security') }}"
+           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
+                  {{ request()->routeIs('settings.security') ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700' }} transition-colors">
+            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Security
+        </a>
+        <a href="{{ route('settings.api-keys') }}"
+           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
+                  {{ request()->routeIs('settings.api-keys*') ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700' }} transition-colors">
+            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+            API Keys
+        </a>
+        <a href="{{ route('calendar.connections') }}"
+           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
+                  {{ request()->routeIs('calendar.*') ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700' }} transition-colors">
+            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Calendar Connections
+        </a>
+    </div>
+
+    {{-- Theme + Logout --}}
+    <div class="border-t border-slate-100 dark:border-slate-700 mt-2 pt-2 mx-2 space-y-0.5">
         <button
             @click="cycleTheme()"
             class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-left
