@@ -21,6 +21,7 @@ class CalendarConnection extends Model
             'token_expires_at' => 'datetime',
             'webhook_expiry' => 'datetime',
             'is_active' => 'boolean',
+            'auto_record' => 'boolean',
         ];
     }
 

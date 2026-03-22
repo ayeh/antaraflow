@@ -26,7 +26,7 @@
         {{-- Offline Indicator --}}
         <x-offline-indicator />
 
-        <div :class="sidebarCollapsed ? 'md:ml-[5rem]' : 'md:ml-[15.5rem]'" class="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 md:[clip-path:inset(0_0_0_0_round_1rem_0_0_0)] transition-all duration-300 ease-in-out">
+        <div :class="sidebarCollapsed ? 'md:ml-[5rem]' : 'md:ml-[15.5rem]'" class="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 md:mt-3 md:[clip-path:inset(0_0_0_0_round_1rem_0_0_0)] transition-all duration-300 ease-in-out">
             @include('layouts.partials.header')
 
             @if(session('success'))

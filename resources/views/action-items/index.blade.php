@@ -85,6 +85,7 @@
                                 <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Priority</th>
                                 <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assignee</th>
                                 <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Due Date</th>
+                                <th class="text-center px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Client</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
@@ -98,6 +99,7 @@
                                         assigneeName: @js($item->assignedTo?->name ?? '—'),
                                         dueDateFormatted: @js($item->due_date?->format('M j, Y') ?? '—'),
                                         dueDatePast: @js($item->due_date?->isPast() && $item->status !== \App\Support\Enums\ActionItemStatus::Completed),
+                                        clientVisible: @js((bool) $item->client_visible),
                                     }"
                                     :class="completed ? 'opacity-60' : ''"
                                     @action-item-updated.window="
@@ -172,10 +174,31 @@
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400" x-text="assigneeName"></td>
                                     <td class="px-6 py-4 text-sm" :class="dueDatePast ? 'text-red-500 dark:text-red-400 font-medium' : 'text-gray-500 dark:text-gray-400'" x-text="dueDateFormatted"></td>
+
+                                    {{-- Client Visibility Toggle --}}
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            @click="fetch('{{ route('action-items.toggle-visibility', $item) }}', {
+                                                method: 'PATCH',
+                                                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content ?? '', 'Accept': 'application/json' }
+                                            }).then(r => r.json()).then(d => { clientVisible = d.client_visible })"
+                                            :title="clientVisible ? 'Visible to clients — click to hide' : 'Internal only — click to share with clients'"
+                                            :class="clientVisible ? 'text-green-600 dark:text-green-400' : 'text-slate-400 dark:text-slate-500'"
+                                            class="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      :d="clientVisible
+                                                        ? 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'
+                                                        : 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21'" />
+                                            </svg>
+                                        </button>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No action items yet.</td>
+                                    <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No action items yet.</td>
                                 </tr>
                             @endforelse
                         </tbody>

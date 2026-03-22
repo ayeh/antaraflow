@@ -86,4 +86,20 @@ class CalendarConnectionController extends Controller
         return redirect()->route('calendar.connections')
             ->with('success', 'Calendar disconnected.');
     }
+
+    public function toggleAutoRecord(Request $request, CalendarConnection $connection): RedirectResponse
+    {
+        if ($connection->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $connection->update([
+            'auto_record' => ! $connection->auto_record,
+        ]);
+
+        $status = $connection->auto_record ? 'enabled' : 'disabled';
+
+        return redirect()->route('calendar.connections')
+            ->with('success', "Auto-record {$status} for ".ucfirst($connection->provider).'.');
+    }
 }

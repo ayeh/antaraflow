@@ -6,6 +6,8 @@ namespace App\Domain\Meeting\Controllers;
 
 use App\Domain\Account\Exceptions\LimitExceededException;
 use App\Domain\Account\Services\SubscriptionService;
+use App\Domain\AI\Services\DecisionTrackerService;
+use App\Domain\AI\Services\KnowledgeLinkService;
 use App\Domain\Analytics\Services\AnalyticsEventService;
 use App\Domain\Collaboration\Services\CommentService;
 use App\Domain\Collaboration\Services\ShareService;
@@ -156,11 +158,14 @@ class MeetingController extends Controller
 
         $comments = $this->commentService->getComments($meeting);
         $shares = $this->shareService->getSharesForMeeting($meeting);
+        $decisionTracker = app(DecisionTrackerService::class)->getDecisionStatus($meeting);
+        $relatedMeetings = app(KnowledgeLinkService::class)->getRelatedMeetings($meeting);
 
         return view('meetings.show', compact(
             'meeting', 'isEditable', 'orgMembers',
             'attendeeStats', 'actionItemStats',
-            'comments', 'shares',
+            'comments', 'shares', 'decisionTracker',
+            'relatedMeetings',
         ));
     }
 

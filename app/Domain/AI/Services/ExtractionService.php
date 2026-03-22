@@ -35,6 +35,7 @@ class ExtractionService
         $this->extractActionItems($mom, $provider, $providerName, $modelName, $text);
         $this->extractDecisions($mom, $provider, $providerName, $modelName, $text);
         $this->extractTopics($mom, $provider, $providerName, $modelName, $text);
+        $this->extractRisks($mom, $provider, $providerName, $modelName, $text);
     }
 
     /**
@@ -386,6 +387,62 @@ class ExtractionService
             [
                 'content' => $content,
                 'structured_data' => $topics,
+                'provider' => $providerName,
+                'model' => $modelName,
+            ],
+        );
+    }
+
+    private function extractRisks(
+        MinutesOfMeeting $mom,
+        AIProviderInterface $provider,
+        string $providerName,
+        string $modelName,
+        string $text,
+    ): void {
+        $template = $this->resolveTemplate($mom, 'risks');
+
+        if ($template) {
+            $response = $provider->chat(
+                $template->renderPrompt($text),
+                $template->system_message ? ['system' => $template->system_message] : [],
+            );
+
+            MomExtraction::query()->updateOrCreate(
+                ['minutes_of_meeting_id' => $mom->id, 'type' => 'risks'],
+                [
+                    'content' => $response,
+                    'structured_data' => ['custom_template' => $template->id],
+                    'provider' => $providerName,
+                    'model' => $modelName,
+                ],
+            );
+
+            return;
+        }
+
+        $risks = $provider->extractRisks($text);
+
+        $structuredData = array_map(
+            fn ($risk) => [
+                'risk' => $risk->risk,
+                'severity' => $risk->severity,
+                'mitigation' => $risk->mitigation,
+                'raised_by' => $risk->raisedBy,
+            ],
+            $risks,
+        );
+
+        $content = implode("\n", array_map(
+            fn ($risk) => "- [{$risk->severity}] {$risk->risk}",
+            $risks,
+        ));
+
+        MomExtraction::query()->updateOrCreate(
+            ['minutes_of_meeting_id' => $mom->id, 'type' => 'risks'],
+            [
+                'content' => $content,
+                'structured_data' => $structuredData,
                 'provider' => $providerName,
                 'model' => $modelName,
             ],

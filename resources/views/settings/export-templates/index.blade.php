@@ -13,12 +13,6 @@
         </a>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3 text-sm text-green-700 dark:text-green-400">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
         @if($templates->isEmpty())
             <div class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 text-sm">

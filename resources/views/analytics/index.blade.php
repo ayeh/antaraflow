@@ -24,6 +24,10 @@
            class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-slate-700/60">
             Governance
         </a>
+        <a href="{{ route('analytics.intelligence') }}"
+           class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-slate-700/60">
+            Intelligence
+        </a>
     </div>
 
     {{-- Stat Cards --}}

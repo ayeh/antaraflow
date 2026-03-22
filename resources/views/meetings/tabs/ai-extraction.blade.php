@@ -56,6 +56,33 @@
     @endif
 
     @php
+        $risksExtraction = $meeting->extractions()->where('type', 'risks')->latest()->first();
+    @endphp
+    @if($risksExtraction && !empty($risksExtraction->structured_data) && !isset($risksExtraction->structured_data['custom_template']))
+        <div class="border border-gray-200 rounded-lg p-4 space-y-3">
+            <h4 class="text-sm font-medium text-gray-700">Risks & Concerns</h4>
+            <div class="space-y-2">
+                @foreach($risksExtraction->structured_data as $risk)
+                    <div class="flex items-start gap-3 p-3 rounded-lg {{ match($risk['severity'] ?? 'medium') { 'high' => 'bg-red-50', 'medium' => 'bg-amber-50', 'low' => 'bg-yellow-50', default => 'bg-gray-50' } }}">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ match($risk['severity'] ?? 'medium') { 'high' => 'bg-red-100 text-red-800', 'medium' => 'bg-amber-100 text-amber-800', 'low' => 'bg-yellow-100 text-yellow-800', default => 'bg-gray-100 text-gray-800' } }}">
+                            {{ ucfirst($risk['severity'] ?? 'medium') }}
+                        </span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm text-gray-900">{{ $risk['risk'] ?? '' }}</p>
+                            @if(!empty($risk['mitigation']))
+                                <p class="text-xs text-gray-500 mt-1"><span class="font-medium">Mitigation:</span> {{ $risk['mitigation'] }}</p>
+                            @endif
+                            @if(!empty($risk['raised_by']))
+                                <p class="text-xs text-gray-400 mt-0.5">Raised by {{ $risk['raised_by'] }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    @php
         $topics = $meeting->topics()->get();
     @endphp
     @if($topics->isNotEmpty())

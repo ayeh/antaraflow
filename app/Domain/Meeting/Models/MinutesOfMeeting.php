@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Meeting\Models;
 
 use App\Domain\ActionItem\Models\ActionItem;
+use App\Domain\AI\Models\KnowledgeLink;
 use App\Domain\AI\Models\MeetingPrepBrief;
 use App\Domain\AI\Models\MomAiConversation;
 use App\Domain\AI\Models\MomExtraction;
@@ -27,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MinutesOfMeeting extends Model
@@ -173,5 +175,15 @@ class MinutesOfMeeting extends Model
     public function guestAccesses(): HasMany
     {
         return $this->hasMany(MomGuestAccess::class, 'minutes_of_meeting_id');
+    }
+
+    public function knowledgeLinksAsSource(): MorphMany
+    {
+        return $this->morphMany(KnowledgeLink::class, 'source');
+    }
+
+    public function knowledgeLinksAsTarget(): MorphMany
+    {
+        return $this->morphMany(KnowledgeLink::class, 'target');
     }
 }

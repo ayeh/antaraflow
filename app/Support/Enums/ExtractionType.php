@@ -10,6 +10,7 @@ enum ExtractionType: string
     case ActionItems = 'action_items';
     case Decisions = 'decisions';
     case Topics = 'topics';
+    case Risks = 'risks';
     case FollowUpEmail = 'follow_up_email';
     case MeetingPreparation = 'meeting_preparation';
 
@@ -20,6 +21,7 @@ enum ExtractionType: string
             self::ActionItems => 'Action Items',
             self::Decisions => 'Decisions',
             self::Topics => 'Topics',
+            self::Risks => 'Risks',
             self::FollowUpEmail => 'Follow-up Email',
             self::MeetingPreparation => 'Meeting Preparation',
         };

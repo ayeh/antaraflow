@@ -44,7 +44,8 @@ test('extraction service generates summary for meeting', function () {
             ])]]]])
             ->push(['choices' => [['message' => ['content' => json_encode([
                 ['title' => 'Project Timeline', 'description' => 'Discussed deadlines'],
-            ])]]]]),
+            ])]]]])
+            ->push(['choices' => [['message' => ['content' => '[]']]]]),
     ]);
 
     $mom = MinutesOfMeeting::factory()->create([
@@ -85,6 +86,7 @@ test('extraction service creates action items extraction', function () {
                 ['title' => 'Update docs', 'priority' => 'medium'],
             ])]]]])
             ->push(['choices' => [['message' => ['content' => '[]']]]])
+            ->push(['choices' => [['message' => ['content' => '[]']]]])
             ->push(['choices' => [['message' => ['content' => '[]']]]]),
     ]);
 
@@ -115,6 +117,7 @@ test('extraction service uses org provider config when available', function () {
                 'key_points' => '- Point',
                 'confidence_score' => 0.88,
             ])]]])
+            ->push(['content' => [['type' => 'text', 'text' => '[]']]])
             ->push(['content' => [['type' => 'text', 'text' => '[]']]])
             ->push(['content' => [['type' => 'text', 'text' => '[]']]])
             ->push(['content' => [['type' => 'text', 'text' => '[]']]]),
@@ -155,6 +158,7 @@ test('extraction service falls back to default config', function () {
                 'key_points' => '',
                 'confidence_score' => 0.8,
             ])]]]])
+            ->push(['choices' => [['message' => ['content' => '[]']]]])
             ->push(['choices' => [['message' => ['content' => '[]']]]])
             ->push(['choices' => [['message' => ['content' => '[]']]]])
             ->push(['choices' => [['message' => ['content' => '[]']]]]),
@@ -201,7 +205,8 @@ test('extraction service creates topics', function () {
             ->push(['choices' => [['message' => ['content' => json_encode([
                 ['title' => 'Budget Review', 'description' => 'Reviewed Q4 budget', 'duration_minutes' => 15],
                 ['title' => 'Hiring Plan', 'description' => 'New positions discussion', 'duration_minutes' => 20],
-            ])]]]]),
+            ])]]]])
+            ->push(['choices' => [['message' => ['content' => '[]']]]]),
     ]);
 
     $mom = MinutesOfMeeting::factory()->create([
@@ -233,6 +238,7 @@ test('extraction service uses custom template when available', function () {
     Http::fake([
         'api.openai.com/*' => Http::sequence()
             ->push(['choices' => [['message' => ['content' => 'Custom summary from template']]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
             ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
             ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
             ->push(['choices' => [['message' => ['content' => $emptyJson]]]]),
@@ -288,6 +294,7 @@ test('extraction service prefers specific meeting type template over wildcard', 
             ->push(['choices' => [['message' => ['content' => 'Specific template used']]]])
             ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
             ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
             ->push(['choices' => [['message' => ['content' => $emptyJson]]]]),
     ]);
 
@@ -336,6 +343,7 @@ test('extraction service ignores inactive templates', function () {
                 'key_points' => '',
                 'confidence_score' => 0.85,
             ])]]]])
+            ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
             ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
             ->push(['choices' => [['message' => ['content' => $emptyJson]]]])
             ->push(['choices' => [['message' => ['content' => $emptyJson]]]]),

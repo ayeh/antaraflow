@@ -3,6 +3,8 @@
 return [
     'default' => env('AI_DEFAULT_PROVIDER', 'openai'),
 
+    'transcriber' => env('AI_TRANSCRIBER', 'openai'),
+
     'providers' => [
         'openai' => [
             'api_key' => env('OPENAI_API_KEY'),
@@ -20,6 +22,10 @@ return [
         'ollama' => [
             'base_url' => env('OLLAMA_BASE_URL', 'http://localhost:11434'),
             'model' => env('OLLAMA_MODEL', 'llama3.2'),
+        ],
+        'whisper_local' => [
+            'url' => env('WHISPER_LOCAL_URL', 'http://localhost:8000'),
+            'model' => env('WHISPER_LOCAL_MODEL', 'large-v3'),
         ],
     ],
 ];

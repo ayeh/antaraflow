@@ -23,8 +23,10 @@ use App\Domain\ActionItem\Controllers\ClientVisibilityController;
 use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\AI\Controllers\ExtractionTemplateController;
+use App\Domain\AI\Controllers\MemoAdvisorController;
 use App\Domain\AI\Controllers\PrepBriefController;
 use App\Domain\Analytics\Controllers\GovernanceAnalyticsController;
+use App\Domain\Analytics\Controllers\IntelligenceController;
 use App\Domain\Attendee\Controllers\AttendeeController;
 use App\Domain\Attendee\Controllers\QrRegistrationController;
 use App\Domain\Calendar\Controllers\CalendarConnectionController;
@@ -149,6 +151,13 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     Route::get('analytics/governance', [GovernanceAnalyticsController::class, 'index'])->name('analytics.governance');
     Route::get('analytics/governance/data', [GovernanceAnalyticsController::class, 'data'])->name('analytics.governance.data');
     Route::get('analytics/governance/export', [GovernanceAnalyticsController::class, 'export'])->name('analytics.governance.export');
+    Route::get('analytics/intelligence', [IntelligenceController::class, 'index'])->name('analytics.intelligence');
+    Route::get('analytics/intelligence/data', [IntelligenceController::class, 'data'])->name('analytics.intelligence.data');
+
+    // Insights (MemoAdvisor)
+    Route::get('insights', [MemoAdvisorController::class, 'index'])->name('insights.index');
+    Route::post('insights/{insight}/read', [MemoAdvisorController::class, 'markRead'])->name('insights.read');
+    Route::post('insights/{insight}/dismiss', [MemoAdvisorController::class, 'dismiss'])->name('insights.dismiss');
 
     // Audit Log
     Route::get('audit-log', [\App\Domain\Account\Controllers\AuditLogController::class, 'index'])->name('audit-log.index');
@@ -174,6 +183,7 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         Route::get('connect/{provider}', [CalendarConnectionController::class, 'connect'])->name('connect');
         Route::get('callback/{provider}', [CalendarConnectionController::class, 'callback'])->name('callback');
         Route::delete('disconnect/{connection}', [CalendarConnectionController::class, 'disconnect'])->name('disconnect');
+        Route::patch('{connection}/toggle-auto-record', [CalendarConnectionController::class, 'toggleAutoRecord'])->name('toggle-auto-record');
     });
 
     // AI Provider Configs

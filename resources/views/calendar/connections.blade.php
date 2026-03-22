@@ -35,11 +35,23 @@
                     </div>
                 </div>
                 @if($googleConn)
-                    <form method="POST" action="{{ route('calendar.disconnect', $googleConn) }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">Disconnect</button>
-                    </form>
+                    <div class="flex items-center gap-4">
+                        <form method="POST" action="{{ route('calendar.toggle-auto-record', $googleConn) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="inline-flex items-center gap-2 text-sm font-medium {{ $googleConn->auto_record ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400' }} hover:opacity-80 transition-opacity">
+                                <span class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out {{ $googleConn->auto_record ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }}">
+                                    <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $googleConn->auto_record ? 'translate-x-4' : 'translate-x-0' }}"></span>
+                                </span>
+                                Auto Record
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('calendar.disconnect', $googleConn) }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">Disconnect</button>
+                        </form>
+                    </div>
                 @else
                     <a href="{{ route('calendar.connect', 'google') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
                         Connect
@@ -66,11 +78,23 @@
                     </div>
                 </div>
                 @if($outlookConn)
-                    <form method="POST" action="{{ route('calendar.disconnect', $outlookConn) }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">Disconnect</button>
-                    </form>
+                    <div class="flex items-center gap-4">
+                        <form method="POST" action="{{ route('calendar.toggle-auto-record', $outlookConn) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="inline-flex items-center gap-2 text-sm font-medium {{ $outlookConn->auto_record ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400' }} hover:opacity-80 transition-opacity">
+                                <span class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out {{ $outlookConn->auto_record ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }}">
+                                    <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $outlookConn->auto_record ? 'translate-x-4' : 'translate-x-0' }}"></span>
+                                </span>
+                                Auto Record
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('calendar.disconnect', $outlookConn) }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">Disconnect</button>
+                        </form>
+                    </div>
                 @else
                     <a href="{{ route('calendar.connect', 'outlook') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
                         Connect

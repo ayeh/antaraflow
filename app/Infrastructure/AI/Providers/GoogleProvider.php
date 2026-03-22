@@ -7,6 +7,7 @@ namespace App\Infrastructure\AI\Providers;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
 use App\Infrastructure\AI\DTOs\ExtractedActionItem;
 use App\Infrastructure\AI\DTOs\ExtractedDecision;
+use App\Infrastructure\AI\DTOs\ExtractedRisk;
 use App\Infrastructure\AI\DTOs\MeetingSummary;
 use Illuminate\Support\Facades\Http;
 
@@ -130,6 +131,31 @@ class GoogleProvider implements AIProviderInterface
                 madeBy: $item['made_by'] ?? null,
             ),
             $decisions,
+        );
+    }
+
+    /** {@inheritDoc} */
+    public function extractRisks(string $text): array
+    {
+        $prompt = "Extract risks and concerns raised during the following meeting transcript. Return a JSON array where each item has:\n"
+            ."- \"risk\": Description of the risk or concern\n"
+            ."- \"severity\": high, medium, or low\n"
+            ."- \"mitigation\": Suggested mitigation if mentioned (optional)\n"
+            ."- \"raised_by\": Who raised the concern (optional)\n\n"
+            ."Respond with ONLY a valid JSON array, no other text.\n\n"
+            ."Transcript:\n{$text}";
+
+        $response = $this->chat($prompt, ['system' => 'You are an expert at identifying risks and concerns from meetings. Always respond with valid JSON.']);
+        $risks = json_decode($response, true) ?? [];
+
+        return array_map(
+            fn (array $item) => new ExtractedRisk(
+                risk: $item['risk'] ?? '',
+                severity: $item['severity'] ?? 'medium',
+                mitigation: $item['mitigation'] ?? null,
+                raisedBy: $item['raised_by'] ?? null,
+            ),
+            $risks,
         );
     }
 }

@@ -21,6 +21,14 @@ class Comment extends Model
 
     protected $guarded = ['id'];
 
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'client_visible' => 'boolean',
+        ];
+    }
+
     protected static function newFactory(): CommentFactory
     {
         return CommentFactory::new();

@@ -6,6 +6,7 @@ namespace App\Infrastructure\AI\Contracts;
 
 use App\Infrastructure\AI\DTOs\ExtractedActionItem;
 use App\Infrastructure\AI\DTOs\ExtractedDecision;
+use App\Infrastructure\AI\DTOs\ExtractedRisk;
 use App\Infrastructure\AI\DTOs\MeetingSummary;
 
 interface AIProviderInterface
@@ -22,4 +23,7 @@ interface AIProviderInterface
 
     /** @return array<ExtractedDecision> */
     public function extractDecisions(string $text): array;
+
+    /** @return array<ExtractedRisk> */
+    public function extractRisks(string $text): array;
 }

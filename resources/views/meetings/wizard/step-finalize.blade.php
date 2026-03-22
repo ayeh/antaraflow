@@ -93,13 +93,38 @@
                 @endif
             </div>
 
-            {{-- Decisions --}}
+            {{-- Decisions with Follow-Up Status --}}
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Decisions</h2>
                 @php
                     $decisions = $meeting->extractions->firstWhere('type', 'decisions');
+                    $decisionStatuses = isset($decisionTracker) ? $decisionTracker : [];
                 @endphp
-                @if($decisions && !empty($decisions->structured_data))
+                @if(!empty($decisionStatuses))
+                    <ol class="space-y-3">
+                        @foreach($decisionStatuses as $index => $ds)
+                            <li class="flex items-start gap-3 p-3 rounded-lg {{ match($ds['status']) { 'followed_up' => 'bg-green-50 dark:bg-green-900/10', 'stale' => 'bg-red-50 dark:bg-red-900/10', default => 'bg-gray-50 dark:bg-slate-700/30' } }}">
+                                <span class="flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-xs font-medium
+                                    {{ match($ds['status']) { 'followed_up' => 'bg-green-100 text-green-700', 'stale' => 'bg-red-100 text-red-700', default => 'bg-gray-100 text-gray-600' } }}">{{ $index + 1 }}</span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm text-gray-900 dark:text-white">{{ $ds['decision'] }}</p>
+                                    @if(!empty($ds['made_by']) && $ds['made_by'] !== 'Unspecified speaker')
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">— {{ $ds['made_by'] }}</span>
+                                    @endif
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium
+                                            {{ match($ds['status']) { 'followed_up' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300', 'stale' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', default => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' } }}">
+                                            {{ match($ds['status']) { 'followed_up' => 'Followed Up', 'stale' => 'Stale (' . $ds['days_since'] . 'd)', default => 'Pending' } }}
+                                        </span>
+                                        @foreach($ds['linked_action_items'] as $linkedItem)
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">→ {{ $linkedItem['title'] }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                @elseif($decisions && !empty($decisions->structured_data) && !isset($decisions->structured_data['custom_template']))
                     <ol class="space-y-3 list-decimal list-inside">
                         @foreach($decisions->structured_data as $decision)
                             <li class="text-sm text-gray-900 dark:text-white">
@@ -118,6 +143,34 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400 italic">No decisions recorded.</p>
                 @endif
             </div>
+
+            {{-- Risks --}}
+            @php
+                $risks = $meeting->extractions->firstWhere('type', 'risks');
+            @endphp
+            @if($risks && !empty($risks->structured_data) && !isset($risks->structured_data['custom_template']))
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Risks & Concerns</h2>
+                    <div class="space-y-3">
+                        @foreach($risks->structured_data as $risk)
+                            <div class="flex items-start gap-3 p-3 rounded-lg {{ match($risk['severity'] ?? 'medium') { 'high' => 'bg-red-50 dark:bg-red-900/10', 'medium' => 'bg-amber-50 dark:bg-amber-900/10', 'low' => 'bg-yellow-50 dark:bg-yellow-900/10', default => 'bg-gray-50 dark:bg-slate-700/30' } }}">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ match($risk['severity'] ?? 'medium') { 'high' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300', 'medium' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', 'low' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300', default => 'bg-gray-100 text-gray-800' } }}">
+                                    {{ ucfirst($risk['severity'] ?? 'medium') }}
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-gray-900 dark:text-white">{{ $risk['risk'] ?? '' }}</p>
+                                    @if(!empty($risk['mitigation']))
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span class="font-medium">Mitigation:</span> {{ $risk['mitigation'] }}</p>
+                                    @endif
+                                    @if(!empty($risk['raised_by']))
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Raised by {{ $risk['raised_by'] }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             {{-- Issues --}}
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
@@ -191,6 +244,9 @@
                 </div>
             </div>
 
+            {{-- Related Meetings --}}
+            @include('meetings.partials.related-meetings', ['relatedMeetings' => $relatedMeetings ?? collect()])
+
             {{-- AI Assistant --}}
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">AI Assistant</h3>
@@ -240,6 +296,10 @@
                     <a href="{{ route('meetings.export.csv', $meeting) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                         <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                         Download CSV (Action Items)
+                    </a>
+                    <a href="{{ route('meetings.export.json', $meeting) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        <svg class="h-4 w-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                        Download JSON
                     </a>
 
                     {{-- Email MOM --}}

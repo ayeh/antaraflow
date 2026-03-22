@@ -46,7 +46,7 @@ class PrepBriefController extends Controller
     {
         $this->authorize('view', $meeting);
 
-        $this->briefService->generateForMeeting($meeting);
+        $this->briefService->generateForUser($meeting, $request->user());
 
         return redirect()->back()->with('success', 'Prep brief generated successfully.');
     }

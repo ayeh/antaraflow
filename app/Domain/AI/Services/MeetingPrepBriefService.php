@@ -13,6 +13,7 @@ use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Infrastructure\AI\AIProviderFactory;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
+use App\Models\User;
 use App\Support\Enums\ActionItemStatus;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -26,11 +27,49 @@ class MeetingPrepBriefService
      */
     public function generateForMeeting(MinutesOfMeeting $meeting): Collection
     {
-        $meeting->load('attendees.user');
+        $meeting->load('attendees.user', 'documents');
 
         return $meeting->attendees->map(
             fn (MomAttendee $attendee) => $this->generateForAttendee($meeting, $attendee)
         );
+    }
+
+    /**
+     * Generate a personalized prep brief for the requesting user, using their attendee record if found.
+     */
+    public function generateForUser(MinutesOfMeeting $meeting, User $user): MeetingPrepBrief
+    {
+        $meeting->load('attendees.user', 'documents');
+
+        // Find the user's attendee record, or synthesize one for context
+        $attendee = $meeting->attendees->firstWhere('user_id', $user->id);
+
+        if ($attendee === null) {
+            $attendee = new MomAttendee;
+            $attendee->user_id = $user->id;
+            $attendee->name = $user->name;
+            $attendee->setRelation('user', $user);
+        }
+
+        // Delete any existing brief for this user
+        MeetingPrepBrief::query()
+            ->where('minutes_of_meeting_id', $meeting->id)
+            ->where('user_id', $user->id)
+            ->delete();
+
+        $content = $this->buildBriefContent($meeting, $attendee);
+        $highlights = $this->buildHighlights($content);
+        $prepMinutes = $this->estimatePrepTime($content);
+
+        return MeetingPrepBrief::query()->create([
+            'minutes_of_meeting_id' => $meeting->id,
+            'attendee_id' => $attendee->exists ? $attendee->id : null,
+            'user_id' => $user->id,
+            'content' => $content,
+            'summary_highlights' => $highlights,
+            'estimated_prep_minutes' => $prepMinutes,
+            'generated_at' => now(),
+        ]);
     }
 
     /**
@@ -80,6 +119,7 @@ class MeetingPrepBriefService
             'metrics' => $metrics,
             'reading_list' => $readingList,
             'conflicts' => [],
+            'suggested_questions' => $aiInsights['suggested_questions'] ?? [],
         ];
     }
 

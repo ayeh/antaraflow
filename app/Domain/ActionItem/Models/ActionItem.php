@@ -30,6 +30,7 @@ class ActionItem extends Model
             'due_date' => 'datetime',
             'completed_at' => 'datetime',
             'metadata' => 'array',
+            'client_visible' => 'boolean',
         ];
     }
 

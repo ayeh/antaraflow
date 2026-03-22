@@ -86,4 +86,13 @@ class MinutesOfMeetingPolicy
             UserRole::Manager,
         );
     }
+
+    public function startLive(User $user, MinutesOfMeeting $meeting): bool
+    {
+        return $this->authorizationService->hasPermission(
+            $user,
+            $user->currentOrganization,
+            'edit_meeting',
+        );
+    }
 }
