@@ -250,6 +250,7 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         Route::get('export/pdf', [\App\Domain\Export\Controllers\ExportController::class, 'pdf'])->name('export.pdf');
         Route::get('export/word', [\App\Domain\Export\Controllers\ExportController::class, 'word'])->name('export.word');
         Route::get('export/csv', [\App\Domain\Export\Controllers\ExportController::class, 'csv'])->name('export.csv');
+        Route::get('export/json', [\App\Domain\Export\Controllers\ExportController::class, 'json'])->name('export.json');
         Route::post('email-distribution', [\App\Domain\Export\Controllers\EmailDistributionController::class, 'store'])->name('email-distribution.store');
 
         Route::get('shares', [\App\Domain\Collaboration\Controllers\ShareController::class, 'index'])->name('shares.index');
