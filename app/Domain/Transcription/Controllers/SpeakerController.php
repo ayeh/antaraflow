@@ -27,4 +27,26 @@ class SpeakerController extends Controller
 
         return response()->json(['message' => 'Speaker renamed successfully.']);
     }
+
+    public function suggestions(MinutesOfMeeting $meeting, AudioTranscription $transcription): JsonResponse
+    {
+        $this->authorize('view', $meeting);
+
+        $attendeeNames = $meeting->attendees()
+            ->where('is_present', true)
+            ->pluck('name')
+            ->toArray();
+
+        $currentSpeakers = $transcription->segments()
+            ->select('speaker')
+            ->distinct()
+            ->whereNotNull('speaker')
+            ->pluck('speaker')
+            ->toArray();
+
+        return response()->json([
+            'attendees' => $attendeeNames,
+            'current_speakers' => $currentSpeakers,
+        ]);
+    }
 }

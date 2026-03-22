@@ -10,4 +10,5 @@ enum InputType: string
     case Document = 'document';
     case ManualNote = 'manual_note';
     case BrowserRecording = 'browser_recording';
+    case VoiceNote = 'voice_note';
 }

@@ -7,6 +7,7 @@ namespace App\Domain\Report\Services;
 use App\Domain\Report\Generators\ActionItemStatusGenerator;
 use App\Domain\Report\Generators\AttendanceReportGenerator;
 use App\Domain\Report\Generators\GovernanceComplianceGenerator;
+use App\Domain\Report\Generators\MeetingTrendGenerator;
 use App\Domain\Report\Generators\MonthlySummaryGenerator;
 use App\Domain\Report\Models\GeneratedReport;
 use App\Domain\Report\Models\ReportTemplate;
@@ -20,6 +21,7 @@ class ReportGeneratorService
         private ActionItemStatusGenerator $actionItemStatusGenerator,
         private AttendanceReportGenerator $attendanceReportGenerator,
         private GovernanceComplianceGenerator $governanceComplianceGenerator,
+        private MeetingTrendGenerator $meetingTrendGenerator,
     ) {}
 
     public function generate(ReportTemplate $template): GeneratedReport
@@ -29,6 +31,7 @@ class ReportGeneratorService
             ReportType::ActionItemStatus => $this->actionItemStatusGenerator->generate($template),
             ReportType::AttendanceReport => $this->attendanceReportGenerator->generate($template),
             ReportType::GovernanceCompliance => $this->governanceComplianceGenerator->generate($template),
+            ReportType::MeetingTrend => $this->meetingTrendGenerator->generate($template),
         };
 
         $fileSize = Storage::disk('local')->exists($filePath)

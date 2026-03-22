@@ -11,15 +11,34 @@
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $transcription->original_filename }}</h1>
             </div>
         </div>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-            @if($transcription->status->value === 'completed') bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
-            @elseif($transcription->status->value === 'processing') bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
-            @elseif($transcription->status->value === 'failed') bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300
-            @else bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300
-            @endif
-        ">
-            {{ ucfirst($transcription->status->value) }}
-        </span>
+        <div class="flex items-center gap-3">
+            {{-- AI Speaker Diarization Button --}}
+            @can('update', $meeting)
+                @if($transcription->status->value === 'completed' && $transcription->segments->isNotEmpty())
+                    <form method="POST" action="{{ route('meetings.transcriptions.diarize', [$meeting, $transcription]) }}" class="inline">
+                        @csrf
+                        <button type="submit"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/20 rounded-lg hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
+                                onclick="return confirm('Run AI speaker analysis? This will re-label speakers based on conversation context. Manual edits will be preserved.')">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                            </svg>
+                            AI Analyze Speakers
+                        </button>
+                    </form>
+                @endif
+            @endcan
+
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                @if($transcription->status->value === 'completed') bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
+                @elseif($transcription->status->value === 'processing') bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+                @elseif($transcription->status->value === 'failed') bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300
+                @else bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300
+                @endif
+            ">
+                {{ ucfirst($transcription->status->value) }}
+            </span>
+        </div>
     </div>
 
     {{-- Speaker Timeline --}}

@@ -10,6 +10,7 @@ enum ReportType: string
     case ActionItemStatus = 'action_item_status';
     case AttendanceReport = 'attendance_report';
     case GovernanceCompliance = 'governance_compliance';
+    case MeetingTrend = 'meeting_trend';
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum ReportType: string
             self::ActionItemStatus => 'Action Item Status',
             self::AttendanceReport => 'Attendance Report',
             self::GovernanceCompliance => 'Governance Compliance',
+            self::MeetingTrend => 'Meeting Trend & Pattern',
         };
     }
 }

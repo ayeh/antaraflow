@@ -17,6 +17,7 @@ use App\Domain\Export\Models\MomExport;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\Project\Models\Project;
 use App\Domain\Transcription\Models\AudioTranscription;
+use App\Domain\Transcription\Models\VoiceNote;
 use App\Models\User;
 use App\Support\Enums\MeetingPlatform;
 use App\Support\Enums\MeetingStatus;
@@ -175,6 +176,11 @@ class MinutesOfMeeting extends Model
     public function guestAccesses(): HasMany
     {
         return $this->hasMany(MomGuestAccess::class, 'minutes_of_meeting_id');
+    }
+
+    public function voiceNotes(): HasMany
+    {
+        return $this->hasMany(VoiceNote::class);
     }
 
     public function knowledgeLinksAsSource(): MorphMany

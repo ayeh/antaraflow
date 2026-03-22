@@ -790,4 +790,7 @@
             </div>
         </div>
     </div>
+
+    {{-- Voice Notes --}}
+    @include('meetings.partials.voice-notes')
 </div>

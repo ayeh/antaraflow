@@ -44,7 +44,9 @@ use App\Domain\Report\Controllers\GeneratedReportController;
 use App\Domain\Report\Controllers\ReportTemplateController;
 use App\Domain\Search\Controllers\SearchController;
 use App\Domain\Transcription\Controllers\AudioChunkController;
+use App\Domain\Transcription\Controllers\SpeakerDiarizationController;
 use App\Domain\Transcription\Controllers\TranscriptionController;
+use App\Domain\Transcription\Controllers\VoiceNoteController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -240,6 +242,8 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     Route::prefix('meetings/{meeting}')->as('meetings.')->group(function () {
         Route::resource('transcriptions', TranscriptionController::class)->only(['store', 'show', 'destroy']);
         Route::patch('transcriptions/{transcription}/speakers', [\App\Domain\Transcription\Controllers\SpeakerController::class, 'update'])->name('transcriptions.speakers.update');
+        Route::get('transcriptions/{transcription}/speaker-suggestions', [\App\Domain\Transcription\Controllers\SpeakerController::class, 'suggestions'])->name('transcriptions.speaker-suggestions');
+        Route::post('transcriptions/{transcription}/diarize', [SpeakerDiarizationController::class, 'analyze'])->name('transcriptions.diarize');
         Route::resource('documents', DocumentController::class)->only(['store', 'destroy']);
         Route::resource('manual-notes', ManualNoteController::class);
         Route::post('extract', [ExtractionController::class, 'extract'])->name('extract');
@@ -271,6 +275,11 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
         Route::post('audio-chunks', [AudioChunkController::class, 'store'])->name('audio-chunks.store');
         Route::post('audio-chunks/finalize', [AudioChunkController::class, 'finalize'])->name('audio-chunks.finalize');
         Route::delete('audio-chunks', [AudioChunkController::class, 'destroy'])->name('audio-chunks.destroy');
+
+        // Voice Notes
+        Route::get('voice-notes', [VoiceNoteController::class, 'index'])->name('voice-notes.index');
+        Route::post('voice-notes', [VoiceNoteController::class, 'store'])->name('voice-notes.store');
+        Route::delete('voice-notes/{voiceNote}', [VoiceNoteController::class, 'destroy'])->name('voice-notes.destroy');
 
         // Comments
         Route::post('comments', [\App\Domain\Collaboration\Controllers\CommentController::class, 'store'])->name('comments.store');
