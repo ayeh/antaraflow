@@ -234,4 +234,30 @@ class MeetingController extends Controller
         return redirect()->route('meetings.show', $meeting)
             ->with('success', 'Meeting reverted to draft.');
     }
+
+    public function duplicate(MinutesOfMeeting $meeting): RedirectResponse
+    {
+        $this->authorize('view', $meeting);
+
+        $duplicate = $meeting->replicate(['status', 'finalized_at', 'approved_at', 'approved_by', 'mom_number']);
+        $duplicate->title = $meeting->title.' (Copy)';
+        $duplicate->meeting_date = today()->toDateString();
+        $duplicate->status = MeetingStatus::Draft;
+        $duplicate->save();
+
+        foreach ($meeting->attendees as $attendee) {
+            $duplicate->attendees()->create($attendee->only([
+                'name', 'email', 'phone', 'company', 'role', 'is_external', 'department',
+            ]));
+        }
+
+        foreach ($meeting->topics as $topic) {
+            $duplicate->topics()->create($topic->only([
+                'title', 'description', 'duration_minutes', 'sort_order',
+            ]));
+        }
+
+        return redirect()->route('meetings.show', $duplicate)
+            ->with('success', 'Meeting duplicated successfully.');
+    }
 }
