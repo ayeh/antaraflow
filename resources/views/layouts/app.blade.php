@@ -7,6 +7,7 @@
     <title>{{ $title ?? $branding->appName() }}</title>
     <x-pwa-meta />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="{{ asset('js/celebration.js') }}" defer></script>
     @if($branding->get('custom_css'))
     <style>{!! $branding->get('custom_css') !!}</style>
     @endif
@@ -57,5 +58,14 @@
             @include('layouts.partials.mobile-bottom-nav')
         </div>
     </div>
+
+    {{-- Celebration FX: trigger on action item completed --}}
+    <script>
+        window.addEventListener('action-item-status-changed', function (e) {
+            if (e.detail && e.detail.status === 'completed' && typeof celebrate === 'function') {
+                celebrate();
+            }
+        });
+    </script>
 </body>
 </html>
