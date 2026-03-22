@@ -1,5 +1,5 @@
 {{-- Step 5: Finalize (MOM Preview + AI Assistant + Status Actions) --}}
-<div x-data="{ showFinalizeModal: false }" class="space-y-6">
+<div x-data="{ showFinalizeModal: false, shareModalOpen: false }" class="space-y-6">
 
     {{-- Warning Banner (if no content) --}}
     @if($meeting->extractions->isEmpty() && $meeting->manualNotes->isEmpty())
@@ -249,6 +249,71 @@
                 {{-- Export History --}}
                 @include('meetings.partials.export-history')
             </div>
+
+            {{-- Guest Access / Share Section --}}
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300">Guest Access Links</h3>
+                    <button @click="shareModalOpen = true"
+                            class="text-xs px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors">
+                        + Create Link
+                    </button>
+                </div>
+
+                @if($meeting->guestAccesses->isNotEmpty())
+                    <div class="space-y-2">
+                        @foreach($meeting->guestAccesses as $access)
+                            <div class="flex items-center justify-between text-sm py-1.5 border-b border-gray-100 dark:border-slate-700 last:border-0">
+                                <div>
+                                    <span class="font-medium text-gray-700 dark:text-slate-300">{{ $access->label ?? 'Guest Link' }}</span>
+                                    <button onclick="navigator.clipboard.writeText('{{ route('guest.mom', $access->token) }}')"
+                                            class="ml-2 text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400">
+                                        Copy link
+                                    </button>
+                                </div>
+                                <form action="{{ route('meetings.guest-access.destroy', $access) }}" method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-xs text-red-500 hover:text-red-700">Revoke</button>
+                                </form>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-xs text-gray-400 dark:text-slate-500">No guest links created yet.</p>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Create Link Modal --}}
+    <div x-show="shareModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+         @click.self="shareModalOpen = false">
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">Create Guest Access Link</h3>
+            <form action="{{ route('meetings.guest-access.store', $meeting) }}" method="POST">
+                @csrf
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Label (optional)</label>
+                        <input type="text" name="label" placeholder="e.g. Client ABC"
+                               class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Expires (optional)</label>
+                        <input type="date" name="expires_at"
+                               class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button type="button" @click="shareModalOpen = false"
+                            class="px-4 py-2 text-sm text-gray-600 dark:text-slate-400">Cancel</button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg">
+                        Create Link
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 

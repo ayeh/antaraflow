@@ -169,4 +169,9 @@ class MinutesOfMeeting extends Model
     {
         return $this->hasMany(\App\Domain\Export\Models\MomEmailDistribution::class, 'minutes_of_meeting_id');
     }
+
+    public function guestAccesses(): HasMany
+    {
+        return $this->hasMany(MomGuestAccess::class, 'minutes_of_meeting_id');
+    }
 }

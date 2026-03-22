@@ -19,6 +19,7 @@ use App\Domain\ActionItem\Controllers\ActionItemBulkController;
 use App\Domain\ActionItem\Controllers\ActionItemController;
 use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
 use App\Domain\ActionItem\Controllers\ActionItemStatusController;
+use App\Domain\ActionItem\Controllers\ClientVisibilityController;
 use App\Domain\AI\Controllers\ChatController;
 use App\Domain\AI\Controllers\ExtractionController;
 use App\Domain\AI\Controllers\ExtractionTemplateController;
@@ -30,6 +31,7 @@ use App\Domain\Calendar\Controllers\CalendarConnectionController;
 use App\Domain\Calendar\Controllers\CalendarWebhookController;
 use App\Domain\Meeting\Controllers\BoardSettingController;
 use App\Domain\Meeting\Controllers\DocumentController;
+use App\Domain\Meeting\Controllers\GuestAccessController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
 use App\Domain\Meeting\Controllers\MeetingController;
 use App\Domain\Meeting\Controllers\OfflineDataController;
@@ -53,6 +55,7 @@ Route::get('/', function () {
 
 // Guest meeting view (no auth required)
 Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessController::class, 'show'])->name('guest.meeting');
+Route::get('guest/{token}', [GuestAccessController::class, 'show'])->name('guest.mom');
 
 // QR Registration (public)
 Route::get('register/{token}', [QrRegistrationController::class, 'showForm'])->name('qr-registration.form');
@@ -219,6 +222,10 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     Route::post('meetings/{meeting}/qr-registration/disable', [QrRegistrationController::class, 'disable'])
         ->name('meetings.qr-registration.disable');
 
+    // Guest Access Links
+    Route::post('meetings/{meeting}/guest-access', [GuestAccessController::class, 'store'])->name('meetings.guest-access.store');
+    Route::delete('meetings/guest-access/{guestAccess}', [GuestAccessController::class, 'destroy'])->name('meetings.guest-access.destroy');
+
     // Meeting sub-resources (transcriptions, notes, attendees, actions, chat, extractions)
     Route::prefix('meetings/{meeting}')->as('meetings.')->group(function () {
         Route::resource('transcriptions', TranscriptionController::class)->only(['store', 'show', 'destroy']);
@@ -290,6 +297,9 @@ Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group
     Route::put('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'update'])->name('comments.update');
     Route::delete('comments/{comment}', [\App\Domain\Collaboration\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('comments/{comment}/reactions', [\App\Domain\Collaboration\Controllers\ReactionController::class, 'toggle'])->name('comments.reactions.toggle');
+    Route::patch('comments/{comment}/visibility', [ClientVisibilityController::class, 'toggleComment'])->name('comments.toggle-visibility');
+
+    Route::patch('action-items/{actionItem}/visibility', [ClientVisibilityController::class, 'toggleActionItem'])->name('action-items.toggle-visibility');
 
     // Reports
     Route::get('reports/generated', [GeneratedReportController::class, 'index'])->name('reports.generated.index');
