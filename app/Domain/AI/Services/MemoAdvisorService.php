@@ -95,7 +95,7 @@ class MemoAdvisorService
                 continue;
             }
 
-            $daysSince = $stale['days_since'];
+            $daysSince = (int) $stale['days_since'];
 
             ProactiveInsight::create([
                 'organization_id' => $orgId,
