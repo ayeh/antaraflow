@@ -105,7 +105,7 @@ test('full wizard lifecycle: create with project, add attendees, add notes, add 
     $response = $this->actingAs($this->user)->post(route('meetings.store'), [
         'title' => 'Wizard Test Meeting',
         'project_id' => $project->id,
-        'meeting_date' => '2026-03-15',
+        'meeting_date' => now()->addDay()->format('Y-m-d'),
         'start_time' => '09:00',
         'end_time' => '10:00',
         'language' => 'ms',
@@ -151,7 +151,7 @@ test('full wizard lifecycle: create with project, add attendees, add notes, add 
         [
             'title' => 'Follow up with client on deliverables',
             'priority' => 'high',
-            'due_date' => '2026-03-20',
+            'due_date' => now()->addDays(10)->format('Y-m-d'),
         ]
     )->assertRedirect();
 

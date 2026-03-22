@@ -164,4 +164,9 @@ class MinutesOfMeeting extends Model
     {
         return $this->hasMany(MomExport::class, 'minutes_of_meeting_id');
     }
+
+    public function emailDistributions(): HasMany
+    {
+        return $this->hasMany(\App\Domain\Export\Models\MomEmailDistribution::class, 'minutes_of_meeting_id');
+    }
 }

@@ -23,7 +23,7 @@ class LiveMeetingController extends Controller
 
     public function start(Request $request, MinutesOfMeeting $meeting): JsonResponse
     {
-        $this->authorize('update', $meeting);
+        $this->authorize('startLive', $meeting);
 
         $config = $request->validate([
             'chunk_interval' => ['sometimes', 'integer', 'min:10', 'max:120'],
@@ -55,12 +55,12 @@ class LiveMeetingController extends Controller
 
     public function chunk(Request $request, MinutesOfMeeting $meeting, LiveMeetingSession $session): JsonResponse
     {
-        $this->authorize('update', $meeting);
+        $this->authorize('startLive', $meeting);
         abort_if($session->minutes_of_meeting_id !== $meeting->id, 404);
         abort_if(! $session->isActive(), 409, 'Session is not active.');
 
         $request->validate([
-            'audio' => ['required', 'file', 'mimetypes:audio/*'],
+            'audio' => ['required', 'file', 'mimetypes:audio/webm,video/webm,audio/mp4,video/mp4,audio/ogg,audio/x-m4a,audio/wav,audio/mpeg'],
             'chunk_number' => ['required', 'integer', 'min:0'],
             'start_time' => ['required', 'numeric', 'min:0'],
             'end_time' => ['required', 'numeric', 'gt:start_time'],
@@ -79,7 +79,7 @@ class LiveMeetingController extends Controller
 
     public function end(Request $request, MinutesOfMeeting $meeting, LiveMeetingSession $session): JsonResponse
     {
-        $this->authorize('update', $meeting);
+        $this->authorize('startLive', $meeting);
         abort_if($session->minutes_of_meeting_id !== $meeting->id, 404);
         abort_if(! $session->isActive(), 409, 'Session is not active.');
 

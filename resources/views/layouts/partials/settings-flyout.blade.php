@@ -5,6 +5,7 @@ $settingsItems = [
     ['label' => 'Security',            'route' => route('settings.security'),          'active' => request()->routeIs('settings.security')],
     ['label' => 'Integrations',        'route' => route('settings.integrations'),      'active' => request()->routeIs('settings.integrations')],
     ['label' => 'API Keys',            'route' => route('settings.api-keys'),          'active' => request()->routeIs('settings.api-keys*')],
+    ['label' => 'Export Templates',    'route' => route('settings.export-templates.index'), 'active' => request()->routeIs('settings.export-templates.*')],
     ['label' => 'Organizations',       'route' => route('organizations.index'),        'active' => request()->routeIs('organizations.index', 'organizations.create')],
     ['label' => 'Meeting Templates',   'route' => route('meeting-templates.index'),    'active' => request()->routeIs('meeting-templates.*')],
     ['label' => 'Meeting Series',      'route' => route('meeting-series.index'),       'active' => request()->routeIs('meeting-series.*')],
