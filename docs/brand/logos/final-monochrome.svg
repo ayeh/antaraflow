@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 312 56" width="312" height="56">
+  <title>antaraNote — Monochrome</title>
+  <line x1="54" y1="28" x2="68" y2="28" stroke="#0D7377" stroke-width="1.5" stroke-dasharray="2.5 2.5" opacity="0.2" stroke-linecap="round"/>
+  <circle cx="21" cy="28" r="9" fill="#0D7377"/>
+  <circle cx="44" cy="28" r="9" fill="#0D7377"/>
+  <circle cx="78" cy="28" r="9" fill="#095153"/>
+  <text x="112" y="28" font-family="'Plus Jakarta Sans','Inter','Helvetica Neue',Arial,sans-serif" font-size="30" fill="#0D7377" dominant-baseline="central" text-anchor="start">
+    <tspan font-weight="400">antara</tspan><tspan font-weight="700">Note</tspan>
+  </text>
+</svg>

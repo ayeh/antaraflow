@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 99 60" width="99" height="60">
+  <title>antaraNote</title>
+  <line x1="54" y1="30" x2="68" y2="30" stroke="#D97706" stroke-width="1.5" stroke-dasharray="2.5 2.5" opacity="0.3" stroke-linecap="round"/>
+  <circle cx="21" cy="30" r="9" fill="#095153"/>
+  <circle cx="44" cy="30" r="9" fill="#0D7377"/>
+  <circle cx="78" cy="30" r="9" fill="#D97706"/>
+</svg>
