@@ -25,11 +25,14 @@
 .bg-violet-50  { background-color: var(--brand-p50)  !important; }
 .bg-violet-100 { background-color: var(--brand-p100) !important; }
 .bg-violet-200 { background-color: var(--brand-p200) !important; }
+.bg-violet-300 { background-color: var(--brand-p300) !important; }
+.bg-violet-400 { background-color: var(--brand-p400) !important; }
 .bg-violet-500 { background-color: var(--brand-p500) !important; }
 .bg-violet-600 { background-color: var(--brand-p600) !important; }
 .bg-violet-700 { background-color: var(--brand-p700) !important; }
 .hover\:bg-violet-50:hover  { background-color: var(--brand-p50)  !important; }
 .hover\:bg-violet-100:hover { background-color: var(--brand-p100) !important; }
+.hover\:bg-violet-600:hover { background-color: var(--brand-p600) !important; }
 .hover\:bg-violet-700:hover { background-color: var(--brand-p700) !important; }
 
 .text-violet-400 { color: var(--brand-p400) !important; }

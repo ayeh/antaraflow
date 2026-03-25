@@ -12,6 +12,11 @@ document.addEventListener('alpine:init', () => {
         init() {
             this.applyTheme();
             this.$watch('theme', () => this.applyTheme());
+
+            // Re-apply when OS dark mode preference changes (for 'system' theme)
+            this._mql = window.matchMedia('(prefers-color-scheme: dark)');
+            this._mqlHandler = () => { if (this.theme === 'system') { this.applyTheme(); } };
+            this._mql.addEventListener('change', this._mqlHandler);
         },
 
         toggleSidebar() {
