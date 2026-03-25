@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Item Alpha — AppName</title>
+    <link rel="stylesheet" href="presets/preset-blank.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../assets/app.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="../assets/app.js"></script>
+</head>
+<body class="h-full bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+<div x-data="appState" x-init="init()" class="min-h-full">
+
+    <!-- SIDEBAR: copy _sidebar.html content here in production -->
+    <!-- For this template, we include a simplified inline sidebar reference -->
+
+    <!-- Content area wrapper -->
+    <div :class="sidebarCollapsed ? 'md:ml-[5rem]' : 'md:ml-[15.5rem]'"
+         class="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900
+                md:mt-3 md:[clip-path:inset(0_0_0_0_round_1rem_0_0_0)]
+                transition-all duration-300 ease-in-out">
+
+        <!-- HEADER: copy _header.html content here in production -->
+        <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm
+                       border-b border-slate-200 dark:border-slate-700 px-6 h-16
+                       flex items-center gap-3">
+            <div class="flex-1 min-w-0">
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Organisation Name</span>
+            </div>
+            <button @click="cycleTheme()"
+                    class="flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                <span x-show="theme === 'light'">☀️</span>
+                <span x-show="theme === 'dark'">🌙</span>
+                <span x-show="theme === 'system'">💻</span>
+            </button>
+        </header>
+
+        <!-- FLASH MESSAGES -->
+        <!-- Success: <div class="mx-6 mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg text-sm">Success message</div> -->
+        <!-- Error: <div class="mx-6 mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm">Error message</div> -->
+
+        <main class="flex-1 p-6 space-y-4">
+
+            <!-- Back link + page header -->
+            <div>
+                <a href="list.html"
+                   class="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400
+                          hover:text-slate-700 dark:hover:text-slate-200 transition-colors mb-3">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Back to Items
+                </a>
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Item Alpha</h1>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
+                                     bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400
+                                     border border-green-200 dark:border-green-800">Active</span>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a href="form.html"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600
+                                  text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800
+                                  hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                            Edit
+                        </a>
+                        <button class="inline-flex items-center gap-2 px-4 py-2 rounded-xl
+                                       bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors">
+                            Primary Action
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2-column layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Main content (2/3) -->
+                <div class="lg:col-span-2 space-y-6">
+
+                    <!-- Tabs -->
+                    <div x-data="{ tab: 'details' }"
+                         class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+
+                        <!-- Tab nav -->
+                        <div class="border-b border-slate-200 dark:border-slate-700 px-4">
+                            <nav class="flex gap-0 -mb-px">
+                                <button @click="tab = 'details'"
+                                        :class="tab === 'details'
+                                            ? 'border-violet-600 text-violet-600 dark:text-violet-400 dark:border-violet-400'
+                                            : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300'"
+                                        class="px-4 py-3 text-sm font-medium border-b-2 transition-colors">Details</button>
+                                <button @click="tab = 'activity'"
+                                        :class="tab === 'activity'
+                                            ? 'border-violet-600 text-violet-600 dark:text-violet-400 dark:border-violet-400'
+                                            : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300'"
+                                        class="px-4 py-3 text-sm font-medium border-b-2 transition-colors">Activity</button>
+                                <button @click="tab = 'notes'"
+                                        :class="tab === 'notes'
+                                            ? 'border-violet-600 text-violet-600 dark:text-violet-400 dark:border-violet-400'
+                                            : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300'"
+                                        class="px-4 py-3 text-sm font-medium border-b-2 transition-colors">Notes</button>
+                            </nav>
+                        </div>
+
+                        <!-- Tab content -->
+                        <div class="p-6">
+
+                            <div x-show="tab === 'details'">
+                                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div>
+                                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Category</dt>
+                                        <dd class="text-sm text-slate-900 dark:text-slate-100">Category A</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Created</dt>
+                                        <dd class="text-sm text-slate-900 dark:text-slate-100">20 March 2026</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Owner</dt>
+                                        <dd class="flex items-center gap-2 text-sm text-slate-900 dark:text-slate-100">
+                                            <div class="w-5 h-5 rounded-full bg-violet-600 text-white text-[10px] font-bold flex items-center justify-center">JD</div>
+                                            John Doe
+                                        </dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Last Updated</dt>
+                                        <dd class="text-sm text-slate-900 dark:text-slate-100">25 March 2026</dd>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <dt class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Description</dt>
+                                        <dd class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                                            This is the full description of the item. It provides context, details, and any relevant information that users need to understand what this item is about. Replace this with your actual content.
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </div>
+
+                            <div x-show="tab === 'activity'">
+                                <div class="space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="shrink-0 w-7 h-7 rounded-full bg-violet-600 text-white text-xs font-bold flex items-center justify-center">JD</div>
+                                        <div class="flex-1">
+                                            <p class="text-sm text-slate-800 dark:text-slate-200"><span class="font-medium">John Doe</span> changed status to <span class="font-medium text-green-600 dark:text-green-400">Active</span></p>
+                                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">2 hours ago</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="shrink-0 w-7 h-7 rounded-full bg-slate-400 text-white text-xs font-bold flex items-center justify-center">SA</div>
+                                        <div class="flex-1">
+                                            <p class="text-sm text-slate-800 dark:text-slate-200"><span class="font-medium">Sarah Ali</span> created this item</p>
+                                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">20 Mar 2026</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div x-show="tab === 'notes'">
+                                <div class="space-y-3">
+                                    <textarea rows="4" placeholder="Add a note..."
+                                              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600
+                                                     bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100
+                                                     placeholder-slate-400 dark:placeholder-slate-500 text-sm
+                                                     focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors resize-y"></textarea>
+                                    <button class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors">
+                                        Save Note
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Sidebar (1/3) -->
+                <div class="space-y-4">
+
+                    <!-- Info card -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">Details</h3>
+                        <dl class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <dt class="text-xs text-slate-500 dark:text-slate-400">Priority</dt>
+                                <dd>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                                 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400
+                                                 border border-red-200 dark:border-red-800">High</span>
+                                </dd>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <dt class="text-xs text-slate-500 dark:text-slate-400">Due date</dt>
+                                <dd class="text-xs font-medium text-slate-700 dark:text-slate-300">31 Mar 2026</dd>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <dt class="text-xs text-slate-500 dark:text-slate-400">Assignee</dt>
+                                <dd class="flex items-center gap-1.5">
+                                    <div class="w-5 h-5 rounded-full bg-violet-600 text-white text-[10px] font-bold flex items-center justify-center">JD</div>
+                                    <span class="text-xs font-medium text-slate-700 dark:text-slate-300">John Doe</span>
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <!-- Related items card -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Related Items</h3>
+                            <button class="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700">Add</button>
+                        </div>
+                        <div class="space-y-2">
+                            <a href="#"
+                               class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                <div class="w-7 h-7 rounded-lg bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center shrink-0">
+                                    <svg class="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                    </svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">Related Item One</p>
+                                    <p class="text-[10px] text-slate-400 dark:text-slate-500">15 Mar 2026</p>
+                                </div>
+                            </a>
+                            <a href="#"
+                               class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center shrink-0">
+                                    <svg class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">Related Item Two</p>
+                                    <p class="text-[10px] text-slate-400 dark:text-slate-500">10 Mar 2026</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Empty state (uncomment when no related items) -->
+                        <!--
+                        <div class="py-6 text-center">
+                            <p class="text-xs text-slate-400 dark:text-slate-500">No related items yet</p>
+                        </div>
+                        -->
+                    </div>
+
+                    <!-- Danger zone -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl border border-red-200 dark:border-red-800/50 p-4">
+                        <h3 class="text-sm font-semibold text-red-600 dark:text-red-400 mb-2">Danger Zone</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Permanently delete this item. This action cannot be undone.</p>
+                        <button class="w-full px-4 py-2 rounded-xl border border-red-200 dark:border-red-800
+                                       text-sm font-medium text-red-600 dark:text-red-400
+                                       hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                            Delete Item
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+</body>
+</html>
