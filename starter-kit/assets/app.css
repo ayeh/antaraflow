@@ -1,0 +1,51 @@
+/* antaraFlow Starter Kit — Base CSS
+   ============================================================
+   Import a preset file BEFORE this file to set brand variables.
+   Preset files live in html/presets/preset-*.css
+   ============================================================ */
+
+/* Tailwind v4 CDN is loaded in each HTML file via <script>.
+   This file contains only custom brand variable overrides. */
+
+:root {
+    /* Brand shades — auto-generated from --brand-primary */
+    --brand-p50:  color-mix(in srgb, var(--brand-primary)  5%, white);
+    --brand-p100: color-mix(in srgb, var(--brand-primary) 10%, white);
+    --brand-p200: color-mix(in srgb, var(--brand-primary) 20%, white);
+    --brand-p300: color-mix(in srgb, var(--brand-primary) 40%, white);
+    --brand-p400: color-mix(in srgb, var(--brand-primary) 60%, white);
+    --brand-p500: color-mix(in srgb, var(--brand-primary) 80%, white);
+    --brand-p600: var(--brand-primary);
+    --brand-p700: color-mix(in srgb, var(--brand-primary) 85%, black);
+    --brand-p800: color-mix(in srgb, var(--brand-primary) 70%, black);
+    --brand-p900: color-mix(in srgb, var(--brand-primary) 15%, #0f172a);
+}
+
+/* Map Tailwind violet-* classes to brand variables */
+.bg-violet-50  { background-color: var(--brand-p50)  !important; }
+.bg-violet-100 { background-color: var(--brand-p100) !important; }
+.bg-violet-200 { background-color: var(--brand-p200) !important; }
+.bg-violet-500 { background-color: var(--brand-p500) !important; }
+.bg-violet-600 { background-color: var(--brand-p600) !important; }
+.bg-violet-700 { background-color: var(--brand-p700) !important; }
+.hover\:bg-violet-50:hover  { background-color: var(--brand-p50)  !important; }
+.hover\:bg-violet-100:hover { background-color: var(--brand-p100) !important; }
+.hover\:bg-violet-700:hover { background-color: var(--brand-p700) !important; }
+
+.text-violet-400 { color: var(--brand-p400) !important; }
+.text-violet-500 { color: var(--brand-p500) !important; }
+.text-violet-600 { color: var(--brand-p600) !important; }
+.text-violet-700 { color: var(--brand-p700) !important; }
+.hover\:text-violet-700:hover { color: var(--brand-p700) !important; }
+
+.border-violet-200 { border-color: var(--brand-p200) !important; }
+.border-violet-500 { border-color: var(--brand-p500) !important; }
+.border-violet-600 { border-color: var(--brand-p600) !important; }
+.focus\:border-violet-500:focus { border-color: var(--brand-p500) !important; }
+.focus\:ring-violet-500:focus { --tw-ring-color: var(--brand-p500) !important; }
+
+.dark .dark\:text-violet-300 { color: var(--brand-p300) !important; }
+.dark .dark\:text-violet-400 { color: var(--brand-p400) !important; }
+.dark .dark\:bg-violet-900\/10  { background-color: color-mix(in srgb, var(--brand-primary) 10%, transparent) !important; }
+.dark .dark\:bg-violet-900\/20  { background-color: color-mix(in srgb, var(--brand-primary) 20%, transparent) !important; }
+.dark .dark\:border-violet-500  { border-color: var(--brand-p500) !important; }
