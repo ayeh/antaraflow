@@ -1,0 +1,27 @@
+/* antaraFlow Starter Kit — antaraNote Brand Preset
+   ============================================================
+   Teal brand identity for antaraNote (meeting management SaaS).
+   Fonts: Plus Jakarta Sans (headings) + Inter (body)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Inter:wght@400;500&display=swap');
+
+:root {
+    --brand-primary:        #0D7377;    /* Nusantara Teal */
+    --brand-primary-dark:   #095153;    /* Deep Teal */
+    --brand-primary-light:  #E6F4F4;    /* Soft Teal */
+    --brand-sidebar-bg:     #095153;    /* Deep Teal */
+    --brand-sidebar-text:   #ffffff;
+
+    --brand-font-heading: 'Plus Jakarta Sans', sans-serif;
+    --brand-font-body:    'Inter', sans-serif;
+
+    --brand-radius: 0.75rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--brand-font-heading);
+}
+body {
+    font-family: var(--brand-font-body);
+}

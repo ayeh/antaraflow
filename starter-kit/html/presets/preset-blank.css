@@ -1,0 +1,29 @@
+/* antaraFlow Starter Kit — Blank/Neutral Preset
+   ============================================================
+   CUSTOMISE THIS FILE to rebrand for a new system.
+   Only change the values below — the rest auto-generates.
+   ============================================================ */
+
+:root {
+    /* 1. Primary brand color — change this one value to rebrand */
+    --brand-primary: #7c3aed;           /* Default: violet */
+
+    /* 2. Sidebar */
+    --brand-sidebar-bg: #ffffff;        /* white sidebar for neutral preset */
+    --brand-sidebar-text: #334155;      /* slate-700 */
+
+    /* 3. Typography */
+    --brand-font-heading: 'Inter', sans-serif;
+    --brand-font-body:    'Inter', sans-serif;
+
+    /* 4. Shape */
+    --brand-radius: 0.75rem;            /* rounded-xl */
+}
+
+/* Apply heading font */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--brand-font-heading);
+}
+body {
+    font-family: var(--brand-font-body);
+}
