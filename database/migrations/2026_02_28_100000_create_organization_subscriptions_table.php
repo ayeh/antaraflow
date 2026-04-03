@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('subscription_plan_id')->constrained()->cascadeOnDelete();
             $table->string('status')->default('active');
             $table->timestamp('trial_ends_at')->nullable();
-            $table->timestamp('starts_at');
+            $table->timestamp('starts_at')->useCurrent();
             $table->timestamp('ends_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
             $table->json('metadata')->nullable();
