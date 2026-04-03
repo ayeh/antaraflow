@@ -36,7 +36,32 @@ class MinutesOfMeeting extends Model
 {
     use BelongsToOrganization, HasFactory, SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'created_by',
+        'meeting_series_id',
+        'meeting_template_id',
+        'project_id',
+        'title',
+        'summary',
+        'content',
+        'status',
+        'meeting_type',
+        'meeting_link',
+        'meeting_platform',
+        'mom_number',
+        'location',
+        'meeting_date',
+        'start_time',
+        'end_time',
+        'duration_minutes',
+        'language',
+        'prepared_by',
+        'share_with_client',
+        'metadata',
+        'calendar_event_id',
+        'calendar_provider',
+        'calendar_synced_at',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

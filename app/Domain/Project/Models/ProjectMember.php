@@ -10,7 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProjectMember extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'project_id',
+        'user_id',
+        'role',
+    ];
 
     public function project(): BelongsTo
     {

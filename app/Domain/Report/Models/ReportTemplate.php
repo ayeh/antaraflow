@@ -16,7 +16,16 @@ class ReportTemplate extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name',
+        'type',
+        'filters',
+        'schedule',
+        'recipients',
+        'is_active',
+        'last_generated_at',
+        'created_by',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

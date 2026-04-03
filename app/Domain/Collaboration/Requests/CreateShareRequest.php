@@ -16,8 +16,25 @@ class CreateShareRequest extends FormRequest
     /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
+        $orgId = $this->user()->current_organization_id;
+
         return [
-            'shared_with_user_id' => ['nullable', 'exists:users,id'],
+            'shared_with_user_id' => [
+                'nullable',
+                'exists:users,id',
+                function (string $attribute, mixed $value, \Closure $fail) use ($orgId): void {
+                    if ($value === null) {
+                        return;
+                    }
+                    $belongsToOrg = \App\Domain\Account\Models\Organization::find($orgId)
+                        ?->members()
+                        ->where('users.id', $value)
+                        ->exists();
+                    if (! $belongsToOrg) {
+                        $fail('The selected user does not belong to your organization.');
+                    }
+                },
+            ],
             'permission' => ['required', 'in:view,comment,edit'],
             'expires_at' => ['nullable', 'date', 'after:now'],
             'is_link_share' => ['nullable', 'boolean'],

@@ -12,7 +12,15 @@ class WebhookDelivery extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'webhook_endpoint_id',
+        'event',
+        'payload',
+        'response_status',
+        'response_body',
+        'attempt',
+        'successful',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

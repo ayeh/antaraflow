@@ -8,7 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmailTemplate extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'slug',
+        'name',
+        'subject',
+        'body_html',
+        'variables',
+        'is_active',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

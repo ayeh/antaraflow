@@ -36,7 +36,12 @@ class WebhookApiController extends ApiController
             'created_by' => $this->resolveCreatedBy($orgId),
         ]);
 
-        return response()->json(['data' => $webhook], 201);
+        // Return secret only on creation (it's hidden from normal serialization)
+        return response()->json([
+            'data' => $webhook,
+            'secret' => $webhook->getOriginal('secret') ? decrypt($webhook->getRawOriginal('secret')) : $webhook->secret,
+            'note' => 'Store this secret securely. It will not be shown again.',
+        ], 201);
     }
 
     public function destroy(Request $request, WebhookEndpoint $webhookEndpoint): JsonResponse

@@ -14,10 +14,12 @@ class GlobalSearchService
     /** @return array<string, array<int, array<string, mixed>>> */
     public function search(string $query, int $organizationId, int $limit = 20): array
     {
+        $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $query);
+
         return [
-            'meetings' => $this->searchMeetings($query, $organizationId, min($limit, 10)),
-            'action_items' => $this->searchActionItems($query, $organizationId, min($limit, 5)),
-            'projects' => $this->searchProjects($query, $organizationId, min($limit, 3)),
+            'meetings' => $this->searchMeetings($escaped, $organizationId, min($limit, 10)),
+            'action_items' => $this->searchActionItems($escaped, $organizationId, min($limit, 5)),
+            'projects' => $this->searchProjects($escaped, $organizationId, min($limit, 3)),
         ];
     }
 

@@ -12,7 +12,11 @@ class AttendeeGroup extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name',
+        'description',
+        'default_members',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

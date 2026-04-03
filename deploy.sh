@@ -11,6 +11,9 @@ set -euo pipefail
 
 echo "🚀 Starting deployment..."
 
+# Enter maintenance mode
+php artisan down --retry=60 --refresh=15
+
 # Pull latest code
 git pull origin main
 
@@ -30,7 +33,19 @@ php artisan route:cache
 php artisan view:cache
 php artisan icons:cache 2>/dev/null || true
 
+# Harden file permissions
+chmod 600 .env
+chmod -R 750 storage/ bootstrap/cache/
+
+# Verify critical production settings
+if grep -q "APP_DEBUG=true" .env; then
+    echo "⚠️  WARNING: APP_DEBUG is true in production!"
+fi
+
 # Restart queue workers (if using database queue)
 php artisan queue:restart
+
+# Exit maintenance mode
+php artisan up
 
 echo "✅ Deployment complete!"

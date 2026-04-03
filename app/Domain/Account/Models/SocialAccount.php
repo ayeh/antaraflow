@@ -13,7 +13,13 @@ class SocialAccount extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'provider',
+        'provider_id',
+        'provider_email',
+        'avatar_url',
+    ];
 
     public function user(): BelongsTo
     {

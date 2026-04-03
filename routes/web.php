@@ -58,26 +58,32 @@ Route::get('/', function () {
 });
 
 // Guest meeting view (no auth required)
-Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessController::class, 'show'])->name('guest.meeting');
-Route::get('guest/{token}', [GuestAccessController::class, 'show'])->name('guest.mom');
+Route::middleware('throttle:10,1')->group(function () {
+    Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessController::class, 'show'])->name('guest.meeting');
+    Route::get('guest/{token}', [GuestAccessController::class, 'show'])->name('guest.mom');
+});
 
 // QR Registration (public)
-Route::get('register/{token}', [QrRegistrationController::class, 'showForm'])->name('qr-registration.form');
-Route::post('register/{token}', [QrRegistrationController::class, 'register'])->name('qr-registration.submit');
-Route::get('register/{token}/success', [QrRegistrationController::class, 'success'])->name('qr-registration.success');
+Route::middleware('throttle:10,1')->group(function () {
+    Route::get('register/{token}', [QrRegistrationController::class, 'showForm'])->name('qr-registration.form');
+    Route::post('register/{token}', [QrRegistrationController::class, 'register'])->name('qr-registration.submit');
+    Route::get('register/{token}/success', [QrRegistrationController::class, 'success'])->name('qr-registration.success');
+});
 
 // Calendar Webhooks (no auth - called by Google/Microsoft)
-Route::post('calendar/webhook/{provider}', [CalendarWebhookController::class, 'handle'])->name('calendar.webhook');
+Route::post('calendar/webhook/{provider}', [CalendarWebhookController::class, 'handle'])
+    ->middleware('throttle:60,1')
+    ->name('calendar.webhook');
 
 // Auth routes
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [LoginController::class, 'login']);
+    Route::post('login', [LoginController::class, 'login'])->middleware('throttle:5,1');
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('register', [RegisterController::class, 'register']);
+    Route::post('register', [RegisterController::class, 'register'])->middleware('throttle:3,1');
 
-    Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
-    Route::get('auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
+    Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->middleware('throttle:10,1')->name('social.redirect');
+    Route::get('auth/{provider}/callback', [SocialAuthController::class, 'callback'])->middleware('throttle:10,1')->name('social.callback');
 });
 
 Route::middleware('auth')->group(function () {
@@ -90,7 +96,7 @@ Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(fu
     Route::post('/skip', [OnboardingController::class, 'skip'])->name('skip');
 });
 
-Route::middleware(['auth', 'org.context', 'org.suspended', 'onboarding'])->group(function () {
+Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboarding'])->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

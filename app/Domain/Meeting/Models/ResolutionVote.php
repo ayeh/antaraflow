@@ -14,7 +14,12 @@ class ResolutionVote extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'resolution_id',
+        'attendee_id',
+        'vote',
+        'voted_at',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

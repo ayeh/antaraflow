@@ -53,10 +53,13 @@ export function initDB() {
  */
 export async function cacheMeeting(id, data) {
     const db = await initDB();
+    // Strip sensitive fields before caching
+    const { attendees, ...safeData } = data;
+    const safeAttendees = (attendees || []).map(({ name, role }) => ({ name, role }));
     return new Promise((resolve, reject) => {
         const tx = db.transaction(MEETINGS_STORE, 'readwrite');
         const store = tx.objectStore(MEETINGS_STORE);
-        store.put({ ...data, id, cached_at: new Date().toISOString() });
+        store.put({ ...safeData, attendees: safeAttendees, id, cached_at: new Date().toISOString(), expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() });
         tx.oncomplete = () => resolve();
         tx.onerror = (event) => reject(event.target.error);
     });
@@ -112,7 +115,7 @@ export async function getCachedMeetingsList() {
  */
 export async function addOfflineAction(type, meetingId, payload) {
     const db = await initDB();
-    const offlineId = `offline_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    const offlineId = `offline_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
 
     return new Promise((resolve, reject) => {
         const tx = db.transaction(ACTIONS_STORE, 'readwrite');
@@ -207,10 +210,18 @@ export async function evictOldMeetings(maxCount = 50) {
  */
 window.__offlineStore = {
     async cacheMeetingFromUrl(url) {
+        // Security: only allow same-origin meeting data URLs
+        const allowed = /^\/meetings\/\d+\/offline-data$/;
         try {
+            const parsed = new URL(url, window.location.origin);
+            if (parsed.origin !== window.location.origin || !allowed.test(parsed.pathname)) {
+                console.warn('Blocked offline cache request to disallowed URL:', url);
+                return;
+            }
             await initDB();
             const response = await fetch(url, {
                 headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin',
             });
             if (response.ok) {
                 const data = await response.json();
@@ -220,5 +231,14 @@ window.__offlineStore = {
         } catch {
             // Offline caching failed silently
         }
+    },
+    async clearAll() {
+        const db = await initDB();
+        await new Promise((resolve) => {
+            const tx = db.transaction([MEETINGS_STORE, ACTIONS_STORE], 'readwrite');
+            tx.objectStore(MEETINGS_STORE).clear();
+            tx.objectStore(ACTIONS_STORE).clear();
+            tx.oncomplete = () => resolve();
+        });
     },
 };

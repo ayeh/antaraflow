@@ -13,7 +13,13 @@ class GeneratedReport extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'report_template_id',
+        'file_path',
+        'file_size',
+        'parameters',
+        'generated_at',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

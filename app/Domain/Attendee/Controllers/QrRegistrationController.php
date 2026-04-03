@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -39,7 +40,7 @@ class QrRegistrationController extends Controller
             'token' => Str::random(64),
             'join_code' => $joinCode,
             'is_active' => true,
-            'expires_at' => $validated['expires_at'] ?? now()->addHours(24),
+            'expires_at' => $validated['expires_at'] ?? null,
             'max_attendees' => $validated['max_attendees'] ?? null,
             'required_fields' => $validated['required_fields'] ?? ['name'],
             'welcome_message' => $validated['welcome_message'] ?? null,
@@ -89,65 +90,67 @@ class QrRegistrationController extends Controller
 
     public function register(Request $request, string $token): RedirectResponse
     {
-        $qrToken = QrRegistrationToken::where('token', $token)->firstOrFail();
+        return DB::transaction(function () use ($request, $token): RedirectResponse {
+            $qrToken = QrRegistrationToken::where('token', $token)->lockForUpdate()->firstOrFail();
 
-        if (! $qrToken->isValid()) {
-            abort(410, 'This registration link has expired.');
-        }
+            if (! $qrToken->isValid()) {
+                abort(410, 'This registration link has expired.');
+            }
 
-        if ($qrToken->isFull()) {
-            abort(410, 'Registration is full. No more spots available.');
-        }
+            if ($qrToken->isFull()) {
+                abort(410, 'Registration is full. No more spots available.');
+            }
 
-        $requiredFields = $qrToken->required_fields ?? ['name'];
-        $rules = [];
+            $requiredFields = $qrToken->required_fields ?? ['name'];
+            $rules = [];
 
-        if (in_array('name', $requiredFields)) {
-            $rules['name'] = ['required', 'string', 'max:255'];
-        } else {
-            $rules['name'] = ['nullable', 'string', 'max:255'];
-        }
+            if (in_array('name', $requiredFields)) {
+                $rules['name'] = ['required', 'string', 'max:255'];
+            } else {
+                $rules['name'] = ['nullable', 'string', 'max:255'];
+            }
 
-        if (in_array('email', $requiredFields)) {
-            $rules['email'] = ['required', 'email', 'max:255'];
-        } else {
-            $rules['email'] = ['nullable', 'email', 'max:255'];
-        }
+            if (in_array('email', $requiredFields)) {
+                $rules['email'] = ['required', 'email', 'max:255'];
+            } else {
+                $rules['email'] = ['nullable', 'email', 'max:255'];
+            }
 
-        if (in_array('phone', $requiredFields)) {
-            $rules['phone'] = ['required', 'string', 'max:20'];
-        } else {
-            $rules['phone'] = ['nullable', 'string', 'max:20'];
-        }
+            if (in_array('phone', $requiredFields)) {
+                $rules['phone'] = ['required', 'string', 'max:20'];
+            } else {
+                $rules['phone'] = ['nullable', 'string', 'max:20'];
+            }
 
-        if (in_array('company', $requiredFields)) {
-            $rules['company'] = ['required', 'string', 'max:255'];
-        } else {
-            $rules['company'] = ['nullable', 'string', 'max:255'];
-        }
+            if (in_array('company', $requiredFields)) {
+                $rules['company'] = ['required', 'string', 'max:255'];
+            } else {
+                $rules['company'] = ['nullable', 'string', 'max:255'];
+            }
 
-        $validated = $request->validate($rules);
+            $validated = $request->validate($rules);
 
-        $meeting = $qrToken->meeting;
+            $meeting = $qrToken->meeting;
 
-        $meeting->attendees()->create([
-            'name' => $validated['name'] ?? 'Guest',
-            'email' => $validated['email'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'company' => $validated['company'] ?? null,
-            'role' => AttendeeRole::Participant,
-            'is_present' => true,
-            'is_external' => true,
-            'rsvp_status' => RsvpStatus::Accepted,
-        ]);
-
-        $qrToken->incrementRegistrations();
-
-        return redirect()->route('qr-registration.success', $token)
-            ->with('registration', [
+            $meeting->attendees()->create([
                 'name' => $validated['name'] ?? 'Guest',
                 'email' => $validated['email'] ?? null,
+                'phone' => $validated['phone'] ?? null,
+                'company' => $validated['company'] ?? null,
+                'role' => AttendeeRole::Participant,
+                'is_present' => true,
+                'is_external' => true,
+                'rsvp_status' => RsvpStatus::Accepted,
             ]);
+
+            $qrToken->incrementRegistrations();
+
+            return redirect()->route('qr-registration.success', $token)
+                ->with('registration', [
+                    'name' => $validated['name'] ?? 'Guest',
+                    'email' => $validated['email'] ?? null,
+                ]);
+        }); // end DB::transaction
     }
 
     public function success(string $token): View

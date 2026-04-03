@@ -16,7 +16,25 @@ class AudioTranscription extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'uploaded_by',
+        'original_filename',
+        'file_path',
+        'mime_type',
+        'file_size',
+        'duration_seconds',
+        'language',
+        'status',
+        'full_text',
+        'confidence_score',
+        'provider',
+        'provider_metadata',
+        'retry_count',
+        'error_message',
+        'started_at',
+        'completed_at',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

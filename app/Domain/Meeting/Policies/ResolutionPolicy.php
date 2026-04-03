@@ -25,6 +25,10 @@ class ResolutionPolicy
 
     public function update(User $user, MeetingResolution $resolution): bool
     {
+        if ($resolution->meeting?->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,
@@ -34,6 +38,10 @@ class ResolutionPolicy
 
     public function delete(User $user, MeetingResolution $resolution): bool
     {
+        if ($resolution->meeting?->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,
@@ -43,6 +51,10 @@ class ResolutionPolicy
 
     public function vote(User $user, MeetingResolution $resolution): bool
     {
+        if ($resolution->meeting?->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,

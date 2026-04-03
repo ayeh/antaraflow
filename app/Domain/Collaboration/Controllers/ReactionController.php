@@ -13,6 +13,11 @@ class ReactionController
 {
     public function toggle(ToggleReactionRequest $request, Comment $comment): JsonResponse
     {
+        abort_unless(
+            $comment->organization_id === $request->user()->current_organization_id,
+            403
+        );
+
         $emoji = $request->validated('emoji');
         $userId = $request->user()->id;
 

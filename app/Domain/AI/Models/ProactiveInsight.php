@@ -12,7 +12,17 @@ class ProactiveInsight extends Model
 {
     use BelongsToOrganization;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'type',
+        'title',
+        'description',
+        'severity',
+        'metadata',
+        'is_read',
+        'is_dismissed',
+        'generated_at',
+        'expires_at',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

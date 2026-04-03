@@ -13,7 +13,13 @@ class MomJoinSetting extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'allow_external_join',
+        'require_rsvp',
+        'auto_notify',
+        'notification_config',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

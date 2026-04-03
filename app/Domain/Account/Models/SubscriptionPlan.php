@@ -12,7 +12,20 @@ class SubscriptionPlan extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'price_monthly',
+        'price_yearly',
+        'features',
+        'max_users',
+        'max_meetings_per_month',
+        'max_audio_minutes_per_month',
+        'max_storage_mb',
+        'is_active',
+        'sort_order',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

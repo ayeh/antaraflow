@@ -16,7 +16,16 @@ class ExtractionTemplate extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name',
+        'meeting_type',
+        'extraction_type',
+        'prompt_template',
+        'system_message',
+        'is_active',
+        'sort_order',
+        'created_by',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

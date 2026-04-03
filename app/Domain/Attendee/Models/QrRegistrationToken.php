@@ -10,7 +10,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QrRegistrationToken extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'token',
+        'join_code',
+        'is_active',
+        'expires_at',
+        'max_attendees',
+        'required_fields',
+        'welcome_message',
+        'registrations_count',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

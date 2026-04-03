@@ -10,7 +10,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserSettings extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'notification_preferences',
+        'timezone',
+        'locale',
+        'two_factor_enabled',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

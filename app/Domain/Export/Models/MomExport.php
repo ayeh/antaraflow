@@ -11,7 +11,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MomExport extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'user_id',
+        'format',
+        'file_path',
+        'file_size',
+        'downloaded_at',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

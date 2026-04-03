@@ -14,6 +14,11 @@ class EmailDistributionController
 {
     public function store(SendEmailDistributionRequest $request, MinutesOfMeeting $meeting): RedirectResponse
     {
+        abort_unless(
+            $meeting->organization_id === $request->user()->current_organization_id,
+            403
+        );
+
         $dist = MomEmailDistribution::create([
             'minutes_of_meeting_id' => $meeting->id,
             'sent_by' => $request->user()->id,

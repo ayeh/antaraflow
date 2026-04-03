@@ -11,7 +11,17 @@ use Illuminate\Support\Facades\Crypt;
 
 class SmtpConfiguration extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'organization_id',
+        'host',
+        'port',
+        'username',
+        'password',
+        'encryption',
+        'from_address',
+        'from_name',
+        'is_active',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

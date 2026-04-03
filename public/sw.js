@@ -89,12 +89,14 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Network-first for HTML pages
+    // Network-first for HTML pages (only cache public/guest pages, not authenticated ones)
     if (request.headers.get('Accept')?.includes('text/html')) {
+        const publicPaths = ['/login', '/register', '/guest/', '/share/'];
+        const isPublicPage = publicPaths.some((p) => url.pathname.startsWith(p)) || url.pathname === '/';
         event.respondWith(
             fetch(request)
                 .then((response) => {
-                    if (response.ok) {
+                    if (response.ok && isPublicPage) {
                         const clone = response.clone();
                         caches.open(PAGE_CACHE).then((cache) => cache.put(request, clone));
                     }
@@ -132,11 +134,27 @@ async function syncOfflineActions() {
             offline_id: a.offline_id,
         }));
 
+        // Read XSRF-TOKEN from cookies for CSRF protection
+        const xsrfToken = decodeURIComponent(
+            (document?.cookie ?? self?.registration?.scope ?? '')
+                .split('; ')
+                .find((c) => c.startsWith('XSRF-TOKEN='))
+                ?.split('=')[1] ?? ''
+        ) || await (async () => {
+            // Fallback: read from cookie jar via fetch to same origin
+            try {
+                const cookies = await cookieStore?.getAll?.('XSRF-TOKEN') ?? [];
+                return cookies[0]?.value ?? '';
+            } catch { return ''; }
+        })();
+
         const response = await fetch('/offline/sync', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                ...(xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}),
             },
             body: JSON.stringify({ actions }),
         });

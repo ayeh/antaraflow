@@ -13,7 +13,16 @@ class MomExtraction extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'type',
+        'content',
+        'structured_data',
+        'provider',
+        'model',
+        'confidence_score',
+        'token_usage',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

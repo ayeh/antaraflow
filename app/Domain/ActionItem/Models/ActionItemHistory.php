@@ -13,7 +13,14 @@ class ActionItemHistory extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'action_item_id',
+        'changed_by',
+        'field_changed',
+        'old_value',
+        'new_value',
+        'comment',
+    ];
 
     protected static function newFactory(): \Database\Factories\ActionItemHistoryFactory
     {

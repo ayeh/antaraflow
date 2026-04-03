@@ -10,7 +10,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AnalyticsDailySnapshot extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'snapshot_date',
+        'total_meetings',
+        'total_action_items',
+        'completed_action_items',
+        'overdue_action_items',
+        'total_attendees',
+        'ai_usage_count',
+        'avg_meeting_duration_minutes',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

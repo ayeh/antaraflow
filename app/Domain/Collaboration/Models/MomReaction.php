@@ -10,7 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MomReaction extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'comment_id',
+        'user_id',
+        'emoji',
+    ];
 
     public function comment(): BelongsTo
     {

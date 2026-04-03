@@ -14,7 +14,14 @@ class AnalyticsEvent extends Model
 {
     public $timestamps = false;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'event_type',
+        'subject_type',
+        'subject_id',
+        'properties',
+        'occurred_at',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

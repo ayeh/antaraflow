@@ -13,7 +13,18 @@ class LiveTranscriptChunk extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'live_meeting_session_id',
+        'chunk_number',
+        'audio_file_path',
+        'text',
+        'speaker',
+        'start_time',
+        'end_time',
+        'confidence',
+        'status',
+        'error_message',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

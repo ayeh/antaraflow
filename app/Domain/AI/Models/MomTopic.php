@@ -13,7 +13,14 @@ class MomTopic extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'title',
+        'description',
+        'duration_minutes',
+        'sort_order',
+        'related_segments',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

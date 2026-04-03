@@ -25,6 +25,10 @@ class ActionItemPolicy
 
     public function view(User $user, ActionItem $actionItem): bool
     {
+        if ($actionItem->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,
@@ -43,6 +47,10 @@ class ActionItemPolicy
 
     public function update(User $user, ActionItem $actionItem): bool
     {
+        if ($actionItem->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,
@@ -52,6 +60,10 @@ class ActionItemPolicy
 
     public function delete(User $user, ActionItem $actionItem): bool
     {
+        if ($actionItem->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,

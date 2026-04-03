@@ -17,7 +17,14 @@ class MeetingShare extends Model
 {
     use BelongsToOrganization, HasFactory, SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'shared_with_user_id',
+        'shared_by_user_id',
+        'permission',
+        'share_token',
+        'expires_at',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

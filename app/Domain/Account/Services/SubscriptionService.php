@@ -8,6 +8,7 @@ use App\Domain\Account\Exceptions\LimitExceededException;
 use App\Domain\Account\Models\Organization;
 use App\Domain\Account\Models\OrganizationSubscription;
 use App\Domain\Account\Models\UsageTracking;
+use Illuminate\Support\Facades\DB;
 
 class SubscriptionService
 {
@@ -86,14 +87,16 @@ class SubscriptionService
     {
         $period = now()->format('Y-m');
 
-        UsageTracking::withoutGlobalScopes()->updateOrCreate(
-            [
-                'organization_id' => $org->id,
-                'metric' => $metric,
-                'period' => $period,
-            ],
-            []
-        )->increment('value', $amount);
+        DB::transaction(function () use ($org, $metric, $period, $amount): void {
+            UsageTracking::withoutGlobalScopes()->updateOrCreate(
+                [
+                    'organization_id' => $org->id,
+                    'metric' => $metric,
+                    'period' => $period,
+                ],
+                []
+            )->lockForUpdate()->increment('value', $amount);
+        });
     }
 
     public function decrementUsage(Organization $org, string $metric, int $amount = 1): void

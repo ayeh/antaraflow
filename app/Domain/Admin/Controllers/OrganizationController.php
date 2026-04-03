@@ -11,6 +11,7 @@ use App\Domain\Meeting\Models\MinutesOfMeeting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class OrganizationController extends Controller
@@ -22,7 +23,8 @@ class OrganizationController extends Controller
             ->withCount(['members', 'subscriptions']);
 
         if ($search = $request->input('search')) {
-            $query->where('name', 'like', "%{$search}%");
+            $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $search);
+            $query->where('name', 'like', "%{$escaped}%");
         }
 
         if ($request->input('status') === 'suspended') {
@@ -102,6 +104,12 @@ class OrganizationController extends Controller
             'suspended_reason' => $request->input('reason'),
         ]);
 
+        Log::warning('Admin suspended organization', [
+            'admin_id' => auth('admin')->id(),
+            'organization_id' => $organization->id,
+            'reason' => $request->input('reason'),
+        ]);
+
         return redirect()->route('admin.organizations.show', $organization)
             ->with('success', "Organization \"{$organization->name}\" has been suspended.");
     }
@@ -112,6 +120,11 @@ class OrganizationController extends Controller
             'is_suspended' => false,
             'suspended_at' => null,
             'suspended_reason' => null,
+        ]);
+
+        Log::warning('Admin unsuspended organization', [
+            'admin_id' => auth('admin')->id(),
+            'organization_id' => $organization->id,
         ]);
 
         return redirect()->route('admin.organizations.show', $organization)
@@ -140,6 +153,12 @@ class OrganizationController extends Controller
                 'ends_at' => now()->addYear(),
             ]);
         }
+
+        Log::warning('Admin changed subscription plan', [
+            'admin_id' => auth('admin')->id(),
+            'organization_id' => $organization->id,
+            'plan_id' => $request->input('plan_id'),
+        ]);
 
         return redirect()->route('admin.organizations.show', $organization)
             ->with('success', 'Subscription plan has been updated.');

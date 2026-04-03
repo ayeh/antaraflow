@@ -46,10 +46,11 @@ class ExtractionController extends Controller
             ]);
         } catch (\Throwable $e) {
             event(new ExtractionFailed($meeting, $e->getMessage()));
+            report($e);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Extraction failed: '.$e->getMessage(),
+                'message' => 'Extraction failed. Please try again or contact support.',
             ], 422);
         }
     }

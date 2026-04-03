@@ -15,7 +15,15 @@ class MeetingResolution extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'meeting_id',
+        'resolution_number',
+        'title',
+        'description',
+        'mover_id',
+        'seconder_id',
+        'status',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

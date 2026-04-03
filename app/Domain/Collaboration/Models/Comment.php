@@ -19,7 +19,14 @@ class Comment extends Model
 {
     use BelongsToOrganization, HasFactory, SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'commentable_type',
+        'commentable_id',
+        'user_id',
+        'body',
+        'parent_id',
+        'client_visible',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

@@ -17,6 +17,10 @@ class OrganizationScope implements Scope
                 $model->getTable().'.organization_id',
                 auth()->user()->current_organization_id
             );
+        } elseif (! app()->runningInConsole()) {
+            // Fail safe: when no auth context is available in web/API requests,
+            // return no results rather than leaking cross-tenant data.
+            $builder->whereRaw('1 = 0');
         }
     }
 }

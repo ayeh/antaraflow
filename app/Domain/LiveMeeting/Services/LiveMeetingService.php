@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Support\Enums\InputType;
 use App\Support\Enums\TranscriptionStatus;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 
 class LiveMeetingService
 {
@@ -25,24 +26,27 @@ class LiveMeetingService
      */
     public function startSession(MinutesOfMeeting $meeting, User $user, array $config = []): LiveMeetingSession
     {
-        $existingActiveSession = LiveMeetingSession::query()
-            ->where('minutes_of_meeting_id', $meeting->id)
-            ->where('status', LiveSessionStatus::Active)
-            ->exists();
+        return DB::transaction(function () use ($meeting, $user, $config): LiveMeetingSession {
+            $existingActiveSession = LiveMeetingSession::query()
+                ->where('minutes_of_meeting_id', $meeting->id)
+                ->where('status', LiveSessionStatus::Active)
+                ->lockForUpdate()
+                ->exists();
 
-        if ($existingActiveSession) {
-            throw new \RuntimeException('Meeting already has an active live session.');
-        }
+            if ($existingActiveSession) {
+                throw new \RuntimeException('Meeting already has an active live session.');
+            }
 
-        $defaultConfig = ['chunk_interval' => 30, 'extraction_interval' => 300];
+            $defaultConfig = ['chunk_interval' => 30, 'extraction_interval' => 300];
 
-        return LiveMeetingSession::query()->create([
-            'minutes_of_meeting_id' => $meeting->id,
-            'started_by' => $user->id,
-            'status' => LiveSessionStatus::Active,
-            'config' => array_merge($defaultConfig, $config),
-            'started_at' => now(),
-        ]);
+            return LiveMeetingSession::query()->create([
+                'minutes_of_meeting_id' => $meeting->id,
+                'started_by' => $user->id,
+                'status' => LiveSessionStatus::Active,
+                'config' => array_merge($defaultConfig, $config),
+                'started_at' => now(),
+            ]);
+        });
     }
 
     public function endSession(LiveMeetingSession $session): void

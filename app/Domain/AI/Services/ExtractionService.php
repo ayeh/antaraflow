@@ -22,12 +22,13 @@ class ExtractionService
     {
         $provider = $this->resolveProvider($mom->organization);
         $providerConfig = $this->getProviderConfig($mom->organization);
-        $text = $this->getFullText($mom);
+        $rawText = $this->getFullText($mom);
 
-        if (empty($text)) {
+        if (empty($rawText)) {
             return;
         }
 
+        $text = ChatService::sanitizeForPrompt($rawText);
         $providerName = $providerConfig?->provider ?? config('ai.default');
         $modelName = $providerConfig?->model ?? config('ai.providers.'.$providerName.'.model');
 
@@ -71,8 +72,8 @@ class ExtractionService
                 'minutes_of_meeting_id' => $mom->id,
                 'created_by' => $user->id,
                 'assigned_to' => $assignedTo,
-                'title' => $item['title'] ?? $item['description'] ?? 'Untitled',
-                'description' => $item['description'] ?? null,
+                'title' => strip_tags($item['title'] ?? $item['description'] ?? 'Untitled'),
+                'description' => strip_tags($item['description'] ?? ''),
                 'priority' => $priority,
                 'status' => 'open',
                 'due_date' => $this->parseDueDate($item['due_date'] ?? null),
@@ -187,7 +188,7 @@ class ExtractionService
             MomExtraction::query()->updateOrCreate(
                 ['minutes_of_meeting_id' => $mom->id, 'type' => 'summary'],
                 [
-                    'content' => $response,
+                    'content' => strip_tags($response),
                     'structured_data' => ['custom_template' => $template->id],
                     'provider' => $providerName,
                     'model' => $modelName,
@@ -229,7 +230,7 @@ class ExtractionService
             MomExtraction::query()->updateOrCreate(
                 ['minutes_of_meeting_id' => $mom->id, 'type' => 'action_items'],
                 [
-                    'content' => $response,
+                    'content' => strip_tags($response),
                     'structured_data' => ['custom_template' => $template->id],
                     'provider' => $providerName,
                     'model' => $modelName,
@@ -286,7 +287,7 @@ class ExtractionService
             MomExtraction::query()->updateOrCreate(
                 ['minutes_of_meeting_id' => $mom->id, 'type' => 'decisions'],
                 [
-                    'content' => $response,
+                    'content' => strip_tags($response),
                     'structured_data' => ['custom_template' => $template->id],
                     'provider' => $providerName,
                     'model' => $modelName,
@@ -341,7 +342,7 @@ class ExtractionService
             MomExtraction::query()->updateOrCreate(
                 ['minutes_of_meeting_id' => $mom->id, 'type' => 'topics'],
                 [
-                    'content' => $response,
+                    'content' => strip_tags($response),
                     'structured_data' => ['custom_template' => $template->id],
                     'provider' => $providerName,
                     'model' => $modelName,
@@ -411,7 +412,7 @@ class ExtractionService
             MomExtraction::query()->updateOrCreate(
                 ['minutes_of_meeting_id' => $mom->id, 'type' => 'risks'],
                 [
-                    'content' => $response,
+                    'content' => strip_tags($response),
                     'structured_data' => ['custom_template' => $template->id],
                     'provider' => $providerName,
                     'model' => $modelName,

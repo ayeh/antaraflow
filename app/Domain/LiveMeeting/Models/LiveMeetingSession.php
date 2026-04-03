@@ -17,7 +17,16 @@ class LiveMeetingSession extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'started_by',
+        'status',
+        'config',
+        'started_at',
+        'paused_at',
+        'ended_at',
+        'total_duration_seconds',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

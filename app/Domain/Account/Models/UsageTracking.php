@@ -12,7 +12,12 @@ class UsageTracking extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'metric',
+        'value',
+        'period',
+        'metadata',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

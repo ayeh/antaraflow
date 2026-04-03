@@ -13,7 +13,16 @@ class TranscriptionSegment extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'audio_transcription_id',
+        'text',
+        'speaker',
+        'start_time',
+        'end_time',
+        'confidence',
+        'sequence_order',
+        'is_edited',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

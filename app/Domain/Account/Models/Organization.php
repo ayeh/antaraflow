@@ -17,7 +17,20 @@ class Organization extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'logo_path',
+        'settings',
+        'timezone',
+        'language',
+        'teams_webhook_url',
+        'parent_organization_id',
+        'is_suspended',
+        'suspended_at',
+        'suspended_reason',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

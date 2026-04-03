@@ -15,7 +15,16 @@ class AuditLog extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'action',
+        'auditable_type',
+        'auditable_id',
+        'old_values',
+        'new_values',
+        'ip_address',
+        'user_agent',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

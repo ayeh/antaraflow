@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\LiveMeeting\Controllers;
 
+use App\Domain\LiveMeeting\Enums\LiveSessionStatus;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\LiveMeeting\Services\LiveMeetingService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
@@ -33,7 +34,15 @@ class LiveMeetingController extends Controller
         try {
             $session = $this->liveMeetingService->startSession($meeting, $request->user(), $config);
         } catch (\RuntimeException $e) {
-            return response()->json(['error' => $e->getMessage()], 409);
+            $activeSession = LiveMeetingSession::query()
+                ->where('minutes_of_meeting_id', $meeting->id)
+                ->where('status', LiveSessionStatus::Active)
+                ->first();
+
+            return response()->json([
+                'error' => $e->getMessage(),
+                'session' => $activeSession,
+            ], 409);
         }
 
         return response()->json(['session' => $session], 201);
@@ -60,7 +69,7 @@ class LiveMeetingController extends Controller
         abort_if(! $session->isActive(), 409, 'Session is not active.');
 
         $request->validate([
-            'audio' => ['required', 'file', 'mimetypes:audio/webm,video/webm,audio/mp4,video/mp4,audio/ogg,audio/x-m4a,audio/wav,audio/mpeg'],
+            'audio' => ['required', 'file', 'mimetypes:audio/webm,audio/mp4,audio/ogg,audio/wav,audio/x-m4a,audio/mpeg,audio/mp3,video/webm'],
             'chunk_number' => ['required', 'integer', 'min:0'],
             'start_time' => ['required', 'numeric', 'min:0'],
             'end_time' => ['required', 'numeric', 'gt:start_time'],

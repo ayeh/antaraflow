@@ -19,16 +19,21 @@ class LoginController extends Controller
 
     public function login(LoginRequest $request): RedirectResponse
     {
-        if (! Auth::attempt($request->only('email', 'password'))) {
+        $request->ensureIsNotRateLimited();
+
+        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+            $request->hitRateLimiter();
+
             return back()->withErrors([
                 'email' => 'The provided credentials do not match our records.',
             ])->onlyInput('email');
         }
 
+        $request->clearRateLimiter();
         $request->session()->regenerate();
 
         $request->user()->update(['last_login_at' => now()]);
 
-        return redirect()->intended(route('organizations.index'));
+        return redirect()->intended(route('dashboard'));
     }
 }

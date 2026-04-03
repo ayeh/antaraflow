@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class PlatformSetting extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'key',
+        'value',
+    ];
 
     public static function getValue(string $key, mixed $default = null): mixed
     {

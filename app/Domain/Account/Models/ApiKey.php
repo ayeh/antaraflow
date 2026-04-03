@@ -12,13 +12,23 @@ class ApiKey extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name',
+        'key',
+        'secret_hash',
+        'permissions',
+        'allowed_ips',
+        'last_used_at',
+        'expires_at',
+        'is_active',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array
     {
         return [
             'permissions' => 'array',
+            'allowed_ips' => 'array',
             'last_used_at' => 'datetime',
             'expires_at' => 'datetime',
             'is_active' => 'boolean',

@@ -55,6 +55,11 @@ class ExportTemplateController
 
     public function update(StoreExportTemplateRequest $request, ExportTemplate $exportTemplate): RedirectResponse
     {
+        abort_unless(
+            $exportTemplate->organization_id === $request->user()->current_organization_id,
+            403
+        );
+
         $orgId = $request->user()->current_organization_id;
 
         if ($request->boolean('is_default')) {

@@ -27,6 +27,10 @@ class MinutesOfMeetingPolicy
 
     public function view(User $user, MinutesOfMeeting $meeting): bool
     {
+        if ($meeting->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,
@@ -45,6 +49,10 @@ class MinutesOfMeetingPolicy
 
     public function update(User $user, MinutesOfMeeting $meeting): bool
     {
+        if ($meeting->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         if ($meeting->status === MeetingStatus::Approved) {
             return false;
         }
@@ -58,6 +66,10 @@ class MinutesOfMeetingPolicy
 
     public function delete(User $user, MinutesOfMeeting $meeting): bool
     {
+        if ($meeting->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,
@@ -67,6 +79,10 @@ class MinutesOfMeetingPolicy
 
     public function finalize(User $user, MinutesOfMeeting $meeting): bool
     {
+        if ($meeting->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,
@@ -76,6 +92,10 @@ class MinutesOfMeetingPolicy
 
     public function approve(User $user, MinutesOfMeeting $meeting): bool
     {
+        if ($meeting->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,
@@ -89,6 +109,10 @@ class MinutesOfMeetingPolicy
 
     public function startLive(User $user, MinutesOfMeeting $meeting): bool
     {
+        if ($meeting->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
         return $this->authorizationService->hasPermission(
             $user,
             $user->currentOrganization,

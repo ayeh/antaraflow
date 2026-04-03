@@ -63,6 +63,10 @@ class MeetingApiController extends ApiController
             ->where('id', $id)
             ->firstOrFail();
 
+        if ($meeting->status === MeetingStatus::Approved) {
+            return response()->json(['message' => 'Cannot update an approved meeting.'], 422);
+        }
+
         $meeting->update($request->validated());
 
         return response()->json(new MeetingResource($meeting->fresh()));
@@ -74,6 +78,10 @@ class MeetingApiController extends ApiController
             ->where('organization_id', $this->organizationId($request))
             ->where('id', $id)
             ->firstOrFail();
+
+        if (in_array($meeting->status, [MeetingStatus::Finalized, MeetingStatus::Approved], true)) {
+            return response()->json(['message' => 'Cannot delete a finalized or approved meeting.'], 422);
+        }
 
         $meeting->delete();
 

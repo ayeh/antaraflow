@@ -15,7 +15,16 @@ class VoiceNote extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'created_by',
+        'file_path',
+        'mime_type',
+        'file_size',
+        'duration_seconds',
+        'transcript',
+        'status',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

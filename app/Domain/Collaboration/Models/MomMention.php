@@ -13,7 +13,13 @@ class MomMention extends Model
 {
     use BelongsToOrganization;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'comment_id',
+        'mentioned_user_id',
+        'minutes_of_meeting_id',
+        'is_read',
+        'notified_at',
+    ];
 
     protected function casts(): array
     {

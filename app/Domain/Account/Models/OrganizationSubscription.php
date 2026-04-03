@@ -13,7 +13,15 @@ class OrganizationSubscription extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'subscription_plan_id',
+        'status',
+        'trial_ends_at',
+        'starts_at',
+        'ends_at',
+        'cancelled_at',
+        'metadata',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

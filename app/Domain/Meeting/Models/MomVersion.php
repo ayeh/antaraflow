@@ -13,7 +13,14 @@ class MomVersion extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'created_by',
+        'version_number',
+        'content',
+        'change_summary',
+        'snapshot',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

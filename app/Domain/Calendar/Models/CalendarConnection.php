@@ -10,7 +10,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CalendarConnection extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'provider',
+        'access_token',
+        'refresh_token',
+        'token_expires_at',
+        'calendar_id',
+        'webhook_channel_id',
+        'webhook_expiry',
+        'is_active',
+        'auto_record',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

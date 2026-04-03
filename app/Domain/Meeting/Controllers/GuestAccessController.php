@@ -22,14 +22,20 @@ class GuestAccessController
             403
         );
 
+        $validated = $request->validate([
+            'label' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'expires_at' => ['nullable', 'date', 'after:now'],
+        ]);
+
         MomGuestAccess::create([
             'minutes_of_meeting_id' => $meeting->id,
             'organization_id' => $meeting->organization_id,
             'token' => Str::random(48),
-            'label' => $request->input('label', 'Guest Link'),
-            'email' => $request->input('email'),
+            'label' => $validated['label'] ?? 'Guest Link',
+            'email' => $validated['email'] ?? null,
             'is_active' => true,
-            'expires_at' => $request->input('expires_at'),
+            'expires_at' => $validated['expires_at'] ?? null,
         ]);
 
         return redirect()->route('meetings.show', $meeting)
@@ -64,15 +70,16 @@ class GuestAccessController
         $access->update(['last_accessed_at' => now()]);
 
         $meeting = $access->meeting()->withoutGlobalScopes()->with([
-            'attendees',
-            'actionItems' => fn ($q) => $q->where('client_visible', true),
+            'attendees' => fn ($q) => $q->select('id', 'minutes_of_meeting_id', 'name', 'role'),
+            'topics' => fn ($q) => $q->orderBy('sort_order'),
+            'actionItems' => fn ($q) => $q->where('client_visible', true)->with('assignedTo:id,name'),
         ])->firstOrFail();
 
         $comments = Comment::withoutGlobalScopes()
             ->where('commentable_type', MinutesOfMeeting::class)
             ->where('commentable_id', $meeting->id)
             ->where('client_visible', true)
-            ->with('user')
+            ->with('user:id,name')
             ->get();
 
         return view('meetings.guest', compact('meeting', 'access', 'comments'));

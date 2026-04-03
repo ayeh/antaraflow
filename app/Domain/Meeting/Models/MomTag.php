@@ -13,7 +13,11 @@ class MomTag extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name',
+        'slug',
+        'color',
+    ];
 
     protected static function newFactory(): \Database\Factories\MomTagFactory
     {

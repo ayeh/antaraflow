@@ -15,7 +15,18 @@ class WebhookEndpoint extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'url',
+        'secret',
+        'events',
+        'is_active',
+        'failure_count',
+        'description',
+        'created_by',
+    ];
+
+    /** @var list<string> */
+    protected $hidden = ['secret'];
 
     /** @return array<string, string> */
     protected function casts(): array

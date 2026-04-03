@@ -12,7 +12,16 @@ class AiProviderConfig extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'provider',
+        'display_name',
+        'api_key_encrypted',
+        'model',
+        'base_url',
+        'settings',
+        'is_default',
+        'is_active',
+    ];
 
     /**
      * The attributes that should be hidden for serialization.

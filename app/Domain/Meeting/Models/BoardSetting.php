@@ -14,7 +14,15 @@ class BoardSetting extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'quorum_type',
+        'quorum_value',
+        'require_chair',
+        'require_secretary',
+        'voting_enabled',
+        'chair_casting_vote',
+        'block_finalization_without_quorum',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

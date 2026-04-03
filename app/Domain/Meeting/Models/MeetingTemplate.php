@@ -14,7 +14,15 @@ class MeetingTemplate extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'created_by',
+        'name',
+        'description',
+        'structure',
+        'default_settings',
+        'is_default',
+        'is_shared',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

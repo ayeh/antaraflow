@@ -13,7 +13,13 @@ class MomManualNote extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'created_by',
+        'title',
+        'content',
+        'sort_order',
+    ];
 
     protected static function newFactory(): \Database\Factories\MomManualNoteFactory
     {

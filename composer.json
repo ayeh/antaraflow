@@ -10,12 +10,12 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "barryvdh/laravel-dompdf": "*",
+        "barryvdh/laravel-dompdf": "^3.1",
         "laravel/framework": "^12.0",
-        "laravel/reverb": "*",
-        "laravel/socialite": "*",
+        "laravel/reverb": "^1.8",
+        "laravel/socialite": "^5.24",
         "laravel/tinker": "^2.10.1",
-        "phpoffice/phpword": "*"
+        "phpoffice/phpword": "^1.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -54,7 +54,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=0\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74,#34d399\" \"php artisan serve\" \"php artisan queue:listen --queue=live-transcription,live-extraction,default --tries=1 --timeout=0\" \"php artisan pail --timeout=0\" \"npm run dev\" \"php artisan reverb:start\" --names=server,queue,logs,vite,reverb --kill-others"
         ],
         "test": [
             "@php artisan config:clear --ansi",

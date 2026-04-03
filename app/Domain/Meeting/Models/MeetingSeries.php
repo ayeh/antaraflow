@@ -13,7 +13,13 @@ class MeetingSeries extends Model
 {
     use BelongsToOrganization, HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name',
+        'description',
+        'recurrence_pattern',
+        'recurrence_config',
+        'is_active',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

@@ -15,7 +15,18 @@ class MeetingPrepBrief extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'attendee_id',
+        'user_id',
+        'content',
+        'summary_highlights',
+        'estimated_prep_minutes',
+        'generated_at',
+        'email_sent_at',
+        'viewed_at',
+        'sections_read',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

@@ -13,7 +13,15 @@ class MomDocument extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'uploaded_by',
+        'original_filename',
+        'file_path',
+        'mime_type',
+        'file_size',
+        'status',
+    ];
 
     public function minutesOfMeeting(): BelongsTo
     {

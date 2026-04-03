@@ -28,7 +28,7 @@ class DocumentController extends Controller
             'uploaded_by' => $request->user()->id,
             'original_filename' => $file->getClientOriginalName(),
             'file_path' => $path,
-            'mime_type' => $file->getClientMimeType(),
+            'mime_type' => $file->getMimeType(),
             'file_size' => $file->getSize(),
             'status' => 'uploaded',
         ]);

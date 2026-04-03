@@ -56,6 +56,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -63,6 +64,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Password::defaults(fn () => Password::min(8)
+            ->mixedCase()
+            ->numbers()
+            ->uncompromised()
+        );
+
         RateLimiter::for('api', function (Request $request) {
             $apiKey = $request->attributes->get('api_key');
 
@@ -123,5 +130,17 @@ class AppServiceProvider extends ServiceProvider
         Notification::extend('teams', function ($app) {
             return $app->make(TeamsChannel::class);
         });
+
+        // Production safety checks
+        if (app()->isProduction()) {
+            if (config('app.debug')) {
+                logger()->critical('APP_DEBUG is enabled in production! Disable it immediately.');
+            }
+
+            if (empty(config('database.connections.'.config('database.default').'.password'))
+                && config('database.default') !== 'sqlite') {
+                logger()->warning('Database password is empty in production.');
+            }
+        }
     }
 }

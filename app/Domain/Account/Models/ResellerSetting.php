@@ -12,7 +12,16 @@ class ResellerSetting extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'organization_id',
+        'subdomain',
+        'custom_domain',
+        'is_reseller',
+        'allowed_plans',
+        'commission_rate',
+        'max_sub_organizations',
+        'branding_overrides',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

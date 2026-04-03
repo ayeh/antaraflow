@@ -19,7 +19,20 @@ class ActionItem extends Model
 {
     use BelongsToOrganization, HasFactory, SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'assigned_to',
+        'created_by',
+        'carried_from_id',
+        'title',
+        'description',
+        'priority',
+        'status',
+        'due_date',
+        'completed_at',
+        'metadata',
+        'client_visible',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array
@@ -47,6 +60,11 @@ class ActionItem extends Model
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function assignee(): BelongsTo
+    {
+        return $this->assignedTo();
     }
 
     public function createdBy(): BelongsTo

@@ -10,7 +10,6 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class RegisterController extends Controller
@@ -29,13 +28,15 @@ class RegisterController extends Controller
         $user = User::query()->create([
             'name' => $request->validated('name'),
             'email' => $request->validated('email'),
-            'password' => Hash::make($request->validated('password')),
+            'password' => $request->validated('password'),
         ]);
 
         $this->organizationService->createOrganization(
             $user,
             $user->name."'s Workspace",
         );
+
+        $user->sendEmailVerificationNotification();
 
         Auth::login($user);
 

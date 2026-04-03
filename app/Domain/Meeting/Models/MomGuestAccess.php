@@ -12,7 +12,16 @@ class MomGuestAccess extends Model
 {
     use BelongsToOrganization;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'token',
+        'label',
+        'email',
+        'is_active',
+        'expires_at',
+        'last_accessed_at',
+        'access_count',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

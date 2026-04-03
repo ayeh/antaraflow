@@ -18,7 +18,14 @@ class Project extends Model
 {
     use BelongsToOrganization, HasFactory, SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'created_by',
+        'name',
+        'code',
+        'description',
+        'settings',
+        'is_active',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

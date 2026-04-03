@@ -11,7 +11,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MomEmailDistribution extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'sent_by',
+        'recipients',
+        'subject',
+        'body_note',
+        'export_format',
+        'status',
+        'sent_at',
+        'failed_at',
+        'error_message',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

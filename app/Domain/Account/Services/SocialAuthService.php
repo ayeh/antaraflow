@@ -33,9 +33,12 @@ class SocialAuthService
             ->first();
 
         if ($existingUser) {
-            $this->linkAccount($existingUser, $provider, $socialUser);
-
-            return $existingUser;
+            // Security: Do not auto-link social accounts to existing users.
+            // The user must log in with their existing credentials first, then
+            // link the social account from their profile settings.
+            throw new \RuntimeException(
+                'An account with this email already exists. Please log in with your password and link your '.ucfirst($provider).' account from profile settings.'
+            );
         }
 
         return DB::transaction(function () use ($provider, $socialUser): User {
@@ -52,8 +55,6 @@ class SocialAuthService
             );
 
             $this->linkAccount($user, $provider, $socialUser);
-
-            $user->update(['password' => null]);
 
             return $user;
         });

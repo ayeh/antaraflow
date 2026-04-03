@@ -15,7 +15,16 @@ class KnowledgeLink extends Model
 {
     use BelongsToOrganization;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'source_type',
+        'source_id',
+        'target_type',
+        'target_id',
+        'link_type',
+        'strength',
+        'created_by',
+        'metadata',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

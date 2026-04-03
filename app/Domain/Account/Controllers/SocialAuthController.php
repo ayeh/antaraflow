@@ -41,9 +41,14 @@ class SocialAuthController extends Controller
                 ->withErrors(['social' => 'Unable to authenticate with '.ucfirst($provider).'. Please try again.']);
         }
 
-        $user = $this->socialAuthService->findOrCreateUser($provider, $socialUser);
+        try {
+            $user = $this->socialAuthService->findOrCreateUser($provider, $socialUser);
+        } catch (\RuntimeException $e) {
+            return redirect()->route('login')
+                ->withErrors(['social' => $e->getMessage()]);
+        }
 
-        Auth::login($user, remember: true);
+        Auth::login($user);
 
         $user->update(['last_login_at' => now()]);
 

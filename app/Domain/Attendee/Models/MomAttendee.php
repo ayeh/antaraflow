@@ -16,7 +16,19 @@ class MomAttendee extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'user_id',
+        'name',
+        'email',
+        'phone',
+        'company',
+        'role',
+        'rsvp_status',
+        'is_present',
+        'is_external',
+        'department',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

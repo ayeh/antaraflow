@@ -17,7 +17,7 @@ use App\Domain\API\Controllers\V1\WebhookApiController;
 use App\Domain\API\Middleware\ApiKeyAuthentication;
 use Illuminate\Support\Facades\Route;
 
-Route::get('v1', ApiInfoController::class);
+Route::get('v1', ApiInfoController::class)->middleware('throttle:30,1');
 
 Route::prefix('v1')->middleware([ApiKeyAuthentication::class, 'throttle:api'])->group(function () {
     Route::get('meetings', [MeetingApiController::class, 'index']);

@@ -14,7 +14,14 @@ class MomInput extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'type',
+        'source_type',
+        'source_id',
+        'sort_order',
+        'is_primary',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

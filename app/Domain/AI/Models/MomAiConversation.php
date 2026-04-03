@@ -14,7 +14,15 @@ class MomAiConversation extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'minutes_of_meeting_id',
+        'user_id',
+        'role',
+        'message',
+        'context',
+        'token_usage',
+        'provider',
+    ];
 
     /** @return array<string, string> */
     protected function casts(): array

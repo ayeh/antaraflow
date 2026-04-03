@@ -9,14 +9,26 @@
 <body class="bg-gray-50 dark:bg-slate-900 min-h-screen">
 
     {{-- Header --}}
-    <div class="bg-violet-600 text-white px-6 py-3">
+    <div class="text-white px-6 py-3" style="background-color:#095153;">
         <div class="max-w-3xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="font-semibold text-sm">AntaraFlow</span>
-                <span class="text-violet-200 text-sm">&mdash; Minutes of Meeting</span>
+                {{-- Waveform mark --}}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 50" width="22" height="16" aria-hidden="true">
+                    <rect x="0"  y="21" width="7" height="16" rx="3.5" fill="rgba(255,255,255,0.85)"/>
+                    <rect x="11" y="10" width="7" height="36" rx="3.5" fill="rgba(255,255,255,0.85)"/>
+                    <rect x="22" y="16" width="7" height="25" rx="3.5" fill="rgba(255,255,255,0.85)"/>
+                    <rect x="33" y="4"  width="7" height="50" rx="3.5" fill="rgba(255,255,255,0.85)"/>
+                    <rect x="44" y="13" width="7" height="31" rx="3.5" fill="rgba(255,255,255,0.85)"/>
+                    <rect x="55" y="8"  width="7" height="43" rx="3.5" fill="rgba(255,255,255,0.85)"/>
+                    <rect x="66" y="19" width="7" height="22" rx="3.5" fill="rgba(255,255,255,0.85)"/>
+                </svg>
+                <span class="font-semibold text-sm tracking-tight">
+                    <span style="font-weight:400;">antara</span><span style="font-weight:700;">Note</span>
+                </span>
+                <span class="text-white/50 text-sm">&mdash; Minutes of Meeting</span>
             </div>
             @if($access->expires_at)
-                <span class="text-violet-100 text-xs">
+                <span class="text-white/70 text-xs">
                     Expires {{ $access->expires_at->format('M j, Y') }}
                 </span>
             @endif
@@ -29,11 +41,17 @@
         <div class="mb-6">
             <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">
                 {{ $meeting->organization->name ?? '' }}
+                @if($meeting->mom_number)
+                    <span class="ml-1">&middot; {{ $meeting->mom_number }}</span>
+                @endif
             </div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-slate-100">{{ $meeting->title }}</h1>
             <div class="flex flex-wrap gap-4 mt-2 text-sm text-gray-500 dark:text-slate-400">
                 @if($meeting->meeting_date)
                     <span>{{ $meeting->meeting_date->format('d M Y') }}</span>
+                @endif
+                @if($meeting->start_time)
+                    <span>{{ $meeting->start_time->format('H:i') }}{{ $meeting->end_time ? ' – ' . $meeting->end_time->format('H:i') : '' }}</span>
                 @endif
                 @if($meeting->location)
                     <span>{{ $meeting->location }}</span>
@@ -52,7 +70,50 @@
                     </span>
                 @endif
             </div>
+            @if($meeting->prepared_by)
+                <div class="mt-2 text-xs text-gray-400 dark:text-slate-500">Prepared by {{ $meeting->prepared_by }}</div>
+            @endif
         </div>
+
+        {{-- Summary --}}
+        @if($meeting->summary)
+            <section class="mb-6 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Summary</h2>
+                <p class="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">{{ $meeting->summary }}</p>
+            </section>
+        @endif
+
+        {{-- Topics / Agenda --}}
+        @if($meeting->topics->isNotEmpty())
+            <section class="mb-6 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Topics Discussed</h2>
+                <div class="space-y-3">
+                    @foreach($meeting->topics as $topic)
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-800 dark:text-slate-200">{{ $topic->title }}</span>
+                                @if($topic->duration_minutes)
+                                    <span class="text-xs text-gray-400 dark:text-slate-500">({{ $topic->duration_minutes }} min)</span>
+                                @endif
+                            </div>
+                            @if($topic->description)
+                                <p class="text-sm text-gray-500 dark:text-slate-400 mt-0.5 leading-relaxed">{{ $topic->description }}</p>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        {{-- Meeting Content / Minutes --}}
+        @if($meeting->content)
+            <section class="mb-6 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700">
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Minutes</h2>
+                <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-slate-400">
+                    {!! nl2br(e($meeting->content)) !!}
+                </div>
+            </section>
+        @endif
 
         {{-- Attendees --}}
         @if($meeting->attendees->isNotEmpty())
@@ -137,10 +198,7 @@
             </section>
         @endif
 
-        {{-- Footer --}}
-        <div class="text-center text-xs text-gray-400 dark:text-slate-500 mt-8 pb-6">
-            Powered by <span class="font-medium text-gray-500 dark:text-slate-400">AntaraFlow</span>
-        </div>
+        <x-antara-note-footer />
     </div>
 </body>
 </html>
