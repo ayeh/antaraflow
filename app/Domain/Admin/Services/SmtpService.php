@@ -24,6 +24,7 @@ class SmtpService
 
     public function applyConfig(SmtpConfiguration $config): void
     {
+        Config::set('mail.default', 'smtp');
         Config::set('mail.mailers.smtp.host', $config->host);
         Config::set('mail.mailers.smtp.port', $config->port);
         Config::set('mail.mailers.smtp.username', $config->decrypted_username);
