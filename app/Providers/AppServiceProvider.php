@@ -6,6 +6,8 @@ namespace App\Providers;
 
 use App\Domain\Account\Models\Organization;
 use App\Domain\Account\Policies\OrganizationPolicy;
+use App\Domain\Admin\Models\SmtpConfiguration;
+use App\Domain\Admin\Services\SmtpService;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\ActionItem\Policies\ActionItemPolicy;
 use App\Domain\AI\Events\ExtractionCompleted;
@@ -64,6 +66,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->applyActiveSmtpConfig();
+
         Password::defaults(fn () => Password::min(8)
             ->mixedCase()
             ->numbers()
@@ -141,6 +145,22 @@ class AppServiceProvider extends ServiceProvider
                 && config('database.default') !== 'sqlite') {
                 logger()->warning('Database password is empty in production.');
             }
+        }
+    }
+
+    private function applyActiveSmtpConfig(): void
+    {
+        try {
+            $config = SmtpConfiguration::query()
+                ->whereNull('organization_id')
+                ->where('is_active', true)
+                ->first();
+
+            if ($config) {
+                app(SmtpService::class)->applyConfig($config);
+            }
+        } catch (\Exception) {
+            // DB may not be available yet (e.g. during migrations)
         }
     }
 }
