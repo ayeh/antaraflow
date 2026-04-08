@@ -14,5 +14,11 @@ if (import.meta.env.VITE_PUSHER_APP_KEY) {
         key: import.meta.env.VITE_PUSHER_APP_KEY,
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'ap1',
         forceTLS: true,
+        authEndpoint: '/broadcasting/auth',
+        auth: {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+            },
+        },
     });
 }
