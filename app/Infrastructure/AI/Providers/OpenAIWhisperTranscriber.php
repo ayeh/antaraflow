@@ -36,16 +36,38 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
 
         $data = $response->json();
 
+        // Known Whisper hallucinations for silence/low-quality audio
+        $hallucinations = [
+            'terima kasih kerana menonton',
+            'terima kasih kerana menonton!',
+            'subscribe',
+            'like and subscribe',
+            'thank you for watching',
+            'thanks for watching',
+            'you',
+        ];
+
         $segments = [];
         foreach ($data['segments'] ?? [] as $segment) {
-            // Skip segments where Whisper detects mostly silence (hallucination prevention)
+            // Skip segments where Whisper detects mostly silence
             $noSpeechProb = (float) ($segment['no_speech_prob'] ?? 0);
-            if ($noSpeechProb > 0.9) {
+            if ($noSpeechProb > 0.7) {
+                continue;
+            }
+
+            $text = trim($segment['text'] ?? '');
+
+            // Skip known hallucination phrases
+            if (in_array(mb_strtolower($text), $hallucinations, true)) {
+                continue;
+            }
+
+            if ($text === '') {
                 continue;
             }
 
             $segments[] = new TranscriptionSegmentData(
-                text: $segment['text'] ?? '',
+                text: $text,
                 speaker: null,
                 startTime: (float) ($segment['start'] ?? 0),
                 endTime: (float) ($segment['end'] ?? 0),
@@ -55,7 +77,7 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
 
         // Rebuild full text from filtered segments to exclude hallucinated content
         $fullText = empty($segments)
-            ? ($data['text'] ?? '')
+            ? ''
             : implode(' ', array_map(fn (TranscriptionSegmentData $s) => trim($s->text), $segments));
 
         return new TranscriptionResult(
