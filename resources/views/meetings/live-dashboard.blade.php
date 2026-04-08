@@ -320,12 +320,18 @@
                             liveChunkUrl: '{{ route('meetings.live.chunk', [$meeting, $session]) }}',
                             liveSessionId: {{ $session->id }},
                         })">
+                            <template x-if="['recording', 'paused'].includes(state)">
+                                <div class="mb-2 flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
+                                    <div class="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse flex-shrink-0"></div>
+                                    Recording continues even when switching tabs or apps.
+                                </div>
+                            </template>
                             <div class="flex items-center gap-2">
                                 <template x-if="state === 'idle' || state === 'ready'">
                                     <button @click="startRecording()"
                                             class="flex-1 inline-flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
-                                        Start Recording
+                                        <span x-text="transcriptChunks.length > 0 ? 'Continue Recording' : 'Start Recording'"></span>
                                     </button>
                                 </template>
                                 <template x-if="state === 'recording'">
