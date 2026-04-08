@@ -15,6 +15,7 @@ class AnalyticsEvent extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'organization_id',
         'user_id',
         'event_type',
         'subject_type',
