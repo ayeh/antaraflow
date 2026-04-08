@@ -319,6 +319,7 @@
                             liveMode: true,
                             liveChunkUrl: '{{ route('meetings.live.chunk', [$meeting, $session]) }}',
                             liveSessionId: {{ $session->id }},
+                            initialChunkCount: {{ $state['chunks']->count() }},
                         })">
                             <template x-if="['recording', 'paused'].includes(state)">
                                 <div class="mb-2 flex items-center gap-2 text-xs text-red-600 dark:text-red-400">

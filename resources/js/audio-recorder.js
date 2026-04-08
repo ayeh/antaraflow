@@ -12,7 +12,7 @@ export default function audioRecorder(config) {
         liveMode: config.liveMode || false,
         liveChunkUrl: config.liveChunkUrl || '',
         liveSessionId: config.liveSessionId || null,
-        liveChunkNumber: 0,
+        liveChunkNumber: config.initialChunkCount || 0,
 
         // State machine
         state: 'idle', // idle, requesting_permission, ready, countdown, recording, paused, stopping, processing, uploading, complete, error
@@ -36,6 +36,9 @@ export default function audioRecorder(config) {
         canvasContext: null,
         animationFrame: null,
         showCountdown: true,
+        audioContext: null,
+        analyserNode: null,
+        audioLevel: 0,
 
         // Chunk upload tracking
         chunkIndex: 0,
@@ -49,6 +52,11 @@ export default function audioRecorder(config) {
         // Recovery
         hasPendingRecovery: false,
         recoveryTimestamp: null,
+
+        // Wall-clock tracking for accurate timer resync after background tab
+        _recordingStartTime: null,
+        _pausedDuration: 0,
+        _pauseStartTime: null,
 
         // Computed
         get formattedTimer() {
@@ -85,10 +93,37 @@ export default function audioRecorder(config) {
                     this.canvasContext = canvas.getContext('2d');
                 }
             });
+
+            // Warn user before closing/refreshing tab while recording
+            this._beforeUnloadHandler = (e) => {
+                if (['recording', 'paused'].includes(this.state)) {
+                    e.preventDefault();
+                    e.returnValue = 'Recording is in progress. Are you sure you want to leave?';
+                    return e.returnValue;
+                }
+            };
+            window.addEventListener('beforeunload', this._beforeUnloadHandler);
+
+            // Resync timer using real wall-clock time when tab becomes visible again
+            // (browsers throttle setInterval in background tabs)
+            this._visibilityHandler = () => {
+                if (document.visibilityState === 'visible' && this._recordingStartTime && ['recording', 'paused'].includes(this.state)) {
+                    if (this.state === 'recording') {
+                        this.timer = Math.floor((Date.now() - this._recordingStartTime - this._pausedDuration) / 1000);
+                    }
+                    // Restart waveform animation if it stopped
+                    if (!this.animationFrame) {
+                        this.drawWaveform();
+                    }
+                }
+            };
+            document.addEventListener('visibilitychange', this._visibilityHandler);
         },
 
         destroy() {
             this.cleanup();
+            window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+            document.removeEventListener('visibilitychange', this._visibilityHandler);
         },
 
         // -- MIME Type Detection --
@@ -102,7 +137,8 @@ export default function audioRecorder(config) {
 
             for (const type of types) {
                 if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(type)) {
-                    this.mimeType = type;
+                    // Strip codec parameters — server validation only accepts the base MIME type
+                    this.mimeType = type.split(';')[0];
                     return;
                 }
             }
@@ -160,6 +196,17 @@ export default function audioRecorder(config) {
                 },
             });
 
+            // Setup Web Audio API analyser for real microphone level
+            try {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = this.audioContext.createMediaStreamSource(this.mediaStream);
+                this.analyserNode = this.audioContext.createAnalyser();
+                this.analyserNode.fftSize = 256;
+                source.connect(this.analyserNode);
+            } catch (e) {
+                // Fallback: waveform will use static animation
+            }
+
             this.drawWaveform();
         },
 
@@ -206,10 +253,22 @@ export default function audioRecorder(config) {
                 ctx.fillStyle = '#9ca3af';
             }
 
-            // Volume level: animate when recording, gentle pulse when ready/paused, flat otherwise
+            // Read real microphone level via Web Audio API analyser
+            if (this.analyserNode && (this.state === 'recording' || this.state === 'ready')) {
+                const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
+                this.analyserNode.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i];
+                }
+                // Normalize to 0-1 range with a floor so bars are always visible when recording
+                this.audioLevel = Math.min(1, (sum / dataArray.length / 128));
+            }
+
+            // Volume level: use real audio level when recording, gentle pulse otherwise
             let vol;
             if (this.state === 'recording') {
-                vol = 0.6;
+                vol = Math.max(0.15, this.audioLevel);
             } else if (this.state === 'paused') {
                 vol = 0.15 + Math.sin(time * 1.5) * 0.05;
             } else if (this.state === 'ready' || this.state === 'countdown') {
@@ -282,7 +341,6 @@ export default function audioRecorder(config) {
             this.uploadedChunks = 0;
             this.timer = 0;
             this.isLongRecording = false;
-            this.liveChunkNumber = 0;
             this.sessionId = crypto.randomUUID();
             this.errorMessage = '';
 
@@ -320,6 +378,10 @@ export default function audioRecorder(config) {
             this.state = 'recording';
             this.playBeep(300, 200);
 
+            this._recordingStartTime = Date.now();
+            this._pausedDuration = 0;
+            this._pauseStartTime = null;
+
             this.timerInterval = setInterval(() => {
                 this.timer++;
 
@@ -344,25 +406,7 @@ export default function audioRecorder(config) {
             if (this.mediaRecorder?.state === 'recording') {
                 this.mediaRecorder.stop();
 
-                this.mediaRecorder = new MediaRecorder(this.mediaStream, {
-                    mimeType: this.mimeType,
-                });
-
-                this.mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) {
-                        if (this.liveMode) {
-                            this.uploadLiveChunk(e.data);
-                        } else {
-                            this.uploadChunk(e.data, this.chunkIndex);
-                        }
-                        this.chunkIndex++;
-                    }
-                };
-
-                this.mediaRecorder.onstop = () => {
-                    this.handleRecordingStop();
-                };
-
+                // Upload the initial recording as chunk 0
                 const initialBlob = new Blob(this.chunks, { type: this.mimeType });
                 if (initialBlob.size > 0) {
                     if (this.liveMode) {
@@ -374,14 +418,73 @@ export default function audioRecorder(config) {
                 this.chunkIndex = 1;
                 this.chunks = [];
 
-                this.mediaRecorder.start(30000);
+                // Start a fresh recorder for each chunk (stop/restart cycle)
+                // This ensures every chunk has a valid file header
+                this.startChunkCycle();
             }
+        },
+
+        startChunkCycle() {
+            const startNewChunk = () => {
+                if (this.state !== 'recording' || !this.mediaStream) return;
+
+                const recorder = new MediaRecorder(this.mediaStream, {
+                    mimeType: this.mimeType,
+                });
+                this.mediaRecorder = recorder;
+
+                const chunkData = [];
+                recorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) {
+                        chunkData.push(e.data);
+                    }
+                };
+
+                recorder.onstop = () => {
+                    // If user stopped recording, delegate to handleRecordingStop
+                    if (this.state === 'stopping') {
+                        this.handleRecordingStop();
+                        return;
+                    }
+
+                    // Upload the complete chunk (has proper file header)
+                    const blob = new Blob(chunkData, { type: this.mimeType });
+                    if (blob.size > 0) {
+                        if (this.liveMode) {
+                            this.uploadLiveChunk(blob);
+                        } else {
+                            this.uploadChunk(blob, this.chunkIndex);
+                        }
+                        this.chunkIndex++;
+                    }
+
+                    // Start the next chunk immediately
+                    startNewChunk();
+                };
+
+                recorder.onerror = () => {
+                    // Try to restart on error
+                    startNewChunk();
+                };
+
+                recorder.start();
+
+                // Stop after 30 seconds to flush as a complete file
+                this.chunkInterval = setTimeout(() => {
+                    if (recorder.state === 'recording') {
+                        recorder.stop();
+                    }
+                }, 30000);
+            };
+
+            startNewChunk();
         },
 
         pauseRecording() {
             if (this.mediaRecorder?.state === 'recording') {
                 this.mediaRecorder.pause();
                 this.state = 'paused';
+                this._pauseStartTime = Date.now();
                 clearInterval(this.timerInterval);
             }
         },
@@ -390,6 +493,11 @@ export default function audioRecorder(config) {
             if (this.mediaRecorder?.state === 'paused') {
                 this.mediaRecorder.resume();
                 this.state = 'recording';
+
+                if (this._pauseStartTime) {
+                    this._pausedDuration += Date.now() - this._pauseStartTime;
+                    this._pauseStartTime = null;
+                }
 
                 this.timerInterval = setInterval(() => {
                     this.timer++;
@@ -408,6 +516,7 @@ export default function audioRecorder(config) {
             this.state = 'stopping';
             this.playBeep(500, 150);
             clearInterval(this.timerInterval);
+            clearTimeout(this.chunkInterval);
 
             const stopTimeout = setTimeout(() => {
                 if (this.state === 'stopping') {
@@ -783,7 +892,7 @@ export default function audioRecorder(config) {
         cleanup() {
             clearInterval(this.timerInterval);
             clearInterval(this.countdownInterval);
-            clearInterval(this.chunkInterval);
+            clearTimeout(this.chunkInterval);
 
             if (this.animationFrame) {
                 cancelAnimationFrame(this.animationFrame);
@@ -791,6 +900,10 @@ export default function audioRecorder(config) {
 
             if (this.mediaStream) {
                 this.mediaStream.getTracks().forEach((track) => track.stop());
+            }
+
+            if (this.audioContext && this.audioContext.state !== 'closed') {
+                this.audioContext.close().catch(() => {});
             }
         },
     };
