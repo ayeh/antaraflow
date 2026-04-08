@@ -54,10 +54,14 @@ export default function liveMeetingDashboard(config) {
         // Collapsed sections in extractions panel
         collapsedSections: {},
 
+        // Polling
+        pollInterval: null,
+
         init() {
             this.calculateElapsedSeconds();
             this.startTimer();
             this.subscribeToChannels();
+            this.startPolling();
 
             this.$nextTick(() => {
                 this.scrollToLatest();
@@ -67,6 +71,59 @@ export default function liveMeetingDashboard(config) {
         destroy() {
             this.leaveChannels();
             this.stopTimer();
+            this.stopPolling();
+        },
+
+        startPolling() {
+            if (this.sessionStatus === 'ended') return;
+
+            this.pollInterval = setInterval(() => {
+                if (this.sessionStatus === 'ended') {
+                    this.stopPolling();
+                    return;
+                }
+                this.fetchLatestState();
+            }, 5000);
+        },
+
+        stopPolling() {
+            if (this.pollInterval) {
+                clearInterval(this.pollInterval);
+                this.pollInterval = null;
+            }
+        },
+
+        async fetchLatestState() {
+            try {
+                const response = await fetch(this.stateUrl, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                if (!response.ok) return;
+
+                const state = await response.json();
+
+                // Merge new chunks
+                if (state.chunks) {
+                    for (const chunk of state.chunks) {
+                        const exists = this.transcriptChunks.find(c => c.id === chunk.id);
+                        if (!exists) {
+                            this.transcriptChunks.push(chunk);
+                            this.transcriptChunks.sort((a, b) => a.id - b.id);
+                            if (this.isAutoScroll) {
+                                this.$nextTick(() => this.scrollToLatest());
+                            }
+                        }
+                    }
+                }
+
+                // Merge extractions
+                if (state.extractions && state.extractions.length > 0) {
+                    this.extractions = state.extractions;
+                    this.lastExtractionUpdate = new Date().toLocaleTimeString();
+                }
+            } catch (e) {
+                // Silently fail — next poll will retry
+            }
         },
 
         // -- Timer --
@@ -135,7 +192,7 @@ export default function liveMeetingDashboard(config) {
 
         handleChunkProcessed(data) {
             const exists = this.transcriptChunks.find(
-                (c) => c.chunk_number === data.chunk_number,
+                (c) => c.id === data.chunk_id,
             );
 
             if (!exists) {
@@ -149,7 +206,7 @@ export default function liveMeetingDashboard(config) {
                     confidence: data.confidence,
                 });
 
-                this.transcriptChunks.sort((a, b) => a.chunk_number - b.chunk_number);
+                this.transcriptChunks.sort((a, b) => a.id - b.id);
 
                 if (this.isAutoScroll) {
                     this.$nextTick(() => {
