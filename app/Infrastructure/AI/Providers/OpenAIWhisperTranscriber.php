@@ -26,6 +26,7 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
                 'language' => $options['language'] ?? null,
                 'response_format' => 'verbose_json',
                 'timestamp_granularities' => ['segment'],
+                'temperature' => 0,
             ]);
 
         if ($response->failed()) {
@@ -37,6 +38,12 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
 
         $segments = [];
         foreach ($data['segments'] ?? [] as $segment) {
+            // Skip segments where Whisper detects mostly silence (hallucination prevention)
+            $noSpeechProb = (float) ($segment['no_speech_prob'] ?? 0);
+            if ($noSpeechProb > 0.9) {
+                continue;
+            }
+
             $segments[] = new TranscriptionSegmentData(
                 text: $segment['text'] ?? '',
                 speaker: null,
@@ -46,8 +53,13 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
             );
         }
 
+        // Rebuild full text from filtered segments to exclude hallucinated content
+        $fullText = empty($segments)
+            ? ($data['text'] ?? '')
+            : implode(' ', array_map(fn (TranscriptionSegmentData $s) => trim($s->text), $segments));
+
         return new TranscriptionResult(
-            fullText: $data['text'] ?? '',
+            fullText: $fullText,
             segments: $segments,
             language: $data['language'] ?? $options['language'] ?? 'en',
             confidence: $this->calculateAverageConfidence($segments),
