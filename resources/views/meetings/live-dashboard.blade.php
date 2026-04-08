@@ -86,7 +86,7 @@
                     </div>
 
                     {{-- Transcript Chunks --}}
-                    <template x-for="chunk in transcriptChunks" :key="chunk.chunk_number">
+                    <template x-for="chunk in transcriptChunks" :key="chunk.id">
                         <div class="group rounded-lg px-3 py-2 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="text-xs font-semibold"
