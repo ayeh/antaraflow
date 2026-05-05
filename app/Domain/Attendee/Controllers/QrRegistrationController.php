@@ -85,6 +85,10 @@ class QrRegistrationController extends Controller
 
         $meeting = $qrToken->meeting;
 
+        if (! $meeting) {
+            abort(410, 'This meeting no longer exists.');
+        }
+
         return view('qr-registration.form', compact('meeting', 'qrToken'));
     }
 
@@ -132,6 +136,10 @@ class QrRegistrationController extends Controller
 
             $meeting = $qrToken->meeting;
 
+            if (! $meeting) {
+                abort(410, 'This meeting no longer exists.');
+            }
+
             $meeting->attendees()->create([
                 'name' => $validated['name'] ?? 'Guest',
                 'email' => $validated['email'] ?? null,
@@ -158,6 +166,10 @@ class QrRegistrationController extends Controller
         $qrToken = QrRegistrationToken::where('token', $token)->firstOrFail();
         $meeting = $qrToken->meeting;
         $registration = session('registration', []);
+
+        if (! $meeting) {
+            abort(410, 'This meeting no longer exists.');
+        }
 
         return view('qr-registration.success', compact('meeting', 'qrToken', 'registration'));
     }
