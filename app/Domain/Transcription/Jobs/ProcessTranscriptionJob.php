@@ -130,7 +130,8 @@ class ProcessTranscriptionJob implements ShouldQueue
      */
     private function compressAudio(string $filePath): string
     {
-        $compressedPath = sys_get_temp_dir().'/whisper_'.uniqid().'.mp3';
+        // Use Opus/OGG: Whisper supports .ogg and Opus has no bitrate quantization unlike MP3
+        $compressedPath = sys_get_temp_dir().'/whisper_'.uniqid().'.ogg';
 
         // Get duration so we can calculate the exact bitrate needed
         $probeResult = Process::timeout(30)->run([
@@ -142,17 +143,19 @@ class ProcessTranscriptionJob implements ShouldQueue
 
         $duration = $probeResult->successful() ? (float) trim($probeResult->output()) : 0.0;
 
-        // Target 20 MB to leave a comfortable margin below the 25 MB API limit
+        // Target 20 MB to leave a comfortable margin below the 25 MB API limit.
+        // Opus supports arbitrary bitrates so the calculated value is used exactly.
         $targetBytes = 20 * 1024 * 1024;
         $bitrate = $duration > 0
-            ? max(8_000, min(48_000, (int) ($targetBytes * 8 / $duration)))
-            : 32_000;
+            ? max(6_000, min(48_000, (int) ($targetBytes * 8 / $duration)))
+            : 16_000;
 
         $result = Process::timeout(300)->run([
             'ffmpeg', '-i', $filePath,
+            '-c:a', 'libopus',                  // Opus codec — arbitrary bitrate, no quantization
             '-ac', '1',                         // Mono
             '-ar', '16000',                     // 16kHz (Whisper's native sample rate)
-            '-b:a', $bitrate,                   // Dynamic bitrate
+            '-b:a', $bitrate,                   // Dynamic bitrate (exact, not rounded)
             '-y',                               // Overwrite
             $compressedPath,
         ]);
