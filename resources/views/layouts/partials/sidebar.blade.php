@@ -91,8 +91,17 @@ $isSettingsActive = request()->routeIs(
             x-transition:leave-end="opacity-0"
             class="flex items-center gap-2 min-w-0"
         >
-            <span class="text-violet-600 dark:text-violet-400 font-black text-sm leading-none tracking-tighter shrink-0">aF</span>
-            <span class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">antaraFLOW</span>
+            @php
+                $sidebarLogoSrc = $branding->get('logo_path') ? Storage::url($branding->get('logo_path')) : $branding->get('logo_url');
+                $appName = $branding->appName();
+                $initials = collect(explode(' ', $appName))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->implode('');
+            @endphp
+            @if($sidebarLogoSrc)
+                <img src="{{ $sidebarLogoSrc }}" alt="{{ $appName }}" class="h-7 w-auto max-w-[140px] object-contain">
+            @else
+                <span class="font-black text-sm leading-none tracking-tighter shrink-0" style="color: var(--brand-primary)">{{ $initials }}</span>
+                <span class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{{ $appName }}</span>
+            @endif
         </a>
         <button
             @click.stop="toggleSidebar()"
