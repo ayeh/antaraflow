@@ -326,9 +326,11 @@
                             <div class="flex items-center justify-between text-sm py-1.5 border-b border-gray-100 dark:border-slate-700 last:border-0">
                                 <div>
                                     <span class="font-medium text-gray-700 dark:text-slate-300">{{ $access->label ?? 'Guest Link' }}</span>
-                                    <button onclick="navigator.clipboard.writeText('{{ route('guest.mom', $access->token) }}')"
-                                            class="ml-2 text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400">
-                                        Copy link
+                                    <button x-data="{ copied: false }"
+                                            @click="navigator.clipboard.writeText('{{ route('guest.mom', $access->token) }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                            class="ml-2 text-xs cursor-pointer text-violet-600 hover:text-violet-700 dark:text-violet-400 transition-colors">
+                                        <span x-show="!copied">Copy link</span>
+                                        <span x-show="copied" x-cloak class="text-green-600 dark:text-green-400">Copied!</span>
                                     </button>
                                 </div>
                                 <form action="{{ route('meetings.guest-access.destroy', $access) }}" method="POST" class="inline">
