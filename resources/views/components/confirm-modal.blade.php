@@ -76,7 +76,7 @@
 </div>
 
 <script>
-document.addEventListener('alpine:init', () => {
+function _registerConfirmStore() {
     Alpine.store('confirmDialog', {
         open: false,
         title: 'Confirm',
@@ -102,7 +102,14 @@ document.addEventListener('alpine:init', () => {
             }
         },
     });
-});
+}
+
+// Register store whether Alpine has already initialized or not
+if (window.Alpine) {
+    _registerConfirmStore();
+} else {
+    document.addEventListener('alpine:init', _registerConfirmStore);
+}
 
 window.antaraConfirm = function(message, options = {}) {
     return new Promise(resolve => {

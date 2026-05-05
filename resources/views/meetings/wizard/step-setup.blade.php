@@ -13,7 +13,7 @@
             <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Project</p>
                 <p class="text-base font-medium text-violet-600 dark:text-violet-400">
-                    {{ $meeting->project ? $meeting->project->name . ' (' . $meeting->project->code . ')' : '-' }}
+                    {{ $meeting->project ? $meeting->project->name . ($meeting->project->code ? ' (' . $meeting->project->code . ')' : '') : '-' }}
                 </p>
             </div>
             <div>
