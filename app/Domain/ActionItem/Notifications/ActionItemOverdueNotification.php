@@ -48,12 +48,15 @@ class ActionItemOverdueNotification extends Notification implements ShouldQueue
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
+        $daysOverdue = (int) $this->actionItem->due_date->diffInDays(now());
+
         return [
             'type' => 'action_item_overdue',
             'action_item_id' => $this->actionItem->id,
             'title' => $this->actionItem->title,
             'due_date' => $this->actionItem->due_date->toIso8601String(),
-            'days_overdue' => (int) $this->actionItem->due_date->diffInDays(now()),
+            'days_overdue' => $daysOverdue,
+            'message' => "Action item overdue by {$daysOverdue} day".($daysOverdue === 1 ? '' : 's').": \"{$this->actionItem->title}\"",
         ];
     }
 }

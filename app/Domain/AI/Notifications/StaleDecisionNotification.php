@@ -53,12 +53,15 @@ class StaleDecisionNotification extends Notification implements ShouldQueue
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
+        $count = count($this->staleDecisions);
+
         return [
             'type' => 'stale_decisions',
             'meeting_id' => $this->meeting->id,
             'meeting_title' => $this->meeting->title,
-            'stale_count' => count($this->staleDecisions),
+            'stale_count' => $count,
             'decisions' => array_map(fn ($d) => $d['decision'], array_slice($this->staleDecisions, 0, 5)),
+            'message' => "{$count} stale decision".($count === 1 ? '' : 's')." in \"{$this->meeting->title}\"",
         ];
     }
 }

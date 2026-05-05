@@ -61,6 +61,7 @@ class MeetingFinalizedNotification extends Notification implements ShouldQueue
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
             'finalized_by' => $this->finalizedBy->name,
+            'message' => "\"{$this->meeting->title}\" was finalized by {$this->finalizedBy->name}",
         ];
     }
 }

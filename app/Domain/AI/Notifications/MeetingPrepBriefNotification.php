@@ -55,6 +55,7 @@ class MeetingPrepBriefNotification extends Notification implements ShouldQueue
             'meeting_id' => $this->brief->minutes_of_meeting_id,
             'meeting_title' => $this->brief->meeting->title,
             'estimated_prep_minutes' => $this->brief->estimated_prep_minutes,
+            'message' => "Meeting prep brief ready for \"{$this->brief->meeting->title}\"",
         ];
     }
 }

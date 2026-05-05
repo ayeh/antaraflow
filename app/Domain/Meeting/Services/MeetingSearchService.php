@@ -53,6 +53,23 @@ class MeetingSearchService
             });
         }
 
-        return $query->latest('meeting_date')->paginate($perPage);
+        $sortBy = $filters['sort_by'] ?? 'meeting_date';
+        $sortDir = in_array($filters['sort_dir'] ?? '', ['asc', 'desc']) ? $filters['sort_dir'] : 'desc';
+
+        $allowedSorts = ['mom_number', 'title', 'meeting_date', 'status'];
+
+        if ($sortBy === 'project') {
+            $query->leftJoin('projects', 'minutes_of_meetings.project_id', '=', 'projects.id')
+                ->select('minutes_of_meetings.*')
+                ->orderBy('projects.name', $sortDir);
+        } elseif ($sortBy === 'items') {
+            $query->withCount('actionItems')->orderBy('action_items_count', $sortDir);
+        } elseif (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortDir);
+        } else {
+            $query->latest('meeting_date');
+        }
+
+        return $query->paginate($perPage);
     }
 }

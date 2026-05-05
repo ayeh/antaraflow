@@ -12,7 +12,7 @@ class PdfExportService
 {
     public function export(MinutesOfMeeting $meeting): Response
     {
-        $meeting->load(['createdBy', 'attendees.user', 'actionItems.assignedTo', 'extractions', 'manualNotes']);
+        $meeting->load(['createdBy', 'attendees.user', 'actionItems.assignedTo', 'extractions', 'manualNotes', 'topics']);
 
         $pdf = Pdf::loadView('exports.meeting-pdf', compact('meeting'));
 

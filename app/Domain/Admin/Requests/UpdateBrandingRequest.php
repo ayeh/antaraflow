@@ -27,6 +27,7 @@ class UpdateBrandingRequest extends FormRequest
             'body_font' => ['nullable', 'string', 'max:100'],
             'footer_text' => ['nullable', 'string', 'max:500'],
             'support_email' => ['nullable', 'email', 'max:255'],
+            'marketing_url' => ['nullable', 'string', 'max:500'],
             'custom_css' => ['nullable', 'string'],
             'custom_domain' => ['nullable', 'string', 'max:255'],
             'logo_url' => ['nullable', 'string', 'max:500'],
@@ -34,9 +35,9 @@ class UpdateBrandingRequest extends FormRequest
             'login_background_url' => ['nullable', 'string', 'max:500'],
             'email_header_html' => ['nullable', 'string'],
             'email_footer_html' => ['nullable', 'string'],
-            'logo' => ['nullable', 'image', 'max:2048'],
+            'logo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,svg,webp', 'max:2048'],
             'favicon' => ['nullable', 'mimes:jpg,jpeg,png,gif,svg,webp,ico,bmp', 'max:2048'],
-            'login_background' => ['nullable', 'image', 'max:5120'],
+            'login_background' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp', 'max:5120'],
         ];
     }
 }

@@ -54,6 +54,7 @@ class ActionItemAssignedNotification extends Notification implements ShouldQueue
             'action_item_id' => $this->actionItem->id,
             'title' => $this->actionItem->title,
             'meeting_title' => $this->actionItem->meeting?->title,
+            'message' => "You've been assigned: \"{$this->actionItem->title}\"",
         ];
     }
 }

@@ -60,6 +60,7 @@ class MeetingApprovedNotification extends Notification implements ShouldQueue
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
             'approved_by' => $this->approvedBy->name,
+            'message' => "\"{$this->meeting->title}\" was approved by {$this->approvedBy->name}",
         ];
     }
 }

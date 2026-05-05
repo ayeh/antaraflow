@@ -36,7 +36,7 @@
                         class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                         <option value="">— Select Project —</option>
                         @foreach($projects as $project)
-                            <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>{{ $project->name }} ({{ $project->code }})</option>
+                            <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>{{ $project->name }}{{ $project->code ? ' (' . $project->code . ')' : '' }}</option>
                         @endforeach
                     </select>
                     @error('project_id')

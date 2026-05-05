@@ -40,6 +40,7 @@ class MentionedInCommentNotification extends Notification
             'comment_id' => $this->comment->id,
             'commenter' => $this->comment->user->name,
             'meeting_id' => $this->comment->commentable_id,
+            'message' => "{$this->comment->user->name} mentioned you in a comment",
         ];
     }
 }

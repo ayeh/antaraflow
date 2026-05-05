@@ -46,6 +46,7 @@ class ExtractionCompletedNotification extends Notification implements ShouldQueu
             'type' => 'extraction_completed',
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
+            'message' => "AI extraction completed for \"{$this->meeting->title}\"",
         ];
     }
 }

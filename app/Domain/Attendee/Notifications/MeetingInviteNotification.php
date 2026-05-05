@@ -56,6 +56,7 @@ class MeetingInviteNotification extends Notification implements ShouldQueue
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
             'meeting_date' => $this->meeting->meeting_date?->toIso8601String(),
+            'message' => "You've been invited to \"{$this->meeting->title}\"",
         ];
     }
 }

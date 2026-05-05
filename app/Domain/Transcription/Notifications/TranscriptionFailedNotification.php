@@ -37,11 +37,14 @@ class TranscriptionFailedNotification extends Notification implements ShouldQueu
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
+        $meetingTitle = $this->transcription->minutesOfMeeting?->title ?? 'Unknown Meeting';
+
         return [
             'type' => 'transcription_failed',
             'transcription_id' => $this->transcription->id,
             'meeting_id' => $this->transcription->minutes_of_meeting_id,
             'meeting_title' => $this->transcription->minutesOfMeeting?->title,
+            'message' => "Transcription failed for \"{$meetingTitle}\"",
         ];
     }
 }

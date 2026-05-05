@@ -43,6 +43,7 @@ class ExtractionFailedNotification extends Notification implements ShouldQueue
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
             'error' => $this->error,
+            'message' => "AI extraction failed for \"{$this->meeting->title}\"",
         ];
     }
 }
