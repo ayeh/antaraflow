@@ -97,7 +97,7 @@ $isSettingsActive = request()->routeIs(
                 $initials = collect(explode(' ', $appName))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->implode('');
             @endphp
             @if($sidebarLogoSrc)
-                <img src="{{ $sidebarLogoSrc }}" alt="{{ $appName }}" class="h-7 w-auto max-w-[140px] object-contain">
+                <img src="{{ $sidebarLogoSrc }}" alt="{{ $appName }}" class="h-9 w-auto max-w-[160px] object-contain">
             @else
                 <span class="font-black text-sm leading-none tracking-tighter shrink-0" style="color: var(--brand-primary)">{{ $initials }}</span>
                 <span class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{{ $appName }}</span>
