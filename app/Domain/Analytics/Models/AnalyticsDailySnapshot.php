@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AnalyticsDailySnapshot extends Model
 {
     protected $fillable = [
+        'organization_id',
         'snapshot_date',
         'total_meetings',
         'total_action_items',

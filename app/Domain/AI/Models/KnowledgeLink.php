@@ -16,6 +16,7 @@ class KnowledgeLink extends Model
     use BelongsToOrganization;
 
     protected $fillable = [
+        'organization_id',
         'source_type',
         'source_id',
         'target_type',
