@@ -69,5 +69,10 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('system', [SystemController::class, 'index'])->name('system.index');
         Route::post('system/retry-job/{id}', [SystemController::class, 'retryJob'])->name('system.retry-job');
         Route::delete('system/failed-job/{id}', [SystemController::class, 'deleteJob'])->name('system.delete-job');
+        Route::post('system/retry-all-failed', [SystemController::class, 'retryAllFailed'])->name('system.retry-all-failed');
+        Route::delete('system/all-failed', [SystemController::class, 'deleteAllFailed'])->name('system.delete-all-failed');
+        Route::delete('system/pending', [SystemController::class, 'clearPendingJobs'])->name('system.clear-pending');
+        Route::get('system/export-errors.json', [SystemController::class, 'exportErrorsJson'])->name('system.export-errors-json');
+        Route::get('system/export-errors.txt', [SystemController::class, 'exportErrorsText'])->name('system.export-errors-text');
     });
 });
