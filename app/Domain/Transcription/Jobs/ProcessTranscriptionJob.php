@@ -126,18 +126,34 @@ class ProcessTranscriptionJob implements ShouldQueue
 
     /**
      * Compress audio to mono 16kHz MP3 to fit within the Whisper API size limit.
-     * Whisper only uses 16kHz internally, so this is lossless for transcription quality.
+     * Bitrate is calculated dynamically based on duration to guarantee output < 25 MB.
      */
     private function compressAudio(string $filePath): string
     {
         $compressedPath = sys_get_temp_dir().'/whisper_'.uniqid().'.mp3';
 
-        $result = Process::timeout(120)->run([
+        // Get duration so we can calculate the exact bitrate needed
+        $probeResult = Process::timeout(30)->run([
+            'ffprobe', '-v', 'quiet',
+            '-show_entries', 'format=duration',
+            '-of', 'csv=p=0',
+            $filePath,
+        ]);
+
+        $duration = $probeResult->successful() ? (float) trim($probeResult->output()) : 0.0;
+
+        // Target 23 MB to leave a 2 MB safety margin below the 25 MB API limit
+        $targetBytes = 23 * 1024 * 1024;
+        $bitrate = $duration > 0
+            ? max(8_000, min(48_000, (int) ($targetBytes * 8 / $duration)))
+            : 32_000;
+
+        $result = Process::timeout(300)->run([
             'ffmpeg', '-i', $filePath,
-            '-ac', '1',           // Mono
-            '-ar', '16000',       // 16kHz (Whisper's native sample rate)
-            '-b:a', '48k',        // 48kbps bitrate
-            '-y',                 // Overwrite
+            '-ac', '1',                         // Mono
+            '-ar', '16000',                     // 16kHz (Whisper's native sample rate)
+            '-b:a', $bitrate,                   // Dynamic bitrate
+            '-y',                               // Overwrite
             $compressedPath,
         ]);
 
