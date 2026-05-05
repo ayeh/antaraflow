@@ -111,21 +111,26 @@
     @endunless
 
     {{-- Modal Overlay --}}
-    <div x-show="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            {{-- Background overlay --}}
-            <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                class="fixed inset-0 bg-gray-500 dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-75 transition-opacity" @click="open = false">
-            </div>
+    <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0">
 
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        {{-- Background overlay --}}
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="open = false"></div>
 
-            {{-- Modal content --}}
-            <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="inline-block align-bottom bg-white dark:bg-slate-700 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-transparent dark:border-slate-600">
+        {{-- Modal content --}}
+        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-100 dark:border-slate-700 flex flex-col max-h-[90vh]"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            @click.stop>
 
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">AI Meeting Preparation</h3>
@@ -134,7 +139,7 @@
                     </button>
                 </div>
 
-                <div class="px-6 py-4 max-h-[70vh] overflow-y-auto">
+                <div class="px-6 py-4 overflow-y-auto flex-1">
                     {{-- Loading State --}}
                     <div x-show="loading" class="flex flex-col items-center justify-center py-12">
                         <svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -227,7 +232,6 @@
                         </button>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
 </div>
