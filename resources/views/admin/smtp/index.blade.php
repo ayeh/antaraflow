@@ -92,7 +92,7 @@
                         <label for="from_name" class="block text-sm font-medium text-slate-300 mb-1">From Name</label>
                         <input type="text" name="from_name" id="from_name"
                                value="{{ old('from_name', $config?->from_name) }}"
-                               placeholder="antaraFLOW"
+                               placeholder="antaraNote"
                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                         @error('from_name') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
                     </div>

@@ -276,7 +276,7 @@
         },
 
         async removeAttendee(attendeeId) {
-            if (!confirm('Remove this attendee?')) return;
+            if (!(await window.antaraConfirm('Remove this attendee?', {title: 'Remove Attendee'}))) return;
             this.loading = true;
             this.errorMessage = '';
 
@@ -368,7 +368,7 @@
         },
 
         async disableQr() {
-            if (!confirm('Disable QR registration? Existing links will stop working.')) return;
+            if (!(await window.antaraConfirm('Existing QR links will stop working.', {title: 'Disable QR Registration', confirmLabel: 'Disable', isDanger: false}))) return;
             this.qrLoading = true;
 
             try {

@@ -53,7 +53,7 @@
                     </div>
                     <div class="flex items-center gap-3 ml-4 flex-shrink-0">
                         <a href="{{ route('meeting-series.edit', $item) }}" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Edit</a>
-                        <form method="POST" action="{{ route('meeting-series.destroy', $item) }}" onsubmit="return confirm('Are you sure you want to delete this series?')">
+                        <form method="POST" action="{{ route('meeting-series.destroy', $item) }}" onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this series?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">Delete</button>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $meeting->title }} — antaraFLOW</title>
+    <title>{{ $meeting->title }} — antaraNote</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -12,7 +12,7 @@
     <div class="bg-blue-600 text-white px-6 py-3">
         <div class="max-w-4xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <span class="font-semibold text-sm">antaraFLOW</span>
+                <span class="font-semibold text-sm">antaraNote</span>
                 <span class="text-blue-200 text-sm">&mdash; Shared Meeting View</span>
             </div>
             @if($share->expires_at)

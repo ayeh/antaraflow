@@ -66,7 +66,7 @@
 
                     <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-slate-700">
                         <a href="{{ route('ai-provider-configs.edit', $config) }}" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Edit</a>
-                        <form method="POST" action="{{ route('ai-provider-configs.destroy', $config) }}" onsubmit="return confirm('Delete this provider configuration?')">
+                        <form method="POST" action="{{ route('ai-provider-configs.destroy', $config) }}" onsubmit="confirmThenSubmit(event, 'Delete this provider configuration?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">Delete</button>

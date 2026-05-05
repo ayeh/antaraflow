@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'antaraflow-v2';
+const CACHE_VERSION = 'antaranote-v1';
 const STATIC_CACHE = CACHE_VERSION + '-static';
 const PAGE_CACHE = CACHE_VERSION + '-pages';
 const OFFLINE_DATA_CACHE = CACHE_VERSION + '-offline-data';
@@ -23,7 +23,7 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((keys) =>
             Promise.all(
                 keys
-                    .filter((key) => key.startsWith('antaraflow-') && !key.startsWith(CACHE_VERSION))
+                    .filter((key) => (key.startsWith('antaraflow-') || key.startsWith('antaranote-')) && !key.startsWith(CACHE_VERSION))
                     .map((key) => caches.delete(key))
             )
         )

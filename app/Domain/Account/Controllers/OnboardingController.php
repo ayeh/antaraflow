@@ -42,7 +42,7 @@ class OnboardingController extends Controller
         $request->user()->update(['onboarding_completed_at' => now()]);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Welcome to antaraFLOW! Create your first meeting to get started.');
+            ->with('success', 'Welcome to antaraNote! Create your first meeting to get started.');
     }
 
     private function updateStep1(Request $request): RedirectResponse
@@ -74,6 +74,6 @@ class OnboardingController extends Controller
         $request->user()->update(['onboarding_completed_at' => now()]);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Welcome to antaraFLOW! Create your first meeting to get started.');
+            ->with('success', 'Welcome to antaraNote! Create your first meeting to get started.');
     }
 }

@@ -1,4 +1,12 @@
 {{-- Step 3: Inputs (Audio, Documents, Manual Notes) --}}
+<style>
+@keyframes progress-slide {
+    0% { transform: translateX(-100%); width: 50%; }
+    50% { transform: translateX(80%); width: 80%; }
+    100% { transform: translateX(200%); width: 50%; }
+}
+.progress-bar-indeterminate { animation: progress-slide 1.5s ease-in-out infinite; }
+</style>
 <div
     x-data="{
         activeTab: 'all',
@@ -65,6 +73,19 @@
             const tmp = document.createElement('div');
             tmp.innerHTML = html;
             return tmp.textContent || tmp.innerText || '';
+        },
+
+        formatDate(dateString) {
+            if (!dateString) return '';
+            const d = new Date(dateString);
+            return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+        },
+
+        sourceLabel(filename) {
+            if (!filename) return 'Uploaded';
+            if (filename.startsWith('recording_')) return 'Browser';
+            if (filename.startsWith('live_session_') || filename.startsWith('live_chunk_')) return 'Live';
+            return 'Uploaded';
         },
 
         statusClasses(status) {
@@ -175,7 +196,7 @@
         },
 
         async deleteTranscription(id) {
-            if (!confirm('Remove this transcription?')) return;
+            if (!(await window.antaraConfirm('Remove this transcription?', {title: 'Remove Audio'}))) return;
             this.loading = true;
 
             try {
@@ -253,7 +274,7 @@
         },
 
         async deleteDocument(id) {
-            if (!confirm('Remove this document?')) return;
+            if (!(await window.antaraConfirm('Remove this document?', {title: 'Remove Document'}))) return;
             this.loading = true;
 
             try {
@@ -278,7 +299,7 @@
         },
 
         async deleteManualNote(id) {
-            if (!confirm('Remove this note?')) return;
+            if (!(await window.antaraConfirm('Remove this note?', {title: 'Remove Note'}))) return;
             this.loading = true;
 
             try {
@@ -313,6 +334,53 @@
                 this.successMessage = 'Browser recording uploaded. Transcription processing...';
                 setTimeout(() => this.successMessage = '', 4000);
             }
+        },
+
+        pollTimer: null,
+        stuckMs: 10 * 60 * 1000,
+
+        init() {
+            if (this.hasActiveJobs) this.startPolling();
+            this.$watch('transcriptions', () => {
+                if (this.hasActiveJobs) { this.startPolling(); } else { this.stopPolling(); }
+            });
+        },
+
+        get hasActiveJobs() {
+            return this.transcriptions.some(t => t.status === 'pending' || t.status === 'processing');
+        },
+
+        startPolling() {
+            if (this.pollTimer) return;
+            this.pollTimer = setInterval(() => this.pollStatuses(), 5000);
+        },
+
+        stopPolling() {
+            if (this.pollTimer) { clearInterval(this.pollTimer); this.pollTimer = null; }
+        },
+
+        async pollStatuses() {
+            try {
+                const res = await fetch('{{ route('meetings.transcriptions.status', $meeting) }}', {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': this.csrfToken() },
+                });
+                if (!res.ok) return;
+                const statuses = await res.json();
+                statuses.forEach(s => {
+                    const idx = this.transcriptions.findIndex(t => t.id === s.id);
+                    if (idx !== -1) this.transcriptions[idx] = { ...this.transcriptions[idx], ...s };
+                });
+                if (!this.hasActiveJobs) this.stopPolling();
+            } catch (e) {}
+        },
+
+        isStuck(item) {
+            if (item.status !== 'processing' || !item.started_at) return false;
+            return (Date.now() - new Date(item.started_at).getTime()) > this.stuckMs;
+        },
+
+        statusLabel(status) {
+            return { pending: 'Waiting in queue', processing: 'Transcribing...', completed: 'Transcribed', failed: 'Failed' }[status] || status;
         },
     }"
     @recording-complete.window="handleRecordingComplete($event.detail)"
@@ -407,35 +475,108 @@
                     <div class="space-y-2">
                         {{-- Audio items --}}
                         <template x-for="item in (activeTab === 'audio' || activeTab === 'all') ? transcriptions : []" :key="'t-' + item.id">
-                            <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-                                        <svg class="h-5 w-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                                        </svg>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="item.original_filename || 'Audio Recording'"></p>
-                                        <div class="flex items-center gap-2 mt-0.5">
-                                            <span class="text-xs text-gray-500 dark:text-gray-400" x-text="formatSize(item.file_size)"></span>
-                                            <span x-show="item.duration_seconds" class="text-xs text-gray-500 dark:text-gray-400" x-text="formatDuration(item.duration_seconds)" x-cloak></span>
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium" :class="statusClasses(item.status)" x-text="item.status || 'pending'"></span>
+                            <div class="rounded-lg border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors"
+                                :class="item.status === 'failed' ? 'bg-red-50/30 dark:bg-red-900/10' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'">
+
+                                {{-- Main row --}}
+                                <div class="flex items-center justify-between p-3">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center"
+                                            :class="item.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30' : item.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-violet-100 dark:bg-violet-900/30'">
+                                            <template x-if="item.status === 'processing'">
+                                                <svg class="h-5 w-5 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                </svg>
+                                            </template>
+                                            <template x-if="item.status === 'pending'">
+                                                <svg class="h-5 w-5 text-gray-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </template>
+                                            <template x-if="item.status === 'completed'">
+                                                <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </template>
+                                            <template x-if="item.status === 'failed'">
+                                                <svg class="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </template>
+                                            <template x-if="!['processing','pending','completed','failed'].includes(item.status)">
+                                                <svg class="h-5 w-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                                </svg>
+                                            </template>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="item.original_filename || 'Audio Recording'"></p>
+                                            <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                                                <span class="text-xs text-gray-500 dark:text-gray-400" x-text="formatSize(item.file_size)"></span>
+                                                <span x-show="item.duration_seconds" class="text-xs text-gray-500 dark:text-gray-400" x-text="formatDuration(item.duration_seconds)" x-cloak></span>
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium" :class="statusClasses(item.status)" x-text="statusLabel(item.status)"></span>
+                                                <span class="text-xs text-gray-400 dark:text-gray-500" x-text="sourceLabel(item.original_filename)"></span>
+                                            </div>
                                         </div>
                                     </div>
+                                    @if($isEditable)
+                                        <button
+                                            type="button"
+                                            @click="deleteTranscription(item.id)"
+                                            :disabled="loading"
+                                            class="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                                            title="Remove"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    @endif
                                 </div>
-                                @if($isEditable)
-                                    <button
-                                        type="button"
-                                        @click="deleteTranscription(item.id)"
-                                        :disabled="loading"
-                                        class="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
-                                        title="Remove"
-                                    >
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                @endif
+
+                                {{-- Progress bar (pending / processing, not stuck) --}}
+                                <template x-if="(item.status === 'pending' || item.status === 'processing') && !isStuck(item)">
+                                    <div class="px-3 pb-3">
+                                        <div class="w-full bg-gray-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                            <div class="h-1.5 rounded-full progress-bar-indeterminate"
+                                                :class="item.status === 'processing' ? 'bg-blue-500' : 'bg-gray-400'"></div>
+                                        </div>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5"
+                                            x-text="item.status === 'pending' ? 'Waiting for a worker to pick up this job...' : 'Transcribing audio with AI. Large files may take a few minutes.'"></p>
+                                    </div>
+                                </template>
+
+                                {{-- Stuck warning --}}
+                                <template x-if="isStuck(item)">
+                                    <div class="mx-3 mb-3 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 px-3 py-2">
+                                        <div class="flex items-start gap-2">
+                                            <svg class="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                            </svg>
+                                            <div>
+                                                <p class="text-xs font-medium text-amber-700 dark:text-amber-300">Taking longer than expected</p>
+                                                <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Queue worker may be stuck. Check <a href="{{ route('admin.system.index') }}" class="underline font-medium">Admin → System</a> for queue status, or delete and re-upload this file.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                {{-- Failed message --}}
+                                <template x-if="item.status === 'failed'">
+                                    <div class="mx-3 mb-3 rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 px-3 py-2">
+                                        <div class="flex items-start gap-2">
+                                            <svg class="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-medium text-red-700 dark:text-red-300">Transcription failed</p>
+                                                <p x-show="item.error_message" class="text-xs text-red-600 dark:text-red-400 mt-0.5 line-clamp-2" x-text="item.error_message" x-cloak></p>
+                                                <p class="text-xs text-red-500 dark:text-red-400 mt-1">Delete this file and re-upload to try again.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </template>
 
@@ -450,10 +591,11 @@
                                     </div>
                                     <div class="min-w-0">
                                         <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="item.original_filename || 'Document'"></p>
-                                        <div class="flex items-center gap-2 mt-0.5">
+                                        <div class="flex items-center gap-2 mt-0.5 flex-wrap">
                                             <span class="text-xs text-gray-500 dark:text-gray-400" x-text="formatSize(item.file_size)"></span>
                                             <span class="text-xs text-gray-500 dark:text-gray-400" x-text="item.mime_type || 'document'"></span>
                                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium" :class="statusClasses(item.status)" x-text="item.status || 'uploaded'"></span>
+                                            <span x-show="item.created_at" class="text-xs text-gray-400 dark:text-gray-500" x-text="formatDate(item.created_at)" x-cloak></span>
                                         </div>
                                     </div>
                                 </div>
@@ -536,7 +678,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                                 </svg>
                                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Drop audio file here or click to browse</p>
-                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">MP3, WAV, M4A, OGG, WebM (max 200MB)</p>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">MP3, WAV, M4A, OGG, WebM (max 500MB)</p>
                                 <input
                                     type="file"
                                     accept=".mp3,.wav,.m4a,.ogg,.webm,audio/*"
@@ -574,6 +716,16 @@
                                         <button @click="recoverRecording()" class="text-xs font-medium text-amber-700 dark:text-amber-300 hover:underline">Recover</button>
                                         <button @click="discardRecovery()" class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">Discard</button>
                                     </div>
+                                </div>
+                            </template>
+
+                            {{-- Background recording notice --}}
+                            <template x-if="['recording', 'paused'].includes(state)">
+                                <div class="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-4 py-2 flex items-center gap-2">
+                                    <div class="h-2 w-2 rounded-full bg-red-500 animate-pulse flex-shrink-0"></div>
+                                    <p class="text-xs text-red-700 dark:text-red-300">
+                                        Recording is active — you can switch tabs or apps freely. Recording will continue in the background.
+                                    </p>
                                 </div>
                             </template>
 

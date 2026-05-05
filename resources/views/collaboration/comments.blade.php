@@ -85,7 +85,7 @@
                                 <form method="POST" action="{{ route('comments.destroy', $comment) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:underline" onclick="return confirm('Delete this comment?')">Delete</button>
+                                    <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:underline" onclick="event.preventDefault(); window.antaraConfirm('Delete this comment?').then(ok => ok && this.closest('form').submit())">Delete</button>
                                 </form>
                             @endif
                         </div>
@@ -112,7 +112,7 @@
                                         <form method="POST" action="{{ route('comments.destroy', $reply) }}" class="flex-shrink-0">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:underline" onclick="return confirm('Delete this reply?')">Delete</button>
+                                            <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:underline" onclick="event.preventDefault(); window.antaraConfirm('Delete this reply?').then(ok => ok && this.closest('form').submit())">Delete</button>
                                         </form>
                                     @endif
                                 </div>

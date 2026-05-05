@@ -189,7 +189,7 @@ function voiceNotes(meetingId) {
         },
 
         async deleteNote(noteId) {
-            if (!confirm('Delete this voice note?')) return;
+            if (!(await window.antaraConfirm('Delete this voice note?', {title: 'Delete Voice Note'}))) return;
             try {
                 await fetch(`/meetings/${meetingId}/voice-notes/${noteId}`, {
                     method: 'DELETE',

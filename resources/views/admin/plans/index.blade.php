@@ -56,7 +56,7 @@
                                 <a href="{{ route('admin.plans.edit', $plan) }}"
                                    class="text-sm text-blue-400 hover:text-blue-300 transition-colors">Edit</a>
                                 <form method="POST" action="{{ route('admin.plans.destroy', $plan) }}" class="inline"
-                                      onsubmit="return confirm('Are you sure you want to delete this plan?')">
+                                      onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this plan?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-sm text-red-400 hover:text-red-300 transition-colors">Delete</button>

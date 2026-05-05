@@ -97,7 +97,7 @@
                                     <a href="{{ route('projects.edit', $project) }}" class="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 font-medium transition-colors">Edit</a>
                                     @endcan
                                     @can('delete', $project)
-                                    <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="return confirm('Are you sure you want to delete this project?')" class="inline">
+                                    <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this project?')" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors">Delete</button>

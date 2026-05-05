@@ -156,7 +156,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <form method="POST" action="{{ route('api-keys.destroy', $apiKey) }}" onsubmit="return confirm('Revoke this API key? This cannot be undone.')">
+                                <form method="POST" action="{{ route('api-keys.destroy', $apiKey) }}" onsubmit="confirmThenSubmit(event, 'Revoke this API key? This cannot be undone.')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700 transition-colors">Revoke</button>

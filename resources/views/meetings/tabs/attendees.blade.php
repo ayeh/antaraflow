@@ -111,7 +111,7 @@
                                 </form>
                             </td>
                             <td class="px-4 py-3 text-right">
-                                <form method="POST" action="{{ route('meetings.attendees.destroy', [$meeting, $attendee]) }}" class="inline" onsubmit="return confirm('Remove this attendee?')">
+                                <form method="POST" action="{{ route('meetings.attendees.destroy', [$meeting, $attendee]) }}" class="inline" onsubmit="confirmThenSubmit(event, 'Remove this attendee?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:text-red-700 text-sm">Remove</button>

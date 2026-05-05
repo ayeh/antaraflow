@@ -55,6 +55,17 @@ class TranscriptionController extends Controller
         return view('transcriptions.show', compact('meeting', 'transcription'));
     }
 
+    public function statusPoll(MinutesOfMeeting $meeting): JsonResponse
+    {
+        $this->authorize('view', $meeting);
+
+        return response()->json(
+            $meeting->transcriptions()
+                ->select(['id', 'status', 'started_at', 'completed_at', 'error_message', 'duration_seconds'])
+                ->get()
+        );
+    }
+
     public function destroy(MinutesOfMeeting $meeting, AudioTranscription $transcription): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $meeting);

@@ -231,6 +231,14 @@
                                placeholder="support@example.com"
                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm">
                     </div>
+                    <div>
+                        <label for="marketing_url" class="block text-sm font-medium text-slate-300 mb-1">Marketing URL</label>
+                        <input type="text" name="marketing_url" id="marketing_url"
+                               value="{{ old('marketing_url', $settings['marketing_url']) }}"
+                               placeholder="https://antaranote.com"
+                               class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm">
+                        <p class="mt-1 text-xs text-slate-500">URL linked from the antaraNote footer on public pages (guest links, QR registration).</p>
+                    </div>
                 </div>
             </div>
 
@@ -299,7 +307,7 @@
                                     <img :src="form.logo_preview" class="h-5 w-auto object-contain">
                                 </template>
                                 <template x-if="!form.logo_preview">
-                                    <span class="text-xs font-bold text-white truncate block" x-text="form.app_name || 'antaraFLOW'"></span>
+                                    <span class="text-xs font-bold text-white truncate block" x-text="form.app_name || 'antaraNote'"></span>
                                 </template>
                             </div>
                             <div class="flex-1 p-2 space-y-1">
@@ -338,7 +346,7 @@
                                 <template x-if="form.logo_preview">
                                     <img :src="form.logo_preview" class="h-8 w-auto object-contain mx-auto mb-2">
                                 </template>
-                                <p class="text-xs font-bold text-white" x-text="form.app_name || 'antaraFLOW'"></p>
+                                <p class="text-xs font-bold text-white" x-text="form.app_name || 'antaraNote'"></p>
                             </div>
                             <div class="space-y-2 mb-3">
                                 <div class="h-7 rounded bg-slate-700 border border-slate-600"></div>
@@ -397,7 +405,7 @@ function brandingForm() {
         customPresets: @json(is_array(json_decode($settings['custom_themes'] ?? '[]')) ? json_decode($settings['custom_themes'] ?? '[]', true) : []),
 
         defaults: {
-            app_name: 'antaraFLOW',
+            app_name: 'antaraNote',
             primary_color: '#7c3aed',
             secondary_color: '#3b82f6',
             accent_color: '#10b981',
@@ -459,7 +467,7 @@ function brandingForm() {
         },
 
         async deletePreset(name) {
-            if (!confirm(`Delete theme "${name}"?`)) { return; }
+            if (!(await window.antaraConfirm(`Delete theme "${name}"?`, {title: 'Delete Theme'}))) return;
 
             const response = await fetch(`{{ url('admin/branding/presets') }}/${encodeURIComponent(name)}`, {
                 method: 'DELETE',

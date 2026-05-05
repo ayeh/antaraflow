@@ -40,7 +40,7 @@
 
                     <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
                         <a href="{{ route('attendee-groups.edit', $group) }}" class="text-xs font-medium text-gray-500 hover:text-gray-700">Edit</a>
-                        <form method="POST" action="{{ route('attendee-groups.destroy', $group) }}" onsubmit="return confirm('Delete this group?')">
+                        <form method="POST" action="{{ route('attendee-groups.destroy', $group) }}" onsubmit="confirmThenSubmit(event, 'Delete this group?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">Delete</button>

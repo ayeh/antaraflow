@@ -75,7 +75,7 @@
             </form>
         @else
             <form method="POST" action="{{ route('admin.users.suspend', $user) }}"
-                  onsubmit="return confirm('Are you sure you want to suspend this user? They will not be able to access the platform.')">
+                  onsubmit="confirmThenSubmit(event, 'Are you sure you want to suspend this user? They will not be able to access the platform.')">
                 @csrf
                 <button type="submit"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
@@ -85,7 +85,7 @@
             </form>
 
             <form method="POST" action="{{ route('admin.users.impersonate', $user) }}"
-                  onsubmit="return confirm('You will be logged in as {{ $user->name }}. Continue?')">
+                  onsubmit="confirmThenSubmit(event, 'You will be logged in as {{ $user->name }}. Continue?')">
                 @csrf
                 <button type="submit"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">

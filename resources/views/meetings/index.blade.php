@@ -93,6 +93,18 @@
         @include('meetings.partials._stat-cards', ['stats' => $stats])
 
         {{-- ── Card Grid (default) / Table (dense) ── --}}
+        @php
+            $currentSort = request('sort_by', 'meeting_date');
+            $currentDir  = request('sort_dir', 'desc');
+            $sortColumns = [
+                'mom_number'   => ['label' => 'MOM No.',   'class' => ''],
+                'title'        => ['label' => 'Title',     'class' => ''],
+                'project'      => ['label' => 'Project',   'class' => 'hidden md:table-cell'],
+                'meeting_date' => ['label' => 'Date',      'class' => 'hidden sm:table-cell'],
+                'status'       => ['label' => 'Status',    'class' => ''],
+                'items'        => ['label' => 'Items',     'class' => 'hidden lg:table-cell'],
+            ];
+        @endphp
         <div>
             {{-- Card Grid --}}
             <div x-show="!dense" x-cloak class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -111,12 +123,27 @@
                     <table class="w-full text-sm" role="grid">
                         <thead>
                             <tr class="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
-                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">MOM No.</th>
-                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
-                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">Project</th>
-                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">Date</th>
-                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                <th scope="col" class="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">Items</th>
+                                @foreach($sortColumns as $colKey => $col)
+                                    @php
+                                        $isActive  = $currentSort === $colKey;
+                                        $nextDir   = ($isActive && $currentDir === 'asc') ? 'desc' : 'asc';
+                                        $sortUrl   = route('meetings.index', array_merge(request()->except(['sort_by', 'sort_dir', 'page']), ['sort_by' => $colKey, 'sort_dir' => $nextDir]));
+                                    @endphp
+                                    <th scope="col" class="text-left px-6 py-3 {{ $col['class'] }}">
+                                        <a href="{{ $sortUrl }}" class="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider transition-colors {{ $isActive ? 'text-violet-600 dark:text-violet-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' }}">
+                                            {{ $col['label'] }}
+                                            @if($isActive)
+                                                @if($currentDir === 'asc')
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+                                                @else
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                                @endif
+                                            @else
+                                                <svg class="w-3 h-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                            @endif
+                                        </a>
+                                    </th>
+                                @endforeach
                                 <th scope="col" class="px-6 py-3"></th>
                             </tr>
                         </thead>
@@ -162,6 +189,14 @@
                                                 @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft)
                                                     <a href="{{ route('meetings.edit', $meeting) }}" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:underline">Edit</a>
                                                 @endif
+                                            @endcan
+                                            @can('delete', $meeting)
+                                                <form method="POST" action="{{ route('meetings.destroy', $meeting) }}"
+                                                      onsubmit="confirmThenSubmit(event, 'Delete this meeting permanently? This cannot be undone.')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-xs font-medium text-red-500 dark:text-red-400 hover:underline">Delete</button>
+                                                </form>
                                             @endcan
                                         </div>
                                     </td>

@@ -208,7 +208,7 @@
         },
 
         async deleteActionItem(id) {
-            if (!confirm('Delete this action item?')) return;
+            if (!(await window.antaraConfirm('Delete this action item?', {title: 'Delete Action Item'}))) return;
             this.loading = true;
 
             try {

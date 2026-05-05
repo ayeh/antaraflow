@@ -11,9 +11,9 @@ class ApiInfoController
     public function __invoke(): JsonResponse
     {
         return response()->json([
-            'name' => 'AntaraFlow API',
+            'name' => 'antaraNote API',
             'version' => 'v1',
-            'description' => 'REST API for AntaraFlow — Minutes of Meeting platform',
+            'description' => 'REST API for antaraNote — Minutes of Meeting platform',
             'endpoints' => [
                 'meetings' => '/api/v1/meetings',
                 'attendees' => '/api/v1/meetings/{id}/attendees',

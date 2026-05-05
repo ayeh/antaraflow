@@ -91,7 +91,7 @@
                                     <a href="{{ route('reports.edit', $template) }}" class="text-xs font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">Edit</a>
                                 @endcan
                                 @can('delete', $template)
-                                    <form method="POST" action="{{ route('reports.destroy', $template) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this template?')">
+                                    <form method="POST" action="{{ route('reports.destroy', $template) }}" class="inline" onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this template?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">Delete</button>

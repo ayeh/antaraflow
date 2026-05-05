@@ -12,7 +12,7 @@ class BrandingService
 {
     /** @var array<string, mixed> */
     private const array DEFAULTS = [
-        'app_name' => 'antaraFLOW',
+        'app_name' => 'antaraNote',
         'primary_color' => '#7c3aed',
         'secondary_color' => '#3b82f6',
         'accent_color' => '#10b981',
@@ -33,6 +33,7 @@ class BrandingService
         'heading_font' => 'Inter',
         'body_font' => 'Inter',
         'custom_themes' => '[]',
+        'marketing_url' => 'https://antaranote.com',
     ];
 
     /** @var array<string, mixed>|null */
@@ -53,7 +54,7 @@ class BrandingService
 
     public function appName(): string
     {
-        return (string) $this->get('app_name', 'antaraFLOW');
+        return (string) $this->get('app_name', 'antaraNote');
     }
 
     /** @return array<string, mixed> */

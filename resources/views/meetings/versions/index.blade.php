@@ -51,7 +51,7 @@
                         </a>
                         @if(!$loop->first)
                             <form method="POST" action="{{ route('meetings.revert', $meeting) }}"
-                                  onsubmit="return confirm('Are you sure you want to revert this meeting to draft?')">
+                                  onsubmit="confirmThenSubmit(event, 'Are you sure you want to revert this meeting to draft?')">
                                 @csrf
                                 <input type="hidden" name="version_id" value="{{ $version->id }}">
                                 <button type="submit"

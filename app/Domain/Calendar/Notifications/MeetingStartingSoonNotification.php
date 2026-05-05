@@ -32,7 +32,7 @@ class MeetingStartingSoonNotification extends Notification implements ShouldQueu
             ->line("Your meeting **{$this->meeting->title}** is starting soon.")
             ->line('Auto-recording is enabled for this calendar connection. You can start live recording now.')
             ->action('Start Live Recording', route('meetings.show', $this->meeting))
-            ->line('Thank you for using AntaraFlow.');
+            ->line('Thank you for using antaraNote.');
     }
 
     /** @return array<string, mixed> */
@@ -42,6 +42,7 @@ class MeetingStartingSoonNotification extends Notification implements ShouldQueu
             'type' => 'meeting_starting_soon',
             'meeting_id' => $this->meeting->id,
             'meeting_title' => $this->meeting->title,
+            'message' => "\"{$this->meeting->title}\" is starting soon",
         ];
     }
 }

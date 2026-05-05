@@ -4,14 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin Login — antaraFLOW</title>
+    <title>Admin Login — antaraNote</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full bg-slate-900">
     <div class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div class="text-center">
-                <h1 class="text-3xl font-bold text-white">antaraFLOW</h1>
+                <h1 class="text-3xl font-bold text-white">antaraNote</h1>
                 <p class="mt-2 text-sm text-slate-400">Super Admin Panel</p>
             </div>
 

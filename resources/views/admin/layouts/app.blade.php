@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin') — antaraFLOW Admin</title>
+    <title>@yield('title', 'Admin') — antaraNote Admin</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full bg-slate-800 text-slate-100">
@@ -13,7 +13,7 @@
         <aside class="w-64 bg-slate-900 border-r border-slate-700 flex flex-col fixed inset-y-0">
             {{-- Logo area --}}
             <div class="p-6 border-b border-slate-700">
-                <h1 class="text-lg font-bold text-white">antaraFLOW</h1>
+                <h1 class="text-lg font-bold text-white">antaraNote</h1>
                 <p class="text-xs text-slate-400 mt-1">Super Admin</p>
             </div>
 
@@ -119,5 +119,6 @@
             </main>
         </div>
     </div>
+    <x-confirm-modal />
 </body>
 </html>

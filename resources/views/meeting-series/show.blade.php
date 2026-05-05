@@ -28,7 +28,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-3">
             <a href="{{ route('meeting-series.edit', $meetingSeries) }}" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Edit</a>
-            <form method="POST" action="{{ route('meeting-series.destroy', $meetingSeries) }}" onsubmit="return confirm('Are you sure you want to delete this series?')" class="inline">
+            <form method="POST" action="{{ route('meeting-series.destroy', $meetingSeries) }}" onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this series?')" class="inline">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="bg-white dark:bg-slate-800 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">Delete</button>

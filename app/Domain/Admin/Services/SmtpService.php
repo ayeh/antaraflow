@@ -39,10 +39,10 @@ class SmtpService
         $this->applyConfig($config);
 
         try {
-            Mail::raw('This is a test email from antaraFLOW admin panel.', function ($message) use ($testEmail, $config) {
+            Mail::raw('This is a test email from antaraNote admin panel.', function ($message) use ($testEmail, $config) {
                 $message->to($testEmail)
                     ->from($config->from_address, $config->from_name)
-                    ->subject('SMTP Test — antaraFLOW');
+                    ->subject('SMTP Test — antaraNote');
             });
 
             return true;

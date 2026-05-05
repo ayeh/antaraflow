@@ -61,7 +61,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:text-red-700 text-sm font-medium"
-                                        onclick="return confirm('Delete this template?')">Delete</button>
+                                        onclick="event.preventDefault(); window.antaraConfirm('Delete this template?').then(ok => ok && this.closest('form').submit())">Delete</button>
                                 </form>
                             </td>
                         </tr>

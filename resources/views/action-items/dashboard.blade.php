@@ -44,7 +44,7 @@
                 },
                 async applyBulk(action, value = null) {
                     if (this.selected.length === 0) { return; }
-                    if (action === 'delete' && !confirm(`Delete ${this.selected.length} item(s)? This cannot be undone.`)) { return; }
+                    if (action === 'delete' && !(await window.antaraConfirm(`Delete ${this.selected.length} item(s)? This cannot be undone.`, {title: 'Delete Items'}))) { return; }
                     try {
                         const res = await fetch('{{ route('action-items.bulk') }}', {
                             method: 'POST',

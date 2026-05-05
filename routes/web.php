@@ -246,6 +246,7 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
 
     // Meeting sub-resources (transcriptions, notes, attendees, actions, chat, extractions)
     Route::prefix('meetings/{meeting}')->as('meetings.')->group(function () {
+        Route::get('transcriptions/status', [TranscriptionController::class, 'statusPoll'])->name('transcriptions.status');
         Route::resource('transcriptions', TranscriptionController::class)->only(['store', 'show', 'destroy']);
         Route::patch('transcriptions/{transcription}/speakers', [\App\Domain\Transcription\Controllers\SpeakerController::class, 'update'])->name('transcriptions.speakers.update');
         Route::get('transcriptions/{transcription}/speaker-suggestions', [\App\Domain\Transcription\Controllers\SpeakerController::class, 'suggestions'])->name('transcriptions.speaker-suggestions');

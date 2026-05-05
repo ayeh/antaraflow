@@ -46,7 +46,7 @@
                                 </div>
                                 <div class="flex items-center gap-3 flex-shrink-0">
                                     <button @click="editing = true" class="text-xs font-medium text-violet-600 hover:text-violet-700">Edit</button>
-                                    <form method="POST" action="{{ route('tags.destroy', $tag) }}" onsubmit="return confirm('Delete this tag?')">
+                                    <form method="POST" action="{{ route('tags.destroy', $tag) }}" onsubmit="confirmThenSubmit(event, 'Delete this tag?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">Delete</button>

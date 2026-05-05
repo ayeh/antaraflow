@@ -27,7 +27,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-3">
             <a href="{{ route('projects.edit', $project) }}" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Edit</a>
-            <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="return confirm('Are you sure you want to delete this project?')" class="inline">
+            <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this project?')" class="inline">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="bg-white dark:bg-slate-800 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">Delete</button>
@@ -63,7 +63,7 @@
                                 </div>
                                 <div class="flex items-center gap-3 ml-4 flex-shrink-0">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">{{ ucfirst($member->pivot->role) }}</span>
-                                    <form method="POST" action="{{ route('projects.members.remove', [$project, $member]) }}" onsubmit="return confirm('Remove this member?')">
+                                    <form method="POST" action="{{ route('projects.members.remove', [$project, $member]) }}" onsubmit="confirmThenSubmit(event, 'Remove this member?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">Remove</button>
@@ -91,9 +91,32 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="w-32">
-                        <label for="role" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Role</label>
-                        <select name="role" id="role"
+                    <div class="w-36"
+                        x-data="{
+                            role: 'member',
+                            descriptions: {
+                                member: 'Can view meetings and update their assigned action items.',
+                                lead: 'Can manage meetings, assign action items, and oversee project progress.',
+                                viewer: 'Read-only access to project meetings and action items.'
+                            }
+                        }">
+                        <div class="flex items-center gap-1 mb-1">
+                            <label for="role" class="block text-xs font-medium text-gray-600 dark:text-gray-400">Role</label>
+                            <div class="relative flex items-center" x-data="{ open: false }">
+                                <button type="button" @mouseenter="open = true" @mouseleave="open = false" @focus="open = true" @blur="open = false"
+                                    class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 focus:outline-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div x-show="open" x-transition
+                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded-lg bg-gray-800 dark:bg-slate-700 text-white text-xs px-3 py-2 shadow-lg z-10 pointer-events-none">
+                                    <p x-text="descriptions[role]"></p>
+                                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800 dark:border-t-slate-700"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <select name="role" id="role" x-model="role"
                             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                             <option value="member">Member</option>
                             <option value="lead">Lead</option>

@@ -45,7 +45,7 @@
                                 <form method="POST" action="{{ route('meetings.shares.destroy', [$meeting, $share]) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline" onclick="return confirm('Revoke this share?')">Revoke</button>
+                                    <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline" onclick="event.preventDefault(); window.antaraConfirm('Revoke this share?').then(ok => ok && this.closest('form').submit())">Revoke</button>
                                 </form>
                             </td>
                         </tr>

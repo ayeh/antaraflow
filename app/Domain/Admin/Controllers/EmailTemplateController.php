@@ -51,7 +51,7 @@ class EmailTemplateController extends Controller
         foreach ($emailTemplate->variables ?? [] as $variable) {
             $sampleData[$variable] = match ($variable) {
                 'user_name' => 'John Doe',
-                'app_name' => 'antaraFLOW',
+                'app_name' => 'antaraNote',
                 'org_name' => 'Demo Organization',
                 'login_url' => 'https://antaraflow.test/login',
                 'reset_url' => 'https://antaraflow.test/reset/token123',

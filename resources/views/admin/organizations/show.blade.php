@@ -109,7 +109,7 @@
             </form>
         @else
             <form method="POST" action="{{ route('admin.organizations.suspend', $organization) }}" class="flex items-end gap-2"
-                  onsubmit="return confirm('Are you sure you want to suspend this organization?')">
+                  onsubmit="confirmThenSubmit(event, 'Are you sure you want to suspend this organization?')">
                 @csrf
                 <div>
                     <label for="reason" class="block text-xs text-slate-400 mb-1">Suspension Reason</label>

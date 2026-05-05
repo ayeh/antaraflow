@@ -739,7 +739,7 @@ export default function audioRecorder(config) {
         // -- IndexedDB Recovery --
         getDB() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open('antaraflow-recordings', 1);
+                const request = indexedDB.open('antaranote-recordings', 1);
                 request.onupgradeneeded = (e) => {
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains('recordings')) {

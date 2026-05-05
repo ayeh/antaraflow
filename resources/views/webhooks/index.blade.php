@@ -55,7 +55,7 @@
                                 <a href="{{ route('webhooks.edit', $webhook = $endpoint) }}" class="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700">Edit</a>
                             @endcan
                             @can('delete', $endpoint)
-                                <form method="POST" action="{{ route('webhooks.destroy', $webhook = $endpoint) }}" class="inline" onsubmit="return confirm('Delete this webhook endpoint?')">
+                                <form method="POST" action="{{ route('webhooks.destroy', $webhook = $endpoint) }}" class="inline" onsubmit="confirmThenSubmit(event, 'Delete this webhook endpoint?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:text-red-700">Delete</button>

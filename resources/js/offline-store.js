@@ -1,4 +1,4 @@
-const DB_NAME = 'antaraflow-offline';
+const DB_NAME = 'antaranote-offline';
 const DB_VERSION = 1;
 const MEETINGS_STORE = 'meetings';
 const ACTIONS_STORE = 'offline_actions';
