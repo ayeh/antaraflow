@@ -142,8 +142,8 @@ class ProcessTranscriptionJob implements ShouldQueue
 
         $duration = $probeResult->successful() ? (float) trim($probeResult->output()) : 0.0;
 
-        // Target 23 MB to leave a 2 MB safety margin below the 25 MB API limit
-        $targetBytes = 23 * 1024 * 1024;
+        // Target 20 MB to leave a comfortable margin below the 25 MB API limit
+        $targetBytes = 20 * 1024 * 1024;
         $bitrate = $duration > 0
             ? max(8_000, min(48_000, (int) ($targetBytes * 8 / $duration)))
             : 32_000;

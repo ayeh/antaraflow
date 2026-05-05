@@ -20,7 +20,7 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
     {
         $response = Http::withToken($this->config['api_key'])
             ->timeout(300)
-            ->attach('file', file_get_contents($filePath), basename($filePath))
+            ->attach('file', fopen($filePath, 'r'), basename($filePath))
             ->post('https://api.openai.com/v1/audio/transcriptions', [
                 'model' => $this->config['transcription_model'] ?? 'whisper-1',
                 'language' => $options['language'] ?? null,
