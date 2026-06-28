@@ -24,4 +24,5 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             cd ${{ secrets.DEPLOY_PATH }}
+            git pull origin main
             bash deploy.sh
