@@ -69,6 +69,14 @@ npm run build
 chmod 600 .env
 chmod -R 750 storage/ bootstrap/cache/
 
+# storage/app/public is symlinked into public/storage and served as static files
+# by the web server, which runs under a different group than the app user. The
+# 750 hardening above makes uploaded assets (logos, favicons) unreadable to it,
+# yielding 404s. Re-open just that public subtree for traversal and reading.
+chmod o+x storage storage/app
+find storage/app/public -type d -exec chmod 755 {} +
+find storage/app/public -type f -exec chmod 644 {} +
+
 # Verify critical production settings
 if grep -q "APP_DEBUG=true" .env; then
     echo "⚠️  WARNING: APP_DEBUG is true in production!"
