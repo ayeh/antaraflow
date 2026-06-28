@@ -96,7 +96,7 @@
                     </div>
                 </div>
                 <a href="{{ $meeting->meeting_link }}" target="_blank" rel="noopener noreferrer"
-                    class="inline-flex items-center gap-1.5 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors shrink-0">
+                    class="inline-flex items-center gap-1.5 border border-violet-300 dark:border-violet-700/60 text-violet-600 dark:text-violet-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                     Join Meeting
                 </a>
@@ -118,27 +118,28 @@
         </div>
     @endif
 
-    {{-- Quick Stats --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Attendees</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $attendeeStats['total'] }}</p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $attendeeStats['present'] }} present</p>
+    {{-- Quick Stats (compact strip) --}}
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-3 text-sm">
+        <div class="flex items-baseline gap-1.5">
+            <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $attendeeStats['total'] }}</span>
+            <span class="text-gray-500 dark:text-gray-400">Attendees</span>
+            <span class="text-xs text-gray-400 dark:text-gray-500">· {{ $attendeeStats['present'] }} present</span>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Action Items</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $actionItemStats['total'] }}</p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $actionItemStats['completed'] }} completed</p>
+        <span class="hidden sm:block h-4 w-px bg-gray-200 dark:bg-slate-700"></span>
+        <div class="flex items-baseline gap-1.5">
+            <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $actionItemStats['total'] }}</span>
+            <span class="text-gray-500 dark:text-gray-400">Action items</span>
+            <span class="text-xs text-gray-400 dark:text-gray-500">· {{ $actionItemStats['completed'] }} completed</span>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">In Progress</p>
-            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ $actionItemStats['in_progress'] }}</p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">action items</p>
+        <span class="hidden sm:block h-4 w-px bg-gray-200 dark:bg-slate-700"></span>
+        <div class="flex items-baseline gap-1.5">
+            <span class="text-lg font-semibold text-blue-600 dark:text-blue-400">{{ $actionItemStats['in_progress'] }}</span>
+            <span class="text-gray-500 dark:text-gray-400">In progress</span>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Overdue</p>
-            <p class="text-2xl font-bold {{ $actionItemStats['overdue'] > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }} mt-1">{{ $actionItemStats['overdue'] }}</p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">action items</p>
+        <span class="hidden sm:block h-4 w-px bg-gray-200 dark:bg-slate-700"></span>
+        <div class="flex items-baseline gap-1.5">
+            <span class="text-lg font-semibold {{ $actionItemStats['overdue'] > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">{{ $actionItemStats['overdue'] }}</span>
+            <span class="text-gray-500 dark:text-gray-400">Overdue</span>
         </div>
     </div>
 </div>
