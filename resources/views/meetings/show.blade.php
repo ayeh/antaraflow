@@ -7,17 +7,18 @@
         isEditable: @json($isEditable),
      }">
 
-    {{-- Meeting Title Header --}}
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <a href="{{ route('meetings.index') }}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                Back to Meetings
-            </a>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $meeting->title }}</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">{{ $meeting->mom_number }}</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3">
+    {{-- Meeting Title --}}
+    <div class="mb-4">
+        <a href="{{ route('meetings.index') }}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            Back to Meetings
+        </a>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $meeting->title }}</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">{{ $meeting->mom_number }}</p>
+    </div>
+
+    {{-- Action Toolbar (separated from title) --}}
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3">
             {{-- Meta cluster: live presence + status --}}
             <div class="flex items-center gap-2">
             {{-- Live Presence Avatars --}}
@@ -183,7 +184,7 @@
                             .catch(() => { starting = false; })
                         "
                         :disabled="starting"
-                        class="h-9 px-4 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 transition-colors inline-flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="h-9 px-4 border border-red-300 dark:border-red-700/60 text-red-600 dark:text-red-400 rounded-xl text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors inline-flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                         <span x-text="starting ? 'Starting...' : 'Live Meeting'"></span>
@@ -195,7 +196,7 @@
             @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress)
                 <form method="POST" action="{{ route('meetings.finalize', $meeting) }}" class="inline">
                     @csrf
-                    <button type="submit" class="h-9 px-4 bg-yellow-500 text-white rounded-xl text-sm font-medium hover:bg-yellow-600 transition-colors inline-flex items-center justify-center whitespace-nowrap">Finalize</button>
+                    <button type="submit" class="h-9 px-4 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center justify-center whitespace-nowrap">Finalize</button>
                 </form>
             @endif
 
@@ -208,7 +209,6 @@
             @endif
             </div>
         </div>
-    </div>
 
     {{-- AI Prepare Agenda modal (hidden trigger, opened via overflow dropdown dispatch) --}}
     @if(($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress) && $meeting->project_id)
@@ -218,31 +218,8 @@
     {{-- Stepper Bar --}}
     @include('meetings.wizard.stepper')
 
-    {{-- Navigation Buttons --}}
-    <div class="flex items-center justify-between gap-3 my-4">
-        {{-- Previous (left) --}}
-        <button x-show="activeStep > 1" @click="activeStep--" x-cloak
-            class="h-9 px-3 inline-flex items-center gap-1 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            <span x-text="['', 'Setup', 'Attendees', 'Inputs', 'Review'][activeStep - 1]"></span>
-        </button>
-        <div x-show="activeStep === 1" class="h-9"></div>
-
-        {{-- Step indicator (center) --}}
-        <span class="text-xs font-medium text-gray-400 dark:text-slate-500 whitespace-nowrap"
-              x-text="'Step ' + activeStep + ' of 5'"></span>
-
-        {{-- Next (right) --}}
-        <button x-show="activeStep < 5" @click="activeStep++" x-cloak
-            class="h-9 px-4 inline-flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-medium transition-colors whitespace-nowrap">
-            <span x-text="['Attendees', 'Inputs', 'Review', 'Finalize', ''][activeStep - 1]"></span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        </button>
-        <div x-show="activeStep === 5" class="h-9"></div>
-    </div>
-
     {{-- Step Content --}}
-    <div x-show="activeStep === 1">
+    <div class="mt-4" x-show="activeStep === 1">
         @include('meetings.wizard.step-setup')
     </div>
     <div x-show="activeStep === 2" x-cloak>
@@ -256,6 +233,29 @@
     </div>
     <div x-show="activeStep === 5" x-cloak>
         @include('meetings.wizard.step-finalize')
+    </div>
+
+    {{-- Wizard Footer Navigation --}}
+    <div class="mt-6 flex items-center justify-between gap-3 border-t border-gray-200 dark:border-slate-700 pt-4">
+        {{-- Previous (left) --}}
+        <button x-show="activeStep > 1" @click="activeStep--" x-cloak
+            class="h-9 px-3 inline-flex items-center gap-1 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            <span x-text="['', 'Setup', 'Attendees', 'Inputs', 'Review'][activeStep - 1]"></span>
+        </button>
+        <div x-show="activeStep === 1" class="h-9"></div>
+
+        {{-- Step indicator (center) --}}
+        <span class="text-xs font-medium text-gray-400 dark:text-slate-500 whitespace-nowrap"
+              x-text="'Step ' + activeStep + ' of 5'"></span>
+
+        {{-- Next (right) — single primary action of the wizard --}}
+        <button x-show="activeStep < 5" @click="activeStep++" x-cloak
+            class="h-9 px-4 inline-flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-medium transition-colors whitespace-nowrap">
+            <span x-text="'Next: ' + ['Attendees', 'Inputs', 'Review', 'Finalize', ''][activeStep - 1]"></span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+        <div x-show="activeStep === 5" class="h-9"></div>
     </div>
 </div>
 </div>
