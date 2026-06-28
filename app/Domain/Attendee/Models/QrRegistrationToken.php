@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Attendee\Models;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Infrastructure\Tenancy\OrganizationScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -34,9 +35,19 @@ class QrRegistrationToken extends Model
         ];
     }
 
+    /**
+     * The meeting this registration token belongs to.
+     *
+     * The token itself is the access grant for a public, unauthenticated
+     * registration flow, so the organization tenancy scope must be bypassed —
+     * otherwise OrganizationScope filters the meeting out for guests and the
+     * controller aborts 410. SoftDeletes is intentionally preserved so a
+     * genuinely deleted meeting still resolves to null.
+     */
     public function meeting(): BelongsTo
     {
-        return $this->belongsTo(MinutesOfMeeting::class, 'minutes_of_meeting_id');
+        return $this->belongsTo(MinutesOfMeeting::class, 'minutes_of_meeting_id')
+            ->withoutGlobalScope(OrganizationScope::class);
     }
 
     public function isValid(): bool

@@ -110,6 +110,63 @@ test('rejects registration with inactive token', function () {
     $response->assertStatus(410);
 });
 
+test('shows registration form to a viewer from another organization', function () {
+    $token = QrRegistrationToken::create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'token' => 'cross-org-token-111',
+        'is_active' => true,
+        'expires_at' => now()->addHours(24),
+    ]);
+
+    $otherOrg = Organization::factory()->create();
+    $otherUser = User::factory()->create(['current_organization_id' => $otherOrg->id]);
+
+    $response = $this->actingAs($otherUser)
+        ->get(route('qr-registration.form', $token->token));
+
+    $response->assertSuccessful();
+    $response->assertSee($this->meeting->title);
+});
+
+test('allows registration from a viewer in another organization', function () {
+    $token = QrRegistrationToken::create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'token' => 'cross-org-token-222',
+        'is_active' => true,
+        'expires_at' => now()->addHours(24),
+    ]);
+
+    $otherOrg = Organization::factory()->create();
+    $otherUser = User::factory()->create(['current_organization_id' => $otherOrg->id]);
+
+    $response = $this->actingAs($otherUser)
+        ->post(route('qr-registration.submit', $token->token), [
+            'name' => 'Cross Org Attendee',
+            'email' => 'crossorg@example.com',
+        ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('mom_attendees', [
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'name' => 'Cross Org Attendee',
+    ]);
+});
+
+test('aborts 410 when the token meeting is soft-deleted', function () {
+    $token = QrRegistrationToken::create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'token' => 'soft-deleted-token-333',
+        'is_active' => true,
+        'expires_at' => now()->addHours(24),
+    ]);
+
+    $this->meeting->delete();
+
+    $response = $this->get(route('qr-registration.form', $token->token));
+
+    $response->assertStatus(410);
+});
+
 test('returns live attendees and registration count for the lobby', function () {
     QrRegistrationToken::create([
         'minutes_of_meeting_id' => $this->meeting->id,
