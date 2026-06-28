@@ -11,9 +11,13 @@ set -euo pipefail
 
 echo "🚀 Starting deployment..."
 
-# Resolve a PHP 8.4+ binary (the cPanel CLI default may be an older PHP)
+# Resolve a PHP 8.4+ binary (the shell/cron CLI default may be an older PHP).
+# Covers cPanel (ea-php*) and DirectAdmin (/usr/local/php*) layouts.
 PHP_BIN=""
 for candidate in php ea-php84 php8.4 php84 \
+    /usr/local/php84/bin/php \
+    /usr/local/bin/php84 \
+    /usr/local/php8*/bin/php \
     /opt/cpanel/ea-php84/root/usr/bin/php \
     /opt/cpanel/ea-php8*/root/usr/bin/php; do
     if command -v "$candidate" >/dev/null 2>&1 && \
