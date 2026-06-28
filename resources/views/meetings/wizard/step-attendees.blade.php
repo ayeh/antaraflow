@@ -327,6 +327,28 @@
             welcome_message: '',
         },
 
+        // QR Lobby (presentation) state
+        lobbyOpen: false,
+        lobbyTitle: @js($meeting->title),
+        lobbyOrgName: @js($meeting->organization?->name),
+        lobbyOrgLogo: @js($meeting->organization?->logo_path ? Storage::url($meeting->organization->logo_path) : null),
+        lobbyAttendees: [],
+        lobbyCount: 0,
+        lobbyMax: null,
+        lobbyPollId: null,
+        lobbyLoaded: false,
+        countPulse: false,
+        lobbySoundOn: true,
+        lobbyAudioCtx: null,
+        lobbyHero: null,
+        lobbyHeroTimer: null,
+        lobbyBanner: null,
+        lobbyBannerTimer: null,
+        lobbyNewIds: [],
+        lobbyLangs: ['Welcome', 'Selamat Datang', '欢迎', 'नमस्ते', 'مرحبا', 'ようこそ', 'Bienvenue'],
+        lobbyLangIndex: 0,
+        lobbyLangTimer: null,
+
         get qrUrl() {
             return this.qrData ? '{{ url('register') }}/' + this.qrData.token : null;
         },
@@ -426,6 +448,193 @@
                 this.qrSettings.required_fields.splice(idx, 1);
             } else {
                 this.qrSettings.required_fields.push(field);
+            }
+        },
+
+        lobbyInitials(name) {
+            if (!name) return '?';
+            const parts = name.trim().split(/\s+/).filter(Boolean);
+            if (parts.length === 0) return '?';
+            if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        },
+
+        lobbyAvatarColor(name) {
+            const colors = [
+                'from-violet-500 to-purple-600', 'from-pink-500 to-rose-600',
+                'from-blue-500 to-cyan-600', 'from-emerald-500 to-green-600',
+                'from-amber-500 to-orange-600', 'from-indigo-500 to-blue-600',
+                'from-fuchsia-500 to-pink-600', 'from-teal-500 to-emerald-600',
+            ];
+            let hash = 0;
+            for (let i = 0; i < (name || '').length; i++) { hash = (name.charCodeAt(i) + ((hash << 5) - hash)) | 0; }
+            return colors[Math.abs(hash) % colors.length];
+        },
+
+        get lobbyProgress() {
+            if (!this.lobbyMax) { return null; }
+            return Math.min(100, Math.round((this.lobbyCount / this.lobbyMax) * 100));
+        },
+
+        get lobbyRingOffset() {
+            const circumference = 339.292; // 2 * PI * r (r = 54)
+            return circumference - (circumference * (this.lobbyProgress ?? 0) / 100);
+        },
+
+        get lobbyWelcomeWord() {
+            return this.lobbyLangs[this.lobbyLangIndex];
+        },
+
+        async openLobby() {
+            if (!this.qrData) return;
+            this.lobbyOpen = true;
+            this.lobbyLoaded = false;
+            this.lobbyAttendees = [];
+            this.lobbyCount = 0;
+            this.lobbyHero = null;
+            this.lobbyBanner = null;
+            this.lobbyNewIds = [];
+            this.initLobbyAudio();
+            await this.$nextTick();
+            const el = this.$refs.lobbyScreen;
+            if (el && el.requestFullscreen) {
+                el.requestFullscreen().catch(() => {});
+            }
+            await this.fetchLobby();
+            this.lobbyPollId = setInterval(() => this.fetchLobby(), 3000);
+            this.lobbyLangTimer = setInterval(() => {
+                this.lobbyLangIndex = (this.lobbyLangIndex + 1) % this.lobbyLangs.length;
+            }, 2200);
+        },
+
+        closeLobby() {
+            if (this.lobbyPollId) { clearInterval(this.lobbyPollId); this.lobbyPollId = null; }
+            if (this.lobbyLangTimer) { clearInterval(this.lobbyLangTimer); this.lobbyLangTimer = null; }
+            if (this.lobbyHeroTimer) { clearTimeout(this.lobbyHeroTimer); }
+            if (this.lobbyBannerTimer) { clearTimeout(this.lobbyBannerTimer); }
+            if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); }
+            this.lobbyOpen = false;
+        },
+
+        async fetchLobby() {
+            try {
+                const response = await fetch('{{ route('meetings.qr-registration.attendees', $meeting) }}', {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': this.csrfToken() },
+                });
+                if (!response.ok) return;
+                const data = await response.json();
+                const incoming = data.attendees || [];
+                const existingIds = new Set(this.lobbyAttendees.map(a => a.id));
+                const fresh = incoming.filter(a => !existingIds.has(a.id));
+                const prevCount = this.lobbyCount;
+
+                // newest first for display
+                this.lobbyAttendees = incoming.slice().reverse();
+                this.lobbyMax = data.max_attendees || null;
+                const newCount = data.registrations_count ?? incoming.length;
+
+                if (this.lobbyLoaded && fresh.length > 0) {
+                    this.fireConfetti(36);
+                    this.playChime();
+                    this.countPulse = true;
+                    setTimeout(() => { this.countPulse = false; }, 700);
+                    this.showHero(this.lobbyAttendees[0], fresh.length - 1);
+                    this.lobbyNewIds = fresh.map(a => a.id);
+                    setTimeout(() => { this.lobbyNewIds = []; }, 5000);
+                }
+
+                if (this.lobbyLoaded) {
+                    this.checkMilestones(newCount, prevCount);
+                }
+
+                this.lobbyCount = newCount;
+                this.lobbyLoaded = true;
+            } catch (e) {
+                console.error('Lobby poll failed:', e);
+            }
+        },
+
+        showHero(att, extra) {
+            if (!att) return;
+            this.lobbyHero = { name: att.name, company: att.company || null, extra: extra > 0 ? extra : 0 };
+            if (this.lobbyHeroTimer) { clearTimeout(this.lobbyHeroTimer); }
+            this.lobbyHeroTimer = setTimeout(() => { this.lobbyHero = null; }, 2800);
+        },
+
+        checkMilestones(count, prev) {
+            if (!this.lobbyMax || count <= prev) return;
+            const half = Math.ceil(this.lobbyMax / 2);
+            if (this.lobbyMax >= 4 && count >= half && prev < half && count < this.lobbyMax) {
+                this.celebrate('Halfway there!');
+            }
+            if (count >= this.lobbyMax && prev < this.lobbyMax) {
+                this.celebrate("We're full! 🎉");
+            }
+        },
+
+        celebrate(message) {
+            this.lobbyBanner = message;
+            this.fireConfetti(140);
+            if (this.lobbyBannerTimer) { clearTimeout(this.lobbyBannerTimer); }
+            this.lobbyBannerTimer = setTimeout(() => { this.lobbyBanner = null; }, 3600);
+        },
+
+        initLobbyAudio() {
+            try {
+                if (!this.lobbyAudioCtx) {
+                    const Ctx = window.AudioContext || window.webkitAudioContext;
+                    if (Ctx) { this.lobbyAudioCtx = new Ctx(); }
+                }
+                if (this.lobbyAudioCtx && this.lobbyAudioCtx.state === 'suspended') {
+                    this.lobbyAudioCtx.resume();
+                }
+            } catch (e) { /* audio unsupported */ }
+        },
+
+        toggleLobbySound() {
+            this.lobbySoundOn = !this.lobbySoundOn;
+            if (this.lobbySoundOn) { this.initLobbyAudio(); this.playChime(); }
+        },
+
+        playChime() {
+            if (!this.lobbySoundOn || !this.lobbyAudioCtx) return;
+            try {
+                const ctx = this.lobbyAudioCtx;
+                const now = ctx.currentTime;
+                [523.25, 659.25, 783.99].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    const t = now + (i * 0.09);
+                    gain.gain.setValueAtTime(0.0001, t);
+                    gain.gain.linearRampToValueAtTime(0.16, t + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(t);
+                    osc.stop(t + 0.6);
+                });
+            } catch (e) { /* ignore */ }
+        },
+
+        fireConfetti(count = 70) {
+            const container = this.$refs.lobbyConfetti;
+            if (!container) return;
+            const colors = ['#8b5cf6', '#ec4899', '#22c55e', '#f59e0b', '#3b82f6', '#ef4444', '#06b6d4'];
+            for (let i = 0; i < count; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'lobby-confetti-piece';
+                piece.style.left = (Math.random() * 100) + 'vw';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+                piece.style.animationDelay = (Math.random() * 0.3) + 's';
+                const size = (6 + Math.random() * 8);
+                piece.style.width = size + 'px';
+                piece.style.height = size + 'px';
+                if (Math.random() > 0.5) { piece.style.borderRadius = '50%'; }
+                container.appendChild(piece);
+                setTimeout(() => piece.remove(), 5000);
             }
         },
     }"
@@ -924,6 +1133,13 @@
 
                     {{-- Preview: QR Code & Details --}}
                     <div x-show="qrView === 'preview' && qrData" x-cloak class="space-y-3">
+                        {{-- Present / Live Lobby --}}
+                        <button type="button" @click="openLobby()"
+                            class="group w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-200 hover:-translate-y-0.5">
+                            <svg class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2m8-16h2a2 2 0 012 2v2m-4 12h2a2 2 0 002-2v-2"/></svg>
+                            Present Live Lobby
+                        </button>
+
                         {{-- QR Code --}}
                         <div class="flex items-center justify-center p-3 bg-white rounded-lg border border-gray-200 dark:border-slate-600">
                             <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(qrUrl)" alt="QR Code" class="w-40 h-40" />
@@ -1002,4 +1218,227 @@
             </div>
         @endif
     </div>
+
+    {{-- ============================ QR LIVE LOBBY (full-screen) ============================ --}}
+    <div x-ref="lobbyScreen" x-show="lobbyOpen" x-cloak
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[90] overflow-hidden bg-slate-950 text-white"
+        style="background-image: radial-gradient(circle at 20% 20%, rgba(139,92,246,0.18), transparent 45%), radial-gradient(circle at 85% 80%, rgba(236,72,153,0.16), transparent 45%);">
+
+        {{-- Confetti layer --}}
+        <div x-ref="lobbyConfetti" class="pointer-events-none fixed inset-0 z-[60]"></div>
+
+        {{-- (#8) Milestone banner --}}
+        <div x-show="lobbyBanner" x-cloak
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+            class="absolute top-20 left-1/2 -translate-x-1/2 z-[75] pointer-events-none">
+            <div class="px-6 py-3 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 shadow-2xl shadow-fuchsia-900/40 text-lg md:text-2xl font-bold flex items-center gap-2">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4L12 16.9 5.7 21.4 8 14 2 9.4h7.6z"/></svg>
+                <span x-text="lobbyBanner"></span>
+            </div>
+        </div>
+
+        {{-- (#1) Hero welcome moment --}}
+        <div x-show="lobbyHero" x-cloak class="absolute inset-0 z-[80] flex items-center justify-center pointer-events-none">
+            <div class="absolute inset-0 bg-slate-950/55 backdrop-blur-sm"></div>
+            <template x-if="lobbyHero">
+                <div class="lobby-hero-card relative text-center px-8">
+                    <div class="mx-auto w-28 h-28 md:w-40 md:h-40 rounded-full bg-gradient-to-br flex items-center justify-center text-4xl md:text-6xl font-black text-white shadow-2xl ring-4 ring-white/20"
+                        :class="lobbyAvatarColor(lobbyHero.name)" x-text="lobbyInitials(lobbyHero.name)"></div>
+                    <p class="mt-6 text-xl md:text-3xl font-semibold text-violet-200">Welcome,</p>
+                    <p class="mt-1 text-4xl md:text-7xl font-black leading-tight" x-text="lobbyHero.name"></p>
+                    <p x-show="lobbyHero.company" class="mt-2 text-lg md:text-2xl text-white/60" x-text="lobbyHero.company"></p>
+                    <p x-show="lobbyHero.extra > 0" class="mt-3 text-base md:text-xl text-fuchsia-300 font-semibold">
+                        + <span x-text="lobbyHero.extra"></span> more just joined
+                    </p>
+                </div>
+            </template>
+        </div>
+
+        {{-- (#7) Top bar: branding + controls --}}
+        <div class="absolute top-0 inset-x-0 z-[70] flex items-center justify-between px-5 py-4 md:px-8">
+            <div class="flex items-center gap-3 min-w-0">
+                <img x-show="lobbyOrgLogo" :src="lobbyOrgLogo" :alt="lobbyOrgName"
+                    class="w-9 h-9 md:w-11 md:h-11 rounded-xl object-cover border border-white/15 bg-white/5" />
+                <span x-show="lobbyOrgName" class="text-sm md:text-base font-semibold text-white/70 truncate" x-text="lobbyOrgName"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                {{-- (#2) Sound toggle --}}
+                <button type="button" @click="toggleLobbySound()"
+                    :title="lobbySoundOn ? 'Sound on' : 'Sound off'"
+                    class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white backdrop-blur transition-colors">
+                    <svg x-show="lobbySoundOn" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M5 9v6h4l5 4V5L9 9H5z"/></svg>
+                    <svg x-show="!lobbySoundOn" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l4-4m0 4l-4-4M5 9v6h4l5 4V5L9 9H5z"/></svg>
+                </button>
+                <button type="button" @click="closeLobby()"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white backdrop-blur transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Exit
+                </button>
+            </div>
+        </div>
+
+        <div class="relative z-10 h-full w-full flex flex-col px-6 pt-16 pb-8 md:px-12 md:pt-20 md:pb-10">
+            {{-- Header --}}
+            <div class="text-center shrink-0">
+                {{-- (#6) Cycling multi-language welcome --}}
+                <p class="text-xs md:text-sm font-semibold uppercase tracking-[0.3em] text-violet-300/80">
+                    <span x-text="lobbyWelcomeWord"></span> · Scan to Join
+                </p>
+                <h1 class="mt-2 text-2xl md:text-4xl lg:text-5xl font-bold leading-tight" x-text="lobbyTitle"></h1>
+                <p x-show="qrData?.welcome_message" x-cloak class="mt-2 text-sm md:text-lg text-white/60 max-w-2xl mx-auto" x-text="qrData?.welcome_message"></p>
+            </div>
+
+            {{-- Body --}}
+            <div class="flex-1 min-h-0 mt-6 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+                {{-- Scan side --}}
+                <div class="flex flex-col items-center justify-center">
+                    {{-- (#3) QR with animated glow ring --}}
+                    <div class="lobby-qr-glow relative rounded-3xl">
+                        <div class="relative bg-white rounded-3xl p-5 md:p-7 shadow-2xl shadow-violet-900/40">
+                            <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=480x480&margin=8&data=' + encodeURIComponent(qrUrl)"
+                                alt="Scan to register" class="w-52 h-52 md:w-72 md:h-72 lg:w-80 lg:h-80" />
+                        </div>
+                    </div>
+                    {{-- (#6) Idle bobbing scan prompt --}}
+                    <div x-show="lobbyAttendees.length === 0" class="mt-5 lobby-bob inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/20 border border-violet-400/30 text-violet-200 text-sm md:text-base font-medium">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>
+                        Point your camera here to check in
+                    </div>
+                    <div class="mt-6 text-center">
+                        <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">Or enter join code</p>
+                        <p class="mt-1 text-4xl md:text-6xl font-black font-mono tracking-[0.2em] bg-gradient-to-r from-violet-300 to-fuchsia-300 bg-clip-text text-transparent" x-text="qrData?.join_code"></p>
+                    </div>
+                </div>
+
+                {{-- People side --}}
+                <div class="flex flex-col h-full min-h-0">
+                    {{-- Counter / (#5) progress ring --}}
+                    <div class="shrink-0 flex items-center gap-5 justify-center md:justify-start">
+                        {{-- With max: circular progress ring --}}
+                        <div x-show="lobbyMax" x-cloak class="relative w-32 h-32 md:w-40 md:h-40 shrink-0">
+                            <svg class="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="10" />
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="url(#lobbyRingGrad)" stroke-width="10" stroke-linecap="round"
+                                    stroke-dasharray="339.292" :stroke-dashoffset="lobbyRingOffset" class="transition-all duration-700 ease-out" />
+                                <defs>
+                                    <linearGradient id="lobbyRingGrad" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stop-color="#8b5cf6" />
+                                        <stop offset="100%" stop-color="#ec4899" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-4xl md:text-5xl font-black tabular-nums transition-transform duration-300"
+                                    :class="countPulse ? 'scale-125 text-emerald-300' : 'text-white'" x-text="lobbyCount"></span>
+                                <span class="text-xs md:text-sm text-white/40">of <span x-text="lobbyMax"></span></span>
+                            </div>
+                        </div>
+                        {{-- Without max: plain big counter --}}
+                        <div x-show="!lobbyMax" class="text-center md:text-left">
+                            <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">Registered</p>
+                            <span class="text-5xl md:text-7xl font-black tabular-nums transition-transform duration-300 inline-block"
+                                :class="countPulse ? 'scale-125 text-emerald-300' : 'text-white'" x-text="lobbyCount"></span>
+                        </div>
+                        {{-- Label beside ring --}}
+                        <div x-show="lobbyMax" x-cloak>
+                            <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">Checked In</p>
+                            <p class="text-lg md:text-2xl font-bold text-white" x-text="(lobbyProgress ?? 0) + '%'"></p>
+                            <p class="text-xs md:text-sm text-white/40" x-show="lobbyProgress >= 100">Registration full</p>
+                        </div>
+                    </div>
+
+                    {{-- Attendee grid --}}
+                    <div class="flex-1 min-h-0 mt-5 overflow-y-auto pr-1">
+                        {{-- (#6) Empty attract state --}}
+                        <div x-show="lobbyAttendees.length === 0" class="h-full flex flex-col items-center justify-center text-center text-white/50">
+                            <p class="text-3xl md:text-5xl font-black bg-gradient-to-r from-violet-300 to-fuchsia-300 bg-clip-text text-transparent" x-text="lobbyWelcomeWord"></p>
+                            <div class="mt-5 w-14 h-14 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center animate-pulse">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                            </div>
+                            <p class="mt-3 text-sm md:text-base">Waiting for the first guest to scan…</p>
+                        </div>
+
+                        <div x-show="lobbyAttendees.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <template x-for="att in lobbyAttendees" :key="att.id">
+                                {{-- (#4) Newest highlight via lobby-card-new --}}
+                                <div class="lobby-attendee-card flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm transition-shadow"
+                                    :class="lobbyNewIds.includes(att.id) ? 'lobby-card-new' : ''">
+                                    <div class="shrink-0 w-11 h-11 md:w-12 md:h-12 rounded-full bg-gradient-to-br flex items-center justify-center font-bold text-white text-sm md:text-base shadow-lg"
+                                        :class="lobbyAvatarColor(att.name)" x-text="lobbyInitials(att.name)"></div>
+                                    <div class="min-w-0">
+                                        <p class="font-semibold truncate text-base md:text-lg" x-text="att.name"></p>
+                                        <p x-show="att.company" class="text-xs md:text-sm text-white/50 truncate" x-text="att.company"></p>
+                                    </div>
+                                    <span x-show="lobbyNewIds.includes(att.id)" class="ml-auto shrink-0 px-2 py-0.5 text-[10px] md:text-xs font-bold uppercase tracking-wide rounded-full bg-emerald-400/20 text-emerald-300">New</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes lobbyConfettiFall {
+            0% { transform: translateY(-12vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+        .lobby-confetti-piece {
+            position: fixed; top: 0;
+            animation-name: lobbyConfettiFall;
+            animation-timing-function: ease-in;
+            animation-fill-mode: forwards;
+            pointer-events: none;
+        }
+        @keyframes lobbyPop {
+            0% { transform: scale(0.6) translateY(14px); opacity: 0; }
+            60% { transform: scale(1.05) translateY(-2px); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .lobby-attendee-card { animation: lobbyPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+        /* (#4) Newest registrant highlight */
+        @keyframes lobbyNewGlow {
+            0%, 100% { box-shadow: 0 0 0 1px rgba(52,211,153,0.4), 0 0 18px rgba(52,211,153,0.25); }
+            50% { box-shadow: 0 0 0 2px rgba(52,211,153,0.7), 0 0 28px rgba(52,211,153,0.5); }
+        }
+        .lobby-card-new {
+            border-color: rgba(52,211,153,0.6) !important;
+            animation: lobbyNewGlow 1.4s ease-in-out infinite;
+        }
+
+        /* (#3) QR breathing glow */
+        @keyframes lobbyQrGlow {
+            0%, 100% { box-shadow: 0 0 28px 6px rgba(139,92,246,0.35), 0 0 60px 12px rgba(236,72,153,0.18); }
+            50% { box-shadow: 0 0 44px 12px rgba(139,92,246,0.6), 0 0 90px 20px rgba(236,72,153,0.32); }
+        }
+        .lobby-qr-glow { animation: lobbyQrGlow 2.8s ease-in-out infinite; }
+
+        /* (#1) Hero welcome card */
+        @keyframes lobbyHeroIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            55% { transform: scale(1.04); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .lobby-hero-card { animation: lobbyHeroIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+        /* (#6) Idle bobbing prompt */
+        @keyframes lobbyBob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .lobby-bob { animation: lobbyBob 1.6s ease-in-out infinite; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .lobby-qr-glow, .lobby-card-new, .lobby-bob, .lobby-hero-card, .lobby-attendee-card { animation: none; }
+        }
+    </style>
 </div>
