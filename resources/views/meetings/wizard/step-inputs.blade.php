@@ -1090,10 +1090,13 @@
 
                             toggleFullscreen() {
                                 this.isFullscreen = !this.isFullscreen;
+                                const frame = document.getElementById('appContentFrame');
                                 if (this.isFullscreen) {
                                     document.body.style.overflow = 'hidden';
+                                    if (frame) { frame.style.clipPath = 'none'; }
                                 } else {
                                     document.body.style.overflow = '';
+                                    if (frame) { frame.style.clipPath = ''; }
                                 }
                                 this.$nextTick(() => this.$refs.editor.focus());
                             },
