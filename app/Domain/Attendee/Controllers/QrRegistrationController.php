@@ -53,7 +53,7 @@ class QrRegistrationController extends Controller
             'token' => $token->token,
             'join_code' => $token->join_code,
             'url' => $url,
-            'expires_at' => $token->expires_at->toIso8601String(),
+            'expires_at' => $token->expires_at?->toIso8601String(),
             'max_attendees' => $token->max_attendees,
             'required_fields' => $token->required_fields,
             'welcome_message' => $token->welcome_message,

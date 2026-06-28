@@ -33,6 +33,19 @@ test('generates QR registration token', function () {
     ]);
 });
 
+test('generates QR registration token without an expiry and the link works', function () {
+    $response = $this->actingAs($this->user)
+        ->postJson(route('meetings.qr-registration.generate', $this->meeting));
+
+    $response->assertSuccessful();
+    $response->assertJson(['expires_at' => null]);
+
+    $token = QrRegistrationToken::where('minutes_of_meeting_id', $this->meeting->id)->firstOrFail();
+
+    $this->get(route('qr-registration.form', $token->token))
+        ->assertSuccessful();
+});
+
 test('shows registration form with valid token', function () {
     $token = QrRegistrationToken::create([
         'minutes_of_meeting_id' => $this->meeting->id,
