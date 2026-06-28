@@ -568,7 +568,7 @@
                 this.celebrate('Halfway there!');
             }
             if (count >= this.lobbyMax && prev < this.lobbyMax) {
-                this.celebrate("We're full! 🎉");
+                this.celebrate('We\'re full! 🎉');
             }
         },
 
