@@ -17,9 +17,11 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $meeting->title }}</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">{{ $meeting->mom_number }}</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-3">
+            {{-- Meta cluster: live presence + status --}}
+            <div class="flex items-center gap-2">
             {{-- Live Presence Avatars --}}
-            <div x-show="viewerCount > 0" x-cloak class="flex items-center gap-1 mr-1">
+            <div x-show="viewerCount > 0" x-cloak class="flex items-center gap-1">
                 <div class="flex -space-x-2">
                     <template x-for="(initials, index) in viewerInitials.slice(0, 5)" :key="index">
                         <div class="w-7 h-7 rounded-full bg-indigo-500 text-white text-xs font-medium flex items-center justify-center ring-2 ring-white dark:ring-slate-900"
@@ -41,6 +43,10 @@
                 data-meeting-status="{{ $meeting->status->value }}">
                 {{ ucfirst(str_replace('_', ' ', $meeting->status->value)) }}
             </span>
+            </div>
+
+            {{-- Action cluster: overflow menu + primary CTAs --}}
+            <div class="flex items-center gap-2">
 
             {{-- [•••] Overflow Dropdown --}}
             <div class="relative" x-data="{ moreOpen: false }">
@@ -177,7 +183,7 @@
                             .catch(() => { starting = false; })
                         "
                         :disabled="starting"
-                        class="bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-700 transition-colors inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="h-9 px-4 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 transition-colors inline-flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                         <span x-text="starting ? 'Starting...' : 'Live Meeting'"></span>
@@ -189,7 +195,7 @@
             @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress)
                 <form method="POST" action="{{ route('meetings.finalize', $meeting) }}" class="inline">
                     @csrf
-                    <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-yellow-600 transition-colors">Finalize</button>
+                    <button type="submit" class="h-9 px-4 bg-yellow-500 text-white rounded-xl text-sm font-medium hover:bg-yellow-600 transition-colors inline-flex items-center justify-center whitespace-nowrap">Finalize</button>
                 </form>
             @endif
 
@@ -197,9 +203,10 @@
             @if($meeting->status === \App\Support\Enums\MeetingStatus::Finalized)
                 <form method="POST" action="{{ route('meetings.approve', $meeting) }}" class="inline">
                     @csrf
-                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-700 transition-colors">Approve</button>
+                    <button type="submit" class="h-9 px-4 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 transition-colors inline-flex items-center justify-center whitespace-nowrap">Approve</button>
                 </form>
             @endif
+            </div>
         </div>
     </div>
 
@@ -212,19 +219,26 @@
     @include('meetings.wizard.stepper')
 
     {{-- Navigation Buttons --}}
-    <div class="flex justify-between items-center my-4">
+    <div class="flex items-center justify-between gap-3 my-4">
+        {{-- Previous (left) --}}
         <button x-show="activeStep > 1" @click="activeStep--" x-cloak
-            class="inline-flex items-center gap-1 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            class="h-9 px-3 inline-flex items-center gap-1 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            <span x-text="'Previous: ' + ['', 'Setup', 'Attendees', 'Inputs', 'Review'][activeStep - 1]"></span>
+            <span x-text="['', 'Setup', 'Attendees', 'Inputs', 'Review'][activeStep - 1]"></span>
         </button>
-        <div class="ml-auto" x-show="activeStep < 5" x-cloak>
-            <button @click="activeStep++"
-                class="inline-flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white rounded-xl px-5 py-2 text-sm font-medium transition-colors">
-                <span x-text="'Next: ' + ['Attendees', 'Inputs', 'Review', 'Finalize', ''][activeStep - 1]"></span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </button>
-        </div>
+        <div x-show="activeStep === 1" class="h-9"></div>
+
+        {{-- Step indicator (center) --}}
+        <span class="text-xs font-medium text-gray-400 dark:text-slate-500 whitespace-nowrap"
+              x-text="'Step ' + activeStep + ' of 5'"></span>
+
+        {{-- Next (right) --}}
+        <button x-show="activeStep < 5" @click="activeStep++" x-cloak
+            class="h-9 px-4 inline-flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-medium transition-colors whitespace-nowrap">
+            <span x-text="['Attendees', 'Inputs', 'Review', 'Finalize', ''][activeStep - 1]"></span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+        <div x-show="activeStep === 5" class="h-9"></div>
     </div>
 
     {{-- Step Content --}}
