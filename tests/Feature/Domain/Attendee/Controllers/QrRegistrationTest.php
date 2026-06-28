@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Account\Models\Organization;
+use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Attendee\Models\QrRegistrationToken;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Models\User;
@@ -107,4 +108,69 @@ test('rejects registration with inactive token', function () {
     $response = $this->get(route('qr-registration.form', $token->token));
 
     $response->assertStatus(410);
+});
+
+test('returns live attendees and registration count for the lobby', function () {
+    QrRegistrationToken::create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'token' => 'lobby-test-token-111',
+        'is_active' => true,
+        'expires_at' => now()->addHours(24),
+        'max_attendees' => 5,
+        'registrations_count' => 2,
+    ]);
+
+    MomAttendee::factory()->external()->present()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'name' => 'Ariff Walk-In',
+        'company' => 'RocketWeb',
+    ]);
+    MomAttendee::factory()->external()->present()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'name' => 'Second Guest',
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->getJson(route('meetings.qr-registration.attendees', $this->meeting));
+
+    $response->assertSuccessful();
+    $response->assertJson([
+        'is_active' => true,
+        'registrations_count' => 2,
+        'max_attendees' => 5,
+    ]);
+    $response->assertJsonCount(2, 'attendees');
+    $response->assertJsonPath('attendees.0.name', 'Ariff Walk-In');
+    $response->assertJsonPath('attendees.0.company', 'RocketWeb');
+});
+
+test('lobby excludes non-external attendees', function () {
+    QrRegistrationToken::create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'token' => 'lobby-test-token-222',
+        'is_active' => true,
+    ]);
+
+    MomAttendee::factory()->external()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'name' => 'External Guest',
+    ]);
+    MomAttendee::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'name' => 'Internal Member',
+        'is_external' => false,
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->getJson(route('meetings.qr-registration.attendees', $this->meeting));
+
+    $response->assertSuccessful();
+    $response->assertJsonCount(1, 'attendees');
+    $response->assertJsonPath('attendees.0.name', 'External Guest');
+});
+
+test('lobby endpoint requires authentication', function () {
+    $response = $this->getJson(route('meetings.qr-registration.attendees', $this->meeting));
+
+    $response->assertUnauthorized();
 });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Attendee\Controllers;
 
+use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Attendee\Models\QrRegistrationToken;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Support\Enums\AttendeeRole;
@@ -69,6 +70,32 @@ class QrRegistrationController extends Controller
             ->update(['is_active' => false]);
 
         return response()->json(['message' => 'QR registration disabled.']);
+    }
+
+    public function liveAttendees(MinutesOfMeeting $meeting): JsonResponse
+    {
+        $token = QrRegistrationToken::where('minutes_of_meeting_id', $meeting->id)
+            ->where('is_active', true)
+            ->first();
+
+        $attendees = $meeting->attendees()
+            ->where('is_external', true)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get(['id', 'name', 'company', 'created_at'])
+            ->map(fn (MomAttendee $attendee): array => [
+                'id' => $attendee->id,
+                'name' => $attendee->name,
+                'company' => $attendee->company,
+                'registered_at' => $attendee->created_at?->toIso8601String(),
+            ]);
+
+        return response()->json([
+            'is_active' => $token !== null,
+            'registrations_count' => $token?->registrations_count ?? $attendees->count(),
+            'max_attendees' => $token?->max_attendees,
+            'attendees' => $attendees,
+        ]);
     }
 
     public function showForm(string $token): View
