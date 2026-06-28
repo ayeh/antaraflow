@@ -239,6 +239,8 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
         ->name('meetings.qr-registration.generate');
     Route::post('meetings/{meeting}/qr-registration/disable', [QrRegistrationController::class, 'disable'])
         ->name('meetings.qr-registration.disable');
+    Route::get('meetings/{meeting}/qr-registration/attendees', [QrRegistrationController::class, 'liveAttendees'])
+        ->name('meetings.qr-registration.attendees');
 
     // Guest Access Links
     Route::post('meetings/{meeting}/guest-access', [GuestAccessController::class, 'store'])->name('meetings.guest-access.store');
