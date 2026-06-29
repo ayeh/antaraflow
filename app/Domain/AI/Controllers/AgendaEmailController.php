@@ -8,6 +8,7 @@ use App\Domain\AI\Mail\AgendaEmail;
 use App\Domain\AI\Requests\SendAgendaEmailRequest;
 use App\Domain\AI\Services\AgendaEmailService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
@@ -28,11 +29,18 @@ class AgendaEmailController extends Controller
 
         $data = $this->agendaEmailService->generate($meeting);
 
+        $orgMembers = User::query()
+            ->where('current_organization_id', $meeting->organization_id)
+            ->whereNotNull('email')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
+
         return view('meetings.agenda-email', [
             'meeting' => $meeting,
             'subject' => $data['subject'],
             'body' => $data['body'],
             'recipients' => $data['recipients'],
+            'orgMembers' => $orgMembers,
         ]);
     }
 
