@@ -23,6 +23,7 @@ class AddAttendeeRequest extends FormRequest
             'email' => ['nullable', 'email'],
             'role' => ['nullable', Rule::in(array_column(AttendeeRole::cases(), 'value'))],
             'is_external' => ['nullable', 'boolean'],
+            'is_present' => ['nullable', 'boolean'],
             'department' => ['nullable', 'string', 'max:255'],
         ];
     }

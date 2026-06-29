@@ -39,6 +39,26 @@ test('user can add attendee', function () {
     ]);
 });
 
+test('adding a guest marked present persists is_present', function () {
+    $response = $this->actingAs($this->user)->post(
+        route('meetings.attendees.store', $this->meeting),
+        [
+            'name' => 'Datuk Seri Ahmad bin Abdullah',
+            'email' => 'ahmad@example.gov.my',
+            'role' => 'participant',
+            'is_external' => true,
+            'is_present' => true,
+        ]
+    );
+
+    $response->assertRedirect(route('meetings.show', $this->meeting));
+    $this->assertDatabaseHas('mom_attendees', [
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'name' => 'Datuk Seri Ahmad bin Abdullah',
+        'is_present' => true,
+    ]);
+});
+
 test('user can view attendees', function () {
     MomAttendee::factory()->create([
         'minutes_of_meeting_id' => $this->meeting->id,
