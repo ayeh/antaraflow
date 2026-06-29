@@ -55,6 +55,32 @@ test('user can generate agenda email preview', function () {
     $response->assertSee('Send Agenda');
 });
 
+test('generate exposes organization members for import', function () {
+    $colleague = User::factory()->create([
+        'current_organization_id' => $this->org->id,
+        'name' => 'Imported Colleague',
+        'email' => 'colleague@example.com',
+    ]);
+    $this->org->members()->attach($colleague, ['role' => UserRole::Member->value]);
+
+    Http::fake([
+        'api.openai.com/*' => Http::response([
+            'choices' => [['message' => ['content' => json_encode([
+                'subject' => 'Agenda',
+                'body' => 'Please prepare.',
+            ])]]],
+        ]),
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->get(route('meetings.agenda-email.generate', $this->meeting));
+
+    $response->assertSuccessful()
+        ->assertViewHas('orgMembers', fn ($members) => $members->contains('email', 'colleague@example.com'))
+        ->assertSee('Import members')
+        ->assertSee('colleague@example.com', false);
+});
+
 test('agenda context includes the meeting topics', function () {
     Http::fake([
         'api.openai.com/*' => Http::response([
