@@ -76,6 +76,33 @@ test('user can send follow-up email', function () {
     });
 });
 
+test('email body renders markdown as html', function () {
+    $mailable = new FollowUpMeetingEmail(
+        emailSubject: 'Follow-up: Q4 Roadmap',
+        emailBody: "Thank you for attending.\n\n**Key Discussion Points:**\n- Item one\n- Item two",
+        meetingTitle: 'Q4 Roadmap',
+    );
+
+    $rendered = $mailable->render();
+
+    expect($rendered)
+        ->toContain('<strong>Key Discussion Points:</strong>')
+        ->toContain('<li>Item one</li>')
+        ->not->toContain('**Key Discussion Points:**');
+});
+
+test('email body escapes raw html in markdown', function () {
+    $mailable = new FollowUpMeetingEmail(
+        emailSubject: 'Follow-up',
+        emailBody: 'Hello <script>alert(1)</script>',
+        meetingTitle: 'Test',
+    );
+
+    $rendered = $mailable->render();
+
+    expect($rendered)->not->toContain('<script>alert(1)</script>');
+});
+
 test('send validation requires recipients', function () {
     $response = $this->actingAs($this->user)
         ->post(route('meetings.follow-up-email.send', $this->meeting), [
