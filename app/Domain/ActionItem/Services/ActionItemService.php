@@ -6,6 +6,7 @@ namespace App\Domain\ActionItem\Services;
 
 use App\Domain\Account\Services\AuditService;
 use App\Domain\ActionItem\Models\ActionItem;
+use App\Domain\ActionItem\Notifications\ActionItemAssignedNotification;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Events\ActionItemUpdated;
 use App\Models\User;
@@ -29,12 +30,17 @@ class ActionItemService
         $item = ActionItem::query()->create($data);
         $this->auditService->log('created', $item);
 
-        return $item->fresh();
+        $item = $item->fresh();
+        $this->notifyAssigneeChanged($item, null, $user);
+
+        return $item;
     }
 
     /** @param  array<string, mixed>  $data */
     public function update(ActionItem $item, array $data, User $user): ActionItem
     {
+        $previousAssigneeId = $item->assigned_to;
+
         foreach ($data as $field => $newValue) {
             $oldValue = $item->getAttribute($field);
             if ($oldValue != $newValue) {
@@ -65,8 +71,26 @@ class ActionItemService
 
         $item = $item->fresh();
         ActionItemUpdated::dispatch($item);
+        $this->notifyAssigneeChanged($item, $previousAssigneeId, $user);
 
         return $item;
+    }
+
+    /**
+     * Notify the assignee when an action item is assigned to a different user.
+     *
+     * Skips when the assignee is unchanged, cleared, or the user assigned the
+     * item to themselves.
+     */
+    private function notifyAssigneeChanged(ActionItem $item, ?int $previousAssigneeId, User $actor): void
+    {
+        $newAssigneeId = $item->assigned_to;
+
+        if ($newAssigneeId === null || $newAssigneeId === $previousAssigneeId || $newAssigneeId === $actor->id) {
+            return;
+        }
+
+        $item->assignedTo()->first()?->notify(new ActionItemAssignedNotification($item));
     }
 
     public function changeStatus(ActionItem $item, ActionItemStatus $status, User $user, ?string $comment = null): ActionItem
