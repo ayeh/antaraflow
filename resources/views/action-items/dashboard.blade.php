@@ -75,7 +75,7 @@
                                         :indeterminate="selected.length > 0 && !allSelected"
                                         @change="toggleAll()"
                                         title="Select all for bulk actions"
-                                        class="w-4 h-4 rounded border-gray-300 text-violet-600 cursor-pointer focus:ring-violet-500 dark:border-slate-500 dark:bg-slate-700"
+                                        class="w-4 h-4 rounded accent-violet-600 cursor-pointer focus:ring-violet-500 dark:border-slate-500 dark:bg-slate-700"
                                     >
                                 </th>
                                 <th class="w-10 px-2 py-3" title="Mark as complete">
@@ -127,7 +127,7 @@
                                             :checked="selected.includes({{ $item->id }})"
                                             @change="toggle({{ $item->id }})"
                                             title="Select for bulk actions"
-                                            class="w-4 h-4 rounded border-gray-300 text-violet-600 cursor-pointer focus:ring-violet-500 dark:border-slate-500 dark:bg-slate-700"
+                                            class="w-4 h-4 rounded accent-violet-600 cursor-pointer focus:ring-violet-500 dark:border-slate-500 dark:bg-slate-700"
                                         >
                                     </td>
 
@@ -157,7 +157,7 @@
                                                 }).catch(() => { completed = !completed; alert('Failed to update. Please try again.'); })
                                             "
                                             title="Mark as complete"
-                                            class="w-4 h-4 rounded-full border-gray-300 text-green-600 cursor-pointer focus:ring-green-500 dark:border-slate-500 dark:bg-slate-700"
+                                            class="w-4 h-4 accent-green-600 cursor-pointer focus:ring-green-500"
                                         >
                                     </td>
 
