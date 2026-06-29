@@ -154,3 +154,21 @@ test('can delete a meeting', function () {
     expect(MinutesOfMeeting::find($mom->id))->toBeNull()
         ->and(MinutesOfMeeting::withTrashed()->find($mom->id))->not->toBeNull();
 });
+
+test('deleting a meeting soft-deletes its action items', function () {
+    $mom = MinutesOfMeeting::factory()->draft()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $item = \App\Domain\ActionItem\Models\ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $mom->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $this->service->delete($mom);
+
+    expect(\App\Domain\ActionItem\Models\ActionItem::find($item->id))->toBeNull()
+        ->and(\App\Domain\ActionItem\Models\ActionItem::withTrashed()->find($item->id)->trashed())->toBeTrue();
+});

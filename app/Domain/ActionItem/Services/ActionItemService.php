@@ -159,6 +159,7 @@ class ActionItemService
     ): Collection {
         $query = ActionItem::query()
             ->where('organization_id', $organizationId)
+            ->whereHas('meeting')
             ->with(['assignedTo', 'meeting', 'createdBy']);
 
         if ($userId) {
