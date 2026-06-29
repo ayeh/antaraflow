@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Account\Models\Organization;
 use App\Domain\AI\Mail\AgendaEmail;
 use App\Domain\AI\Models\MomTopic;
+use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
@@ -78,6 +79,34 @@ test('agenda context includes the meeting topics', function () {
 
         return false;
     });
+});
+
+test('recipients with attendee emails are embedded safely in x-data', function () {
+    MomAttendee::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'user_id' => null,
+        'name' => 'External Guest',
+        'email' => 'guest@example.com',
+    ]);
+
+    Http::fake([
+        'api.openai.com/*' => Http::response([
+            'choices' => [['message' => ['content' => json_encode([
+                'subject' => 'Agenda',
+                'body' => 'Please prepare.',
+            ])]]],
+        ]),
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->get(route('meetings.agenda-email.generate', $this->meeting));
+
+    // Js::from wraps recipients in JSON.parse(...) with hex-escaped quotes so the
+    // data does not break the x-data="..." attribute. Regression: @json emitted raw
+    // double quotes that truncated the attribute whenever recipients was non-empty.
+    $response->assertSuccessful()
+        ->assertSee('JSON.parse(', false)
+        ->assertDontSee('recipients: ["', false);
 });
 
 test('user can send agenda email', function () {

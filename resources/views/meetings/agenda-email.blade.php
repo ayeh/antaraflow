@@ -19,7 +19,7 @@
     @endif
 
     <form method="POST" action="{{ route('meetings.agenda-email.send', $meeting) }}" class="space-y-6" x-data="{
-        recipients: @json($recipients),
+        recipients: {{ \Illuminate\Support\Js::from($recipients) }},
         newRecipient: '',
         addRecipient() {
             const email = this.newRecipient.trim();
