@@ -35,11 +35,13 @@ class ActionItemController extends Controller
         return view('action-items.index', compact('meeting', 'actionItems', 'currentView'));
     }
 
-    public function create(MinutesOfMeeting $meeting): View
+    public function create(Request $request, MinutesOfMeeting $meeting): View
     {
         $this->authorize('create', ActionItem::class);
 
-        return view('action-items.create', compact('meeting'));
+        $users = $this->assignableUsers($request->user()->current_organization_id);
+
+        return view('action-items.create', compact('meeting', 'users'));
     }
 
     public function store(CreateActionItemRequest $request, MinutesOfMeeting $meeting): RedirectResponse
@@ -59,9 +61,7 @@ class ActionItemController extends Controller
         $actionItem->load(['assignedTo', 'createdBy', 'histories.changedBy', 'carriedFrom', 'carriedTo']);
 
         if ($request->wantsJson()) {
-            $users = User::where('current_organization_id', $request->user()->current_organization_id)
-                ->orderBy('name')
-                ->get(['id', 'name']);
+            $users = $this->assignableUsers($request->user()->current_organization_id);
 
             return response()->json([
                 'id' => $actionItem->id,
@@ -97,11 +97,13 @@ class ActionItemController extends Controller
         return view('action-items.show', compact('meeting', 'actionItem'));
     }
 
-    public function edit(MinutesOfMeeting $meeting, ActionItem $actionItem): View
+    public function edit(Request $request, MinutesOfMeeting $meeting, ActionItem $actionItem): View
     {
         $this->authorize('update', $actionItem);
 
-        return view('action-items.edit', compact('meeting', 'actionItem'));
+        $users = $this->assignableUsers($request->user()->current_organization_id);
+
+        return view('action-items.edit', compact('meeting', 'actionItem', 'users'));
     }
 
     public function update(UpdateActionItemRequest $request, MinutesOfMeeting $meeting, ActionItem $actionItem): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
@@ -170,5 +172,21 @@ class ActionItemController extends Controller
 
         return redirect()->route('meetings.show', ['meeting' => $meeting, 'step' => 4])
             ->with('success', "{$count} action item(s) marked as tasks created.");
+    }
+
+    /**
+     * Members of the organization who can be assigned an action item.
+     *
+     * Uses organization membership (the organization_user pivot) rather than a
+     * user's currently-active organization, so every member is assignable and
+     * the list matches the validation rule in UpdateActionItemRequest.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, User>
+     */
+    private function assignableUsers(int $organizationId): \Illuminate\Database\Eloquent\Collection
+    {
+        return User::whereHas('organizations', fn ($query) => $query->whereKey($organizationId))
+            ->orderBy('name')
+            ->get(['id', 'name']);
     }
 }
