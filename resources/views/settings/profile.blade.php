@@ -7,12 +7,6 @@
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Update your name, timezone and locale preferences</p>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3 text-sm text-green-700 dark:text-green-400">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <form method="POST" action="{{ route('settings.profile.update') }}" class="space-y-6">
         @csrf
         @method('PUT')

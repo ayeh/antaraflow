@@ -7,12 +7,6 @@
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your password and account security</p>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3 text-sm text-green-700 dark:text-green-400">
-            {{ session('success') }}
-        </div>
-    @endif
-
     {{-- Change Password --}}
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Change Password</h2>

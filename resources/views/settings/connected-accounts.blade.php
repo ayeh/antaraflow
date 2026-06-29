@@ -7,12 +7,6 @@
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your social login connections</p>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3 text-sm text-green-700 dark:text-green-400">
-            {{ session('success') }}
-        </div>
-    @endif
-
     @if($errors->has('social'))
         <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 text-sm text-red-700 dark:text-red-400">
             {{ $errors->first('social') }}
