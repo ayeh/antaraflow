@@ -153,6 +153,48 @@ test('dashboard ignores action items whose meeting was soft-deleted', function (
     expect($response->viewData('actionItems')->pluck('id'))->not->toContain($orphan->id);
 });
 
+test('assignee list includes all org members regardless of their active organization', function () {
+    $otherOrg = Organization::factory()->create();
+    $member = User::factory()->create([
+        'name' => 'Other Org Member',
+        'current_organization_id' => $otherOrg->id,
+    ]);
+    $this->org->members()->attach($member, ['role' => UserRole::Member->value]);
+
+    $item = ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->getJson(route('meetings.action-items.show', [$this->meeting, $item]));
+
+    $response->assertSuccessful();
+
+    $ids = collect($response->json('users'))->pluck('id');
+    expect($ids)->toContain($member->id)
+        ->and($ids)->toContain($this->user->id);
+});
+
+test('assignee list excludes users who are not members of the organization', function () {
+    $outsider = User::factory()->create(['current_organization_id' => $this->org->id]);
+
+    $item = ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $response = $this->actingAs($this->user)
+        ->getJson(route('meetings.action-items.show', [$this->meeting, $item]));
+
+    $response->assertSuccessful();
+
+    $ids = collect($response->json('users'))->pluck('id');
+    expect($ids)->not->toContain($outsider->id);
+});
+
 test('user can update action item', function () {
     $item = ActionItem::factory()->create([
         'organization_id' => $this->org->id,
