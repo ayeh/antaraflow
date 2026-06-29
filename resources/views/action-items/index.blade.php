@@ -76,10 +76,15 @@
                                         :checked="allSelected"
                                         :indeterminate="selected.length > 0 && !allSelected"
                                         @change="toggleAll()"
+                                        title="Select all for bulk actions"
                                         class="w-4 h-4 rounded border-gray-300 text-violet-600 cursor-pointer focus:ring-violet-500 dark:border-slate-500 dark:bg-slate-700"
                                     >
                                 </th>
-                                <th class="w-10 px-2 py-3"></th>
+                                <th class="w-10 px-2 py-3" title="Mark as complete">
+                                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </th>
                                 <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
                                 <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                                 <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Priority</th>
@@ -124,6 +129,7 @@
                                             type="checkbox"
                                             :checked="selected.includes({{ $item->id }})"
                                             @change="toggle({{ $item->id }})"
+                                            title="Select for bulk actions"
                                             class="w-4 h-4 rounded border-gray-300 text-violet-600 cursor-pointer focus:ring-violet-500 dark:border-slate-500 dark:bg-slate-700"
                                         >
                                     </td>
@@ -152,7 +158,8 @@
                                                     }
                                                 }).catch(() => { completed = !completed; alert('Failed to update. Please try again.'); })
                                             "
-                                            class="w-4 h-4 rounded border-gray-300 text-violet-600 cursor-pointer focus:ring-violet-500 dark:border-slate-500 dark:bg-slate-700"
+                                            title="Mark as complete"
+                                            class="w-4 h-4 rounded-full border-gray-300 text-green-600 cursor-pointer focus:ring-green-500 dark:border-slate-500 dark:bg-slate-700"
                                         >
                                     </td>
 

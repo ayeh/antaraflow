@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Account\Models\Organization;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\ActionItem\Models\ActionItemHistory;
+use App\Domain\ActionItem\Notifications\ActionItemAssignedNotification;
 use App\Domain\ActionItem\Services\ActionItemService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Models\User;
@@ -12,6 +13,7 @@ use App\Support\Enums\ActionItemPriority;
 use App\Support\Enums\ActionItemStatus;
 use App\Support\Enums\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 
 uses(RefreshDatabase::class);
 
@@ -349,4 +351,70 @@ test('getDashboard with explicit cancelled filter shows cancelled items', functi
     );
 
     expect($results)->toHaveCount(1);
+});
+
+test('assigning an action item to another user notifies the assignee', function () {
+    Notification::fake();
+
+    $assignee = User::factory()->create(['current_organization_id' => $this->org->id]);
+    $this->org->members()->attach($assignee, ['role' => UserRole::Member->value]);
+
+    $item = ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'assigned_to' => null,
+    ]);
+
+    app(ActionItemService::class)->update($item, ['assigned_to' => $assignee->id], $this->user);
+
+    Notification::assertSentTo($assignee, ActionItemAssignedNotification::class);
+});
+
+test('creating an action item assigned to another user notifies them', function () {
+    Notification::fake();
+
+    $assignee = User::factory()->create(['current_organization_id' => $this->org->id]);
+    $this->org->members()->attach($assignee, ['role' => UserRole::Member->value]);
+
+    app(ActionItemService::class)->create([
+        'title' => 'Prepare report',
+        'priority' => ActionItemPriority::High,
+        'assigned_to' => $assignee->id,
+    ], $this->meeting, $this->user);
+
+    Notification::assertSentTo($assignee, ActionItemAssignedNotification::class);
+});
+
+test('assigning an action item to yourself does not notify', function () {
+    Notification::fake();
+
+    $item = ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'assigned_to' => null,
+    ]);
+
+    app(ActionItemService::class)->update($item, ['assigned_to' => $this->user->id], $this->user);
+
+    Notification::assertNothingSent();
+});
+
+test('updating an action item without changing the assignee does not notify', function () {
+    Notification::fake();
+
+    $assignee = User::factory()->create(['current_organization_id' => $this->org->id]);
+    $this->org->members()->attach($assignee, ['role' => UserRole::Member->value]);
+
+    $item = ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'assigned_to' => $assignee->id,
+    ]);
+
+    app(ActionItemService::class)->update($item, ['title' => 'Renamed task'], $this->user);
+
+    Notification::assertNothingSent();
 });
