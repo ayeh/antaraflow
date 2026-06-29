@@ -135,6 +135,24 @@ test('user can view action items dashboard', function () {
     $response->assertViewHas('actionItems');
 });
 
+test('dashboard ignores action items whose meeting was soft-deleted', function () {
+    $orphan = ActionItem::factory()->create([
+        'organization_id' => $this->org->id,
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'created_by' => $this->user->id,
+        'status' => ActionItemStatus::Open,
+        'title' => 'Orphaned item',
+    ]);
+
+    $this->meeting->delete();
+
+    $response = $this->actingAs($this->user)
+        ->get(route('action-items.dashboard'));
+
+    $response->assertSuccessful();
+    expect($response->viewData('actionItems')->pluck('id'))->not->toContain($orphan->id);
+});
+
 test('user can update action item', function () {
     $item = ActionItem::factory()->create([
         'organization_id' => $this->org->id,

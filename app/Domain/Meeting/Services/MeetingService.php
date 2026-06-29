@@ -181,6 +181,7 @@ class MeetingService
     public function delete(MinutesOfMeeting $mom): void
     {
         $this->auditService->log('deleted', $mom);
+        $mom->actionItems()->delete();
         $mom->delete();
     }
 }
