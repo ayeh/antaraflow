@@ -13,6 +13,7 @@ enum ExtractionType: string
     case Risks = 'risks';
     case FollowUpEmail = 'follow_up_email';
     case MeetingPreparation = 'meeting_preparation';
+    case AgendaEmail = 'agenda_email';
 
     public function label(): string
     {
@@ -24,6 +25,7 @@ enum ExtractionType: string
             self::Risks => 'Risks',
             self::FollowUpEmail => 'Follow-up Email',
             self::MeetingPreparation => 'Meeting Preparation',
+            self::AgendaEmail => 'Agenda Email',
         };
     }
 }

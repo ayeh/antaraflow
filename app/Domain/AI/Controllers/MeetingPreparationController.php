@@ -44,12 +44,11 @@ class MeetingPreparationController extends Controller
             'agenda.*' => ['required', 'string', 'max:500'],
         ]);
 
-        $metadata = $meeting->metadata ?? [];
-        $metadata['agenda'] = $validated['agenda'];
-        $meeting->update(['metadata' => $metadata]);
+        $topicsCreated = $this->preparationService->applyAgenda($meeting, $validated['agenda']);
 
         return response()->json([
             'message' => 'Agenda applied successfully.',
+            'topics_created' => $topicsCreated,
         ]);
     }
 }

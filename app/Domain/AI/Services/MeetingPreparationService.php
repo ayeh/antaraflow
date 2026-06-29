@@ -49,6 +49,28 @@ class MeetingPreparationService
         return $this->parseResponse($response);
     }
 
+    /**
+     * Persist the selected agenda items as meeting topics.
+     *
+     * Items are appended after any existing topics, preserving their order.
+     *
+     * @param  list<string>  $agenda
+     * @return int Number of topics created.
+     */
+    public function applyAgenda(MinutesOfMeeting $mom, array $agenda): int
+    {
+        $startOrder = (int) $mom->topics()->max('sort_order');
+
+        foreach (array_values($agenda) as $index => $title) {
+            $mom->topics()->create([
+                'title' => $title,
+                'sort_order' => $startOrder + $index + 1,
+            ]);
+        }
+
+        return count($agenda);
+    }
+
     private function buildContext(MinutesOfMeeting $mom): string
     {
         $parts = [];
