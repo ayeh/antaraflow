@@ -301,6 +301,10 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
         Route::get('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'generate'])->name('prepare-agenda.generate');
         Route::post('prepare-agenda', [\App\Domain\AI\Controllers\MeetingPreparationController::class, 'apply'])->name('prepare-agenda.apply');
 
+        // Agenda Email (pre-meeting)
+        Route::get('agenda-email', [\App\Domain\AI\Controllers\AgendaEmailController::class, 'generate'])->name('agenda-email.generate');
+        Route::post('agenda-email', [\App\Domain\AI\Controllers\AgendaEmailController::class, 'send'])->name('agenda-email.send');
+
         // Prep Brief
         Route::get('prep-brief', [PrepBriefController::class, 'show'])->name('prep-brief');
         Route::post('prep-brief/generate', [PrepBriefController::class, 'generate'])->name('prep-brief.generate');

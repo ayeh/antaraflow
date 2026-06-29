@@ -6,6 +6,7 @@ use App\Domain\Account\Models\Organization;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\AI\Models\ExtractionTemplate;
 use App\Domain\AI\Models\MomExtraction;
+use App\Domain\AI\Models\MomTopic;
 use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Project\Models\Project;
@@ -169,7 +170,7 @@ test('generate includes open action items for attendees', function () {
     });
 });
 
-test('apply saves agenda to meeting metadata', function () {
+test('apply creates meeting topics from agenda', function () {
     $response = $this->actingAs($this->user)
         ->postJson(route('meetings.prepare-agenda.apply', $this->meeting), [
             'agenda' => [
@@ -180,13 +181,33 @@ test('apply saves agenda to meeting metadata', function () {
         ]);
 
     $response->assertSuccessful()
-        ->assertJsonPath('message', 'Agenda applied successfully.');
+        ->assertJsonPath('message', 'Agenda applied successfully.')
+        ->assertJsonPath('topics_created', 3);
 
-    $this->meeting->refresh();
+    $topics = $this->meeting->refresh()->topics()->orderBy('sort_order')->get();
 
-    expect($this->meeting->metadata)->toHaveKey('agenda')
-        ->and($this->meeting->metadata['agenda'])->toHaveCount(3)
-        ->and($this->meeting->metadata['agenda'][0])->toBe('Review action items');
+    expect($topics)->toHaveCount(3)
+        ->and($topics[0]->title)->toBe('Review action items')
+        ->and($topics[2]->title)->toBe('Plan next sprint');
+});
+
+test('apply appends agenda after existing topics', function () {
+    MomTopic::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'title' => 'Existing topic',
+        'sort_order' => 5,
+    ]);
+
+    $this->actingAs($this->user)
+        ->postJson(route('meetings.prepare-agenda.apply', $this->meeting), [
+            'agenda' => ['New agenda item'],
+        ])->assertSuccessful();
+
+    $topics = $this->meeting->refresh()->topics()->orderBy('sort_order')->get();
+
+    expect($topics)->toHaveCount(2)
+        ->and($topics->last()->title)->toBe('New agenda item')
+        ->and($topics->last()->sort_order)->toBe(6);
 });
 
 test('cannot generate for approved meeting', function () {

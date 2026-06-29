@@ -104,6 +104,29 @@
         @endif
     </div>
 
+    {{-- Agenda --}}
+    @if($meeting->topics->isNotEmpty())
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Agenda</h2>
+            <ol class="space-y-2">
+                @foreach($meeting->topics->sortBy('sort_order') as $topic)
+                    <li class="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-slate-700/50">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-semibold flex items-center justify-center">{{ $loop->iteration }}</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-800 dark:text-slate-200">{{ $topic->title }}</p>
+                            @if($topic->description)
+                                <p class="text-sm text-gray-500 dark:text-slate-400 mt-0.5 leading-relaxed">{{ $topic->description }}</p>
+                            @endif
+                        </div>
+                        @if($topic->duration_minutes)
+                            <span class="flex-shrink-0 text-xs text-gray-400 dark:text-slate-500">{{ $topic->duration_minutes }} min</span>
+                        @endif
+                    </li>
+                @endforeach
+            </ol>
+        </div>
+    @endif
+
     {{-- Tags --}}
     @if($meeting->tags->isNotEmpty())
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
