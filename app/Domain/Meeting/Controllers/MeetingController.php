@@ -12,6 +12,7 @@ use App\Domain\Analytics\Services\AnalyticsEventService;
 use App\Domain\Calendar\Services\CalendarSyncService;
 use App\Domain\Collaboration\Services\CommentService;
 use App\Domain\Collaboration\Services\ShareService;
+use App\Domain\Meeting\Models\MeetingTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Meeting\Requests\CreateMeetingRequest;
 use App\Domain\Meeting\Requests\UpdateMeetingRequest;
@@ -102,13 +103,25 @@ class MeetingController extends Controller
         return response()->json(array_merge($momItems, $externalItems));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         $this->authorize('create', MinutesOfMeeting::class);
 
         $projects = Project::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']);
 
-        return view('meetings.create', compact('projects'));
+        $templates = MeetingTemplate::query()
+            ->where(function ($q) use ($request) {
+                $q->where('is_shared', true)
+                    ->orWhere('created_by', $request->user()->id);
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'description', 'is_default']);
+
+        $selectedTemplate = $request->query('template_id')
+            ? $templates->firstWhere('id', (int) $request->query('template_id'))
+            : $templates->firstWhere('is_default', true);
+
+        return view('meetings.create', compact('projects', 'templates', 'selectedTemplate'));
     }
 
     public function store(CreateMeetingRequest $request): RedirectResponse

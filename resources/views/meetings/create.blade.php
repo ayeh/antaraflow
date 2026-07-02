@@ -13,6 +13,43 @@
     <form method="POST" action="{{ route('meetings.store') }}" class="space-y-6">
         @csrf
 
+        {{-- Template Selector --}}
+        @if($templates->isNotEmpty())
+        <div x-data="{
+            selectedId: '{{ old('meeting_template_id', $selectedTemplate?->id ?? '') }}',
+            get selectedName() {
+                const t = this.templates.find(t => String(t.id) === String(this.selectedId));
+                return t ? t.name : null;
+            },
+            templates: {{ $templates->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->toJson() }}
+        }" class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Template</h2>
+                <a href="{{ route('meeting-templates.index') }}" class="text-xs text-violet-600 dark:text-violet-400 hover:underline">Manage templates</a>
+            </div>
+
+            <div>
+                <select name="meeting_template_id" id="meeting_template_id" x-model="selectedId"
+                    class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    <option value="">— No template —</option>
+                    @foreach($templates as $template)
+                        <option value="{{ $template->id }}" {{ old('meeting_template_id', $selectedTemplate?->id) == $template->id ? 'selected' : '' }}>
+                            {{ $template->name }}{{ $template->is_default ? ' (Default)' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('meeting_template_id')
+                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div x-show="selectedName" x-cloak class="flex items-center gap-2 text-sm text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20 rounded-lg px-3 py-2">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Using template: <strong x-text="selectedName"></strong></span>
+            </div>
+        </div>
+        @endif
+
         {{-- Basic Information --}}
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-5">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Basic Information</h2>
