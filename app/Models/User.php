@@ -6,11 +6,13 @@ namespace App\Models;
 
 use App\Domain\Account\Models\Organization;
 use App\Domain\Account\Models\SocialAccount;
+use App\Domain\Admin\Models\Admin;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -68,5 +70,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function socialAccounts(): HasMany
     {
         return $this->hasMany(SocialAccount::class);
+    }
+
+    public function adminAccount(): HasOne
+    {
+        return $this->hasOne(Admin::class);
     }
 }

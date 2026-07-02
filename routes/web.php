@@ -100,6 +100,9 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Admin Panel switch (superadmins only)
+    Route::post('switch-to-admin', [\App\Domain\Admin\Controllers\AdminSwitchController::class, 'toAdmin'])->name('switch-to-admin');
+
     // Global Search
     Route::get('search', [SearchController::class, 'index'])->name('search');
     Route::post('search/ai', \App\Domain\Search\Controllers\AiSearchController::class)->name('search.ai');
