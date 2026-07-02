@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Account\Models\Organization;
 use App\Domain\ActionItem\Models\ActionItem;
+use App\Domain\Meeting\Models\MeetingTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Project\Models\Project;
 use App\Models\User;
@@ -295,4 +296,55 @@ test('calendar data defaults to current month', function () {
 
 test('unauthenticated user cannot fetch calendar data', function () {
     $this->get(route('meetings.calendar-data'))->assertRedirect();
+});
+
+test('create form shows templates when available', function () {
+    MeetingTemplate::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'name' => 'Weekly Sync',
+        'is_shared' => true,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('meetings.create'));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('templates');
+    $response->assertSee('Weekly Sync');
+});
+
+test('create form pre-selects template from query string', function () {
+    $template = MeetingTemplate::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'name' => 'Board Meeting Template',
+        'is_shared' => true,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('meetings.create', ['template_id' => $template->id]));
+
+    $response->assertSuccessful();
+    $response->assertViewHas('selectedTemplate', fn ($selected) => $selected?->id === $template->id);
+});
+
+test('meeting is created with template association', function () {
+    $template = MeetingTemplate::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'is_shared' => true,
+    ]);
+
+    $response = $this->actingAs($this->user)->post(route('meetings.store'), [
+        'title' => 'Templated Meeting',
+        'meeting_date' => '2026-04-01',
+        'prepared_by' => 'Jane Doe',
+        'meeting_template_id' => $template->id,
+    ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('minutes_of_meetings', [
+        'title' => 'Templated Meeting',
+        'meeting_template_id' => $template->id,
+        'organization_id' => $this->org->id,
+    ]);
 });

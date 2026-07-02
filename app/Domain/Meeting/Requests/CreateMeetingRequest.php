@@ -17,6 +17,7 @@ class CreateMeetingRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'meeting_template_id' => ['nullable', 'exists:meeting_templates,id'],
             'title' => ['required', 'string', 'max:255'],
             'project_id' => ['nullable', 'exists:projects,id'],
             'meeting_date' => ['required', 'date'],
