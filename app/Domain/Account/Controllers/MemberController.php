@@ -6,6 +6,7 @@ namespace App\Domain\Account\Controllers;
 
 use App\Domain\Account\Models\Organization;
 use App\Domain\Account\Requests\InviteMemberRequest;
+use App\Domain\Account\Services\AuthorizationService;
 use App\Domain\Account\Services\OrganizationService;
 use App\Models\User;
 use App\Support\Enums\UserRole;
@@ -14,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class MemberController extends Controller
 {
@@ -21,17 +23,24 @@ class MemberController extends Controller
 
     public function __construct(
         private OrganizationService $organizationService,
+        private AuthorizationService $authorizationService,
     ) {}
 
-    public function index(Organization $organization): View
+    public function index(Request $request, Organization $organization): View
     {
         $this->authorize('view', $organization);
 
+        $user = $request->user();
         $members = $organization->members;
         $invitations = $organization->invitations()->pending()->latest()->get();
-        $roles = UserRole::cases();
+        $assignableRoles = $this->authorizationService->assignableRoles($user, $organization);
+        $manageable = $members
+            ->mapWithKeys(fn (User $member): array => [
+                $member->id => $this->authorizationService->canManageMember($user, $organization, $member),
+            ])
+            ->all();
 
-        return view('organizations.members.index', compact('organization', 'members', 'invitations', 'roles'));
+        return view('organizations.members.index', compact('organization', 'members', 'invitations', 'assignableRoles', 'manageable'));
     }
 
     public function store(InviteMemberRequest $request, Organization $organization): RedirectResponse
@@ -63,6 +72,12 @@ class MemberController extends Controller
 
         $newRole = UserRole::from($validated['role']);
 
+        abort_unless(
+            $this->authorizationService->canManageMember($request->user(), $organization, $member)
+                && $this->authorizationService->canAssignRole($request->user(), $organization, $newRole),
+            Response::HTTP_FORBIDDEN,
+        );
+
         if ($newRole !== UserRole::Owner && $this->isLastOwner($organization, $member)) {
             return redirect()->back()->withErrors([
                 'role' => 'You cannot change the role of the last owner.',
@@ -81,6 +96,11 @@ class MemberController extends Controller
             ->firstOrFail();
 
         $this->authorize('manageMembers', $organization);
+
+        abort_unless(
+            $this->authorizationService->canManageMember($request->user(), $organization, $member),
+            Response::HTTP_FORBIDDEN,
+        );
 
         if ($this->isLastOwner($organization, $member)) {
             return redirect()->back()->withErrors([

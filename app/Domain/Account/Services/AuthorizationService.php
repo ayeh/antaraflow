@@ -19,6 +19,15 @@ class AuthorizationService
         'viewer' => ['view_meeting'],
     ];
 
+    /** @var array<string, int> */
+    private const array ROLE_HIERARCHY = [
+        'viewer' => 0,
+        'member' => 1,
+        'manager' => 2,
+        'admin' => 3,
+        'owner' => 4,
+    ];
+
     public function getUserRole(User $user, Organization $organization): ?UserRole
     {
         $membership = $user->organizations()->where('organization_id', $organization->id)->first();
@@ -49,14 +58,64 @@ class AuthorizationService
             return false;
         }
 
-        $hierarchy = [
-            UserRole::Viewer->value => 0,
-            UserRole::Member->value => 1,
-            UserRole::Manager->value => 2,
-            UserRole::Admin->value => 3,
-            UserRole::Owner->value => 4,
-        ];
+        return $this->roleLevel($role) >= $this->roleLevel($minimumRole);
+    }
 
-        return ($hierarchy[$role->value] ?? -1) >= ($hierarchy[$minimumRole->value] ?? 999);
+    public function roleLevel(UserRole $role): int
+    {
+        return self::ROLE_HIERARCHY[$role->value] ?? -1;
+    }
+
+    /**
+     * Whether the actor is allowed to grant the given role. Owners may grant any
+     * role; everyone else may only grant roles strictly below their own.
+     */
+    public function canAssignRole(User $actor, Organization $organization, UserRole $role): bool
+    {
+        $actorRole = $this->getUserRole($actor, $organization);
+
+        if (! $actorRole) {
+            return false;
+        }
+
+        if ($actorRole === UserRole::Owner) {
+            return true;
+        }
+
+        return $this->roleLevel($role) < $this->roleLevel($actorRole);
+    }
+
+    /**
+     * Whether the actor is allowed to modify or remove the target member. Owners may
+     * manage anyone; everyone else may only manage members whose current role is
+     * strictly below their own (so admins cannot touch owners, other admins, or themselves).
+     */
+    public function canManageMember(User $actor, Organization $organization, User $target): bool
+    {
+        $actorRole = $this->getUserRole($actor, $organization);
+        $targetRole = $this->getUserRole($target, $organization);
+
+        if (! $actorRole || ! $targetRole) {
+            return false;
+        }
+
+        if ($actorRole === UserRole::Owner) {
+            return true;
+        }
+
+        return $this->roleLevel($targetRole) < $this->roleLevel($actorRole);
+    }
+
+    /**
+     * The roles the actor is permitted to assign within the organization.
+     *
+     * @return array<int, UserRole>
+     */
+    public function assignableRoles(User $actor, Organization $organization): array
+    {
+        return array_values(array_filter(
+            UserRole::cases(),
+            fn (UserRole $role): bool => $this->canAssignRole($actor, $organization, $role),
+        ));
     }
 }
