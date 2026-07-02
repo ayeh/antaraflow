@@ -10,6 +10,7 @@ use App\Domain\Report\Generators\MonthlySummaryGenerator;
 use App\Domain\Report\Jobs\GenerateReportJob;
 use App\Domain\Report\Models\GeneratedReport;
 use App\Domain\Report\Models\ReportTemplate;
+use App\Domain\Report\Services\ReportGeneratorService;
 use App\Models\User;
 use App\Support\Enums\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -75,6 +76,25 @@ test('action item status generator produces PDF file', function () {
 
     expect($filePath)->toContain('action-item-status');
     Storage::disk('local')->assertExists($filePath);
+});
+
+test('service generates report without an authenticated user, as when run from a queue worker', function () {
+    $template = ReportTemplate::factory()->monthlySummary()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'filters' => [
+            'start_date' => now()->subMonth()->startOfMonth()->toDateString(),
+            'end_date' => now()->subMonth()->endOfMonth()->toDateString(),
+        ],
+    ]);
+
+    Storage::fake('local');
+
+    expect(auth()->check())->toBeFalse();
+
+    $generatedReport = app(ReportGeneratorService::class)->generate($template);
+
+    expect($generatedReport->organization_id)->toBe($this->org->id);
 });
 
 test('on-demand generate dispatches job', function () {
