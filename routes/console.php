@@ -19,6 +19,8 @@ Schedule::job(GenerateDailyAnalyticsSnapshotJob::class)->dailyAt('01:00');
 
 Schedule::command('transcription:cleanup-chunks')->hourly();
 
+Schedule::command('calendar:notify-upcoming')->everyFiveMinutes();
+
 Schedule::command('reports:generate-scheduled')->hourly();
 
 Schedule::job(new CheckStaleDecisionsJob)->weeklyOn(1, '09:00');

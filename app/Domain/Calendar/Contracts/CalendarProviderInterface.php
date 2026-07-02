@@ -6,6 +6,7 @@ namespace App\Domain\Calendar\Contracts;
 
 use App\Domain\Calendar\Models\CalendarConnection;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 
 interface CalendarProviderInterface
@@ -25,6 +26,13 @@ interface CalendarProviderInterface
 
     /** @return array<int, array{id: string, name: string}> */
     public function listCalendars(CalendarConnection $connection): array;
+
+    /**
+     * List timed events starting within the given window.
+     *
+     * @return array<int, array{id: string, title: string, start: CarbonInterface}>
+     */
+    public function listUpcomingEvents(CalendarConnection $connection, CarbonInterface $from, CarbonInterface $to): array;
 
     public function registerWebhook(CalendarConnection $connection): void;
 

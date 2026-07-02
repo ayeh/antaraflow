@@ -7,7 +7,9 @@ namespace App\Domain\Calendar\Providers;
 use App\Domain\Calendar\Contracts\CalendarProviderInterface;
 use App\Domain\Calendar\Models\CalendarConnection;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -122,6 +124,32 @@ class GoogleCalendarProvider implements CalendarProviderInterface
             ->map(fn (array $calendar): array => [
                 'id' => $calendar['id'],
                 'name' => $calendar['summary'] ?? $calendar['id'],
+            ])
+            ->values()
+            ->all();
+    }
+
+    /** @return array<int, array{id: string, title: string, start: CarbonInterface}> */
+    public function listUpcomingEvents(CalendarConnection $connection, CarbonInterface $from, CarbonInterface $to): array
+    {
+        $calendarId = $connection->calendar_id ?? 'primary';
+
+        $response = Http::withToken($connection->access_token)
+            ->get(self::CALENDAR_API."/calendars/{$calendarId}/events", [
+                'timeMin' => $from->toRfc3339String(),
+                'timeMax' => $to->toRfc3339String(),
+                'singleEvents' => 'true',
+                'orderBy' => 'startTime',
+            ]);
+
+        $response->throw();
+
+        return collect($response->json('items', []))
+            ->filter(fn (array $event): bool => isset($event['start']['dateTime']))
+            ->map(fn (array $event): array => [
+                'id' => $event['id'],
+                'title' => $event['summary'] ?? '(no title)',
+                'start' => Carbon::parse($event['start']['dateTime']),
             ])
             ->values()
             ->all();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Account\Models\Organization;
 use App\Domain\Calendar\Models\CalendarConnection;
+use App\Domain\Calendar\Notifications\CalendarMeetingStartingNotification;
 use App\Domain\Calendar\Providers\GoogleCalendarProvider;
 use App\Domain\Calendar\Providers\OutlookCalendarProvider;
 use App\Domain\Calendar\Services\CalendarSyncService;
@@ -11,7 +12,9 @@ use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Models\User;
 use App\Support\Enums\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 
 uses(RefreshDatabase::class);
 
@@ -20,6 +23,8 @@ beforeEach(function () {
     $this->org = Organization::factory()->create();
     $this->org->members()->attach($this->user, ['role' => UserRole::Owner->value]);
     $this->user->update(['current_organization_id' => $this->org->id]);
+
+    Cache::flush();
 });
 
 it('shows calendar connections page', function () {
@@ -219,6 +224,88 @@ it('deletes calendar event from provider', function () {
         return str_contains($request->url(), 'event-to-delete')
             && $request->method() === 'DELETE';
     });
+});
+
+it('notifies user of an upcoming meeting when notify-on-start is enabled', function () {
+    Notification::fake();
+    Http::fake([
+        'www.googleapis.com/calendar/v3/calendars/primary/events*' => Http::response([
+            'items' => [
+                [
+                    'id' => 'evt-1',
+                    'summary' => 'Standup',
+                    'start' => ['dateTime' => now()->addMinutes(5)->toRfc3339String()],
+                ],
+            ],
+        ]),
+    ]);
+
+    CalendarConnection::create([
+        'user_id' => $this->user->id,
+        'organization_id' => $this->org->id,
+        'provider' => 'google',
+        'access_token' => 'test-token',
+        'refresh_token' => 'refresh-token',
+        'token_expires_at' => now()->addHour(),
+        'is_active' => true,
+        'auto_record' => true,
+    ]);
+
+    $this->artisan('calendar:notify-upcoming')->assertSuccessful();
+
+    Notification::assertSentTo($this->user, CalendarMeetingStartingNotification::class);
+});
+
+it('does not notify when notify-on-start is disabled', function () {
+    Notification::fake();
+    Http::fake();
+
+    CalendarConnection::create([
+        'user_id' => $this->user->id,
+        'organization_id' => $this->org->id,
+        'provider' => 'google',
+        'access_token' => 'test-token',
+        'refresh_token' => 'refresh-token',
+        'token_expires_at' => now()->addHour(),
+        'is_active' => true,
+        'auto_record' => false,
+    ]);
+
+    $this->artisan('calendar:notify-upcoming')->assertSuccessful();
+
+    Notification::assertNothingSent();
+    Http::assertNothingSent();
+});
+
+it('does not notify twice for the same event', function () {
+    Notification::fake();
+    Http::fake([
+        'www.googleapis.com/calendar/v3/calendars/primary/events*' => Http::response([
+            'items' => [
+                [
+                    'id' => 'evt-1',
+                    'summary' => 'Standup',
+                    'start' => ['dateTime' => now()->addMinutes(5)->toRfc3339String()],
+                ],
+            ],
+        ]),
+    ]);
+
+    CalendarConnection::create([
+        'user_id' => $this->user->id,
+        'organization_id' => $this->org->id,
+        'provider' => 'google',
+        'access_token' => 'test-token',
+        'refresh_token' => 'refresh-token',
+        'token_expires_at' => now()->addHour(),
+        'is_active' => true,
+        'auto_record' => true,
+    ]);
+
+    $this->artisan('calendar:notify-upcoming')->assertSuccessful();
+    $this->artisan('calendar:notify-upcoming')->assertSuccessful();
+
+    Notification::assertSentToTimes($this->user, CalendarMeetingStartingNotification::class, 1);
 });
 
 it('shows connected status for existing connections', function () {
