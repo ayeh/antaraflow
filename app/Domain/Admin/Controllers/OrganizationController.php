@@ -19,8 +19,12 @@ class OrganizationController extends Controller
     public function index(Request $request): View
     {
         $query = Organization::query()
-            ->with(['members', 'subscriptions.subscriptionPlan'])
-            ->withCount(['members', 'subscriptions']);
+            ->with([
+                'members',
+                'subscriptions' => fn ($q) => $q->withoutGlobalScopes(),
+                'subscriptions.subscriptionPlan',
+            ])
+            ->withCount(['members', 'subscriptions' => fn ($q) => $q->withoutGlobalScopes()]);
 
         if ($search = $request->input('search')) {
             $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $search);
@@ -37,7 +41,8 @@ class OrganizationController extends Controller
 
         if ($planId = $request->input('plan')) {
             $query->whereHas('subscriptions', function ($q) use ($planId) {
-                $q->where('subscription_plan_id', $planId)
+                $q->withoutGlobalScopes()
+                    ->where('subscription_plan_id', $planId)
                     ->where('status', 'active');
             });
         }
@@ -51,7 +56,11 @@ class OrganizationController extends Controller
 
     public function show(Organization $organization): View
     {
-        $organization->load(['members', 'subscriptions.subscriptionPlan']);
+        $organization->load([
+            'members',
+            'subscriptions' => fn ($q) => $q->withoutGlobalScopes(),
+            'subscriptions.subscriptionPlan',
+        ]);
 
         $owner = $organization->members->firstWhere('pivot.role', 'owner');
 
@@ -138,6 +147,7 @@ class OrganizationController extends Controller
         ]);
 
         $subscription = $organization->subscriptions()
+            ->withoutGlobalScopes()
             ->where('status', 'active')
             ->first();
 

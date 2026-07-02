@@ -124,6 +124,47 @@ test('admin can change an organization plan', function () {
     expect($activeSubscription->subscription_plan_id)->toBe($newPlan->id);
 });
 
+test('admin can change an organization plan outside the console without duplicating the subscription', function () {
+    // OrganizationScope's tenant fail-safe only engages when app()->runningInConsole()
+    // is false, which the artisan test runner never is. Force it false here so this
+    // test actually exercises the guard-mismatch bug (admin auth guard vs. default
+    // web guard) instead of silently passing because the scope was a no-op.
+    $oldPlan = SubscriptionPlan::factory()->create(['name' => 'Starter']);
+    $newPlan = SubscriptionPlan::factory()->create(['name' => 'Professional']);
+    $organization = Organization::factory()->create();
+
+    OrganizationSubscription::factory()->create([
+        'organization_id' => $organization->id,
+        'subscription_plan_id' => $oldPlan->id,
+        'status' => 'active',
+    ]);
+
+    $property = new ReflectionProperty($this->app, 'isRunningInConsole');
+    $property->setAccessible(true);
+    $original = $property->getValue($this->app);
+    $property->setValue($this->app, false);
+
+    try {
+        $this->actingAs($this->admin, 'admin')
+            ->withSession(['_token' => 'test-token'])
+            ->put(route('admin.organizations.change-plan', $organization), [
+                'plan_id' => $newPlan->id,
+                '_token' => 'test-token',
+            ])
+            ->assertRedirect(route('admin.organizations.show', $organization));
+    } finally {
+        $property->setValue($this->app, $original);
+    }
+
+    $subscriptions = OrganizationSubscription::withoutGlobalScopes()
+        ->where('organization_id', $organization->id)
+        ->get();
+
+    expect($subscriptions)->toHaveCount(1)
+        ->and($subscriptions->first()->subscription_plan_id)->toBe($newPlan->id)
+        ->and($subscriptions->first()->status)->toBe('active');
+});
+
 test('admin can assign a plan when organization has no active subscription', function () {
     $plan = SubscriptionPlan::factory()->create(['name' => 'Enterprise']);
     $organization = Organization::factory()->create();
