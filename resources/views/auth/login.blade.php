@@ -34,8 +34,4 @@
     <div class="relative flex justify-center text-xs"><span class="bg-white px-2 text-gray-500">or continue with</span></div>
 </div>
 @include('auth.partials.social-buttons')
-
-<p class="mt-4 text-center text-sm text-gray-500">
-    Don't have an account? <a href="{{ route('register') }}" class="link-primary font-medium hover:opacity-80">Register</a>
-</p>
 @endsection

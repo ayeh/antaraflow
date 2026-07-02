@@ -6,10 +6,10 @@ namespace App\Providers;
 
 use App\Domain\Account\Models\Organization;
 use App\Domain\Account\Policies\OrganizationPolicy;
-use App\Domain\Admin\Models\SmtpConfiguration;
-use App\Domain\Admin\Services\SmtpService;
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Domain\ActionItem\Policies\ActionItemPolicy;
+use App\Domain\Admin\Models\SmtpConfiguration;
+use App\Domain\Admin\Services\SmtpService;
 use App\Domain\AI\Events\ExtractionCompleted;
 use App\Domain\AI\Events\ExtractionFailed;
 use App\Domain\AI\Listeners\NotifyExtractionComplete;
@@ -128,6 +128,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(MeetingFinalized::class, NotifyMeetingFinalized::class);
         Event::listen(MeetingFinalized::class, SyncMeetingToCalendar::class);
         Event::listen(MeetingApproved::class, NotifyMeetingApproved::class);
+
+        Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
+            $event->extendSocialite('microsoft', \SocialiteProviders\Microsoft\Provider::class);
+        });
 
         Event::subscribe(WebhookEventSubscriber::class);
 
