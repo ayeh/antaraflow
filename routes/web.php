@@ -59,6 +59,11 @@ Route::get('/', function () {
         : redirect()->route('login');
 });
 
+// Public pages (landing + legal — required for OAuth verification, indexable)
+Route::view('/about', 'legal.about')->name('about');
+Route::view('/privacy', 'legal.privacy')->name('privacy');
+Route::view('/terms', 'legal.terms')->name('terms');
+
 // Guest meeting view (no auth required)
 Route::middleware('throttle:10,1')->group(function () {
     Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessController::class, 'show'])->name('guest.meeting');
