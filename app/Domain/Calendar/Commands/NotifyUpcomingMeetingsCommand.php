@@ -9,6 +9,7 @@ use App\Domain\Calendar\Notifications\CalendarMeetingStartingNotification;
 use App\Domain\Calendar\Services\CalendarSyncService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class NotifyUpcomingMeetingsCommand extends Command
@@ -51,8 +52,10 @@ class NotifyUpcomingMeetingsCommand extends Command
 
                 $events = $provider->listUpcomingEvents($connection, $from, $to);
             } catch (Throwable $e) {
-                report($e);
-                $this->error("Calendar sync failed for connection {$connection->id}: {$e->getMessage()}");
+                // Expected operationally (expired grants, mailboxes without Exchange
+                // Online, transient API errors). Log concisely instead of a full
+                // stack trace every run, and move on to the next connection.
+                Log::warning("calendar:notify-upcoming skipped connection {$connection->id} ({$connection->provider}): {$e->getMessage()}");
 
                 continue;
             }
