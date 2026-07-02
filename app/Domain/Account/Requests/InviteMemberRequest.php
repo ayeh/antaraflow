@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Account\Requests;
 
 use App\Domain\Account\Models\Organization;
+use App\Domain\Account\Services\AuthorizationService;
 use App\Support\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -13,7 +14,10 @@ class InviteMemberRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $organization = $this->route('organization');
+
+        return $organization instanceof Organization
+            && (bool) $this->user()?->can('manageMembers', $organization);
     }
 
     /** @return array<string, array<int, mixed>> */
@@ -39,7 +43,17 @@ class InviteMemberRequest extends FormRequest
                     }
                 },
             ],
-            'role' => ['required', Rule::in(array_column(UserRole::cases(), 'value'))],
+            'role' => [
+                'required',
+                Rule::in(array_column(UserRole::cases(), 'value')),
+                function (string $attribute, mixed $value, \Closure $fail) use ($organization): void {
+                    $role = UserRole::tryFrom((string) $value);
+
+                    if ($role && ! app(AuthorizationService::class)->canAssignRole($this->user(), $organization, $role)) {
+                        $fail('You do not have permission to assign this role.');
+                    }
+                },
+            ],
         ];
     }
 

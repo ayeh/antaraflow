@@ -45,7 +45,7 @@
                     <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
                     <select id="role" name="role"
                         class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
-                        @foreach ($roles as $role)
+                        @foreach ($assignableRoles as $role)
                             <option value="{{ $role->value }}" @selected(old('role', 'member') === $role->value)>{{ ucfirst($role->value) }}</option>
                         @endforeach
                     </select>
@@ -72,6 +72,7 @@
                     @forelse ($members as $member)
                         @php
                             $isLastOwner = $member->pivot->role === 'owner' && $ownerCount <= 1;
+                            $canManage = ($manageable[$member->id] ?? false) && ! $isLastOwner;
                         @endphp
                         <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30">
                             <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
@@ -79,13 +80,13 @@
                                 <span class="block text-xs font-normal text-gray-500 dark:text-gray-400">{{ $member->email }}</span>
                             </td>
                             <td class="px-6 py-4">
-                                @can('manageMembers', $organization)
+                                @if ($canManage)
                                     <form method="POST" action="{{ route('members.update', $member) }}">
                                         @csrf
                                         @method('PATCH')
-                                        <select name="role" onchange="this.form.submit()" @disabled($isLastOwner)
-                                            class="rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-1.5 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none disabled:opacity-60 disabled:cursor-not-allowed">
-                                            @foreach ($roles as $role)
+                                        <select name="role" onchange="this.form.submit()"
+                                            class="rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-1.5 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                                            @foreach ($assignableRoles as $role)
                                                 <option value="{{ $role->value }}" @selected($member->pivot->role === $role->value)>{{ ucfirst($role->value) }}</option>
                                             @endforeach
                                         </select>
@@ -98,19 +99,21 @@
                                         @endif">
                                         {{ ucfirst($member->pivot->role) }}
                                     </span>
-                                @endcan
+                                @endif
                             </td>
                             @can('manageMembers', $organization)
                                 <td class="px-6 py-4 text-right">
-                                    @unless ($isLastOwner)
+                                    @if ($canManage)
                                         <form method="POST" action="{{ route('members.destroy', $member) }}" onsubmit="return confirm('Remove {{ $member->name }} from this organization?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">Remove</button>
                                         </form>
-                                    @else
+                                    @elseif ($isLastOwner)
                                         <span class="text-xs text-gray-400 dark:text-gray-500">Last owner</span>
-                                    @endunless
+                                    @else
+                                        <span class="text-xs text-gray-400 dark:text-gray-500">&mdash;</span>
+                                    @endif
                                 </td>
                             @endcan
                         </tr>
