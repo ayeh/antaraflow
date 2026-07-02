@@ -325,6 +325,20 @@ $isSettingsActive = request()->routeIs(
         </a>
     </div>
 
+    @if(auth()->user()->adminAccount)
+    <div class="border-t border-slate-100 dark:border-slate-700 mt-2 pt-2 mx-2">
+        <form method="POST" action="{{ route('switch-to-admin') }}">
+            @csrf
+            <button type="submit"
+                    class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-left
+                           text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                Admin Panel
+            </button>
+        </form>
+    </div>
+    @endif
+
     {{-- Theme + Logout --}}
     <div class="border-t border-slate-100 dark:border-slate-700 mt-2 pt-2 mx-2 space-y-0.5">
         <button

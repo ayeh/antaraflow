@@ -112,6 +112,22 @@ $mobileItems = [
                     <span x-text="'Theme: ' + (theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'System')"></span>
                 </button>
 
+                @if(auth()->user()->adminAccount)
+                <form method="POST" action="{{ route('switch-to-admin') }}">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-left
+                               text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        Admin Panel
+                    </button>
+                </form>
+                @endif
+
                 <div class="border-t border-slate-100 dark:border-slate-700 pt-2 mt-2">
                     <div class="px-4 py-2">
                         <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ auth()->user()->name }}</p>

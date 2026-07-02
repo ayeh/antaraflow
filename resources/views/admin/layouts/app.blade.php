@@ -83,12 +83,20 @@
 
             {{-- Admin info + logout at bottom --}}
             <div class="p-4 border-t border-slate-700">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between gap-2">
                     <span class="text-sm text-slate-300 truncate">{{ auth('admin')->user()->name }}</span>
-                    <form method="POST" action="{{ route('admin.logout') }}">
-                        @csrf
-                        <button type="submit" class="text-sm text-slate-400 hover:text-red-400 transition-colors">Logout</button>
-                    </form>
+                    <div class="flex items-center gap-3 shrink-0">
+                        @if(auth('admin')->user()->user)
+                        <form method="POST" action="{{ route('admin.switch-to-user') }}">
+                            @csrf
+                            <button type="submit" class="text-sm text-slate-400 hover:text-violet-400 transition-colors">My Account</button>
+                        </form>
+                        @endif
+                        <form method="POST" action="{{ route('admin.logout') }}">
+                            @csrf
+                            <button type="submit" class="text-sm text-slate-400 hover:text-red-400 transition-colors">Logout</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </aside>

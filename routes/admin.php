@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Admin\Controllers\AdminSwitchController;
 use App\Domain\Admin\Controllers\Auth\LoginController;
 use App\Domain\Admin\Controllers\BrandingController;
 use App\Domain\Admin\Controllers\DashboardController;
@@ -24,6 +25,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::middleware('admin.auth')->group(function () {
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Switch back to the linked regular account (superadmins only)
+        Route::post('switch-to-user', [AdminSwitchController::class, 'toUser'])->name('switch-to-user');
 
         // Subscription Plans
         Route::resource('plans', SubscriptionPlanController::class);
