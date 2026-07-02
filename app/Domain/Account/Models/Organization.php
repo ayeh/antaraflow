@@ -60,6 +60,11 @@ class Organization extends Model
             ->withTimestamps();
     }
 
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(OrganizationInvitation::class);
+    }
+
     public function subscriptions(): HasMany
     {
         return $this->hasMany(OrganizationSubscription::class);

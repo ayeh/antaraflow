@@ -28,21 +28,25 @@ class MemberController extends Controller
         $this->authorize('view', $organization);
 
         $members = $organization->members;
+        $invitations = $organization->invitations()->pending()->latest()->get();
+        $roles = UserRole::cases();
 
-        return view('organizations.members.index', compact('organization', 'members'));
+        return view('organizations.members.index', compact('organization', 'members', 'invitations', 'roles'));
     }
 
     public function store(InviteMemberRequest $request, Organization $organization): RedirectResponse
     {
         $this->authorize('manageMembers', $organization);
 
-        $user = User::query()->where('email', $request->validated('email'))->firstOrFail();
-        $role = UserRole::from($request->validated('role'));
-
-        $this->organizationService->inviteMember($organization, $user, $role);
+        $this->organizationService->inviteByEmail(
+            $organization,
+            $request->validated('email'),
+            UserRole::from($request->validated('role')),
+            $request->user(),
+        );
 
         return redirect()->route('organizations.members.index', $organization)
-            ->with('success', 'Member invited successfully.');
+            ->with('success', 'Invitation sent successfully.');
     }
 
     public function update(Request $request, User $member): RedirectResponse
@@ -53,11 +57,19 @@ class MemberController extends Controller
 
         $this->authorize('manageMembers', $organization);
 
-        $request->validate([
+        $validated = $request->validate([
             'role' => ['required', 'in:'.implode(',', array_column(UserRole::cases(), 'value'))],
         ]);
 
-        $this->organizationService->changeRole($organization, $member, UserRole::from($request->input('role')));
+        $newRole = UserRole::from($validated['role']);
+
+        if ($newRole !== UserRole::Owner && $this->isLastOwner($organization, $member)) {
+            return redirect()->back()->withErrors([
+                'role' => 'You cannot change the role of the last owner.',
+            ]);
+        }
+
+        $this->organizationService->changeRole($organization, $member, $newRole);
 
         return redirect()->back()->with('success', 'Member role updated successfully.');
     }
@@ -70,8 +82,25 @@ class MemberController extends Controller
 
         $this->authorize('manageMembers', $organization);
 
+        if ($this->isLastOwner($organization, $member)) {
+            return redirect()->back()->withErrors([
+                'member' => 'You cannot remove the last owner of the organization.',
+            ]);
+        }
+
         $this->organizationService->removeMember($organization, $member);
 
         return redirect()->back()->with('success', 'Member removed successfully.');
+    }
+
+    private function isLastOwner(Organization $organization, User $member): bool
+    {
+        $memberRole = $organization->members()->where('user_id', $member->id)->first()?->pivot->role;
+
+        if ($memberRole !== UserRole::Owner->value) {
+            return false;
+        }
+
+        return $organization->members()->wherePivot('role', UserRole::Owner->value)->count() <= 1;
     }
 }

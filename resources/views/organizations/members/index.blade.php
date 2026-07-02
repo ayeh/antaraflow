@@ -11,6 +11,51 @@
         </div>
     </div>
 
+    @if (session('success'))
+        <div class="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 px-4 py-3 text-sm text-green-700 dark:text-green-300">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-300">
+            <ul class="list-disc list-inside space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @php
+        $ownerCount = $members->where('pivot.role', 'owner')->count();
+    @endphp
+
+    @can('manageMembers', $organization)
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Invite a member</h2>
+            <form method="POST" action="{{ route('organizations.members.store', $organization) }}" class="flex flex-col sm:flex-row gap-3 sm:items-end">
+                @csrf
+                <div class="flex-1">
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email address</label>
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" required placeholder="person@example.com"
+                        class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                </div>
+                <div class="sm:w-48">
+                    <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                    <select id="role" name="role"
+                        class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                        @foreach ($roles as $role)
+                            <option value="{{ $role->value }}" @selected(old('role', 'member') === $role->value)>{{ ucfirst($role->value) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors whitespace-nowrap">Send invitation</button>
+            </form>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">If the person doesn't have an account yet, they'll be able to create one when they accept.</p>
+        </div>
+    @endcan
+
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -18,30 +63,109 @@
                     <tr>
                         <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
                         <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                        @can('manageMembers', $organization)
+                            <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                        @endcan
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
                     @forelse ($members as $member)
+                        @php
+                            $isLastOwner = $member->pivot->role === 'owner' && $ownerCount <= 1;
+                        @endphp
                         <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30">
-                            <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{{ $member->name }}</td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    @if($member->pivot->role === 'owner') bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300
-                                    @elseif($member->pivot->role === 'admin') bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300
-                                    @else bg-gray-100 text-gray-700 dark:bg-slate-600 dark:text-gray-300
-                                    @endif">
-                                    {{ ucfirst($member->pivot->role) }}
-                                </span>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                                {{ $member->name }}
+                                <span class="block text-xs font-normal text-gray-500 dark:text-gray-400">{{ $member->email }}</span>
                             </td>
+                            <td class="px-6 py-4">
+                                @can('manageMembers', $organization)
+                                    <form method="POST" action="{{ route('members.update', $member) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <select name="role" onchange="this.form.submit()" @disabled($isLastOwner)
+                                            class="rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-1.5 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none disabled:opacity-60 disabled:cursor-not-allowed">
+                                            @foreach ($roles as $role)
+                                                <option value="{{ $role->value }}" @selected($member->pivot->role === $role->value)>{{ ucfirst($role->value) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </form>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        @if($member->pivot->role === 'owner') bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300
+                                        @elseif($member->pivot->role === 'admin') bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300
+                                        @else bg-gray-100 text-gray-700 dark:bg-slate-600 dark:text-gray-300
+                                        @endif">
+                                        {{ ucfirst($member->pivot->role) }}
+                                    </span>
+                                @endcan
+                            </td>
+                            @can('manageMembers', $organization)
+                                <td class="px-6 py-4 text-right">
+                                    @unless ($isLastOwner)
+                                        <form method="POST" action="{{ route('members.destroy', $member) }}" onsubmit="return confirm('Remove {{ $member->name }} from this organization?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">Remove</button>
+                                        </form>
+                                    @else
+                                        <span class="text-xs text-gray-400 dark:text-gray-500">Last owner</span>
+                                    @endunless
+                                </td>
+                            @endcan
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="2" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No members found.</td>
+                            <td colspan="3" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No members found.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
+
+    @can('manageMembers', $organization)
+        @if ($invitations->isNotEmpty())
+            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Pending invitations</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
+                            <tr>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Expires</th>
+                                <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                            @foreach ($invitations as $invitation)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{{ $invitation->email }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ ucfirst($invitation->role->value) }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $invitation->expires_at->format('M j, Y') }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-4">
+                                            <form method="POST" action="{{ route('organizations.invitations.resend', [$organization, $invitation]) }}">
+                                                @csrf
+                                                <button type="submit" class="text-sm text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 transition-colors">Resend</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('organizations.invitations.destroy', [$organization, $invitation]) }}" onsubmit="return confirm('Revoke the invitation for {{ $invitation->email }}?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">Revoke</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+    @endcan
 </div>
 @endsection

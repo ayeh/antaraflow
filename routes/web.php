@@ -5,6 +5,8 @@ use App\Domain\Account\Controllers\Auth\LoginController;
 use App\Domain\Account\Controllers\Auth\LogoutController;
 use App\Domain\Account\Controllers\Auth\RegisterController;
 use App\Domain\Account\Controllers\IntegrationSettingsController;
+use App\Domain\Account\Controllers\InvitationAcceptController;
+use App\Domain\Account\Controllers\InvitationController;
 use App\Domain\Account\Controllers\MemberController;
 use App\Domain\Account\Controllers\NotificationSettingsController;
 use App\Domain\Account\Controllers\OnboardingController;
@@ -70,6 +72,12 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::get('register/{token}/success', [QrRegistrationController::class, 'success'])->name('qr-registration.success');
 });
 
+// Organization invitation acceptance (public - works for guests and logged-in users)
+Route::middleware('throttle:10,1')->group(function () {
+    Route::get('invitations/{token}', [InvitationAcceptController::class, 'show'])->name('invitations.accept.show');
+    Route::post('invitations/{token}', [InvitationAcceptController::class, 'accept'])->name('invitations.accept');
+});
+
 // Calendar Webhooks (no auth - called by Google/Microsoft)
 Route::post('calendar/webhook/{provider}', [CalendarWebhookController::class, 'handle'])
     ->middleware('throttle:60,1')
@@ -121,6 +129,8 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
     // Organizations
     Route::resource('organizations', OrganizationController::class);
     Route::resource('organizations.members', MemberController::class)->only(['index', 'store', 'update', 'destroy'])->shallow();
+    Route::post('organizations/{organization}/invitations/{invitation}/resend', [InvitationController::class, 'resend'])->name('organizations.invitations.resend');
+    Route::delete('organizations/{organization}/invitations/{invitation}', [InvitationController::class, 'destroy'])->name('organizations.invitations.destroy');
     Route::get('organizations/{organization}/settings', [OrganizationSettingsController::class, 'edit'])->name('organizations.settings.edit');
     Route::put('organizations/{organization}/settings', [OrganizationSettingsController::class, 'update'])->name('organizations.settings.update');
     Route::post('organizations/{organization}/settings/logo', [OrganizationSettingsController::class, 'uploadLogo'])->name('organizations.settings.logo');
