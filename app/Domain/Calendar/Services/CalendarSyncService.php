@@ -9,6 +9,7 @@ use App\Domain\Calendar\Models\CalendarConnection;
 use App\Domain\Calendar\Providers\GoogleCalendarProvider;
 use App\Domain\Calendar\Providers\OutlookCalendarProvider;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use Carbon\CarbonInterface;
 
 class CalendarSyncService
 {
@@ -70,6 +71,49 @@ class CalendarSyncService
         }
 
         $provider->deleteEvent($connection, $meeting->calendar_event_id);
+    }
+
+    /**
+     * @return array<int, array{id: string, title: string, meeting_date: string, start_time: string, provider: string, source: string}>
+     */
+    public function getExternalEventsForUser(int $userId, int $organizationId, CarbonInterface $from, CarbonInterface $to): array
+    {
+        $connections = CalendarConnection::query()
+            ->where('user_id', $userId)
+            ->where('organization_id', $organizationId)
+            ->where('is_active', true)
+            ->get();
+
+        $events = [];
+
+        foreach ($connections as $connection) {
+            try {
+                $provider = $this->resolveProvider($connection->provider);
+
+                if ($connection->isTokenExpired()) {
+                    $connection = $provider->refreshToken($connection);
+                }
+
+                foreach ($provider->listUpcomingEvents($connection, $from, $to) as $event) {
+                    $events[] = [
+                        'id' => 'ext_'.$connection->provider.'_'.$event['id'],
+                        'title' => $event['title'],
+                        'meeting_date' => $event['start']->format('Y-m-d'),
+                        'start_time' => $event['start']->format('H:i'),
+                        'provider' => $connection->provider,
+                        'source' => 'external',
+                    ];
+                }
+            } catch (\Throwable $e) {
+                logger()->warning('Failed to fetch external calendar events', [
+                    'user_id' => $userId,
+                    'provider' => $connection->provider,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $events;
     }
 
     public function resolveProvider(string $provider): CalendarProviderInterface

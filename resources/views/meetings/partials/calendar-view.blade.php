@@ -72,7 +72,7 @@
                                 <template x-for="meeting in cell.meetings" :key="meeting.id">
                                     <button @click="openModal(meeting)"
                                             class="w-full text-left text-[10px] px-1.5 py-0.5 rounded mb-0.5 truncate font-medium transition-opacity hover:opacity-75 focus:outline-none focus:ring-1 focus:ring-violet-500"
-                                            :class="statusClass(meeting.status)"
+                                            :class="meeting.source === 'external' ? externalClass(meeting.provider) : statusClass(meeting.status)"
                                             :title="meeting.title"
                                             x-text="meeting.title">
                                     </button>
@@ -165,31 +165,46 @@
             </button>
             <template x-if="modal.meeting">
                 <div>
-                    <div class="text-xs font-mono text-gray-400 dark:text-gray-500 mb-1" x-text="modal.meeting.mom_number || '—'"></div>
+                    {{-- External event: provider badge --}}
+                    <div x-show="modal.meeting.source === 'external'" class="flex items-center gap-2 mb-3">
+                        <span class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                              :class="externalBadgeClass(modal.meeting.provider)"
+                              x-text="modal.meeting.provider === 'google' ? 'Google Calendar' : 'Outlook'">
+                        </span>
+                    </div>
+                    {{-- MOM: MOM number --}}
+                    <div x-show="modal.meeting.source !== 'external'" class="text-xs font-mono text-gray-400 dark:text-gray-500 mb-1" x-text="modal.meeting.mom_number || '—'"></div>
                     <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1 pr-6" x-text="modal.meeting.title"></h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4" x-text="modal.meeting.meeting_date"></p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4"
+                       x-text="modal.meeting.meeting_date + (modal.meeting.source === 'external' && modal.meeting.start_time ? ' · ' + modal.meeting.start_time : '')">
+                    </p>
                     <div class="space-y-2 mb-5">
-                        <template x-if="modal.meeting.project">
+                        {{-- Project (MOM only) --}}
+                        <template x-if="modal.meeting.source !== 'external' && modal.meeting.project">
                             <div class="flex items-center gap-2 text-sm">
                                 <span class="text-gray-400 w-14 shrink-0 text-xs">Project</span>
                                 <span class="text-gray-700 dark:text-gray-300 font-medium text-xs" x-text="modal.meeting.project.name"></span>
                             </div>
                         </template>
-                        <div class="flex items-center gap-2">
+                        {{-- Status (MOM only) --}}
+                        <div x-show="modal.meeting.source !== 'external'" class="flex items-center gap-2">
                             <span class="text-gray-400 w-14 shrink-0 text-xs">Status</span>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
                                   :class="statusClass(modal.meeting.status)"
-                                  x-text="modal.meeting.status.replace('_', ' ')">
+                                  x-text="modal.meeting.status ? modal.meeting.status.replace('_', ' ') : ''">
                             </span>
                         </div>
-                        <template x-if="modal.meeting.start_time">
+                        {{-- Time (MOM only — external already shows it in subtitle) --}}
+                        <template x-if="modal.meeting.source !== 'external' && modal.meeting.start_time">
                             <div class="flex items-center gap-2 text-xs">
                                 <span class="text-gray-400 w-14 shrink-0">Time</span>
                                 <span class="text-gray-700 dark:text-gray-300" x-text="modal.meeting.start_time + (modal.meeting.end_time ? ' – ' + modal.meeting.end_time : '')"></span>
                             </div>
                         </template>
                     </div>
-                    <a :href="modal.meeting.url"
+                    {{-- View Meeting button (MOM only) --}}
+                    <a x-show="modal.meeting.source !== 'external'"
+                       :href="modal.meeting.url"
                        class="block w-full text-center bg-violet-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
                         View Meeting
                     </a>
@@ -359,7 +374,20 @@ function calendarView() {
             return map[status] ?? 'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-300';
         },
 
+        externalClass(provider) {
+            if (provider === 'google')  return 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800';
+            if (provider === 'outlook') return 'bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800';
+            return 'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-300';
+        },
+
+        externalBadgeClass(provider) {
+            if (provider === 'google')  return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+            if (provider === 'outlook') return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300';
+            return 'bg-gray-100 text-gray-600';
+        },
+
         upcomingBorderClass(status) {
+            if (!status) return 'border-l-2 border-orange-400';
             const map = {
                 draft:       'border-l-2 border-slate-400',
                 in_progress: 'border-l-2 border-blue-500',
