@@ -38,7 +38,7 @@ class ReportGeneratorService
             ? Storage::disk('local')->size($filePath)
             : null;
 
-        $generatedReport = GeneratedReport::query()->create([
+        $generatedReport = GeneratedReport::forceCreate([
             'report_template_id' => $template->id,
             'organization_id' => $template->organization_id,
             'file_path' => $filePath,

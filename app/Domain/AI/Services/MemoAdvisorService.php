@@ -62,7 +62,7 @@ class MemoAdvisorService
             $topicTitle = $topicGroup->first()->title;
             $meetingCount = count($meetingIds);
 
-            ProactiveInsight::create([
+            ProactiveInsight::forceCreate([
                 'organization_id' => $orgId,
                 'type' => 'recurring_topic',
                 'title' => "Recurring topic: {$topicTitle}",
@@ -97,7 +97,7 @@ class MemoAdvisorService
 
             $daysSince = (int) $stale['days_since'];
 
-            ProactiveInsight::create([
+            ProactiveInsight::forceCreate([
                 'organization_id' => $orgId,
                 'type' => 'decision_no_followup',
                 'title' => 'Decision without follow-up',
@@ -140,7 +140,7 @@ class MemoAdvisorService
                 continue;
             }
 
-            ProactiveInsight::create([
+            ProactiveInsight::forceCreate([
                 'organization_id' => $orgId,
                 'type' => 'reraised_action_item',
                 'title' => "Action item carried forward {$carryCount} times",
@@ -193,7 +193,7 @@ class MemoAdvisorService
             $assigneeName = $items->first()->assignedTo?->name ?? 'Unknown';
             $count = $items->count();
 
-            ProactiveInsight::create([
+            ProactiveInsight::forceCreate([
                 'organization_id' => $orgId,
                 'type' => 'overdue_pattern',
                 'title' => "{$assigneeName} has {$count} overdue items",
