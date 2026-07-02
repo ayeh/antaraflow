@@ -88,14 +88,26 @@ class SubscriptionService
         $period = now()->format('Y-m');
 
         DB::transaction(function () use ($org, $metric, $period, $amount): void {
-            UsageTracking::withoutGlobalScopes()->updateOrCreate(
-                [
+            $tracking = UsageTracking::withoutGlobalScopes()
+                ->where('organization_id', $org->id)
+                ->where('metric', $metric)
+                ->where('period', $period)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $tracking) {
+                $tracking = new UsageTracking;
+                $tracking->forceFill([
                     'organization_id' => $org->id,
                     'metric' => $metric,
                     'period' => $period,
-                ],
-                []
-            )->lockForUpdate()->increment('value', $amount);
+                ]);
+                $tracking->save();
+            }
+
+            UsageTracking::withoutGlobalScopes()
+                ->whereKey($tracking->id)
+                ->increment('value', $amount);
         });
     }
 

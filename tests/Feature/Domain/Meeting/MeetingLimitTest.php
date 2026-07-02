@@ -27,7 +27,7 @@ beforeEach(function () {
     $this->user = User::factory()->create(['current_organization_id' => $this->org->id]);
     $this->org->members()->attach($this->user, ['role' => UserRole::Owner->value]);
 
-    OrganizationSubscription::withoutGlobalScopes()->create([
+    OrganizationSubscription::withoutGlobalScopes()->forceCreate([
         'organization_id' => $this->org->id,
         'subscription_plan_id' => $this->plan->id,
         'status' => 'active',
