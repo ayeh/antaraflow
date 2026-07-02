@@ -9,6 +9,7 @@ use App\Domain\Account\Services\SubscriptionService;
 use App\Domain\AI\Services\DecisionTrackerService;
 use App\Domain\AI\Services\KnowledgeLinkService;
 use App\Domain\Analytics\Services\AnalyticsEventService;
+use App\Domain\Calendar\Services\CalendarSyncService;
 use App\Domain\Collaboration\Services\CommentService;
 use App\Domain\Collaboration\Services\ShareService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
@@ -35,6 +36,7 @@ class MeetingController extends Controller
         private MeetingSearchService $searchService,
         private ShareService $shareService,
         private CommentService $commentService,
+        private CalendarSyncService $calendarSyncService,
     ) {}
 
     public function index(Request $request): View
@@ -74,7 +76,7 @@ class MeetingController extends Controller
             ->orderBy('meeting_date')
             ->get(['id', 'title', 'mom_number', 'meeting_date', 'start_time', 'end_time', 'status', 'project_id']);
 
-        return response()->json($meetings->map(fn (MinutesOfMeeting $meeting): array => [
+        $momItems = $meetings->map(fn (MinutesOfMeeting $meeting): array => [
             'id' => $meeting->id,
             'mom_number' => $meeting->mom_number,
             'title' => $meeting->title,
@@ -82,11 +84,22 @@ class MeetingController extends Controller
             'start_time' => $meeting->start_time?->format('H:i'),
             'end_time' => $meeting->end_time?->format('H:i'),
             'status' => $meeting->status->value,
+            'source' => 'mom',
             'project' => $meeting->project
                 ? ['name' => $meeting->project->name, 'code' => $meeting->project->code]
                 : null,
             'url' => route('meetings.show', $meeting->id),
-        ]));
+        ])->all();
+
+        $user = $request->user();
+        $externalItems = $this->calendarSyncService->getExternalEventsForUser(
+            $user->id,
+            $user->current_organization_id,
+            $start,
+            $end,
+        );
+
+        return response()->json(array_merge($momItems, $externalItems));
     }
 
     public function create(): View
