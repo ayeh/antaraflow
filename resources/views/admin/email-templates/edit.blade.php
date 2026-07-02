@@ -136,7 +136,9 @@
 
                 <div>
                     <h4 class="text-sm font-medium text-slate-400 mb-1">Body:</h4>
-                    <div class="bg-white rounded-lg p-6 text-slate-900" x-html="previewBody"></div>
+                    <iframe :srcdoc="previewBody" title="Email preview" sandbox=""
+                            class="w-full bg-white rounded-lg border-0"
+                            style="min-height: 600px;"></iframe>
                 </div>
             </div>
         </div>
