@@ -22,7 +22,7 @@
 
     <section class="space-y-2">
         <h2 class="text-xl font-semibold text-gray-900">How we use Google user data</h2>
-        <p>When you connect a Google account, we request access to the Google Calendar scope (<code>https://www.googleapis.com/auth/calendar</code>) and use it solely to:</p>
+        <p>When you connect a Google account, we request access to your Google Calendar events (<code>calendar.events</code>) and the read-only list of your calendars (<code>calendar.calendarlist.readonly</code>), and use them solely to:</p>
         <ul class="list-disc list-inside space-y-1">
             <li>Read your upcoming events so we can notify you when a meeting is about to start (if you enable "Notify on start").</li>
             <li>Create, update, or remove calendar events that correspond to meetings you choose to sync from {{ $app }}.</li>

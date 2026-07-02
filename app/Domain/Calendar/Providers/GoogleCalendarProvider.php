@@ -27,7 +27,7 @@ class GoogleCalendarProvider implements CalendarProviderInterface
             'client_id' => config('calendar.google.client_id'),
             'redirect_uri' => $redirectUri,
             'response_type' => 'code',
-            'scope' => 'https://www.googleapis.com/auth/calendar',
+            'scope' => 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.calendarlist.readonly',
             'access_type' => 'offline',
             'prompt' => 'consent',
             'state' => $state,
