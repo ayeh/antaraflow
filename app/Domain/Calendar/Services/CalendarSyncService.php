@@ -20,20 +20,28 @@ class CalendarSyncService
             ->get();
 
         foreach ($connections as $connection) {
-            $provider = $this->resolveProvider($connection->provider);
+            try {
+                $provider = $this->resolveProvider($connection->provider);
 
-            if ($connection->isTokenExpired()) {
-                $connection = $provider->refreshToken($connection);
-            }
+                if ($connection->isTokenExpired()) {
+                    $connection = $provider->refreshToken($connection);
+                }
 
-            if ($meeting->calendar_event_id && $meeting->calendar_provider === $connection->provider) {
-                $provider->updateEvent($connection, $meeting);
-            } else {
-                $eventId = $provider->createEvent($connection, $meeting);
-                $meeting->update([
-                    'calendar_event_id' => $eventId,
-                    'calendar_provider' => $connection->provider,
-                    'calendar_synced_at' => now(),
+                if ($meeting->calendar_event_id && $meeting->calendar_provider === $connection->provider) {
+                    $provider->updateEvent($connection, $meeting);
+                } else {
+                    $eventId = $provider->createEvent($connection, $meeting);
+                    $meeting->update([
+                        'calendar_event_id' => $eventId,
+                        'calendar_provider' => $connection->provider,
+                        'calendar_synced_at' => now(),
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                logger()->error('Calendar sync failed for provider '.$connection->provider, [
+                    'meeting_id' => $meeting->id,
+                    'connection_id' => $connection->id,
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
