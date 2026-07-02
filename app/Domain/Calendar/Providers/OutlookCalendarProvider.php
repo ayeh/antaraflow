@@ -7,7 +7,9 @@ namespace App\Domain\Calendar\Providers;
 use App\Domain\Calendar\Contracts\CalendarProviderInterface;
 use App\Domain\Calendar\Models\CalendarConnection;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -132,6 +134,31 @@ class OutlookCalendarProvider implements CalendarProviderInterface
             ->map(fn (array $calendar): array => [
                 'id' => $calendar['id'],
                 'name' => $calendar['name'] ?? $calendar['id'],
+            ])
+            ->values()
+            ->all();
+    }
+
+    /** @return array<int, array{id: string, title: string, start: CarbonInterface}> */
+    public function listUpcomingEvents(CalendarConnection $connection, CarbonInterface $from, CarbonInterface $to): array
+    {
+        $response = Http::withToken($connection->access_token)
+            ->withHeaders(['Prefer' => 'outlook.timezone="UTC"'])
+            ->get(self::GRAPH_API.'/me/calendarView', [
+                'startDateTime' => $from->toIso8601String(),
+                'endDateTime' => $to->toIso8601String(),
+                '$orderby' => 'start/dateTime',
+                '$select' => 'id,subject,start',
+            ]);
+
+        $response->throw();
+
+        return collect($response->json('value', []))
+            ->filter(fn (array $event): bool => isset($event['start']['dateTime']))
+            ->map(fn (array $event): array => [
+                'id' => $event['id'],
+                'title' => $event['subject'] ?? '(no title)',
+                'start' => Carbon::parse($event['start']['dateTime'], $event['start']['timeZone'] ?? 'UTC'),
             ])
             ->values()
             ->all();
