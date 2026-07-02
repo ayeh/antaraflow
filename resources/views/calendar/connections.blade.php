@@ -31,7 +31,7 @@
                                 <span class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out {{ $googleConn->auto_record ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }}">
                                     <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $googleConn->auto_record ? 'translate-x-4' : 'translate-x-0' }}"></span>
                                 </span>
-                                Auto Record
+                                Notify on start
                             </button>
                         </form>
                         <form method="POST" action="{{ route('calendar.disconnect', $googleConn) }}">
@@ -74,7 +74,7 @@
                                 <span class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out {{ $outlookConn->auto_record ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }}">
                                     <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $outlookConn->auto_record ? 'translate-x-4' : 'translate-x-0' }}"></span>
                                 </span>
-                                Auto Record
+                                Notify on start
                             </button>
                         </form>
                         <form method="POST" action="{{ route('calendar.disconnect', $outlookConn) }}">

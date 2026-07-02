@@ -100,6 +100,6 @@ class CalendarConnectionController extends Controller
         $status = $connection->auto_record ? 'enabled' : 'disabled';
 
         return redirect()->route('calendar.connections')
-            ->with('success', "Auto-record {$status} for ".ucfirst($connection->provider).'.');
+            ->with('success', "Meeting-start notifications {$status} for ".ucfirst($connection->provider).'.');
     }
 }
