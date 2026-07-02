@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Account\Services;
 
+use App\Domain\Account\Mail\OrganizationInvitationMail;
 use App\Domain\Account\Models\Organization;
+use App\Domain\Account\Models\OrganizationInvitation;
 use App\Domain\Account\Models\OrganizationSubscription;
 use App\Domain\Account\Models\SubscriptionPlan;
 use App\Models\User;
 use App\Support\Enums\UserRole;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class OrganizationService
@@ -52,6 +55,70 @@ class OrganizationService
             'email' => $user->email,
             'role' => $role->value,
         ]);
+    }
+
+    public function inviteByEmail(Organization $organization, string $email, UserRole $role, User $inviter): OrganizationInvitation
+    {
+        $invitation = $organization->invitations()->create([
+            'email' => $email,
+            'role' => $role,
+            'token' => OrganizationInvitation::generateToken(),
+            'invited_by_user_id' => $inviter->id,
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        Mail::to($email)->send(new OrganizationInvitationMail($invitation));
+
+        $this->auditService->log('member_invited', $invitation, null, [
+            'email' => $email,
+            'role' => $role->value,
+        ]);
+
+        return $invitation;
+    }
+
+    public function acceptInvitation(OrganizationInvitation $invitation, User $user): void
+    {
+        $organization = $invitation->organization;
+
+        if (! $organization->members()->where('user_id', $user->id)->exists()) {
+            $organization->members()->attach($user, ['role' => $invitation->role->value]);
+        }
+
+        $invitation->update(['accepted_at' => now()]);
+
+        if (! $user->current_organization_id) {
+            $user->update(['current_organization_id' => $organization->id]);
+        }
+
+        $this->auditService->log('invitation_accepted', $invitation, null, [
+            'user_id' => $user->id,
+            'email' => $invitation->email,
+            'role' => $invitation->role->value,
+        ]);
+    }
+
+    public function resendInvitation(OrganizationInvitation $invitation): void
+    {
+        $invitation->update([
+            'token' => OrganizationInvitation::generateToken(),
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        Mail::to($invitation->email)->send(new OrganizationInvitationMail($invitation));
+
+        $this->auditService->log('invitation_resent', $invitation, null, [
+            'email' => $invitation->email,
+        ]);
+    }
+
+    public function revokeInvitation(OrganizationInvitation $invitation): void
+    {
+        $this->auditService->log('invitation_revoked', $invitation, [
+            'email' => $invitation->email,
+        ]);
+
+        $invitation->delete();
     }
 
     public function removeMember(Organization $organization, User $user): void
