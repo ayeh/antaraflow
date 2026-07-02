@@ -16,7 +16,7 @@ class SubscriptionPlanController extends Controller
     public function index(): View
     {
         $plans = SubscriptionPlan::query()
-            ->withCount('subscriptions')
+            ->withCount(['subscriptions' => fn ($q) => $q->withoutGlobalScopes()])
             ->orderBy('sort_order')
             ->get();
 
@@ -51,7 +51,7 @@ class SubscriptionPlanController extends Controller
 
     public function destroy(SubscriptionPlan $plan): RedirectResponse
     {
-        if ($plan->subscriptions()->exists()) {
+        if ($plan->subscriptions()->withoutGlobalScopes()->exists()) {
             return redirect()->route('admin.plans.index')
                 ->with('error', 'Cannot delete a plan with active subscribers.');
         }
