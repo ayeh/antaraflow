@@ -80,7 +80,7 @@
                         <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
                         Disconnected
                     </span>
-                    <a href="{{ route('calendar.connect', 'microsoft') }}"
+                    <a href="{{ route('calendar.connect', 'outlook') }}"
                         class="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium">
                         Connect
                     </a>
