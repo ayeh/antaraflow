@@ -1,4 +1,27 @@
 {{-- Step 5: Finalize (MOM Preview + AI Assistant + Status Actions) --}}
+@php
+    $summaryExtraction = $meeting->extractions->firstWhere('type', 'summary');
+    $decisionsExtraction = $meeting->extractions->firstWhere('type', 'decisions');
+    $risksExtraction = $meeting->extractions->firstWhere('type', 'risks');
+    $issuesExtraction = $meeting->extractions->firstWhere('type', 'issues');
+
+    $decisionsRawItems = ($decisionsExtraction && is_array($decisionsExtraction->structured_data) && ! isset($decisionsExtraction->structured_data['custom_template']))
+        ? array_values(array_filter($decisionsExtraction->structured_data, 'is_array'))
+        : [];
+    $risksRawItems = ($risksExtraction && is_array($risksExtraction->structured_data) && ! isset($risksExtraction->structured_data['custom_template']))
+        ? array_values(array_filter($risksExtraction->structured_data, 'is_array'))
+        : [];
+    $issuesRawItems = ($issuesExtraction && is_array($issuesExtraction->structured_data) && ! isset($issuesExtraction->structured_data['custom_template']))
+        ? array_values(array_map(function ($i) {
+            if (is_string($i)) {
+                return ['issue' => $i];
+            }
+            return ['issue' => $i['issue'] ?? $i['content'] ?? $i['text'] ?? $i['description'] ?? ''];
+        }, $issuesExtraction->structured_data))
+        : [];
+
+    $summaryInitial = $summaryExtraction?->content ?? ($summaryExtraction->structured_data['content'] ?? '') ?? ($meeting->summary ?? '');
+@endphp
 <div x-data="{ showFinalizeModal: false, shareModalOpen: false }" class="space-y-6">
 
     {{-- Warning Banner (if no content) --}}
@@ -30,22 +53,50 @@
         {{-- Left Panel: MOM Preview (2/3 width) --}}
         <div class="lg:col-span-2 space-y-4">
             {{-- Summary --}}
-            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Summary</h2>
-                @php
-                    $summary = $meeting->extractions->firstWhere('type', 'summary');
-                @endphp
-                @if($summary)
-                    <div class="prose prose-sm dark:prose-invert max-w-none">
-                        {!! nl2br(e($summary->content ?? ($summary->structured_data['content'] ?? 'No summary content.'))) !!}
+            <div x-data="{ editing: false, content: @js($summaryInitial) }"
+                 class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Summary</h2>
+                    @if($isEditable)
+                        <button x-show="!editing" @click="editing = true" type="button"
+                                class="text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400 font-medium">
+                            Edit
+                        </button>
+                    @endif
+                </div>
+
+                <div x-show="!editing">
+                    @if($summaryExtraction && ($summaryExtraction->content || !empty($summaryExtraction->structured_data['content'])))
+                        <div class="prose prose-sm dark:prose-invert max-w-none">
+                            {!! nl2br(e($summaryExtraction->content ?? ($summaryExtraction->structured_data['content'] ?? ''))) !!}
+                        </div>
+                    @elseif($meeting->summary)
+                        <div class="prose prose-sm dark:prose-invert max-w-none">
+                            {!! nl2br(e($meeting->summary)) !!}
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-500 dark:text-gray-400 italic">No summary available. Run AI extraction from the Inputs step to generate a summary.</p>
+                    @endif
+                </div>
+
+                <form x-show="editing" x-cloak method="POST"
+                      action="{{ route('meetings.extractions.update', ['meeting' => $meeting, 'type' => 'summary']) }}">
+                    @csrf
+                    @method('PATCH')
+                    <textarea name="content" x-model="content" rows="8"
+                              class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm"
+                              placeholder="Write the meeting summary..."></textarea>
+                    <div class="flex justify-end gap-2 mt-3">
+                        <button type="button" @click="editing = false; content = @js($summaryInitial)"
+                                class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-slate-400 hover:text-gray-800">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="px-3 py-1.5 text-xs font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-lg">
+                            Save
+                        </button>
                     </div>
-                @elseif($meeting->summary)
-                    <div class="prose prose-sm dark:prose-invert max-w-none">
-                        {!! nl2br(e($meeting->summary)) !!}
-                    </div>
-                @else
-                    <p class="text-sm text-gray-500 dark:text-gray-400 italic">No summary available. Run AI extraction from the Inputs step to generate a summary.</p>
-                @endif
+                </form>
             </div>
 
             {{-- Action Items --}}
@@ -94,12 +145,23 @@
             </div>
 
             {{-- Decisions with Follow-Up Status --}}
-            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Decisions</h2>
+            <div x-data="{ editing: false, items: @js($decisionsRawItems) }"
+                 class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Decisions</h2>
+                    @if($isEditable)
+                        <button x-show="!editing" @click="editing = true" type="button"
+                                class="text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400 font-medium">
+                            Edit
+                        </button>
+                    @endif
+                </div>
                 @php
-                    $decisions = $meeting->extractions->firstWhere('type', 'decisions');
+                    $decisions = $decisionsExtraction;
                     $decisionStatuses = isset($decisionTracker) ? $decisionTracker : [];
                 @endphp
+
+                <div x-show="!editing">
                 @if(!empty($decisionStatuses))
                     <ol class="space-y-3">
                         @foreach($decisionStatuses as $index => $ds)
@@ -142,57 +204,193 @@
                 @else
                     <p class="text-sm text-gray-500 dark:text-gray-400 italic">No decisions recorded.</p>
                 @endif
+                </div>
+
+                <form x-show="editing" x-cloak method="POST"
+                      action="{{ route('meetings.extractions.update', ['meeting' => $meeting, 'type' => 'decisions']) }}"
+                      class="space-y-3">
+                    @csrf
+                    @method('PATCH')
+                    <template x-for="(item, index) in items" :key="index">
+                        <div class="border border-gray-200 dark:border-slate-700 rounded-lg p-3 space-y-2">
+                            <div class="flex items-start gap-2">
+                                <span class="text-xs text-gray-400 mt-2" x-text="`#${index + 1}`"></span>
+                                <textarea :name="`items[${index}][decision]`" x-model="item.decision" rows="2"
+                                          class="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm"
+                                          placeholder="Decision text..."></textarea>
+                                <button type="button" @click="items.splice(index, 1)"
+                                        class="text-red-500 hover:text-red-700 text-xs px-2 py-1">Remove</button>
+                            </div>
+                            <input type="text" :name="`items[${index}][made_by]`" x-model="item.made_by"
+                                   class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-3 py-1.5 text-xs"
+                                   placeholder="Made by (optional)">
+                        </div>
+                    </template>
+                    <button type="button" @click="items.push({ decision: '', made_by: '' })"
+                            class="text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400 font-medium">
+                        + Add Decision
+                    </button>
+                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-slate-700">
+                        <button type="button" @click="editing = false; items = @js($decisionsRawItems)"
+                                class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-slate-400 hover:text-gray-800">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="px-3 py-1.5 text-xs font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-lg">
+                            Save
+                        </button>
+                    </div>
+                </form>
             </div>
 
             {{-- Risks --}}
-            @php
-                $risks = $meeting->extractions->firstWhere('type', 'risks');
-            @endphp
-            @if($risks && !empty($risks->structured_data) && !isset($risks->structured_data['custom_template']))
-                <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Risks & Concerns</h2>
-                    <div class="space-y-3">
-                        @foreach($risks->structured_data as $risk)
-                            <div class="flex items-start gap-3 p-3 rounded-lg {{ match($risk['severity'] ?? 'medium') { 'high' => 'bg-red-50 dark:bg-red-900/10', 'medium' => 'bg-amber-50 dark:bg-amber-900/10', 'low' => 'bg-yellow-50 dark:bg-yellow-900/10', default => 'bg-gray-50 dark:bg-slate-700/30' } }}">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ match($risk['severity'] ?? 'medium') { 'high' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300', 'medium' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', 'low' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300', default => 'bg-gray-100 text-gray-800' } }}">
-                                    {{ ucfirst($risk['severity'] ?? 'medium') }}
-                                </span>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm text-gray-900 dark:text-white">{{ $risk['risk'] ?? '' }}</p>
-                                    @if(!empty($risk['mitigation']))
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span class="font-medium">Mitigation:</span> {{ $risk['mitigation'] }}</p>
-                                    @endif
-                                    @if(!empty($risk['raised_by']))
-                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Raised by {{ $risk['raised_by'] }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
+            <div x-data="{ editing: false, items: @js($risksRawItems) }"
+                 class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Risks &amp; Concerns</h2>
+                    @if($isEditable)
+                        <button x-show="!editing" @click="editing = true" type="button"
+                                class="text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400 font-medium">
+                            Edit
+                        </button>
+                    @endif
                 </div>
-            @endif
+
+                <div x-show="!editing">
+                    @if(!empty($risksRawItems))
+                        <div class="space-y-3">
+                            @foreach($risksRawItems as $risk)
+                                <div class="flex items-start gap-3 p-3 rounded-lg {{ match($risk['severity'] ?? 'medium') { 'high' => 'bg-red-50 dark:bg-red-900/10', 'medium' => 'bg-amber-50 dark:bg-amber-900/10', 'low' => 'bg-yellow-50 dark:bg-yellow-900/10', default => 'bg-gray-50 dark:bg-slate-700/30' } }}">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ match($risk['severity'] ?? 'medium') { 'high' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300', 'medium' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300', 'low' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300', default => 'bg-gray-100 text-gray-800' } }}">
+                                        {{ ucfirst($risk['severity'] ?? 'medium') }}
+                                    </span>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm text-gray-900 dark:text-white">{{ $risk['risk'] ?? '' }}</p>
+                                        @if(!empty($risk['mitigation']))
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><span class="font-medium">Mitigation:</span> {{ $risk['mitigation'] }}</p>
+                                        @endif
+                                        @if(!empty($risk['raised_by']))
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Raised by {{ $risk['raised_by'] }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-500 dark:text-gray-400 italic">No risks recorded.</p>
+                    @endif
+                </div>
+
+                <form x-show="editing" x-cloak method="POST"
+                      action="{{ route('meetings.extractions.update', ['meeting' => $meeting, 'type' => 'risks']) }}"
+                      class="space-y-3">
+                    @csrf
+                    @method('PATCH')
+                    <template x-for="(item, index) in items" :key="index">
+                        <div class="border border-gray-200 dark:border-slate-700 rounded-lg p-3 space-y-2">
+                            <div class="flex items-start gap-2">
+                                <span class="text-xs text-gray-400 mt-2" x-text="`#${index + 1}`"></span>
+                                <textarea :name="`items[${index}][risk]`" x-model="item.risk" rows="2"
+                                          class="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm"
+                                          placeholder="Risk description..."></textarea>
+                                <button type="button" @click="items.splice(index, 1)"
+                                        class="text-red-500 hover:text-red-700 text-xs px-2 py-1">Remove</button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select :name="`items[${index}][severity]`" x-model="item.severity"
+                                        class="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-2 py-1.5 text-xs">
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                                <input type="text" :name="`items[${index}][raised_by]`" x-model="item.raised_by"
+                                       class="rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-2 py-1.5 text-xs"
+                                       placeholder="Raised by (optional)">
+                            </div>
+                            <textarea :name="`items[${index}][mitigation]`" x-model="item.mitigation" rows="1"
+                                      class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-2 py-1.5 text-xs"
+                                      placeholder="Mitigation (optional)"></textarea>
+                        </div>
+                    </template>
+                    <button type="button" @click="items.push({ risk: '', severity: 'medium', mitigation: '', raised_by: '' })"
+                            class="text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400 font-medium">
+                        + Add Risk
+                    </button>
+                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-slate-700">
+                        <button type="button" @click="editing = false; items = @js($risksRawItems)"
+                                class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-slate-400 hover:text-gray-800">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="px-3 py-1.5 text-xs font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-lg">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
 
             {{-- Issues --}}
-            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Issues</h2>
+            <div x-data="{ editing: false, items: @js($issuesRawItems) }"
+                 class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Issues</h2>
+                    @if($isEditable)
+                        <button x-show="!editing" @click="editing = true" type="button"
+                                class="text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400 font-medium">
+                            Edit
+                        </button>
+                    @endif
+                </div>
                 @php
-                    $issues = $meeting->extractions->firstWhere('type', 'issues');
+                    $issues = $issuesExtraction;
                 @endphp
-                @if($issues && !empty($issues->structured_data))
-                    <ol class="space-y-3 list-decimal list-inside">
-                        @foreach($issues->structured_data as $issue)
-                            <li class="text-sm text-gray-900 dark:text-white">
-                                {{ is_array($issue) ? ($issue['issue'] ?? $issue['content'] ?? $issue['text'] ?? $issue['description'] ?? '') : $issue }}
-                            </li>
-                        @endforeach
-                    </ol>
-                @elseif($issues && $issues->content)
-                    <div class="prose prose-sm dark:prose-invert max-w-none">
-                        {!! nl2br(e($issues->content)) !!}
+
+                <div x-show="!editing">
+                    @if(!empty($issuesRawItems))
+                        <ol class="space-y-2 list-decimal list-inside">
+                            @foreach($issuesRawItems as $issue)
+                                <li class="text-sm text-gray-900 dark:text-white">{{ $issue['issue'] ?? '' }}</li>
+                            @endforeach
+                        </ol>
+                    @elseif($issues && $issues->content)
+                        <div class="prose prose-sm dark:prose-invert max-w-none">
+                            {!! nl2br(e($issues->content)) !!}
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-500 dark:text-gray-400 italic">No issues recorded.</p>
+                    @endif
+                </div>
+
+                <form x-show="editing" x-cloak method="POST"
+                      action="{{ route('meetings.extractions.update', ['meeting' => $meeting, 'type' => 'issues']) }}"
+                      class="space-y-3">
+                    @csrf
+                    @method('PATCH')
+                    <template x-for="(item, index) in items" :key="index">
+                        <div class="flex items-start gap-2">
+                            <span class="text-xs text-gray-400 mt-2" x-text="`#${index + 1}`"></span>
+                            <textarea :name="`items[${index}][issue]`" x-model="item.issue" rows="2"
+                                      class="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm"
+                                      placeholder="Issue description..."></textarea>
+                            <button type="button" @click="items.splice(index, 1)"
+                                    class="text-red-500 hover:text-red-700 text-xs px-2 py-1">Remove</button>
+                        </div>
+                    </template>
+                    <button type="button" @click="items.push({ issue: '' })"
+                            class="text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400 font-medium">
+                        + Add Issue
+                    </button>
+                    <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-slate-700">
+                        <button type="button" @click="editing = false; items = @js($issuesRawItems)"
+                                class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-slate-400 hover:text-gray-800">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="px-3 py-1.5 text-xs font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-lg">
+                            Save
+                        </button>
                     </div>
-                @else
-                    <p class="text-sm text-gray-500 dark:text-gray-400 italic">No issues recorded.</p>
-                @endif
+                </form>
             </div>
         </div>
 

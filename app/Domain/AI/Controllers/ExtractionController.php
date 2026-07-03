@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Arr;
 use Illuminate\View\View;
 
 class ExtractionController extends Controller
@@ -79,5 +80,126 @@ class ExtractionController extends Controller
         $topics = $meeting->topics()->orderBy('sort_order')->get();
 
         return view('extractions.index', compact('meeting', 'extractions', 'topics'));
+    }
+
+    /**
+     * Manually update extraction content (Summary, Decisions, Risks, Issues)
+     * from the Finalize step inline editor.
+     */
+    public function update(Request $request, MinutesOfMeeting $meeting, string $type): RedirectResponse
+    {
+        $this->authorize('update', $meeting);
+
+        abort_unless(in_array($type, ['summary', 'decisions', 'risks', 'issues'], true), 404);
+
+        $validated = $request->validate($this->validationRulesFor($type));
+
+        $extraction = $meeting->extractions()->firstOrNew(['type' => $type]);
+
+        if ($type === 'summary') {
+            $extraction->content = trim((string) ($validated['content'] ?? '')) ?: null;
+        } else {
+            $items = collect($validated['items'] ?? [])
+                ->map(fn (array $item): array => $this->sanitizeItem($type, $item))
+                ->filter(fn (array $item): bool => $this->itemHasContent($type, $item))
+                ->values()
+                ->all();
+
+            $extraction->structured_data = $items;
+            $extraction->content = $this->buildContentSummary($type, $items);
+        }
+
+        if (! $extraction->exists) {
+            $extraction->provider = 'manual';
+            $extraction->model = 'manual-edit';
+        }
+
+        $extraction->save();
+
+        return back()->with('success', ucfirst($type).' updated.');
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    private function validationRulesFor(string $type): array
+    {
+        return match ($type) {
+            'summary' => [
+                'content' => ['nullable', 'string', 'max:20000'],
+            ],
+            'decisions' => [
+                'items' => ['nullable', 'array'],
+                'items.*.decision' => ['nullable', 'string', 'max:2000'],
+                'items.*.made_by' => ['nullable', 'string', 'max:255'],
+            ],
+            'risks' => [
+                'items' => ['nullable', 'array'],
+                'items.*.risk' => ['nullable', 'string', 'max:2000'],
+                'items.*.severity' => ['nullable', 'in:high,medium,low'],
+                'items.*.mitigation' => ['nullable', 'string', 'max:2000'],
+                'items.*.raised_by' => ['nullable', 'string', 'max:255'],
+            ],
+            'issues' => [
+                'items' => ['nullable', 'array'],
+                'items.*.issue' => ['nullable', 'string', 'max:2000'],
+            ],
+        };
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array<string, mixed>
+     */
+    private function sanitizeItem(string $type, array $item): array
+    {
+        return match ($type) {
+            'decisions' => [
+                'decision' => trim((string) Arr::get($item, 'decision', '')),
+                'made_by' => trim((string) Arr::get($item, 'made_by', '')) ?: null,
+            ],
+            'risks' => [
+                'risk' => trim((string) Arr::get($item, 'risk', '')),
+                'severity' => Arr::get($item, 'severity', 'medium'),
+                'mitigation' => trim((string) Arr::get($item, 'mitigation', '')) ?: null,
+                'raised_by' => trim((string) Arr::get($item, 'raised_by', '')) ?: null,
+            ],
+            'issues' => [
+                'issue' => trim((string) Arr::get($item, 'issue', '')),
+            ],
+            default => $item,
+        };
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    private function itemHasContent(string $type, array $item): bool
+    {
+        return match ($type) {
+            'decisions' => ! empty($item['decision']),
+            'risks' => ! empty($item['risk']),
+            'issues' => ! empty($item['issue']),
+            default => false,
+        };
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $items
+     */
+    private function buildContentSummary(string $type, array $items): ?string
+    {
+        if ($items === []) {
+            return null;
+        }
+
+        return collect($items)
+            ->map(fn (array $item): string => match ($type) {
+                'decisions' => '- '.$item['decision'],
+                'risks' => '- ['.$item['severity'].'] '.$item['risk'],
+                'issues' => '- '.$item['issue'],
+                default => '',
+            })
+            ->implode("\n");
     }
 }
