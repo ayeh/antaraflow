@@ -73,7 +73,7 @@ class NotifyUpcomingMeetingsCommand extends Command
                     ucfirst($connection->provider),
                 ));
 
-                Cache::put($cacheKey, true, now()->addHours(2));
+                Cache::put($cacheKey, true, now()->addHours(24));
                 $notified++;
             }
         }

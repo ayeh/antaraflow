@@ -160,6 +160,7 @@ class OutlookCalendarProvider implements CalendarProviderInterface
                 'title' => $event['subject'] ?? '(no title)',
                 'start' => Carbon::parse($event['start']['dateTime'], $event['start']['timeZone'] ?? 'UTC'),
             ])
+            ->filter(fn (array $event): bool => $event['start']->gte($from))
             ->values()
             ->all();
     }
