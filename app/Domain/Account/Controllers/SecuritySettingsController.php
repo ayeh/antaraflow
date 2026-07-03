@@ -8,7 +8,6 @@ use App\Domain\Account\Requests\UpdatePasswordRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -21,14 +20,10 @@ class SecuritySettingsController extends Controller
 
     public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
     {
-        $user = $request->user();
-
-        $user->update([
+        $request->user()->update([
             'password' => $request->validated('password'),
             'remember_token' => Str::random(60),
         ]);
-
-        Auth::logoutOtherDevices($request->validated('password'));
 
         return redirect()->route('settings.security')->with('success', 'Password updated.');
     }

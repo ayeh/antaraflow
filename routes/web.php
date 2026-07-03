@@ -215,17 +215,19 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
     // AI Provider Configs
     Route::resource('ai-provider-configs', \App\Domain\Account\Controllers\AiProviderConfigController::class);
 
-    // Profile Settings
+    // Profile Settings (includes security/password)
     Route::get('settings/profile', [ProfileSettingsController::class, 'edit'])->name('settings.profile');
     Route::put('settings/profile', [ProfileSettingsController::class, 'update'])->name('settings.profile.update');
+    Route::post('settings/profile/avatar', [ProfileSettingsController::class, 'updateAvatar'])->name('settings.profile.avatar');
+    Route::put('settings/profile/password', [ProfileSettingsController::class, 'updatePassword'])->name('settings.profile.password');
+
+    // Security redirect (merged into profile settings)
+    Route::get('settings/security', fn () => redirect()->route('settings.profile'))->name('settings.security');
+    Route::put('settings/security/password', [SecuritySettingsController::class, 'updatePassword'])->name('settings.security.password');
 
     // Notification Settings
     Route::get('settings/notifications', [NotificationSettingsController::class, 'edit'])->name('settings.notifications');
     Route::put('settings/notifications', [NotificationSettingsController::class, 'update'])->name('settings.notifications.update');
-
-    // Security Settings
-    Route::get('settings/security', [SecuritySettingsController::class, 'edit'])->name('settings.security');
-    Route::put('settings/security/password', [SecuritySettingsController::class, 'updatePassword'])->name('settings.security.password');
 
     // Integration Settings
     Route::get('settings/integrations', [IntegrationSettingsController::class, 'index'])->name('settings.integrations');

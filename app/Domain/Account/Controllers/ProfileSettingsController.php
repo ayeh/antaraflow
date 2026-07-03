@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Domain\Account\Controllers;
 
 use App\Domain\Account\Models\UserSettings;
+use App\Domain\Account\Requests\UpdatePasswordRequest;
 use App\Domain\Account\Requests\UpdateProfileSettingsRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ProfileSettingsController extends Controller
@@ -34,5 +37,33 @@ class ProfileSettingsController extends Controller
         );
 
         return redirect()->route('settings.profile')->with('success', 'Profile updated.');
+    }
+
+    public function updateAvatar(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'avatar' => ['required', 'image', 'max:2048'],
+        ]);
+
+        $user = $request->user();
+
+        if ($user->avatar_path) {
+            Storage::disk('public')->delete($user->avatar_path);
+        }
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $user->update(['avatar_path' => $path]);
+
+        return redirect()->route('settings.profile')->with('success', 'Profile photo updated.');
+    }
+
+    public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
+    {
+        $request->user()->update([
+            'password' => $request->validated('password'),
+            'remember_token' => Str::random(60),
+        ]);
+
+        return redirect()->route('settings.profile')->with('success', 'Password updated.');
     }
 }
