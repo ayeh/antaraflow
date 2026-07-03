@@ -12,6 +12,7 @@ use App\Domain\Analytics\Services\AnalyticsEventService;
 use App\Domain\Calendar\Services\CalendarSyncService;
 use App\Domain\Collaboration\Services\CommentService;
 use App\Domain\Collaboration\Services\ShareService;
+use App\Domain\Meeting\Models\MeetingSeries;
 use App\Domain\Meeting\Models\MeetingTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Meeting\Requests\CreateMeetingRequest;
@@ -121,7 +122,11 @@ class MeetingController extends Controller
             ? $templates->firstWhere('id', (int) $request->query('template_id'))
             : $templates->firstWhere('is_default', true);
 
-        return view('meetings.create', compact('projects', 'templates', 'selectedTemplate'));
+        $meetingSeries = MeetingSeries::where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'recurrence_pattern']);
+
+        return view('meetings.create', compact('projects', 'templates', 'selectedTemplate', 'meetingSeries'));
     }
 
     public function store(CreateMeetingRequest $request): RedirectResponse
