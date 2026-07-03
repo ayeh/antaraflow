@@ -62,6 +62,8 @@ class DemoMeetingSeeder extends Seeder
             'name' => 'Sprint Retrospective Template',
         ]);
 
+        $this->call(MeetingTemplateSeeder::class);
+
         $draftMeetings = collect();
         for ($i = 0; $i < 3; $i++) {
             $draftMeetings->push(MinutesOfMeeting::factory()->draft()->create([

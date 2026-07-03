@@ -1,19 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-3xl mx-auto space-y-6">
+@php
+    $initialSections = collect(old('structure.sections', []))->values()->all();
+@endphp
+
+<div class="max-w-3xl mx-auto space-y-6" x-data="sectionBuilder({{ Js::from($initialSections) }})">
     <div class="flex items-center gap-4">
-        <a href="{{ route('meeting-templates.index') }}" class="text-gray-400 hover:text-gray-600">
+        <a href="{{ route('meeting-templates.index') }}" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </a>
-        <h1 class="text-2xl font-bold text-gray-900">Create Template</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Create Template</h1>
     </div>
 
-    <form method="POST" action="{{ route('meeting-templates.store') }}" class="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+    <form method="POST" action="{{ route('meeting-templates.store') }}" class="space-y-6">
         @csrf
 
         @if($errors->any())
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
                 <ul class="list-disc list-inside space-y-1">
                     @foreach($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -22,45 +26,245 @@
             </div>
         @endif
 
-        <div>
-            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
-            <input type="text" name="name" id="name" value="{{ old('name') }}" required class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+        {{-- Basic Info --}}
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-5">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Template Name <span class="text-red-500">*</span>
+                </label>
+                <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    value="{{ old('name') }}"
+                    required
+                    placeholder="e.g. Weekly Standup, Project Kickoff..."
+                    class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
+                >
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Description <span class="text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
+                </label>
+                <textarea
+                    name="description"
+                    id="description"
+                    rows="2"
+                    placeholder="Briefly describe when to use this template..."
+                    class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none resize-none"
+                >{{ old('description') }}</textarea>
+            </div>
         </div>
 
-        <div>
-            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea name="description" id="description" rows="3" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">{{ old('description') }}</textarea>
+        {{-- Section Builder --}}
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-5">
+            <div>
+                <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Meeting Sections <span class="text-red-500">*</span></h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Add the sections that will appear in every meeting using this template.</p>
+            </div>
+
+            {{-- Quick-start presets --}}
+            <div>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">Quick-start presets</p>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button"
+                        @click="applyPreset([
+                            {title: 'Updates', type: 'text'},
+                            {title: 'Blockers', type: 'list'},
+                            {title: 'Action Items', type: 'action_items'}
+                        ])"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-600 text-xs font-medium text-gray-600 dark:text-gray-300 hover:border-violet-400 hover:text-violet-600 dark:hover:border-violet-500 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        Daily Standup
+                    </button>
+                    <button type="button"
+                        @click="applyPreset([
+                            {title: 'Agenda', type: 'agenda'},
+                            {title: 'Discussion', type: 'text'},
+                            {title: 'Decisions', type: 'decisions'},
+                            {title: 'Action Items', type: 'action_items'}
+                        ])"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-600 text-xs font-medium text-gray-600 dark:text-gray-300 hover:border-violet-400 hover:text-violet-600 dark:hover:border-violet-500 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        Project Meeting
+                    </button>
+                    <button type="button"
+                        @click="applyPreset([
+                            {title: 'Agenda', type: 'agenda'},
+                            {title: 'Notes', type: 'text'},
+                            {title: 'Action Items', type: 'action_items'}
+                        ])"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-600 text-xs font-medium text-gray-600 dark:text-gray-300 hover:border-violet-400 hover:text-violet-600 dark:hover:border-violet-500 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        General Meeting
+                    </button>
+                    <button type="button"
+                        @click="applyPreset([
+                            {title: 'Objectives', type: 'list'},
+                            {title: 'Agenda', type: 'agenda'},
+                            {title: 'Team Introductions', type: 'text'},
+                            {title: 'Decisions', type: 'decisions'},
+                            {title: 'Action Items', type: 'action_items'}
+                        ])"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-600 text-xs font-medium text-gray-600 dark:text-gray-300 hover:border-violet-400 hover:text-violet-600 dark:hover:border-violet-500 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Project Kickoff
+                    </button>
+                </div>
+            </div>
+
+            {{-- Section list --}}
+            <div class="space-y-2">
+                <template x-for="(section, index) in sections" :key="index">
+                    <div class="flex items-center gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 group">
+                        {{-- Drag indicator (decorative) --}}
+                        <div class="flex flex-col gap-0.5 shrink-0 text-gray-300 dark:text-slate-500 cursor-grab">
+                            <span class="block w-3.5 h-px bg-current rounded"></span>
+                            <span class="block w-3.5 h-px bg-current rounded"></span>
+                            <span class="block w-3.5 h-px bg-current rounded"></span>
+                        </div>
+
+                        {{-- Section number --}}
+                        <span class="shrink-0 w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 text-xs font-bold flex items-center justify-center" x-text="index + 1"></span>
+
+                        {{-- Hidden inputs for form submission --}}
+                        <input type="hidden" :name="`structure[sections][${index}][title]`" :value="section.title">
+                        <input type="hidden" :name="`structure[sections][${index}][type]`" :value="section.type">
+
+                        {{-- Title --}}
+                        <input
+                            type="text"
+                            x-model="section.title"
+                            placeholder="Section name..."
+                            class="flex-1 min-w-0 rounded-md border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
+                        >
+
+                        {{-- Type --}}
+                        <select
+                            x-model="section.type"
+                            class="shrink-0 rounded-md border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
+                        >
+                            <option value="text">Notes</option>
+                            <option value="agenda">Agenda</option>
+                            <option value="list">Bullet List</option>
+                            <option value="action_items">Action Items</option>
+                            <option value="decisions">Decisions</option>
+                            <option value="qa">Q&amp;A</option>
+                        </select>
+
+                        {{-- Move up/down --}}
+                        <div class="flex flex-col gap-0.5 shrink-0">
+                            <button type="button" @click="moveUp(index)" :disabled="index === 0"
+                                class="p-0.5 rounded text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-25 disabled:cursor-not-allowed transition-colors">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+                            </button>
+                            <button type="button" @click="moveDown(index)" :disabled="index === sections.length - 1"
+                                class="p-0.5 rounded text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-25 disabled:cursor-not-allowed transition-colors">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                        </div>
+
+                        {{-- Remove --}}
+                        <button type="button" @click="removeSection(index)"
+                            class="shrink-0 p-1 rounded-md text-gray-300 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </template>
+
+                {{-- Empty state --}}
+                <div x-show="sections.length === 0" class="text-center py-8 rounded-lg border-2 border-dashed border-gray-200 dark:border-slate-600">
+                    <svg class="w-8 h-8 mx-auto text-gray-300 dark:text-slate-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <p class="text-sm text-gray-400 dark:text-slate-500">No sections yet. Pick a preset above or add one below.</p>
+                </div>
+            </div>
+
+            {{-- Add section button --}}
+            <button type="button" @click="addSection()"
+                class="flex items-center gap-2 w-full px-4 py-2.5 rounded-lg border border-dashed border-gray-300 dark:border-slate-600 text-sm text-gray-500 dark:text-gray-400 hover:border-violet-400 hover:text-violet-600 dark:hover:border-violet-500 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Add Section
+            </button>
         </div>
 
-        <div>
-            <label for="structure" class="block text-sm font-medium text-gray-700 mb-1">Structure <span class="text-red-500">*</span></label>
-            <textarea name="structure" id="structure" rows="8" required class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-mono focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">{{ old('structure') }}</textarea>
-            <p class="mt-1 text-xs text-gray-500">Enter JSON structure. Example: <code class="bg-gray-100 px-1 rounded">{"sections": [{"title": "Agenda", "type": "text"}]}</code></p>
-        </div>
+        {{-- Settings --}}
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-4">
+            <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Settings</h2>
 
-        <div>
-            <label for="default_settings" class="block text-sm font-medium text-gray-700 mb-1">Default Settings <span class="text-gray-400 font-normal">(optional)</span></label>
-            <textarea name="default_settings" id="default_settings" rows="4" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-mono focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">{{ old('default_settings') }}</textarea>
-            <p class="mt-1 text-xs text-gray-500">Enter JSON for default settings (optional).</p>
-        </div>
-
-        <div class="space-y-3">
-            <div class="flex items-center gap-3">
+            <label class="flex items-start gap-3 cursor-pointer group">
                 <input type="hidden" name="is_shared" value="0">
-                <input type="checkbox" name="is_shared" id="is_shared" value="1" {{ old('is_shared', '1') ? 'checked' : '' }} class="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500">
-                <label for="is_shared" class="text-sm font-medium text-gray-700">Shared with organization</label>
-            </div>
-            <div class="flex items-center gap-3">
+                <input type="checkbox" name="is_shared" id="is_shared" value="1"
+                    {{ old('is_shared', '1') ? 'checked' : '' }}
+                    class="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500">
+                <div>
+                    <span class="block text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">Share with organization</span>
+                    <span class="block text-xs text-gray-400 dark:text-slate-500 mt-0.5">Everyone in your organization can use this template when creating meetings.</span>
+                </div>
+            </label>
+
+            <label class="flex items-start gap-3 cursor-pointer group">
                 <input type="hidden" name="is_default" value="0">
-                <input type="checkbox" name="is_default" id="is_default" value="1" {{ old('is_default') ? 'checked' : '' }} class="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500">
-                <label for="is_default" class="text-sm font-medium text-gray-700">Set as default template</label>
-            </div>
+                <input type="checkbox" name="is_default" id="is_default" value="1"
+                    {{ old('is_default') ? 'checked' : '' }}
+                    class="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500">
+                <div>
+                    <span class="block text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">Set as default template</span>
+                    <span class="block text-xs text-gray-400 dark:text-slate-500 mt-0.5">This template will be automatically selected whenever someone creates a new meeting.</span>
+                </div>
+            </label>
         </div>
 
-        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
-            <a href="{{ route('meeting-templates.index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">Cancel</a>
-            <button type="submit" class="bg-violet-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">Create Template</button>
+        <div class="flex items-center justify-end gap-3">
+            <a href="{{ route('meeting-templates.index') }}" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Cancel</a>
+            <button type="submit"
+                :disabled="sections.length === 0"
+                class="bg-violet-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                Create Template
+            </button>
         </div>
     </form>
 </div>
+
+<script>
+function sectionBuilder(initialSections) {
+    return {
+        sections: initialSections.length > 0 ? initialSections : [],
+
+        addSection() {
+            this.sections.push({ title: '', type: 'text' });
+            this.$nextTick(() => {
+                const inputs = this.$el.querySelectorAll('input[placeholder="Section name..."]');
+                if (inputs.length) inputs[inputs.length - 1].focus();
+            });
+        },
+
+        removeSection(index) {
+            this.sections.splice(index, 1);
+        },
+
+        moveUp(index) {
+            if (index === 0) return;
+            const arr = [...this.sections];
+            [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+            this.sections = arr;
+        },
+
+        moveDown(index) {
+            if (index === this.sections.length - 1) return;
+            const arr = [...this.sections];
+            [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
+            this.sections = arr;
+        },
+
+        applyPreset(preset) {
+            this.sections = preset.map(s => ({ ...s }));
+        },
+    };
+}
+</script>
 @endsection
