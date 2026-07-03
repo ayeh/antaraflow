@@ -32,11 +32,13 @@ class ExtractionService
         $providerName = $providerConfig?->provider ?? config('ai.default');
         $modelName = $providerConfig?->model ?? config('ai.providers.'.$providerName.'.model');
 
-        $this->extractSummary($mom, $provider, $providerName, $modelName, $text);
-        $this->extractActionItems($mom, $provider, $providerName, $modelName, $text);
-        $this->extractDecisions($mom, $provider, $providerName, $modelName, $text);
-        $this->extractTopics($mom, $provider, $providerName, $modelName, $text);
-        $this->extractRisks($mom, $provider, $providerName, $modelName, $text);
+        $language = $mom->language ?? 'en';
+
+        $this->extractSummary($mom, $provider, $providerName, $modelName, $text, $language);
+        $this->extractActionItems($mom, $provider, $providerName, $modelName, $text, $language);
+        $this->extractDecisions($mom, $provider, $providerName, $modelName, $text, $language);
+        $this->extractTopics($mom, $provider, $providerName, $modelName, $text, $language);
+        $this->extractRisks($mom, $provider, $providerName, $modelName, $text, $language);
     }
 
     /**
@@ -176,6 +178,7 @@ class ExtractionService
         string $providerName,
         string $modelName,
         string $text,
+        string $language = 'en',
     ): void {
         $template = $this->resolveTemplate($mom, 'summary');
 
@@ -198,7 +201,7 @@ class ExtractionService
             return;
         }
 
-        $result = $provider->summarize($text);
+        $result = $provider->summarize($text, $language);
 
         MomExtraction::query()->updateOrCreate(
             ['minutes_of_meeting_id' => $mom->id, 'type' => 'summary'],
@@ -218,6 +221,7 @@ class ExtractionService
         string $providerName,
         string $modelName,
         string $text,
+        string $language = 'en',
     ): void {
         $template = $this->resolveTemplate($mom, 'action_items');
 
@@ -240,7 +244,7 @@ class ExtractionService
             return;
         }
 
-        $items = $provider->extractActionItems($text);
+        $items = $provider->extractActionItems($text, $language);
 
         $structuredData = array_map(
             fn ($item) => [
@@ -275,6 +279,7 @@ class ExtractionService
         string $providerName,
         string $modelName,
         string $text,
+        string $language = 'en',
     ): void {
         $template = $this->resolveTemplate($mom, 'decisions');
 
@@ -297,7 +302,7 @@ class ExtractionService
             return;
         }
 
-        $decisions = $provider->extractDecisions($text);
+        $decisions = $provider->extractDecisions($text, $language);
 
         $structuredData = array_map(
             fn ($decision) => [
@@ -330,6 +335,7 @@ class ExtractionService
         string $providerName,
         string $modelName,
         string $text,
+        string $language = 'en',
     ): void {
         $template = $this->resolveTemplate($mom, 'topics');
 
@@ -359,7 +365,8 @@ class ExtractionService
             ."Respond with ONLY a valid JSON array, no other text.\n\n"
             ."Transcript:\n{$text}";
 
-        $response = $provider->chat($prompt, ['system' => 'You are an expert at identifying discussion topics from meetings. Always respond with valid JSON.']);
+        $languageNote = ($language && $language !== 'en') ? ' Respond in '.(['ms' => 'Bahasa Melayu (Malay)'][$language] ?? $language).'.' : '';
+        $response = $provider->chat($prompt, ['system' => 'You are an expert at identifying discussion topics from meetings. Always respond with valid JSON.'.$languageNote]);
         $cleaned = trim($response);
         if (preg_match('/^```(?:json)?\s*\n?(.*?)\n?\s*```$/s', $cleaned, $matches)) {
             $cleaned = trim($matches[1]);
@@ -400,6 +407,7 @@ class ExtractionService
         string $providerName,
         string $modelName,
         string $text,
+        string $language = 'en',
     ): void {
         $template = $this->resolveTemplate($mom, 'risks');
 
@@ -422,7 +430,7 @@ class ExtractionService
             return;
         }
 
-        $risks = $provider->extractRisks($text);
+        $risks = $provider->extractRisks($text, $language);
 
         $structuredData = array_map(
             fn ($risk) => [

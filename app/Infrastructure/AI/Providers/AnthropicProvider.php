@@ -56,7 +56,7 @@ class AnthropicProvider implements AIProviderInterface
     }
 
     /** {@inheritDoc} */
-    public function summarize(string $text): MeetingSummary
+    public function summarize(string $text, ?string $language = null): MeetingSummary
     {
         $prompt = "Analyze the following meeting transcript and provide a JSON response with these fields:\n"
             ."- \"summary\": A concise summary of the meeting (2-3 paragraphs)\n"
@@ -65,7 +65,8 @@ class AnthropicProvider implements AIProviderInterface
             ."Respond with ONLY valid JSON, no other text.\n\n"
             ."Transcript:\n{$text}";
 
-        $response = $this->chat($prompt, ['system' => 'You are a meeting summarization expert. Always respond with valid JSON.']);
+        $system = 'You are a meeting summarization expert. Always respond with valid JSON.'.$this->languageInstruction($language);
+        $response = $this->chat($prompt, ['system' => $system]);
         $data = json_decode($response, true) ?? [];
 
         return new MeetingSummary(
@@ -76,7 +77,7 @@ class AnthropicProvider implements AIProviderInterface
     }
 
     /** {@inheritDoc} */
-    public function extractActionItems(string $text): array
+    public function extractActionItems(string $text, ?string $language = null): array
     {
         $prompt = "Extract action items from the following meeting transcript. Return a JSON array where each item has:\n"
             ."- \"title\": Brief action item title\n"
@@ -87,7 +88,8 @@ class AnthropicProvider implements AIProviderInterface
             ."Respond with ONLY a valid JSON array, no other text.\n\n"
             ."Transcript:\n{$text}";
 
-        $response = $this->chat($prompt, ['system' => 'You are an expert at extracting action items from meetings. Always respond with valid JSON.']);
+        $system = 'You are an expert at extracting action items from meetings. Always respond with valid JSON.'.$this->languageInstruction($language);
+        $response = $this->chat($prompt, ['system' => $system]);
         $items = json_decode($response, true) ?? [];
 
         return array_map(
@@ -103,7 +105,7 @@ class AnthropicProvider implements AIProviderInterface
     }
 
     /** {@inheritDoc} */
-    public function extractDecisions(string $text): array
+    public function extractDecisions(string $text, ?string $language = null): array
     {
         $prompt = "Extract decisions made during the following meeting transcript. Return a JSON array where each item has:\n"
             ."- \"decision\": The decision that was made\n"
@@ -112,7 +114,8 @@ class AnthropicProvider implements AIProviderInterface
             ."Respond with ONLY a valid JSON array, no other text.\n\n"
             ."Transcript:\n{$text}";
 
-        $response = $this->chat($prompt, ['system' => 'You are an expert at identifying decisions from meetings. Always respond with valid JSON.']);
+        $system = 'You are an expert at identifying decisions from meetings. Always respond with valid JSON.'.$this->languageInstruction($language);
+        $response = $this->chat($prompt, ['system' => $system]);
         $decisions = json_decode($response, true) ?? [];
 
         return array_map(
@@ -126,7 +129,7 @@ class AnthropicProvider implements AIProviderInterface
     }
 
     /** {@inheritDoc} */
-    public function extractRisks(string $text): array
+    public function extractRisks(string $text, ?string $language = null): array
     {
         $prompt = "Extract risks and concerns raised during the following meeting transcript. Return a JSON array where each item has:\n"
             ."- \"risk\": Description of the risk or concern\n"
@@ -136,7 +139,8 @@ class AnthropicProvider implements AIProviderInterface
             ."Respond with ONLY a valid JSON array, no other text.\n\n"
             ."Transcript:\n{$text}";
 
-        $response = $this->chat($prompt, ['system' => 'You are an expert at identifying risks and concerns from meetings. Always respond with valid JSON.']);
+        $system = 'You are an expert at identifying risks and concerns from meetings. Always respond with valid JSON.'.$this->languageInstruction($language);
+        $response = $this->chat($prompt, ['system' => $system]);
         $risks = json_decode($response, true) ?? [];
 
         return array_map(
@@ -148,5 +152,16 @@ class AnthropicProvider implements AIProviderInterface
             ),
             $risks,
         );
+    }
+
+    private function languageInstruction(?string $language): string
+    {
+        if (! $language || $language === 'en') {
+            return '';
+        }
+
+        $names = ['ms' => 'Bahasa Melayu (Malay)'];
+
+        return ' Respond in '.($names[$language] ?? $language).'.';
     }
 }

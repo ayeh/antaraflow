@@ -16,14 +16,14 @@ interface AIProviderInterface
      */
     public function chat(string $prompt, array $context = []): string;
 
-    public function summarize(string $text): MeetingSummary;
+    public function summarize(string $text, ?string $language = null): MeetingSummary;
 
     /** @return array<ExtractedActionItem> */
-    public function extractActionItems(string $text): array;
+    public function extractActionItems(string $text, ?string $language = null): array;
 
     /** @return array<ExtractedDecision> */
-    public function extractDecisions(string $text): array;
+    public function extractDecisions(string $text, ?string $language = null): array;
 
     /** @return array<ExtractedRisk> */
-    public function extractRisks(string $text): array;
+    public function extractRisks(string $text, ?string $language = null): array;
 }
