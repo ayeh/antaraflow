@@ -31,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'onboarding_completed_at',
         'preferences',
         'current_organization_id',
+        'avatar_path',
     ];
 
     /**
