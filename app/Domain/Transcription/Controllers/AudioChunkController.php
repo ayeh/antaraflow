@@ -30,7 +30,7 @@ class AudioChunkController extends Controller
             $request->file('chunk'),
             $meeting->organization_id,
             $request->validated('session_id'),
-            $request->validated('chunk_index'),
+            (int) $request->validated('chunk_index'),
         );
 
         return response()->json([
@@ -50,20 +50,34 @@ class AudioChunkController extends Controller
             'language' => ['nullable', 'string', 'max:5'],
         ]);
 
-        $mergedPath = $this->audioStorageService->mergeChunks(
-            $meeting->organization_id,
-            $validated['session_id'],
-            $validated['mime_type'],
-        );
+        try {
+            $mergedPath = $this->audioStorageService->mergeChunks(
+                $meeting->organization_id,
+                $validated['session_id'],
+                $validated['mime_type'],
+            );
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'message' => 'No audio chunks found. The recording may not have uploaded correctly — please try recording again.',
+            ], 422);
+        }
 
-        $transcription = $this->transcriptionService->createFromBrowserRecording(
-            $mergedPath,
-            $meeting,
-            $request->user(),
-            $validated['mime_type'],
-            $validated['duration_seconds'],
-            $validated['language'] ?? 'en',
-        );
+        try {
+            $transcription = $this->transcriptionService->createFromBrowserRecording(
+                $mergedPath,
+                $meeting,
+                $request->user(),
+                $validated['mime_type'],
+                $validated['duration_seconds'],
+                $validated['language'] ?? 'en',
+            );
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => 'Recording was saved but transcription could not be started. Please contact support.',
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'Recording finalized and transcription started.',

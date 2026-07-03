@@ -45,6 +45,7 @@ export default function audioRecorder(config) {
         isLongRecording: false,
         chunkInterval: null,
         uploadedChunks: 0,
+        pendingChunkUploads: 0,
 
         // Language
         language: navigator.language ? navigator.language.split('-')[0] : 'en',
@@ -574,6 +575,7 @@ export default function audioRecorder(config) {
             formData.append('chunk_index', String(index));
             formData.append('mime_type', this.mimeType);
 
+            this.pendingChunkUploads++;
             try {
                 const response = await fetch(this.chunkUrl, {
                     method: 'POST',
@@ -589,6 +591,8 @@ export default function audioRecorder(config) {
                 }
             } catch (err) {
                 console.error('Chunk upload failed:', err);
+            } finally {
+                this.pendingChunkUploads--;
             }
         },
 
@@ -633,6 +637,13 @@ export default function audioRecorder(config) {
             this.state = 'uploading';
             this.uploadProgress = 90;
 
+            // Wait for any in-flight chunk uploads to settle before finalizing
+            let waited = 0;
+            while (this.pendingChunkUploads > 0 && waited < 15000) {
+                await new Promise((resolve) => setTimeout(resolve, 200));
+                waited += 200;
+            }
+
             try {
                 const response = await fetch(this.finalizeUrl, {
                     method: 'POST',
@@ -644,7 +655,7 @@ export default function audioRecorder(config) {
                     body: JSON.stringify({
                         session_id: this.sessionId,
                         mime_type: this.mimeType,
-                        duration_seconds: this.timer,
+                        duration_seconds: Math.max(1, this.timer),
                         language: this.language,
                     }),
                 });
@@ -656,11 +667,14 @@ export default function audioRecorder(config) {
                     const data = await response.json();
                     this.$dispatch('recording-complete', { transcription: data.transcription });
                 } else {
-                    throw new Error('Finalize failed');
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(data.message || 'Finalize failed');
                 }
             } catch (err) {
                 this.state = 'error';
-                this.errorMessage = 'Failed to finalize recording. Please try again.';
+                this.errorMessage = err.message && err.message !== 'Finalize failed'
+                    ? err.message
+                    : 'Failed to finalize recording. Please try again.';
             }
         },
 
@@ -882,6 +896,7 @@ export default function audioRecorder(config) {
             this.uploadProgress = 0;
             this.chunkIndex = 0;
             this.uploadedChunks = 0;
+            this.pendingChunkUploads = 0;
             this.isLongRecording = false;
 
             if (this.mediaStream) {
