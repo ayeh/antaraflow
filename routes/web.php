@@ -278,6 +278,7 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
         Route::post('extract', [ExtractionController::class, 'extract'])->name('extract');
         Route::post('generate', [ExtractionController::class, 'generate'])->name('generate');
         Route::get('extractions', [ExtractionController::class, 'index'])->name('extractions.index');
+        Route::patch('extractions/{type}', [ExtractionController::class, 'update'])->name('extractions.update')->whereIn('type', ['summary', 'decisions', 'risks', 'issues']);
         Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
         Route::post('chat', [ChatController::class, 'store'])->name('chat.store');
         Route::post('action-items/create-all-tasks', [ActionItemController::class, 'createAllTasks'])->name('action-items.create-all-tasks');
