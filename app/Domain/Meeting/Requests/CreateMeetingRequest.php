@@ -18,6 +18,7 @@ class CreateMeetingRequest extends FormRequest
     {
         return [
             'meeting_template_id' => ['nullable', 'exists:meeting_templates,id'],
+            'meeting_series_id' => ['nullable', 'exists:meeting_series,id'],
             'title' => ['required', 'string', 'max:255'],
             'project_id' => ['nullable', 'exists:projects,id'],
             'meeting_date' => ['required', 'date'],

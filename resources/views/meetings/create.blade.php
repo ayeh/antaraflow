@@ -50,6 +50,32 @@
         </div>
         @endif
 
+        {{-- Meeting Series --}}
+        @if($meetingSeries->isNotEmpty())
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-4">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Meeting Series</h2>
+
+            <div>
+                <select name="meeting_series_id" id="meeting_series_id"
+                    class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    <option value="">— Not part of a series —</option>
+                    @foreach($meetingSeries as $series)
+                        @php
+                            $patternLabels = ['weekly' => 'Weekly', 'biweekly' => 'Biweekly', 'monthly' => 'Monthly'];
+                            $label = $patternLabels[$series->recurrence_pattern] ?? ucfirst($series->recurrence_pattern);
+                        @endphp
+                        <option value="{{ $series->id }}" {{ old('meeting_series_id') == $series->id ? 'selected' : '' }}>
+                            {{ $series->name }} ({{ $label }})
+                        </option>
+                    @endforeach
+                </select>
+                @error('meeting_series_id')
+                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+        @endif
+
         {{-- Basic Information --}}
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-5">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Basic Information</h2>
