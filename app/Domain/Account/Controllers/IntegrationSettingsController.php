@@ -21,7 +21,7 @@ class IntegrationSettingsController extends Controller
             ->get();
 
         $googleConnected = $calendarConnections->where('provider', 'google')->isNotEmpty();
-        $microsoftConnected = $calendarConnections->where('provider', 'microsoft')->isNotEmpty();
+        $microsoftConnected = $calendarConnections->where('provider', 'outlook')->isNotEmpty();
 
         $org = $user->currentOrganization;
         $teamsWebhookConfigured = $org?->hasTeamsWebhook() ?? false;
