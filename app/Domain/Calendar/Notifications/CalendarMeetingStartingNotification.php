@@ -31,7 +31,7 @@ class CalendarMeetingStartingNotification extends Notification implements Should
         return (new MailMessage)
             ->subject("Meeting Starting Soon: {$this->title}")
             ->greeting("Hello {$notifiable->name},")
-            ->line("Your {$this->provider} Calendar meeting **{$this->title}** starts at {$this->startsAt->format('g:i A')}.")
+            ->line("Your {$this->provider} Calendar meeting **{$this->title}** starts at {$this->startsAt->copy()->setTimezone($notifiable->timezone ?: 'UTC')->format('g:i A')}.")
             ->line('You can start a live recording in antaraNote now.')
             ->action('Open antaraNote', route('calendar.connections'))
             ->line('Thank you for using antaraNote.');
