@@ -64,14 +64,25 @@
                                     </div>
 
                                     {{-- Content --}}
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm {{ is_null($notification->read_at) ? 'font-semibold text-gray-900 dark:text-white' : 'font-normal text-gray-700 dark:text-gray-300' }}">
-                                            {{ $notification->data['message'] ?? 'Notification' }}
-                                        </p>
-                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                                            {{ $notification->created_at->diffForHumans() }}
-                                        </p>
-                                    </div>
+                                    @if($notification->target_url)
+                                        <a href="{{ route('notifications.visit', $notification->id) }}" class="flex-1 min-w-0 group">
+                                            <p class="text-sm {{ is_null($notification->read_at) ? 'font-semibold text-gray-900 dark:text-white' : 'font-normal text-gray-700 dark:text-gray-300' }} group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                                                {{ $notification->data['message'] ?? 'Notification' }}
+                                            </p>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                                {{ $notification->created_at->diffForHumans() }}
+                                            </p>
+                                        </a>
+                                    @else
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm {{ is_null($notification->read_at) ? 'font-semibold text-gray-900 dark:text-white' : 'font-normal text-gray-700 dark:text-gray-300' }}">
+                                                {{ $notification->data['message'] ?? 'Notification' }}
+                                            </p>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                                {{ $notification->created_at->diffForHumans() }}
+                                            </p>
+                                        </div>
+                                    @endif
 
                                     {{-- Mark read action --}}
                                     @if(is_null($notification->read_at))

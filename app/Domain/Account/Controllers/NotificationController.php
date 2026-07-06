@@ -35,6 +35,25 @@ class NotificationController extends Controller
         return response()->json(['notifications' => $notifications, 'count' => $count]);
     }
 
+    public function visit(Request $request, string $id): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $notification = $user->notifications()->where('id', $id)->first();
+
+        if ($notification === null) {
+            return redirect()->route('notifications.index');
+        }
+
+        $notification->markAsRead();
+
+        $url = $this->notificationService->resolveUrl($notification);
+
+        return $url !== null
+            ? redirect()->to($url)
+            : redirect()->route('notifications.index');
+    }
+
     public function markAsRead(Request $request, string $id): RedirectResponse
     {
         /** @var User $user */
