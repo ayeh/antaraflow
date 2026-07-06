@@ -75,8 +75,13 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::get('register/{token}', [QrRegistrationController::class, 'showForm'])->name('qr-registration.form');
     Route::post('register/{token}', [QrRegistrationController::class, 'register'])->name('qr-registration.submit');
     Route::get('register/{token}/success', [QrRegistrationController::class, 'success'])->name('qr-registration.success');
+});
 
-    // Shareable live lobby screen (projector / client display)
+// Shareable live lobby screen (projector / client display). Higher throttle:
+// the projector page polls the attendees endpoint every 3s (~20 req/min) and
+// stays open for the whole event, so it needs generous headroom for several
+// viewers behind one NAT IP.
+Route::middleware('throttle:120,1')->group(function () {
     Route::get('lobby/{token}', [QrRegistrationController::class, 'showLobby'])->name('qr-registration.lobby');
     Route::get('lobby/{token}/attendees', [QrRegistrationController::class, 'lobbyAttendees'])->name('qr-registration.lobby.attendees');
 });
@@ -206,6 +211,7 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
     Route::get('notifications/unread', [\App\Domain\Account\Controllers\NotificationController::class, 'unread'])->name('notifications.unread');
     Route::post('notifications/read-all', [\App\Domain\Account\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::post('notifications/{id}/read', [\App\Domain\Account\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::get('notifications/{id}/visit', [\App\Domain\Account\Controllers\NotificationController::class, 'visit'])->name('notifications.visit');
 
     // Calendar Connections
     Route::prefix('calendar')->name('calendar.')->group(function () {
