@@ -57,17 +57,20 @@
             @if($logoSrc)
                 <img src="{{ $logoSrc }}" alt="{{ $branding->appName() }}" class="mx-auto h-12 object-contain {{ $resellerOrg ? 'mb-1' : '' }}">
                 @if($resellerOrg)
-                    <p class="mt-1 text-sm {{ $bgSrc ? 'text-white/70' : 'text-gray-500' }}">Powered by {{ config('app.name', 'antaraNote') }}</p>
+                    <p class="mt-1 text-sm {{ $bgSrc ? 'text-white/70' : 'text-gray-500' }}">{{ __('common.powered_by', ['name' => config('app.name', 'antaraNote')]) }}</p>
                 @endif
             @else
                 <h1 class="text-2xl font-bold {{ $bgSrc ? 'text-white' : 'text-gray-900' }}">{{ $branding->appName() }}</h1>
                 @if($resellerOrg)
-                    <p class="mt-1 text-sm {{ $bgSrc ? 'text-white/70' : 'text-gray-500' }}">Powered by {{ config('app.name', 'antaraNote') }}</p>
+                    <p class="mt-1 text-sm {{ $bgSrc ? 'text-white/70' : 'text-gray-500' }}">{{ __('common.powered_by', ['name' => config('app.name', 'antaraNote')]) }}</p>
                 @endif
             @endif
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
             @yield('content')
+        </div>
+        <div class="mt-6 flex justify-center">
+            <x-language-switcher />
         </div>
     </div>
 </body>

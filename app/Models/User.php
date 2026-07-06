@@ -73,6 +73,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(SocialAccount::class);
     }
 
+    public function settings(): HasOne
+    {
+        return $this->hasOne(\App\Domain\Account\Models\UserSettings::class);
+    }
+
     public function adminAccount(): HasOne
     {
         return $this->hasOne(Admin::class);

@@ -1,31 +1,31 @@
 @php
 $mobileItems = [
     [
-        'label'  => 'Home',
+        'label'  => __('nav.home'),
         'route'  => 'dashboard',
         'active' => request()->routeIs('dashboard'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
     ],
     [
-        'label'  => 'Meetings',
+        'label'  => __('nav.meetings'),
         'route'  => 'meetings.index',
         'active' => request()->routeIs('meetings.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
     ],
     [
-        'label'  => 'Tasks',
+        'label'  => __('nav.tasks'),
         'route'  => 'action-items.dashboard',
         'active' => request()->routeIs('action-items.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
     ],
     [
-        'label'  => 'Projects',
+        'label'  => __('nav.projects'),
         'route'  => 'projects.index',
         'active' => request()->routeIs('projects.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>',
     ],
     [
-        'label'  => 'Analytics',
+        'label'  => __('nav.analytics'),
         'route'  => 'analytics.index',
         'active' => request()->routeIs('analytics.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
@@ -62,7 +62,7 @@ $mobileItems = [
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
         </svg>
-        <span class="text-xs font-medium">More</span>
+        <span class="text-xs font-medium">{{ __('nav.more') }}</span>
     </button>
 
     {{-- Bottom Sheet --}}
@@ -100,8 +100,23 @@ $mobileItems = [
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    Settings
+                    {{ __('nav.settings') }}
                 </a>
+
+                {{-- Language --}}
+                <div class="px-4 pt-2 pb-1">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('common.language') }}</span>
+                </div>
+                @foreach(config('locales.supported', []) as $code => $label)
+                    <a href="{{ route('locale.switch', $code) }}"
+                       class="flex items-center justify-between gap-4 px-4 py-3 rounded-xl
+                              {{ app()->getLocale() === $code ? 'text-violet-700 dark:text-violet-300 font-medium bg-violet-50 dark:bg-violet-900/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
+                        <span>{{ $label }}</span>
+                        @if(app()->getLocale() === $code)
+                            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        @endif
+                    </a>
+                @endforeach
 
                 <button
                     @click="cycleTheme()"
@@ -109,7 +124,7 @@ $mobileItems = [
                            text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
                     <span class="text-lg" x-text="theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '💻'"></span>
-                    <span x-text="'Theme: ' + (theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'System')"></span>
+                    <span x-text="'{{ __('common.theme') }}: ' + (theme === 'light' ? '{{ __('common.theme_light') }}' : theme === 'dark' ? '{{ __('common.theme_dark') }}' : '{{ __('common.theme_system') }}')"></span>
                 </button>
 
                 @if(auth()->user()->adminAccount)
@@ -123,7 +138,7 @@ $mobileItems = [
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
-                        Admin Panel
+                        {{ __('nav.admin_panel') }}
                     </button>
                 </form>
                 @endif
@@ -143,7 +158,7 @@ $mobileItems = [
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                             </svg>
-                            Logout
+                            {{ __('nav.logout') }}
                         </button>
                     </form>
                 </div>

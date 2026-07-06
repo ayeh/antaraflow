@@ -28,15 +28,19 @@ class ProfileSettingsController extends Controller
         $user = $request->user();
         $user->update(['name' => $request->validated('name')]);
 
+        $locale = $request->validated('locale', 'en');
+
         UserSettings::updateOrCreate(
             ['user_id' => $user->id],
             [
                 'timezone' => $request->validated('timezone', 'UTC'),
-                'locale' => $request->validated('locale', 'en'),
+                'locale' => $locale,
             ]
         );
 
-        return redirect()->route('settings.profile')->with('success', 'Profile updated.');
+        $request->session()->put('locale', $locale);
+
+        return redirect()->route('settings.profile')->with('success', __('settings.updated'));
     }
 
     public function updateAvatar(Request $request): RedirectResponse
@@ -54,7 +58,7 @@ class ProfileSettingsController extends Controller
         $path = $request->file('avatar')->store('avatars', 'public');
         $user->update(['avatar_path' => $path]);
 
-        return redirect()->route('settings.profile')->with('success', 'Profile photo updated.');
+        return redirect()->route('settings.profile')->with('success', __('settings.photo_updated'));
     }
 
     public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
@@ -64,6 +68,6 @@ class ProfileSettingsController extends Controller
             'remember_token' => Str::random(60),
         ]);
 
-        return redirect()->route('settings.profile')->with('success', 'Password updated.');
+        return redirect()->route('settings.profile')->with('success', __('settings.password_updated'));
     }
 }
