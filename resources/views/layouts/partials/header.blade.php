@@ -24,14 +24,17 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <span>Search</span>
+        <span>{{ __('common.search') }}</span>
         <kbd class="ml-1 text-xs px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-500 dark:text-slate-400 font-mono">⌘K</kbd>
     </button>
+
+    {{-- Language switcher --}}
+    <x-language-switcher class="hidden sm:block" />
 
     {{-- Theme toggle --}}
     <button
         @click="cycleTheme()"
-        :title="theme === 'light' ? 'Switch to dark mode' : theme === 'dark' ? 'Switch to system' : 'Switch to light mode'"
+        :title="theme === 'light' ? '{{ __('common.switch_to_dark') }}' : theme === 'dark' ? '{{ __('common.switch_to_system') }}' : '{{ __('common.switch_to_light') }}'"
         class="flex items-center justify-center w-8 h-8 rounded-lg
                text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
     >
@@ -54,20 +57,20 @@
         <div x-show="open" x-transition @click.outside="open=false"
              class="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-lg z-50">
             <div class="p-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-800 dark:text-white">Notifications</span>
-                <a href="{{ route('notifications.index') }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">View all</a>
+                <span class="text-sm font-semibold text-gray-800 dark:text-white">{{ __('common.notifications') }}</span>
+                <a href="{{ route('notifications.index') }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('common.view_all') }}</a>
             </div>
             <div class="max-h-96 overflow-y-auto">
                 <template x-for="n in items" :key="n.id">
                     <div class="px-4 py-3 border-b border-gray-50 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/30 last:border-0 transition-colors" :class="{ 'bg-indigo-50 dark:bg-indigo-900/10': !n.read_at }">
-                        <p class="text-sm text-gray-700 dark:text-gray-300" x-text="n.data?.message ?? 'Notification'"></p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300" x-text="n.data?.message ?? '{{ __('common.notification') }}'"></p>
                         <p class="text-xs text-gray-400 dark:text-gray-500 mt-1" x-text="new Date(n.created_at).toLocaleDateString()"></p>
                     </div>
                 </template>
-                <div x-show="items.length === 0" class="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">No new notifications</div>
+                <div x-show="items.length === 0" class="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">{{ __('common.no_new_notifications') }}</div>
             </div>
             <div class="p-3 border-t border-gray-100 dark:border-slate-700 text-center">
-                <a href="{{ route('notifications.index') }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">View all notifications</a>
+                <a href="{{ route('notifications.index') }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('common.view_all_notifications') }}</a>
             </div>
         </div>
     </div>
