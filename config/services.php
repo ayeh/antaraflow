@@ -53,4 +53,16 @@ return [
         'redirect' => '/auth/github/callback',
     ],
 
+    'mydigitalid' => [
+        'client_id' => env('MYDIGITALID_CLIENT_ID'),
+        'client_secret' => env('MYDIGITALID_CLIENT_SECRET'),
+        'redirect' => '/auth/mydigitalid/callback',
+        'base_url' => env('MYDIGITALID_BASE_URL', 'https://sso.digital-id.my/oidc'),
+        'authorize_uri' => env('MYDIGITALID_AUTHORIZE_URI'),
+        'token_uri' => env('MYDIGITALID_TOKEN_URI'),
+        'userinfo_uri' => env('MYDIGITALID_USERINFO_URI'),
+        'scopes' => explode(' ', (string) env('MYDIGITALID_SCOPES', 'openid profile email')),
+        'pkce' => env('MYDIGITALID_PKCE', true),
+    ],
+
 ];

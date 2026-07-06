@@ -18,6 +18,11 @@ beforeEach(function () {
         'current_organization_id' => $this->org->id,
     ]);
     $this->org->members()->attach($this->user, ['role' => UserRole::Owner->value]);
+
+    config()->set('services.google.client_id', 'test-google-id');
+    config()->set('services.microsoft.client_id', 'test-microsoft-id');
+    config()->set('services.github.client_id', 'test-github-id');
+    config()->set('services.mydigitalid.client_id', 'test-mydigitalid-id');
 });
 
 it('redirects to google oauth provider', function () {
@@ -164,4 +169,72 @@ it('shows social login buttons on login page', function () {
     $response->assertSee(route('social.redirect', 'google'));
     $response->assertSee(route('social.redirect', 'microsoft'));
     $response->assertSee(route('social.redirect', 'github'));
+});
+
+it('shows the mydigital id login button on login page', function () {
+    $response = $this->get(route('login'));
+
+    $response->assertSuccessful();
+    $response->assertSee('MyDigital ID');
+    $response->assertSee(route('social.redirect', 'mydigitalid'));
+});
+
+it('hides a social login button when the provider is not configured', function () {
+    config()->set('services.mydigitalid.client_id', null);
+
+    $response = $this->get(route('login'));
+
+    $response->assertSuccessful();
+    $response->assertDontSee('MyDigital ID');
+    $response->assertDontSee(route('social.redirect', 'mydigitalid'));
+});
+
+it('builds a valid mydigital id authorization redirect from config', function () {
+    config()->set('services.mydigitalid', [
+        'client_id' => 'test-client',
+        'client_secret' => 'test-secret',
+        'redirect' => '/auth/mydigitalid/callback',
+        'base_url' => 'https://sandbox.digital-id.my',
+        'authorize_uri' => null,
+        'token_uri' => null,
+        'userinfo_uri' => null,
+        'scopes' => ['openid', 'profile', 'email'],
+        'pkce' => false,
+    ]);
+
+    $response = $this->get(route('social.redirect', 'mydigitalid'));
+
+    $response->assertRedirect();
+
+    $location = $response->headers->get('Location');
+    expect($location)->toStartWith('https://sandbox.digital-id.my/auth?');
+    expect($location)->toContain('client_id=test-client');
+    expect($location)->toContain('scope=openid+profile+email');
+    expect($location)->toContain('response_type=code');
+});
+
+it('creates a new user from mydigital id callback', function () {
+    Socialite::fake('mydigitalid', (new SocialiteUser)->map([
+        'id' => 'myid-sub-abc123',
+        'name' => 'Ahmad Bin Ali',
+        'email' => 'ahmad@example.my',
+        'avatar' => null,
+    ]));
+
+    $response = $this->get(route('social.callback', 'mydigitalid'));
+
+    $response->assertRedirect(route('dashboard'));
+
+    $this->assertDatabaseHas('users', [
+        'name' => 'Ahmad Bin Ali',
+        'email' => 'ahmad@example.my',
+    ]);
+
+    $this->assertDatabaseHas('social_accounts', [
+        'provider' => 'mydigitalid',
+        'provider_id' => 'myid-sub-abc123',
+        'provider_email' => 'ahmad@example.my',
+    ]);
+
+    $this->assertAuthenticated();
 });

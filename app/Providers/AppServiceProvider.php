@@ -133,6 +133,13 @@ class AppServiceProvider extends ServiceProvider
             $event->extendSocialite('microsoft', \SocialiteProviders\Microsoft\Provider::class);
         });
 
+        \Laravel\Socialite\Facades\Socialite::extend('mydigitalid', function ($app) {
+            return \Laravel\Socialite\Facades\Socialite::buildProvider(
+                \App\Support\Socialite\MyDigitalIdProvider::class,
+                $app['config']['services.mydigitalid'],
+            );
+        });
+
         Event::subscribe(WebhookEventSubscriber::class);
 
         Notification::extend('teams', function ($app) {
