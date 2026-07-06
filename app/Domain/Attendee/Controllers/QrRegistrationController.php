@@ -122,6 +122,7 @@ class QrRegistrationController extends Controller
             'orgLogo' => $organization?->logo_path ? Storage::url($organization->logo_path) : null,
             'primaryColor' => $branding['primary_color'] ?? '#7c3aed',
             'secondaryColor' => $branding['secondary_color'] ?? '#3b82f6',
+            'appName' => $branding['app_name'] ?? 'antaraNote',
         ]);
     }
 

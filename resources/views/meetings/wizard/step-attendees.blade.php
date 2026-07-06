@@ -348,6 +348,30 @@
         lobbyLangs: ['Welcome', 'Selamat Datang', '欢迎', 'नमस्ते', 'مرحبا', 'ようこそ', 'Bienvenue'],
         lobbyLangIndex: 0,
         lobbyLangTimer: null,
+        lobbyAppName: @js($branding->appName()),
+        lobbyTaglines: @js([
+            'Every meeting, minuted by AI.',
+            'Turn conversations into decisions — automatically.',
+            'This live check-in is just one small feature.',
+            'Smart minutes & action items, handled for you.',
+            'Meetings that write their own notes.',
+            'From discussion to decisions in seconds.',
+            "There's a smarter way to run meetings.",
+            'Curious what else it can do?',
+        ]),
+        lobbyTagline: '',
+        lobbyTaglineTimer: null,
+
+        pickTagline() {
+            const list = this.lobbyTaglines;
+            if (!list.length) { return ''; }
+            if (list.length === 1) { return list[0]; }
+            let next = this.lobbyTagline;
+            while (next === this.lobbyTagline) {
+                next = list[Math.floor(Math.random() * list.length)];
+            }
+            return next;
+        },
 
         get qrUrl() {
             return this.qrData ? '{{ url('register') }}/' + this.qrData.token : null;
@@ -528,11 +552,14 @@
             this.lobbyLangTimer = setInterval(() => {
                 this.lobbyLangIndex = (this.lobbyLangIndex + 1) % this.lobbyLangs.length;
             }, 2200);
+            this.lobbyTagline = this.pickTagline();
+            this.lobbyTaglineTimer = setInterval(() => { this.lobbyTagline = this.pickTagline(); }, 5500);
         },
 
         closeLobby() {
             if (this.lobbyPollId) { clearInterval(this.lobbyPollId); this.lobbyPollId = null; }
             if (this.lobbyLangTimer) { clearInterval(this.lobbyLangTimer); this.lobbyLangTimer = null; }
+            if (this.lobbyTaglineTimer) { clearInterval(this.lobbyTaglineTimer); this.lobbyTaglineTimer = null; }
             if (this.lobbyHeroTimer) { clearTimeout(this.lobbyHeroTimer); }
             if (this.lobbyBannerTimer) { clearTimeout(this.lobbyBannerTimer); }
             if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); }

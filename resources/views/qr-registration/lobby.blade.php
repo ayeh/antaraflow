@@ -31,6 +31,20 @@
                 lobbyLangs: ['Welcome', 'Selamat Datang', '欢迎', 'नमस्ते', 'مرحبا', 'ようこそ', 'Bienvenue'],
                 lobbyLangIndex: 0,
 
+                lobbyAppName: config.appName,
+                lobbyTaglines: @js([
+                    'Every meeting, minuted by AI.',
+                    'Turn conversations into decisions — automatically.',
+                    'This live check-in is just one small feature.',
+                    'Smart minutes & action items, handled for you.',
+                    'Meetings that write their own notes.',
+                    'From discussion to decisions in seconds.',
+                    "There's a smarter way to run meetings.",
+                    'Curious what else it can do?',
+                ]),
+                lobbyTagline: '',
+                lobbyTaglineTimer: null,
+
                 isFullscreen: false,
                 lobbyPollId: null,
                 lobbyLangTimer: null,
@@ -43,9 +57,22 @@
                     this.lobbyLangTimer = setInterval(() => {
                         this.lobbyLangIndex = (this.lobbyLangIndex + 1) % this.lobbyLangs.length;
                     }, 2200);
+                    this.lobbyTagline = this.pickTagline();
+                    this.lobbyTaglineTimer = setInterval(() => { this.lobbyTagline = this.pickTagline(); }, 5500);
                     document.addEventListener('fullscreenchange', () => {
                         this.isFullscreen = !!document.fullscreenElement;
                     });
+                },
+
+                pickTagline() {
+                    const list = this.lobbyTaglines;
+                    if (!list.length) { return ''; }
+                    if (list.length === 1) { return list[0]; }
+                    let next = this.lobbyTagline;
+                    while (next === this.lobbyTagline) {
+                        next = list[Math.floor(Math.random() * list.length)];
+                    }
+                    return next;
                 },
 
                 get lobbyProgress() {
@@ -232,6 +259,7 @@
             'title' => $meeting->title,
             'orgName' => $orgName,
             'orgLogo' => $orgLogo,
+            'appName' => $appName,
         ]))"
         x-init="init()"
         class="fixed inset-0 z-[90] overflow-hidden bg-slate-950 text-white"

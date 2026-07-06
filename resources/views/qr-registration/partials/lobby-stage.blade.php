@@ -66,7 +66,7 @@
     </div>
 </div>
 
-<div class="relative z-10 h-full w-full flex flex-col px-6 pt-16 pb-8 md:px-12 md:pt-20 md:pb-10">
+<div class="relative z-10 h-full w-full flex flex-col px-6 pt-16 pb-14 md:px-12 md:pt-20 md:pb-16">
     {{-- Header --}}
     <div class="text-center shrink-0">
         {{-- (#6) Cycling multi-language welcome --}}
@@ -165,4 +165,13 @@
             </div>
         </div>
     </div>
+</div>
+
+{{-- Subtle platform attribution + rotating curiosity tagline --}}
+<div class="absolute bottom-0 inset-x-0 z-[65] px-5 py-3 md:py-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center pointer-events-none select-none">
+    <span class="text-[11px] md:text-sm text-white/35">
+        Powered by <span class="font-semibold text-white/55" x-text="lobbyAppName"></span>
+    </span>
+    <span class="text-white/20 hidden sm:inline">·</span>
+    <span class="text-[11px] md:text-sm italic text-white/45 transition-opacity duration-700" x-text="lobbyTagline"></span>
 </div>
