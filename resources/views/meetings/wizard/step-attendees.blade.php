@@ -353,6 +353,29 @@
             return this.qrData ? '{{ url('register') }}/' + this.qrData.token : null;
         },
 
+        get lobbyShareUrl() {
+            return this.qrData ? '{{ url('lobby') }}/' + this.qrData.token : null;
+        },
+
+        copyLobbyUrl() {
+            if (this.lobbyShareUrl) {
+                navigator.clipboard.writeText(this.lobbyShareUrl);
+                this.successMessage = 'Live screen link copied!';
+                setTimeout(() => this.successMessage = '', 3000);
+            }
+        },
+
+        shareLobbyVia(platform) {
+            if (!this.lobbyShareUrl) return;
+            const text = 'Watch the live registration lobby: ' + this.lobbyShareUrl;
+            const urls = {
+                whatsapp: 'https://wa.me/?text=' + encodeURIComponent(text),
+                telegram: 'https://t.me/share/url?url=' + encodeURIComponent(this.lobbyShareUrl) + '&text=' + encodeURIComponent('Live registration lobby'),
+                email: 'mailto:?subject=' + encodeURIComponent('Live Registration Lobby') + '&body=' + encodeURIComponent(text),
+            };
+            window.open(urls[platform], '_blank');
+        },
+
         async generateQr() {
             this.qrLoading = true;
             this.errorMessage = '';
@@ -1140,6 +1163,34 @@
                             Present Live Lobby
                         </button>
 
+                        {{-- Share Live Lobby (for projector / client screen) --}}
+                        <div class="rounded-lg border border-violet-200 dark:border-violet-800/60 bg-violet-50/60 dark:bg-violet-900/10 p-2.5 space-y-2">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                                Share this live screen to display on a projector or another device — no login needed.
+                            </p>
+                            <div class="flex items-center gap-2">
+                                <input type="text" :value="lobbyShareUrl" readonly class="flex-1 px-3 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 truncate" />
+                                <button type="button" @click="copyLobbyUrl()" class="flex-shrink-0 p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 rounded-md hover:bg-violet-100 dark:hover:bg-violet-900/20 transition-colors" title="Copy live screen link">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </button>
+                            </div>
+                            <div class="flex gap-2">
+                                <a :href="lobbyShareUrl" target="_blank" rel="noopener" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-slate-700 transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    Open
+                                </a>
+                                <button type="button" @click="shareLobbyVia('whatsapp')" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.983-1.395A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.66 0-3.2-.507-4.483-1.372l-.32-.192-3.32.93.973-3.234-.21-.337A7.95 7.95 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/></svg>
+                                    WhatsApp
+                                </button>
+                                <button type="button" @click="shareLobbyVia('telegram')" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                                    Telegram
+                                </button>
+                            </div>
+                        </div>
+
                         {{-- QR Code --}}
                         <div class="flex items-center justify-center p-3 bg-white rounded-lg border border-gray-200 dark:border-slate-600">
                             <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(qrUrl)" alt="QR Code" class="w-40 h-40" />
@@ -1220,225 +1271,17 @@
     </div>
 
     {{-- ============================ QR LIVE LOBBY (full-screen) ============================ --}}
+    @php($lobbyBranding = $branding->getForOrganization($meeting->organization))
     <div x-ref="lobbyScreen" x-show="lobbyOpen" x-cloak
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
         class="fixed inset-0 z-[90] overflow-hidden bg-slate-950 text-white"
-        style="background-image: radial-gradient(circle at 20% 20%, rgba(139,92,246,0.18), transparent 45%), radial-gradient(circle at 85% 80%, rgba(236,72,153,0.16), transparent 45%);">
+        style="--lobby-primary: {{ $lobbyBranding['primary_color'] ?? '#7c3aed' }}; --lobby-secondary: {{ $lobbyBranding['secondary_color'] ?? '#3b82f6' }}; background-image: radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--lobby-primary) 20%, transparent), transparent 45%), radial-gradient(circle at 85% 80%, color-mix(in srgb, var(--lobby-secondary) 18%, transparent), transparent 45%);">
 
-        {{-- Confetti layer --}}
-        <div x-ref="lobbyConfetti" class="pointer-events-none fixed inset-0 z-[60]"></div>
-
-        {{-- (#8) Milestone banner --}}
-        <div x-show="lobbyBanner" x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-            class="absolute top-20 left-1/2 -translate-x-1/2 z-[75] pointer-events-none">
-            <div class="px-6 py-3 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 shadow-2xl shadow-fuchsia-900/40 text-lg md:text-2xl font-bold flex items-center gap-2">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4L12 16.9 5.7 21.4 8 14 2 9.4h7.6z"/></svg>
-                <span x-text="lobbyBanner"></span>
-            </div>
-        </div>
-
-        {{-- (#1) Hero welcome moment --}}
-        <div x-show="lobbyHero" x-cloak class="absolute inset-0 z-[80] flex items-center justify-center pointer-events-none">
-            <div class="absolute inset-0 bg-slate-950/55 backdrop-blur-sm"></div>
-            <template x-if="lobbyHero">
-                <div class="lobby-hero-card relative text-center px-8">
-                    <div class="mx-auto w-28 h-28 md:w-40 md:h-40 rounded-full bg-gradient-to-br flex items-center justify-center text-4xl md:text-6xl font-black text-white shadow-2xl ring-4 ring-white/20"
-                        :class="lobbyAvatarColor(lobbyHero.name)" x-text="lobbyInitials(lobbyHero.name)"></div>
-                    <p class="mt-6 text-xl md:text-3xl font-semibold text-violet-200">Welcome,</p>
-                    <p class="mt-1 text-4xl md:text-7xl font-black leading-tight" x-text="lobbyHero.name"></p>
-                    <p x-show="lobbyHero.company" class="mt-2 text-lg md:text-2xl text-white/60" x-text="lobbyHero.company"></p>
-                    <p x-show="lobbyHero.extra > 0" class="mt-3 text-base md:text-xl text-fuchsia-300 font-semibold">
-                        + <span x-text="lobbyHero.extra"></span> more just joined
-                    </p>
-                </div>
-            </template>
-        </div>
-
-        {{-- (#7) Top bar: branding + controls --}}
-        <div class="absolute top-0 inset-x-0 z-[70] flex items-center justify-between px-5 py-4 md:px-8">
-            <div class="flex items-center gap-3 min-w-0">
-                <img x-show="lobbyOrgLogo" :src="lobbyOrgLogo" :alt="lobbyOrgName"
-                    class="w-9 h-9 md:w-11 md:h-11 rounded-xl object-cover border border-white/15 bg-white/5" />
-                <span x-show="lobbyOrgName" class="text-sm md:text-base font-semibold text-white/70 truncate" x-text="lobbyOrgName"></span>
-            </div>
-            <div class="flex items-center gap-2">
-                {{-- (#2) Sound toggle --}}
-                <button type="button" @click="toggleLobbySound()"
-                    :title="lobbySoundOn ? 'Sound on' : 'Sound off'"
-                    class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white backdrop-blur transition-colors">
-                    <svg x-show="lobbySoundOn" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M5 9v6h4l5 4V5L9 9H5z"/></svg>
-                    <svg x-show="!lobbySoundOn" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l4-4m0 4l-4-4M5 9v6h4l5 4V5L9 9H5z"/></svg>
-                </button>
-                <button type="button" @click="closeLobby()"
-                    class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white backdrop-blur transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    Exit
-                </button>
-            </div>
-        </div>
-
-        <div class="relative z-10 h-full w-full flex flex-col px-6 pt-16 pb-8 md:px-12 md:pt-20 md:pb-10">
-            {{-- Header --}}
-            <div class="text-center shrink-0">
-                {{-- (#6) Cycling multi-language welcome --}}
-                <p class="text-xs md:text-sm font-semibold uppercase tracking-[0.3em] text-violet-300/80">
-                    <span x-text="lobbyWelcomeWord"></span> · Scan to Join
-                </p>
-                <h1 class="mt-2 text-2xl md:text-4xl lg:text-5xl font-bold leading-tight" x-text="lobbyTitle"></h1>
-                <p x-show="qrData?.welcome_message" x-cloak class="mt-2 text-sm md:text-lg text-white/60 max-w-2xl mx-auto" x-text="qrData?.welcome_message"></p>
-            </div>
-
-            {{-- Body --}}
-            <div class="flex-1 min-h-0 mt-6 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-                {{-- Scan side --}}
-                <div class="flex flex-col items-center justify-center">
-                    {{-- (#3) QR with animated glow ring --}}
-                    <div class="lobby-qr-glow relative rounded-3xl">
-                        <div class="relative bg-white rounded-3xl p-5 md:p-7 shadow-2xl shadow-violet-900/40">
-                            <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=480x480&margin=8&data=' + encodeURIComponent(qrUrl)"
-                                alt="Scan to register" class="w-52 h-52 md:w-72 md:h-72 lg:w-80 lg:h-80" />
-                        </div>
-                    </div>
-                    {{-- (#6) Idle bobbing scan prompt --}}
-                    <div x-show="lobbyAttendees.length === 0" class="mt-5 lobby-bob inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/20 border border-violet-400/30 text-violet-200 text-sm md:text-base font-medium">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>
-                        Point your camera here to check in
-                    </div>
-                    <div class="mt-6 text-center">
-                        <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">Or enter join code</p>
-                        <p class="mt-1 text-4xl md:text-6xl font-black font-mono tracking-[0.2em] bg-gradient-to-r from-violet-300 to-fuchsia-300 bg-clip-text text-transparent" x-text="qrData?.join_code"></p>
-                    </div>
-                </div>
-
-                {{-- People side --}}
-                <div class="flex flex-col h-full min-h-0">
-                    {{-- Counter / (#5) progress ring --}}
-                    <div class="shrink-0 flex items-center gap-5 justify-center md:justify-start">
-                        {{-- With max: circular progress ring --}}
-                        <div x-show="lobbyMax" x-cloak class="relative w-32 h-32 md:w-40 md:h-40 shrink-0">
-                            <svg class="w-full h-full -rotate-90" viewBox="0 0 120 120">
-                                <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="10" />
-                                <circle cx="60" cy="60" r="54" fill="none" stroke="url(#lobbyRingGrad)" stroke-width="10" stroke-linecap="round"
-                                    stroke-dasharray="339.292" :stroke-dashoffset="lobbyRingOffset" class="transition-all duration-700 ease-out" />
-                                <defs>
-                                    <linearGradient id="lobbyRingGrad" x1="0" y1="0" x2="1" y2="1">
-                                        <stop offset="0%" stop-color="#8b5cf6" />
-                                        <stop offset="100%" stop-color="#ec4899" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span class="text-4xl md:text-5xl font-black tabular-nums transition-transform duration-300"
-                                    :class="countPulse ? 'scale-125 text-emerald-300' : 'text-white'" x-text="lobbyCount"></span>
-                                <span class="text-xs md:text-sm text-white/40">of <span x-text="lobbyMax"></span></span>
-                            </div>
-                        </div>
-                        {{-- Without max: plain big counter --}}
-                        <div x-show="!lobbyMax" class="text-center md:text-left">
-                            <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">Registered</p>
-                            <span class="text-5xl md:text-7xl font-black tabular-nums transition-transform duration-300 inline-block"
-                                :class="countPulse ? 'scale-125 text-emerald-300' : 'text-white'" x-text="lobbyCount"></span>
-                        </div>
-                        {{-- Label beside ring --}}
-                        <div x-show="lobbyMax" x-cloak>
-                            <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">Checked In</p>
-                            <p class="text-lg md:text-2xl font-bold text-white" x-text="(lobbyProgress ?? 0) + '%'"></p>
-                            <p class="text-xs md:text-sm text-white/40" x-show="lobbyProgress >= 100">Registration full</p>
-                        </div>
-                    </div>
-
-                    {{-- Attendee grid --}}
-                    <div class="flex-1 min-h-0 mt-5 overflow-y-auto pr-1">
-                        {{-- (#6) Empty attract state --}}
-                        <div x-show="lobbyAttendees.length === 0" class="h-full flex flex-col items-center justify-center text-center text-white/50">
-                            <p class="text-3xl md:text-5xl font-black bg-gradient-to-r from-violet-300 to-fuchsia-300 bg-clip-text text-transparent" x-text="lobbyWelcomeWord"></p>
-                            <div class="mt-5 w-14 h-14 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center animate-pulse">
-                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                            </div>
-                            <p class="mt-3 text-sm md:text-base">Waiting for the first guest to scan…</p>
-                        </div>
-
-                        <div x-show="lobbyAttendees.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <template x-for="att in lobbyAttendees" :key="att.id">
-                                {{-- (#4) Newest highlight via lobby-card-new --}}
-                                <div class="lobby-attendee-card flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm transition-shadow"
-                                    :class="lobbyNewIds.includes(att.id) ? 'lobby-card-new' : ''">
-                                    <div class="shrink-0 w-11 h-11 md:w-12 md:h-12 rounded-full bg-gradient-to-br flex items-center justify-center font-bold text-white text-sm md:text-base shadow-lg"
-                                        :class="lobbyAvatarColor(att.name)" x-text="lobbyInitials(att.name)"></div>
-                                    <div class="min-w-0">
-                                        <p class="font-semibold truncate text-base md:text-lg" x-text="att.name"></p>
-                                        <p x-show="att.company" class="text-xs md:text-sm text-white/50 truncate" x-text="att.company"></p>
-                                    </div>
-                                    <span x-show="lobbyNewIds.includes(att.id)" class="ml-auto shrink-0 px-2 py-0.5 text-[10px] md:text-xs font-bold uppercase tracking-wide rounded-full bg-emerald-400/20 text-emerald-300">New</span>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @include('qr-registration.partials.lobby-stage', ['lobbyMode' => 'overlay'])
     </div>
 
-    <style>
-        @keyframes lobbyConfettiFall {
-            0% { transform: translateY(-12vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-        }
-        .lobby-confetti-piece {
-            position: fixed; top: 0;
-            animation-name: lobbyConfettiFall;
-            animation-timing-function: ease-in;
-            animation-fill-mode: forwards;
-            pointer-events: none;
-        }
-        @keyframes lobbyPop {
-            0% { transform: scale(0.6) translateY(14px); opacity: 0; }
-            60% { transform: scale(1.05) translateY(-2px); opacity: 1; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
-        }
-        .lobby-attendee-card { animation: lobbyPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
-
-        /* (#4) Newest registrant highlight */
-        @keyframes lobbyNewGlow {
-            0%, 100% { box-shadow: 0 0 0 1px rgba(52,211,153,0.4), 0 0 18px rgba(52,211,153,0.25); }
-            50% { box-shadow: 0 0 0 2px rgba(52,211,153,0.7), 0 0 28px rgba(52,211,153,0.5); }
-        }
-        .lobby-card-new {
-            border-color: rgba(52,211,153,0.6) !important;
-            animation: lobbyNewGlow 1.4s ease-in-out infinite;
-        }
-
-        /* (#3) QR breathing glow */
-        @keyframes lobbyQrGlow {
-            0%, 100% { box-shadow: 0 0 28px 6px rgba(139,92,246,0.35), 0 0 60px 12px rgba(236,72,153,0.18); }
-            50% { box-shadow: 0 0 44px 12px rgba(139,92,246,0.6), 0 0 90px 20px rgba(236,72,153,0.32); }
-        }
-        .lobby-qr-glow { animation: lobbyQrGlow 2.8s ease-in-out infinite; }
-
-        /* (#1) Hero welcome card */
-        @keyframes lobbyHeroIn {
-            0% { transform: scale(0.7); opacity: 0; }
-            55% { transform: scale(1.04); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .lobby-hero-card { animation: lobbyHeroIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
-
-        /* (#6) Idle bobbing prompt */
-        @keyframes lobbyBob {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
-        .lobby-bob { animation: lobbyBob 1.6s ease-in-out infinite; }
-
-        @media (prefers-reduced-motion: reduce) {
-            .lobby-qr-glow, .lobby-card-new, .lobby-bob, .lobby-hero-card, .lobby-attendee-card { animation: none; }
-        }
-    </style>
+    @include('qr-registration.partials.lobby-styles')
 </div>

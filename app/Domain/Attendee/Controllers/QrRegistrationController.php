@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Attendee\Controllers;
 
+use App\Domain\Admin\Services\BrandingService;
 use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Attendee\Models\QrRegistrationToken;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
@@ -14,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -94,6 +96,61 @@ class QrRegistrationController extends Controller
             'is_active' => $token !== null,
             'registrations_count' => $token?->registrations_count ?? $attendees->count(),
             'max_attendees' => $token?->max_attendees,
+            'attendees' => $attendees,
+        ]);
+    }
+
+    public function showLobby(string $token): View
+    {
+        $qrToken = QrRegistrationToken::where('token', $token)->firstOrFail();
+
+        $meeting = $qrToken->meeting;
+
+        if (! $meeting) {
+            abort(410, 'This meeting no longer exists.');
+        }
+
+        $organization = $meeting->organization;
+        $branding = app(BrandingService::class)->getForOrganization($organization);
+
+        return view('qr-registration.lobby', [
+            'meeting' => $meeting,
+            'qrToken' => $qrToken,
+            'registerUrl' => route('qr-registration.form', $qrToken->token),
+            'attendeesUrl' => route('qr-registration.lobby.attendees', $qrToken->token),
+            'orgName' => $organization?->name,
+            'orgLogo' => $organization?->logo_path ? Storage::url($organization->logo_path) : null,
+            'primaryColor' => $branding['primary_color'] ?? '#7c3aed',
+            'secondaryColor' => $branding['secondary_color'] ?? '#3b82f6',
+        ]);
+    }
+
+    public function lobbyAttendees(string $token): JsonResponse
+    {
+        $qrToken = QrRegistrationToken::where('token', $token)->firstOrFail();
+
+        $meeting = $qrToken->meeting;
+
+        if (! $meeting) {
+            abort(410, 'This meeting no longer exists.');
+        }
+
+        $attendees = $meeting->attendees()
+            ->where('is_external', true)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get(['id', 'name', 'company', 'created_at'])
+            ->map(fn (MomAttendee $attendee): array => [
+                'id' => $attendee->id,
+                'name' => $attendee->name,
+                'company' => $attendee->company,
+                'registered_at' => $attendee->created_at?->toIso8601String(),
+            ]);
+
+        return response()->json([
+            'is_active' => $qrToken->is_active,
+            'registrations_count' => $qrToken->registrations_count,
+            'max_attendees' => $qrToken->max_attendees,
             'attendees' => $attendees,
         ]);
     }

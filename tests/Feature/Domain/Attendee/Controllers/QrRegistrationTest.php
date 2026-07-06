@@ -231,3 +231,75 @@ test('lobby endpoint requires authentication', function () {
 
     $response->assertUnauthorized();
 });
+
+test('shows the shareable live lobby screen publicly with a valid token', function () {
+    $token = QrRegistrationToken::create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'token' => 'lobby-share-token-111',
+        'join_code' => 'ABC123',
+        'is_active' => true,
+    ]);
+
+    $response = $this->get(route('qr-registration.lobby', $token->token));
+
+    $response->assertSuccessful();
+    $response->assertSee($this->meeting->title);
+    $response->assertSee('lobbyPage(');
+});
+
+test('shareable lobby attendees endpoint is public and returns live data', function () {
+    $token = QrRegistrationToken::create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'token' => 'lobby-share-token-222',
+        'is_active' => true,
+        'max_attendees' => 5,
+        'registrations_count' => 1,
+    ]);
+
+    MomAttendee::factory()->external()->present()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'name' => 'Public Guest',
+        'company' => 'RocketWeb',
+    ]);
+
+    $response = $this->getJson(route('qr-registration.lobby.attendees', $token->token));
+
+    $response->assertSuccessful();
+    $response->assertJson([
+        'is_active' => true,
+        'registrations_count' => 1,
+        'max_attendees' => 5,
+    ]);
+    $response->assertJsonCount(1, 'attendees');
+    $response->assertJsonPath('attendees.0.name', 'Public Guest');
+});
+
+test('shareable lobby still renders when the token is inactive', function () {
+    $token = QrRegistrationToken::create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'token' => 'lobby-share-token-333',
+        'is_active' => false,
+    ]);
+
+    $this->get(route('qr-registration.lobby', $token->token))->assertSuccessful();
+    $this->getJson(route('qr-registration.lobby.attendees', $token->token))
+        ->assertSuccessful()
+        ->assertJson(['is_active' => false]);
+});
+
+test('shareable lobby aborts 410 when the meeting is soft-deleted', function () {
+    $token = QrRegistrationToken::create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'token' => 'lobby-share-token-444',
+        'is_active' => true,
+    ]);
+
+    $this->meeting->delete();
+
+    $this->get(route('qr-registration.lobby', $token->token))->assertStatus(410);
+    $this->getJson(route('qr-registration.lobby.attendees', $token->token))->assertStatus(410);
+});
+
+test('shareable lobby returns 404 for an unknown token', function () {
+    $this->get(route('qr-registration.lobby', 'does-not-exist'))->assertNotFound();
+});

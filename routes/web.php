@@ -75,6 +75,10 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::get('register/{token}', [QrRegistrationController::class, 'showForm'])->name('qr-registration.form');
     Route::post('register/{token}', [QrRegistrationController::class, 'register'])->name('qr-registration.submit');
     Route::get('register/{token}/success', [QrRegistrationController::class, 'success'])->name('qr-registration.success');
+
+    // Shareable live lobby screen (projector / client display)
+    Route::get('lobby/{token}', [QrRegistrationController::class, 'showLobby'])->name('qr-registration.lobby');
+    Route::get('lobby/{token}/attendees', [QrRegistrationController::class, 'lobbyAttendees'])->name('qr-registration.lobby.attendees');
 });
 
 // Organization invitation acceptance (public - works for guests and logged-in users)
