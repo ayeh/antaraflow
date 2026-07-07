@@ -77,16 +77,7 @@
                 <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Meetings per Month') }}</h2>
             </div>
             <div class="p-6">
-                <div class="relative h-64" x-data="{}" x-init="
-                    new Chart(document.getElementById('meetingsChart'), {
-                        type: 'bar',
-                        data: {
-                            labels: {{ json_encode(array_keys($meetingStats['meetings_per_month'])) }},
-                            datasets: [{ label: '{{ __("Meetings") }}', data: {{ json_encode(array_values($meetingStats['meetings_per_month'])) }}, backgroundColor: '#7c3aed', borderRadius: 6 }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-                    });
-                ">
+                <div class="relative h-64">
                     <canvas id="meetingsChart"></canvas>
                 </div>
             </div>
@@ -96,16 +87,7 @@
                 <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Status Distribution') }}</h2>
             </div>
             <div class="p-6">
-                <div class="relative h-64" x-data="{}" x-init="
-                    new Chart(document.getElementById('statusChart'), {
-                        type: 'doughnut',
-                        data: {
-                            labels: {!! json_encode(array_map(fn($k) => __(ucfirst($k)), array_keys($meetingStats['status_distribution']))) !!},
-                            datasets: [{ data: {{ json_encode(array_values($meetingStats['status_distribution'])) }}, backgroundColor: ['#6b7280', '#3b82f6', '#eab308', '#22c55e'], borderWidth: 2 }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
-                    });
-                ">
+                <div class="relative h-64">
                     <canvas id="statusChart"></canvas>
                 </div>
             </div>
@@ -119,16 +101,7 @@
                 <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Action Items Summary') }}</h2>
             </div>
             <div class="p-6 space-y-4">
-                <div class="relative h-48" x-data="{}" x-init="
-                    new Chart(document.getElementById('actionsChart'), {
-                        type: 'bar',
-                        data: {
-                            labels: {!! json_encode([__('Completed'), __('Pending'), __('Overdue')]) !!},
-                            datasets: [{ data: [{{ $actionStats['completed'] }}, {{ $actionStats['pending'] }}, {{ $actionStats['overdue'] }}], backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'], borderRadius: 6 }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-                    });
-                ">
+                <div class="relative h-48">
                     <canvas id="actionsChart"></canvas>
                 </div>
                 <div class="grid grid-cols-4 gap-3 pt-2 border-t border-gray-100 dark:border-slate-700">
@@ -200,4 +173,35 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    new Chart(document.getElementById('meetingsChart'), {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode(array_keys($meetingStats['meetings_per_month'])) !!},
+            datasets: [{ label: {!! json_encode(__('Meetings')) !!}, data: {!! json_encode(array_values($meetingStats['meetings_per_month'])) !!}, backgroundColor: '#7c3aed', borderRadius: 6 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {!! json_encode(array_map(fn($k) => __(ucfirst($k)), array_keys($meetingStats['status_distribution']))) !!},
+            datasets: [{ data: {!! json_encode(array_values($meetingStats['status_distribution'])) !!}, backgroundColor: ['#6b7280', '#3b82f6', '#eab308', '#22c55e'], borderWidth: 2 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+    });
+
+    new Chart(document.getElementById('actionsChart'), {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode([__('Completed'), __('Pending'), __('Overdue')]) !!},
+            datasets: [{ data: [{!! $actionStats['completed'] !!}, {!! $actionStats['pending'] !!}, {!! $actionStats['overdue'] !!}], backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'], borderRadius: 6 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+});
+</script>
 @endsection
