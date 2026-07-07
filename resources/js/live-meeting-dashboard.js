@@ -261,7 +261,7 @@ export default function liveMeetingDashboard(config) {
                 return;
             }
 
-            if (!confirm('Are you sure you want to end this live session? This action cannot be undone.')) {
+            if (!confirm(this.i18n?.confirmEndSession || 'Are you sure you want to end this live session? This action cannot be undone.')) {
                 return;
             }
 
@@ -282,10 +282,10 @@ export default function liveMeetingDashboard(config) {
                     this.stopTimer();
                 } else {
                     const errorData = await response.json().catch(() => ({}));
-                    alert(errorData.error || 'Failed to end session. Please try again.');
+                    alert(errorData.error || this.i18n?.failedEndSession || 'Failed to end session. Please try again.');
                 }
             } catch {
-                alert('Network error. Please check your connection and try again.');
+                alert(this.i18n?.networkError || 'Network error. Please check your connection and try again.');
             } finally {
                 this.isEndingSession = false;
             }
@@ -373,7 +373,7 @@ export default function liveMeetingDashboard(config) {
 
         formatLastUpdate() {
             if (!this.lastExtractionUpdate) {
-                return 'Not yet updated';
+                return this.i18n?.notYetUpdated || 'Not yet updated';
             }
 
             const date = new Date(this.lastExtractionUpdate);

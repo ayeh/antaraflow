@@ -99,7 +99,7 @@ export default function audioRecorder(config) {
             this._beforeUnloadHandler = (e) => {
                 if (['recording', 'paused'].includes(this.state)) {
                     e.preventDefault();
-                    e.returnValue = 'Recording is in progress. Are you sure you want to leave?';
+                    e.returnValue = this.config.i18n?.recordingInProgress || 'Recording is in progress. Are you sure you want to leave?';
                     return e.returnValue;
                 }
             };
@@ -177,13 +177,13 @@ export default function audioRecorder(config) {
             this.state = 'error';
 
             if (err.name === 'NotAllowedError') {
-                this.errorMessage = 'Microphone access denied. Please allow microphone access in your browser settings.';
+                this.errorMessage = this.config.i18n?.micDenied || 'Microphone access denied. Please allow microphone access in your browser settings.';
             } else if (err.name === 'NotFoundError') {
-                this.errorMessage = 'No microphone found. Please connect a microphone and try again.';
+                this.errorMessage = this.config.i18n?.micNotFound || 'No microphone found. Please connect a microphone and try again.';
             } else if (err.name === 'NotReadableError') {
-                this.errorMessage = 'Microphone is in use by another application. Please close it and try again.';
+                this.errorMessage = this.config.i18n?.micInUse || 'Microphone is in use by another application. Please close it and try again.';
             } else {
-                this.errorMessage = 'Could not access microphone. Please try again.';
+                this.errorMessage = this.config.i18n?.micError || 'Could not access microphone. Please try again.';
             }
         },
 
@@ -371,7 +371,7 @@ export default function audioRecorder(config) {
             this.mediaRecorder.onerror = (e) => {
                 console.error('MediaRecorder error:', e);
                 this.state = 'error';
-                this.errorMessage = 'Recording failed. Please try again.';
+                this.errorMessage = this.config.i18n?.recordingFailed || 'Recording failed. Please try again.';
                 this.cleanup();
             };
 
@@ -542,7 +542,7 @@ export default function audioRecorder(config) {
             // In live mode, chunks are already uploaded via the live endpoint
             if (this.liveMode && this.isLongRecording) {
                 this.state = 'complete';
-                this.successMessage = 'Recording stopped. Audio chunks have been sent for transcription.';
+                this.successMessage = this.config.i18n?.recordingStopped || 'Recording stopped. Audio chunks have been sent for transcription.';
                 return;
             }
 
@@ -553,7 +553,7 @@ export default function audioRecorder(config) {
 
                 if (this.recordedBlob.size === 0) {
                     this.state = 'error';
-                    this.errorMessage = 'Recording produced no audio data. Please try again.';
+                    this.errorMessage = this.config.i18n?.noAudioData || 'Recording produced no audio data. Please try again.';
                     return;
                 }
 
@@ -663,7 +663,7 @@ export default function audioRecorder(config) {
                 if (response.ok) {
                     this.uploadProgress = 100;
                     this.state = 'complete';
-                    this.successMessage = 'Recording uploaded. Transcription in progress...';
+                    this.successMessage = this.config.i18n?.recordingUploaded || 'Recording uploaded. Transcription in progress...';
                     const data = await response.json();
                     this.$dispatch('recording-complete', { transcription: data.transcription });
                 } else {
@@ -674,7 +674,7 @@ export default function audioRecorder(config) {
                 this.state = 'error';
                 this.errorMessage = err.message && err.message !== 'Finalize failed'
                     ? err.message
-                    : 'Failed to finalize recording. Please try again.';
+                    : (this.config.i18n?.finalizeFailed || 'Failed to finalize recording. Please try again.');
             }
         },
 
@@ -716,7 +716,7 @@ export default function audioRecorder(config) {
                 const data = await uploadPromise;
                 this.uploadProgress = 100;
                 this.state = 'complete';
-                this.successMessage = 'Recording uploaded. Transcription in progress...';
+                this.successMessage = this.config.i18n?.recordingUploaded || 'Recording uploaded. Transcription in progress...';
                 this.removeFromIndexedDB();
                 this.$dispatch('recording-complete', { transcription: data.transcription });
             } catch (err) {
@@ -729,7 +729,7 @@ export default function audioRecorder(config) {
 
             if (retryCount < 3) {
                 const delays = [2000, 5000, 10000];
-                this.errorMessage = `Upload failed. Retrying in ${delays[retryCount] / 1000}s...`;
+                this.errorMessage = (this.config.i18n?.uploadRetrying || 'Upload failed. Retrying in {seconds}s...').replace('{seconds}', delays[retryCount] / 1000);
                 await new Promise(resolve => setTimeout(resolve, delays[retryCount]));
                 this.errorMessage = '';
 
@@ -737,7 +737,7 @@ export default function audioRecorder(config) {
             }
 
             this.state = 'error';
-            this.errorMessage = 'Upload failed after multiple attempts. Your recording is saved locally — click Retry to try again.';
+            this.errorMessage = this.config.i18n?.uploadFailed || 'Upload failed after multiple attempts. Your recording is saved locally — click Retry to try again.';
         },
 
         retryUpload() {
@@ -837,7 +837,7 @@ export default function audioRecorder(config) {
                     }
                 };
             } catch (err) {
-                this.errorMessage = 'Could not recover recording.';
+                this.errorMessage = this.config.i18n?.recoverFailed || 'Could not recover recording.';
             }
         },
 

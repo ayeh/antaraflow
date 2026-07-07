@@ -20,10 +20,10 @@
             @endif
             <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400">
                 @if($resolution->mover)
-                    <span>Mover: {{ $resolution->mover->name }}</span>
+                    <span>{{ __('Mover:') }} {{ $resolution->mover->name }}</span>
                 @endif
                 @if($resolution->seconder)
-                    <span>Seconder: {{ $resolution->seconder->name }}</span>
+                    <span>{{ __('Seconder:') }} {{ $resolution->seconder->name }}</span>
                 @endif
             </div>
         </div>
@@ -36,7 +36,7 @@
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="status" value="withdrawn">
-                        <button type="submit" class="text-gray-400 hover:text-yellow-500 p-1" title="Withdraw">
+                        <button type="submit" class="text-gray-400 hover:text-yellow-500 p-1" title="{{ __('Withdraw') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                         </button>
                     </form>
@@ -46,8 +46,8 @@
                 <form method="POST" action="{{ route('meetings.resolutions.destroy', [$meeting, $resolution]) }}">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="text-gray-400 hover:text-red-500 p-1" title="Delete"
-                        onclick="event.preventDefault(); window.antaraConfirm('Are you sure you want to delete this resolution?').then(ok => ok && this.closest('form').submit())">
+                    <button type="submit" class="text-gray-400 hover:text-red-500 p-1" title="{{ __('Delete') }}"
+                        onclick="event.preventDefault(); window.antaraConfirm('{{ __("Are you sure you want to delete this resolution?") }}').then(ok => ok && this.closest('form').submit())">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>
                 </form>
@@ -65,10 +65,10 @@
 
     <div class="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
         <div class="flex items-center gap-4 text-xs">
-            <span class="text-green-600 dark:text-green-400 font-medium">For: {{ $forVotes }}</span>
-            <span class="text-red-600 dark:text-red-400 font-medium">Against: {{ $againstVotes }}</span>
-            <span class="text-gray-500 dark:text-gray-400 font-medium">Abstain: {{ $abstainVotes }}</span>
-            <span class="text-gray-400 dark:text-gray-500 ml-auto">{{ $totalVotes }} vote(s)</span>
+            <span class="text-green-600 dark:text-green-400 font-medium">{{ __('For:') }} {{ $forVotes }}</span>
+            <span class="text-red-600 dark:text-red-400 font-medium">{{ __('Against:') }} {{ $againstVotes }}</span>
+            <span class="text-gray-500 dark:text-gray-400 font-medium">{{ __('Abstain:') }} {{ $abstainVotes }}</span>
+            <span class="text-gray-400 dark:text-gray-500 ml-auto">{{ $totalVotes }} {{ __('vote(s)') }}</span>
         </div>
 
         {{-- Voting Buttons (only for proposed resolutions in editable meetings) --}}
@@ -76,13 +76,13 @@
             <div x-data="{ showVoteForm: false, selectedAttendee: '' }" class="mt-3">
                 <button @click="showVoteForm = !showVoteForm" type="button"
                     class="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium">
-                    <span x-text="showVoteForm ? 'Hide Voting' : 'Cast Vote'"></span>
+                    <span x-text="showVoteForm ? '{{ __(\'Hide Voting\') }}' : '{{ __(\'Cast Vote\') }}'"></span>
                 </button>
 
                 <div x-show="showVoteForm" x-cloak class="mt-2 space-y-2">
                     <select x-model="selectedAttendee"
                         class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-1.5 text-xs focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
-                        <option value="">Select Attendee</option>
+                        <option value="">{{ __('Select Attendee') }}</option>
                         @foreach($meeting->attendees->where('is_present', true) as $attendee)
                             <option value="{{ $attendee->id }}">{{ $attendee->name }}</option>
                         @endforeach

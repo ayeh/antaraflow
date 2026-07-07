@@ -30,10 +30,10 @@ class UpdateAttendeeGroupRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Group name is required.',
-            'default_members.*.name.required_with' => 'Member name is required.',
-            'default_members.*.email.required_with' => 'Member email is required.',
-            'default_members.*.email.email' => 'Member email must be valid.',
+            'name.required' => __('Group name is required.'),
+            'default_members.*.name.required_with' => __('Member name is required.'),
+            'default_members.*.email.required_with' => __('Member email is required.'),
+            'default_members.*.email.email' => __('Member email must be valid.'),
         ];
     }
 }

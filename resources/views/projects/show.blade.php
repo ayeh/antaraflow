@@ -15,9 +15,9 @@
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">{{ $project->code }}</span>
                     @endif
                     @if($project->is_active)
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Active</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">{{ __('Active') }}</span>
                     @else
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">Inactive</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">{{ __('Inactive') }}</span>
                     @endif
                 </div>
                 @if($project->description)
@@ -26,11 +26,11 @@
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-3">
-            <a href="{{ route('projects.edit', $project) }}" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Edit</a>
-            <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this project?')" class="inline">
+            <a href="{{ route('projects.edit', $project) }}" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">{{ __('Edit') }}</a>
+            <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="confirmThenSubmit(event, '{{ __('Are you sure you want to delete this project?') }}')" class="inline">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="bg-white dark:bg-slate-800 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">Delete</button>
+                <button type="submit" class="bg-white dark:bg-slate-800 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">{{ __('Delete') }}</button>
             </form>
         </div>
     </div>
@@ -40,7 +40,7 @@
         <div class="lg:col-span-2 space-y-6">
             {{-- Members Section --}}
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Members ({{ $project->members->count() }})</h2>
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('Members') }} ({{ $project->members->count() }})</h2>
 
                 @if($project->members->isNotEmpty())
                     <ul class="divide-y divide-gray-100 dark:divide-slate-700 mb-4">
@@ -57,27 +57,27 @@
                                 </div>
                                 <div class="flex items-center gap-3 ml-4 flex-shrink-0">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">{{ ucfirst($member->pivot->role) }}</span>
-                                    <form method="POST" action="{{ route('projects.members.remove', [$project, $member]) }}" onsubmit="confirmThenSubmit(event, 'Remove this member?')">
+                                    <form method="POST" action="{{ route('projects.members.remove', [$project, $member]) }}" onsubmit="confirmThenSubmit(event, '{{ __('Remove this member?') }}')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">Remove</button>
+                                        <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{{ __('Remove') }}</button>
                                     </form>
                                 </div>
                             </li>
                         @endforeach
                     </ul>
                 @else
-                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">No members added yet.</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">{{ __('No members added yet.') }}</p>
                 @endif
 
                 {{-- Add Member Form --}}
                 <form method="POST" action="{{ route('projects.members.add', $project) }}" class="flex items-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-700">
                     @csrf
                     <div class="flex-1">
-                        <label for="user_id" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Add Member</label>
+                        <label for="user_id" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('Add Member') }}</label>
                         <select name="user_id" id="user_id" required
                             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
-                            <option value="">Select a user...</option>
+                            <option value="">{{ __('Select a user...') }}</option>
                             @foreach($orgMembers as $orgMember)
                                 @unless($project->members->contains($orgMember->id))
                                     <option value="{{ $orgMember->id }}">{{ $orgMember->name }} ({{ $orgMember->email }})</option>
@@ -89,13 +89,13 @@
                         x-data="{
                             role: 'member',
                             descriptions: {
-                                member: 'Can view meetings and update their assigned action items.',
-                                lead: 'Can manage meetings, assign action items, and oversee project progress.',
-                                viewer: 'Read-only access to project meetings and action items.'
+                                member: '{{ __('Can view meetings and update their assigned action items.') }}',
+                                lead: '{{ __('Can manage meetings, assign action items, and oversee project progress.') }}',
+                                viewer: '{{ __('Read-only access to project meetings and action items.') }}'
                             }
                         }">
                         <div class="flex items-center gap-1 mb-1">
-                            <label for="role" class="block text-xs font-medium text-gray-600 dark:text-gray-400">Role</label>
+                            <label for="role" class="block text-xs font-medium text-gray-600 dark:text-gray-400">{{ __('Role') }}</label>
                             <div class="relative flex items-center" x-data="{ open: false }">
                                 <button type="button" @mouseenter="open = true" @mouseleave="open = false" @focus="open = true" @blur="open = false"
                                     class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 focus:outline-none">
@@ -112,27 +112,27 @@
                         </div>
                         <select name="role" id="role" x-model="role"
                             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
-                            <option value="member">Member</option>
-                            <option value="lead">Lead</option>
-                            <option value="viewer">Viewer</option>
+                            <option value="member">{{ __('Member') }}</option>
+                            <option value="lead">{{ __('Lead') }}</option>
+                            <option value="viewer">{{ __('Viewer') }}</option>
                         </select>
                     </div>
-                    <button type="submit" class="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">Add</button>
+                    <button type="submit" class="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">{{ __('Add') }}</button>
                 </form>
             </div>
 
             {{-- Recent Meetings Section --}}
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Recent Meetings</h2>
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('Recent Meetings') }}</h2>
                 @if($project->meetings->isEmpty())
-                    <p class="text-sm text-gray-400 dark:text-gray-500">No meetings linked to this project yet.</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-500">{{ __('No meetings linked to this project yet.') }}</p>
                 @else
                     <ul class="divide-y divide-gray-100 dark:divide-slate-700">
                         @foreach($project->meetings as $meeting)
                             <li class="py-3 flex items-center justify-between">
                                 <div class="min-w-0">
                                     <a href="{{ route('meetings.show', $meeting) }}" class="text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-violet-600 dark:hover:text-violet-400">{{ $meeting->title }}</a>
-                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $meeting->meeting_date?->format('M j, Y') ?? 'No date' }}</p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $meeting->meeting_date?->format('M j, Y') ?? __('No date') }}</p>
                                 </div>
                                 @php
                                     $statusColors = [
@@ -156,38 +156,38 @@
         {{-- Sidebar --}}
         <div class="space-y-4">
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
-                <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Details</h2>
+                <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ __('Details') }}</h2>
                 <dl class="space-y-2">
                     @if($project->code)
                         <div class="flex justify-between text-sm">
-                            <dt class="text-gray-500 dark:text-gray-400">Code</dt>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Code') }}</dt>
                             <dd class="font-medium text-gray-800 dark:text-gray-200 font-mono">{{ $project->code }}</dd>
                         </div>
                     @endif
                     <div class="flex justify-between text-sm">
-                        <dt class="text-gray-500 dark:text-gray-400">Status</dt>
-                        <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $project->is_active ? 'Active' : 'Inactive' }}</dd>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Status') }}</dt>
+                        <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $project->is_active ? __('Active') : __('Inactive') }}</dd>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <dt class="text-gray-500 dark:text-gray-400">Members</dt>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Members') }}</dt>
                         <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $project->members->count() }}</dd>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <dt class="text-gray-500 dark:text-gray-400">Meetings</dt>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Meetings') }}</dt>
                         <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $project->meetings->count() }}</dd>
                     </div>
                     @if($project->createdBy)
                         <div class="flex justify-between text-sm">
-                            <dt class="text-gray-500 dark:text-gray-400">Created By</dt>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Created By') }}</dt>
                             <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $project->createdBy->name }}</dd>
                         </div>
                     @endif
                     <div class="flex justify-between text-sm">
-                        <dt class="text-gray-500 dark:text-gray-400">Created</dt>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Created') }}</dt>
                         <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $project->created_at->format('M j, Y') }}</dd>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <dt class="text-gray-500 dark:text-gray-400">Updated</dt>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Updated') }}</dt>
                         <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $project->updated_at->format('M j, Y') }}</dd>
                     </div>
                 </dl>

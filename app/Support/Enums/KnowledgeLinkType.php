@@ -14,10 +14,10 @@ enum KnowledgeLinkType: string
     public function label(): string
     {
         return match ($this) {
-            self::RelatedTo => 'Related To',
-            self::FollowsUp => 'Follows Up',
-            self::Contradicts => 'Contradicts',
-            self::Supersedes => 'Supersedes',
+            self::RelatedTo => __('Related To'),
+            self::FollowsUp => __('Follows Up'),
+            self::Contradicts => __('Contradicts'),
+            self::Supersedes => __('Supersedes'),
         };
     }
 }

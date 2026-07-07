@@ -3,7 +3,7 @@
 @section('content')
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Tags</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Tags') }}</h1>
     </div>
 
     @if($errors->any())
@@ -24,8 +24,8 @@
                     <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                     </svg>
-                    <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No tags yet</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tags help you organize and filter your meetings.</p>
+                    <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">{{ __('No tags yet') }}</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Tags help you organize and filter your meetings.') }}</p>
                 </div>
             @else
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 divide-y divide-gray-100 dark:divide-slate-700">
@@ -39,11 +39,11 @@
                                     <span class="text-xs text-gray-400 dark:text-gray-500">{{ $tag->meetings_count }} {{ Str::plural('meeting', $tag->meetings_count) }}</span>
                                 </div>
                                 <div class="flex items-center gap-3 flex-shrink-0">
-                                    <button @click="editing = true" class="text-xs font-medium text-violet-600 hover:text-violet-700">Edit</button>
-                                    <form method="POST" action="{{ route('tags.destroy', $tag) }}" onsubmit="confirmThenSubmit(event, 'Delete this tag?')">
+                                    <button @click="editing = true" class="text-xs font-medium text-violet-600 hover:text-violet-700">{{ __('Edit') }}</button>
+                                    <form method="POST" action="{{ route('tags.destroy', $tag) }}" onsubmit="confirmThenSubmit(event, '{{ __('Delete this tag?') }}')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">Delete</button>
+                                        <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">{{ __('Delete') }}</button>
                                     </form>
                                 </div>
                             </div>
@@ -56,14 +56,14 @@
 
                                     <div class="flex items-center gap-3">
                                         <div class="flex-1">
-                                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Name</label>
+                                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('Name') }}</label>
                                             <input type="text" name="name" value="{{ $tag->name }}" required maxlength="50"
                                                 class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-sm text-gray-900 dark:text-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Color</label>
+                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">{{ __('Tag Color') }}</label>
                                         <div class="flex items-center gap-2 flex-wrap">
                                             @foreach(['#A855F7', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#6366F1'] as $preset)
                                                 <label class="relative cursor-pointer">
@@ -74,7 +74,7 @@
                                                         style="background-color: {{ $preset }}"></span>
                                                 </label>
                                             @endforeach
-                                            <label class="relative cursor-pointer" title="Custom color">
+                                            <label class="relative cursor-pointer" title="{{ __('Custom color') }}">
                                                 <input type="radio" name="color" value="{{ $tag->color }}"
                                                     {{ !in_array($tag->color, ['#A855F7','#3B82F6','#10B981','#F59E0B','#EF4444','#EC4899','#06B6D4','#6366F1']) ? 'checked' : '' }}
                                                     class="sr-only">
@@ -87,8 +87,8 @@
                                     </div>
 
                                     <div class="flex items-center gap-2 pt-1">
-                                        <button type="submit" class="bg-violet-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-violet-700 transition-colors">Save</button>
-                                        <button type="button" @click="editing = false" class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">Cancel</button>
+                                        <button type="submit" class="bg-violet-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-violet-700 transition-colors">{{ __('Save') }}</button>
+                                        <button type="button" @click="editing = false" class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">{{ __('Cancel') }}</button>
                                     </div>
                                 </form>
                             </div>
@@ -101,19 +101,19 @@
         {{-- Right: create tag form --}}
         <div class="lg:col-span-1">
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 space-y-4">
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Create Tag</h2>
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Create Tag') }}</h2>
 
                 <form method="POST" action="{{ route('tags.store') }}" class="space-y-4">
                     @csrf
 
                     <div>
-                        <label for="name" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Name <span class="text-red-500">*</span></label>
+                        <label for="name" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('Name') }} <span class="text-red-500">*</span></label>
                         <input type="text" name="name" id="name" value="{{ old('name') }}" required maxlength="50" placeholder="e.g. Q1 Review"
                             class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Color <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">{{ __('Tag Color') }} <span class="text-red-500">*</span></label>
                         <div class="flex items-center gap-2 flex-wrap">
                             @foreach(['#A855F7', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#6366F1'] as $index => $preset)
                                 <label class="relative cursor-pointer">
@@ -128,7 +128,7 @@
                     </div>
 
                     <button type="submit" class="w-full bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
-                        Create Tag
+                        {{ __('Create Tag') }}
                     </button>
                 </form>
             </div>

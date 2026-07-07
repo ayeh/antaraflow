@@ -1,13 +1,13 @@
 @extends('admin.layouts.app')
 
-@section('title', 'System Monitoring')
-@section('page-title', 'System Monitoring')
+@section('title', __('System Monitoring'))
+@section('page-title', __('System Monitoring'))
 
 @section('breadcrumbs')
     <nav class="text-sm text-slate-400 mb-1">
-        <a href="{{ route('admin.dashboard') }}" class="hover:text-white">Dashboard</a>
+        <a href="{{ route('admin.dashboard') }}" class="hover:text-white">{{ __('Dashboard') }}</a>
         <span class="mx-1">/</span>
-        <span class="text-slate-200">System Monitoring</span>
+        <span class="text-slate-200">{{ __('System Monitoring') }}</span>
     </nav>
 @endsection
 
@@ -42,7 +42,7 @@
                 <div class="w-8 h-8 rounded-lg bg-emerald-600/20 flex items-center justify-center">
                     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
                 </div>
-                <span class="text-xs text-slate-400">Database</span>
+                <span class="text-xs text-slate-400">{{ __('Database') }}</span>
             </div>
             <p class="text-xl font-bold text-white capitalize">{{ $systemInfo['database'] }}</p>
         </div>
@@ -52,7 +52,7 @@
                 <div class="w-8 h-8 rounded-lg bg-amber-600/20 flex items-center justify-center">
                     <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                 </div>
-                <span class="text-xs text-slate-400">Cache</span>
+                <span class="text-xs text-slate-400">{{ __('Cache') }}</span>
             </div>
             <p class="text-xl font-bold text-white capitalize">{{ $systemInfo['cache_driver'] }}</p>
         </div>
@@ -62,7 +62,7 @@
                 <div class="w-8 h-8 rounded-lg bg-violet-600/20 flex items-center justify-center">
                     <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                 </div>
-                <span class="text-xs text-slate-400">Queue</span>
+                <span class="text-xs text-slate-400">{{ __('Queue') }}</span>
             </div>
             <p class="text-xl font-bold text-white capitalize">{{ $systemInfo['queue_driver'] }}</p>
         </div>
@@ -74,7 +74,7 @@
         {{-- Disk Usage --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Disk Usage</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ __('Disk Usage') }}</span>
                 <span class="text-xs font-bold {{ $diskUsagePercent > 90 ? 'text-red-400' : ($diskUsagePercent > 75 ? 'text-amber-400' : 'text-emerald-400') }}">{{ $diskUsagePercent }}%</span>
             </div>
             <div class="w-full bg-slate-700 rounded-full h-2 mb-3">
@@ -87,18 +87,18 @@
         {{-- SMTP Status --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">SMTP</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ __('SMTP') }}</span>
                 @if($smtpStatus['global_configured'] && $smtpStatus['global_active'])
                     <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-400">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> {{ __('Active') }}
                     </span>
                 @elseif($smtpStatus['global_configured'])
                     <span class="inline-flex items-center gap-1 text-xs font-medium text-amber-400">
-                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Inactive
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> {{ __('Inactive') }}
                     </span>
                 @else
                     <span class="inline-flex items-center gap-1 text-xs font-medium text-red-400">
-                        <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> Not configured
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> {{ __('Not configured') }}
                     </span>
                 @endif
             </div>
@@ -106,23 +106,23 @@
                 <p class="text-sm font-semibold text-white truncate">{{ $smtpStatus['global_host'] }}</p>
                 <p class="text-xs text-slate-400 truncate mt-0.5">{{ $smtpStatus['global_from'] }}</p>
             @else
-                <p class="text-sm text-slate-500 italic">No global SMTP set</p>
+                <p class="text-sm text-slate-500 italic">{{ __('No global SMTP set') }}</p>
             @endif
             @if($smtpStatus['org_custom_count'] > 0)
                 <p class="text-xs text-slate-500 mt-2">+{{ $smtpStatus['org_custom_count'] }} org custom SMTP</p>
             @endif
-            <a href="{{ route('admin.smtp.index') }}" class="mt-3 inline-block text-xs text-blue-400 hover:text-blue-300">Configure →</a>
+            <a href="{{ route('admin.smtp.index') }}" class="mt-3 inline-block text-xs text-blue-400 hover:text-blue-300">{{ __('Configure →') }}</a>
         </div>
 
         {{-- Pending Jobs --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
             <div class="flex items-center justify-between mb-1">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pending Jobs</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ __('Pending Jobs') }}</span>
                 @if($pendingJobs > 0)
                     <form method="POST" action="{{ route('admin.system.clear-pending') }}"
                           onsubmit="confirmThenSubmit(event, 'Clear all {{ $pendingJobs }} pending jobs?')">
                         @csrf @method('DELETE')
-                        <button type="submit" class="text-xs text-amber-400 hover:text-amber-300 font-medium">Clear All</button>
+                        <button type="submit" class="text-xs text-amber-400 hover:text-amber-300 font-medium">{{ __('Clear All') }}</button>
                     </form>
                 @endif
             </div>
@@ -142,24 +142,24 @@
                     @endif
                 </div>
             @else
-                <p class="text-xs text-emerald-400">Queue is clear</p>
+                <p class="text-xs text-emerald-400">{{ __('Queue is clear') }}</p>
             @endif
         </div>
 
         {{-- Failed Jobs --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
             <div class="flex items-center justify-between mb-1">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Failed Jobs</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ __('Failed Jobs') }}</span>
                 @if($failedJobs->count() > 0)
                     <div class="flex items-center gap-3">
                         <form method="POST" action="{{ route('admin.system.retry-all-failed') }}">
                             @csrf
-                            <button type="submit" class="text-xs text-blue-400 hover:text-blue-300 font-medium">Retry All</button>
+                            <button type="submit" class="text-xs text-blue-400 hover:text-blue-300 font-medium">{{ __('Retry All') }}</button>
                         </form>
                         <form method="POST" action="{{ route('admin.system.delete-all-failed') }}"
                               onsubmit="confirmThenSubmit(event, 'Delete all {{ $failedJobs->count() }} failed jobs?')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="text-xs text-red-400 hover:text-red-300 font-medium">Delete All</button>
+                            <button type="submit" class="text-xs text-red-400 hover:text-red-300 font-medium">{{ __('Delete All') }}</button>
                         </form>
                     </div>
                 @endif
@@ -182,7 +182,7 @@
                     @endforeach
                 </div>
             @else
-                <p class="text-xs text-emerald-400">No failed jobs</p>
+                <p class="text-xs text-emerald-400">{{ __('No failed jobs') }}</p>
             @endif
         </div>
     </div>
@@ -192,7 +192,7 @@
         <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden mb-6">
             <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
                 <div>
-                    <h3 class="text-sm font-semibold text-slate-200">Failed Jobs</h3>
+                    <h3 class="text-sm font-semibold text-slate-200">{{ __('Failed Jobs') }}</h3>
                     <p class="text-xs text-slate-400 mt-0.5">{{ $failedJobs->count() }} job(s) — click exception to see full trace</p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -200,7 +200,7 @@
                         @csrf
                         <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-400 border border-blue-500/30 rounded-lg hover:bg-blue-500/10 transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            Retry All
+                            {{ __('Retry All') }}
                         </button>
                     </form>
                     <form method="POST" action="{{ route('admin.system.delete-all-failed') }}"
@@ -208,7 +208,7 @@
                         @csrf @method('DELETE')
                         <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            Delete All
+                            {{ __('Delete All') }}
                         </button>
                     </form>
                 </div>
@@ -218,11 +218,11 @@
                     <thead>
                         <tr class="bg-slate-700/50 text-slate-300 text-xs uppercase tracking-wider">
                             <th class="px-5 py-3">ID</th>
-                            <th class="px-5 py-3">Job</th>
-                            <th class="px-5 py-3">Queue</th>
-                            <th class="px-5 py-3">Exception</th>
-                            <th class="px-5 py-3">Failed At</th>
-                            <th class="px-5 py-3 text-right">Actions</th>
+                            <th class="px-5 py-3">{{ __('Job') }}</th>
+                            <th class="px-5 py-3">{{ __('Queue') }}</th>
+                            <th class="px-5 py-3">{{ __('Exception') }}</th>
+                            <th class="px-5 py-3">{{ __('Failed At') }}</th>
+                            <th class="px-5 py-3 text-right">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-700">
@@ -248,12 +248,12 @@
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
                                     <form method="POST" action="{{ route('admin.system.retry-job', $job->id) }}" class="inline">
                                         @csrf
-                                        <button type="submit" class="text-blue-400 hover:text-blue-300 text-xs font-medium">Retry</button>
+                                        <button type="submit" class="text-blue-400 hover:text-blue-300 text-xs font-medium">{{ __('Retry') }}</button>
                                     </form>
                                     <form method="POST" action="{{ route('admin.system.delete-job', $job->id) }}" class="inline ml-3"
                                           onsubmit="confirmThenSubmit(event, 'Delete job #{{ $job->id }}?')">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="text-red-400 hover:text-red-300 text-xs font-medium">Delete</button>
+                                        <button type="submit" class="text-red-400 hover:text-red-300 text-xs font-medium">{{ __('Delete') }}</button>
                                     </form>
                                 </td>
                             </tr>
@@ -268,19 +268,19 @@
     <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
             <div>
-                <h3 class="text-sm font-semibold text-slate-200">Recent Errors</h3>
+                <h3 class="text-sm font-semibold text-slate-200">{{ __('Recent Errors') }}</h3>
                 <p class="text-xs text-slate-400 mt-0.5">Last {{ $recentErrors->count() }} ERROR/CRITICAL entries from application log</p>
             </div>
             <div class="flex items-center gap-2">
                 <a href="{{ route('admin.system.export-errors-text') }}"
                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    Export .txt
+                    {{ __('Export .txt') }}
                 </a>
                 <a href="{{ route('admin.system.export-errors-json') }}"
                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-teal-400 border border-teal-500/30 rounded-lg hover:bg-teal-500/10 transition-colors">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    Export .json
+                    {{ __('Export .json') }}
                 </a>
             </div>
         </div>
@@ -307,8 +307,8 @@
         @else
             <div class="px-6 py-10 text-center">
                 <svg class="w-10 h-10 text-emerald-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <p class="text-slate-300 font-medium text-sm">No Recent Errors</p>
-                <p class="text-xs text-slate-400 mt-1">Application log is clean.</p>
+                <p class="text-slate-300 font-medium text-sm">{{ __('No Recent Errors') }}</p>
+                <p class="text-xs text-slate-400 mt-1">{{ __('Application log is clean.') }}</p>
             </div>
         @endif
     </div>
@@ -316,7 +316,7 @@
     {{-- Export for Claude Code hint --}}
     <div class="mt-4 flex items-center gap-2 text-xs text-slate-500">
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        Use <strong class="text-slate-400 mx-1">Export .txt</strong> or <strong class="text-slate-400 mx-1">Export .json</strong> to download a full error report and share directly with Claude Code for debugging.
+        Use <strong class="text-slate-400 mx-1">{{ __('Export .txt') }}</strong> or <strong class="text-slate-400 mx-1">{{ __('Export .json') }}</strong> to download a full error report and share directly with Claude Code for debugging.
     </div>
 
 @endsection

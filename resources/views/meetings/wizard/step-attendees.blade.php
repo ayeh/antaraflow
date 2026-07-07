@@ -76,11 +76,11 @@
 
         roleLabel(role) {
             const map = {
-                organizer: 'Organizer',
-                presenter: 'Presenter',
-                note_taker: 'Note Taker',
-                participant: 'Participant',
-                observer: 'Observer',
+                organizer: '{{ __("Organizer") }}',
+                presenter: '{{ __("Presenter") }}',
+                note_taker: '{{ __("Note Taker") }}',
+                participant: '{{ __("Participant") }}',
+                observer: '{{ __("Observer") }}',
             };
             return map[role] || role;
         },
@@ -196,7 +196,7 @@
                     this.guestEmail = '';
                     this.markPresent = false;
                     this.role = 'participant';
-                    this.successMessage = 'Guest added successfully.';
+                    this.successMessage = '{{ __('Guest added successfully.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 } else {
                     const data = await response.json().catch(() => null);
@@ -205,7 +205,7 @@
                 }
             } catch (e) {
                 console.error('Failed to add guest:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -259,7 +259,7 @@
                     this.searchQuery = '';
                     this.markPresent = false;
                     this.role = 'participant';
-                    this.successMessage = 'Member added successfully.';
+                    this.successMessage = '{{ __('Member added successfully.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 } else {
                     const data = await response.json().catch(() => null);
@@ -268,7 +268,7 @@
                 }
             } catch (e) {
                 console.error('Failed to add org member:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -276,7 +276,7 @@
         },
 
         async removeAttendee(attendeeId) {
-            if (!(await window.antaraConfirm('Remove this attendee?', {title: 'Remove Attendee'}))) return;
+            if (!(await window.antaraConfirm('{{ __("Remove this attendee?") }}', {title: '{{ __("Remove Attendee") }}'}))) return;
             this.loading = true;
             this.errorMessage = '';
 
@@ -294,15 +294,15 @@
 
                 if (response.ok || response.redirected) {
                     this.attendees = this.attendees.filter(a => a.id !== attendeeId);
-                    this.successMessage = 'Attendee removed.';
+                    this.successMessage = '{{ __('Attendee removed.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 } else {
-                    this.errorMessage = 'Failed to remove attendee.';
+                    this.errorMessage = '{{ __('Failed to remove attendee.') }}';
                     setTimeout(() => this.errorMessage = '', 4000);
                 }
             } catch (e) {
                 console.error('Failed to remove attendee:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -311,7 +311,7 @@
 
         async importProjectMembers() {
             {{-- This endpoint is not yet implemented; placeholder for future use --}}
-            this.errorMessage = 'Import from project is not yet available.';
+            this.errorMessage = '{{ __('Import from project is not yet available.') }}';
             setTimeout(() => this.errorMessage = '', 4000);
         },
 
@@ -384,7 +384,7 @@
         copyLobbyUrl() {
             if (this.lobbyShareUrl) {
                 navigator.clipboard.writeText(this.lobbyShareUrl);
-                this.successMessage = 'Live screen link copied!';
+                this.successMessage = '{{ __('Live screen link copied!') }}';
                 setTimeout(() => this.successMessage = '', 3000);
             }
         },
@@ -420,7 +420,7 @@
                     this.qrData = data;
                     this.qrView = 'preview';
                     this.qrSetupMode = false;
-                    this.successMessage = 'QR registration activated.';
+                    this.successMessage = '{{ __('QR registration activated.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 } else {
                     const data = await response.json().catch(() => null);
@@ -429,7 +429,7 @@
                 }
             } catch (e) {
                 console.error('QR generation failed:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -437,7 +437,7 @@
         },
 
         async disableQr() {
-            if (!(await window.antaraConfirm('Existing QR links will stop working.', {title: 'Disable QR Registration', confirmLabel: 'Disable', isDanger: false}))) return;
+            if (!(await window.antaraConfirm('{{ __("Existing QR links will stop working.") }}', {title: '{{ __("Disable QR Registration") }}', confirmLabel: '{{ __("Disable") }}', isDanger: false}))) return;
             this.qrLoading = true;
 
             try {
@@ -452,7 +452,7 @@
                 if (response.ok) {
                     this.qrData = null;
                     this.qrView = 'setup';
-                    this.successMessage = 'QR registration disabled.';
+                    this.successMessage = '{{ __('QR registration disabled.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 }
             } catch (e) {
@@ -465,7 +465,7 @@
         copyQrUrl() {
             if (this.qrUrl) {
                 navigator.clipboard.writeText(this.qrUrl);
-                this.successMessage = 'Registration link copied!';
+                this.successMessage = '{{ __('Registration link copied!') }}';
                 setTimeout(() => this.successMessage = '', 3000);
             }
         },
@@ -473,7 +473,7 @@
         copyJoinCode() {
             if (this.qrData?.join_code) {
                 navigator.clipboard.writeText(this.qrData.join_code);
-                this.successMessage = 'Join code copied!';
+                this.successMessage = '{{ __('Join code copied!') }}';
                 setTimeout(() => this.successMessage = '', 3000);
             }
         },
@@ -615,10 +615,10 @@
             if (!this.lobbyMax || count <= prev) return;
             const half = Math.ceil(this.lobbyMax / 2);
             if (this.lobbyMax >= 4 && count >= half && prev < half && count < this.lobbyMax) {
-                this.celebrate('Halfway there!');
+                this.celebrate('{{ __("Halfway there!") }}');
             }
             if (count >= this.lobbyMax && prev < this.lobbyMax) {
-                this.celebrate('We\'re full! 🎉');
+                this.celebrate('{{ __("We\'re full! 🎉") }}');
             }
         },
 
@@ -712,24 +712,24 @@
     {{-- Stats Row --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Total Attendees</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Total Attendees') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="stats.total"></p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">registered</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ __('registered') }}</p>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Present</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Present') }}</p>
             <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1" x-text="stats.present"></p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">marked present</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ __('marked present') }}</p>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Absent</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Absent') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="stats.absent"></p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">not present</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ __('not present') }}</p>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Confirmed</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Confirmed') }}</p>
             <p class="text-2xl font-bold text-violet-600 dark:text-violet-400 mt-1" x-text="stats.confirmed"></p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">RSVP accepted</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ __('RSVP accepted') }}</p>
         </div>
     </div>
 
@@ -741,7 +741,7 @@
             {{-- Header --}}
             <div class="p-6 pb-4">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Attendees</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Attendees') }}</h2>
                     <div class="flex items-center gap-2">
                         @if($meeting->project && $isEditable)
                             <button
@@ -753,7 +753,7 @@
                                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                 </svg>
-                                Import Project Members
+                                {{ __('Import Project Members') }}
                             </button>
                         @endif
                         <span class="text-sm text-gray-500 dark:text-gray-400" x-text="stats.total + ' total'"></span>
@@ -762,7 +762,7 @@
 
                 {{-- Filter Tabs --}}
                 <div class="flex gap-1 bg-gray-100 dark:bg-slate-700/50 rounded-lg p-1">
-                    <template x-for="tab in [{key: 'all', label: 'All'}, {key: 'present', label: 'Present'}, {key: 'absent', label: 'Absent'}, {key: 'guests', label: 'Guests'}]" :key="tab.key">
+                    <template x-for="tab in [{key: 'all', label: '{{ __("All") }}'}, {key: 'present', label: '{{ __("Present") }}'}, {key: 'absent', label: '{{ __("Absent") }}'}, {key: 'guests', label: '{{ __("Guests") }}'}]" :key="tab.key">
                         <button
                             type="button"
                             @click="activeTab = tab.key"
@@ -784,12 +784,12 @@
                         <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                        <h3 class="mt-3 text-sm font-medium text-gray-900 dark:text-white">No attendees added</h3>
+                        <h3 class="mt-3 text-sm font-medium text-gray-900 dark:text-white">{{ __('No attendees added') }}</h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            <span x-show="activeTab === 'all'">Add attendees using the form on the right.</span>
-                            <span x-show="activeTab === 'present'" x-cloak>No attendees are marked as present.</span>
-                            <span x-show="activeTab === 'absent'" x-cloak>No absent attendees.</span>
-                            <span x-show="activeTab === 'guests'" x-cloak>No guest attendees have been added.</span>
+                            <span x-show="activeTab === 'all'">{{ __('Add attendees using the form on the right.') }}</span>
+                            <span x-show="activeTab === 'present'" x-cloak>{{ __('No attendees are marked as present.') }}</span>
+                            <span x-show="activeTab === 'absent'" x-cloak>{{ __('No absent attendees.') }}</span>
+                            <span x-show="activeTab === 'guests'" x-cloak>{{ __('No guest attendees have been added.') }}</span>
                         </p>
                     </div>
                 </template>
@@ -825,7 +825,7 @@
                                                 x-show="attendee.is_external"
                                                 x-cloak
                                                 class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300"
-                                            >Guest</span>
+                                            >{{ __('Guest') }}</span>
                                         </div>
                                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate" x-text="attendee.email || 'No email'"></p>
                                     </div>
@@ -838,7 +838,7 @@
                                         @click="removeAttendee(attendee.id)"
                                         :disabled="loading"
                                         class="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
-                                        title="Remove attendee"
+                                        title="{{ __('Remove attendee') }}"
                                     >
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -856,11 +856,11 @@
         @if($isEditable)
             <div class="lg:col-span-1 space-y-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Add Attendee</h3>
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">{{ __('Add Attendee') }}</h3>
 
                     {{-- Mode Toggle Pills --}}
                     <div class="flex gap-1 mb-5">
-                        <template x-for="mode in [{key: 'team', label: 'Team Members'}, {key: 'org', label: 'Org Member'}, {key: 'guest', label: 'Guest'}]" :key="mode.key">
+                        <template x-for="mode in [{key: 'team', label: '{{ __("Team Members") }}'}, {key: 'org', label: '{{ __("Org Member") }}'}, {key: 'guest', label: '{{ __("Guest") }}'}]" :key="mode.key">
                             <button
                                 type="button"
                                 @click="addMode = mode.key; selectedMembers = []; searchQuery = ''"
@@ -876,10 +876,10 @@
                     {{-- Team Members Mode --}}
                     <div x-show="addMode === 'team'" x-cloak>
                         <div class="flex items-center justify-between mb-3">
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Select team members to add</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Select team members to add') }}</p>
                             <div class="flex gap-2">
-                                <button type="button" @click="selectAll()" class="text-xs text-violet-600 dark:text-violet-400 hover:underline">Select All</button>
-                                <button type="button" @click="deselectAll()" x-show="selectedMembers.length > 0" class="text-xs text-gray-500 hover:underline">Clear</button>
+                                <button type="button" @click="selectAll()" class="text-xs text-violet-600 dark:text-violet-400 hover:underline">{{ __('Select All') }}</button>
+                                <button type="button" @click="deselectAll()" x-show="selectedMembers.length > 0" class="text-xs text-gray-500 hover:underline">{{ __('Clear') }}</button>
                             </div>
                         </div>
 
@@ -891,7 +891,7 @@
                             <input
                                 type="text"
                                 x-model="searchQuery"
-                                placeholder="Search members..."
+                                placeholder="{{ __('Search members...') }}"
                                 class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             />
                         </div>
@@ -900,8 +900,8 @@
                         <div class="max-h-52 overflow-y-auto space-y-1 mb-4 border border-gray-200 dark:border-slate-700 rounded-lg p-2">
                             <template x-if="filteredOrgMembers.length === 0">
                                 <p class="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
-                                    <span x-show="availableOrgMembers.length === 0">All organization members have been added.</span>
-                                    <span x-show="availableOrgMembers.length > 0" x-cloak>No members match your search.</span>
+                                    <span x-show="availableOrgMembers.length === 0">{{ __('All organization members have been added.') }}</span>
+                                    <span x-show="availableOrgMembers.length > 0" x-cloak>{{ __('No members match your search.') }}</span>
                                 </p>
                             </template>
                             <template x-for="member in filteredOrgMembers" :key="member.id">
@@ -928,7 +928,7 @@
 
                     {{-- Organization Member Mode --}}
                     <div x-show="addMode === 'org'" x-cloak>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Search and select a member</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('Search and select a member') }}</p>
 
                         {{-- Search --}}
                         <div class="relative mb-3">
@@ -938,7 +938,7 @@
                             <input
                                 type="text"
                                 x-model="searchQuery"
-                                placeholder="Search by name or email..."
+                                placeholder="{{ __('Search by name or email...') }}"
                                 class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             />
                         </div>
@@ -946,7 +946,7 @@
                         {{-- Single Select List --}}
                         <div class="max-h-52 overflow-y-auto space-y-1 mb-4 border border-gray-200 dark:border-slate-700 rounded-lg p-2">
                             <template x-if="filteredOrgMembers.length === 0">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center py-4">No matching members found.</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center py-4">{{ __('No matching members found.') }}</p>
                             </template>
                             <template x-for="member in filteredOrgMembers" :key="member.id">
                                 <label class="flex items-center gap-2.5 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
@@ -971,16 +971,16 @@
                     <div x-show="addMode === 'guest'" x-cloak>
                         <div class="space-y-3 mb-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Name') }} <span class="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     x-model="guestName"
-                                    placeholder="Attendee name"
+                                    placeholder="{{ __('Attendee name') }}"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                                 />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Email') }}</label>
                                 <input
                                     type="email"
                                     x-model="guestEmail"
@@ -1000,21 +1000,21 @@
                                 x-model="markPresent"
                                 class="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-violet-600 focus:ring-violet-500 dark:bg-slate-700"
                             />
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Mark as Present</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('Mark as Present') }}</span>
                         </label>
 
                         {{-- Role Dropdown --}}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Role') }}</label>
                             <select
                                 x-model="role"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             >
-                                <option value="participant">Participant</option>
-                                <option value="organizer">Organizer</option>
-                                <option value="presenter">Presenter</option>
-                                <option value="note_taker">Note Taker</option>
-                                <option value="observer">Observer</option>
+                                <option value="participant">{{ __('Participant') }}</option>
+                                <option value="organizer">{{ __('Organizer') }}</option>
+                                <option value="presenter">{{ __('Presenter') }}</option>
+                                <option value="note_taker">{{ __('Note Taker') }}</option>
+                                <option value="observer">{{ __('Observer') }}</option>
                             </select>
                         </div>
                     </div>
@@ -1079,8 +1079,8 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <p class="font-medium text-gray-900 dark:text-white">QR Registration</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Walk-in guest registration via QR code</p>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ __('QR Registration') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Walk-in guest registration via QR code') }}</p>
                         </div>
                         <template x-if="qrData && qrView === 'preview'">
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
@@ -1096,18 +1096,18 @@
                             @click="qrSetupMode = true"
                             class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors"
                         >
-                            Set Up QR Registration
+                            {{ __('Set Up QR Registration') }}
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                     </div>
 
                     {{-- Setup: Registration Settings Form --}}
                     <div x-show="qrSetupMode" x-cloak class="space-y-4">
-                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Registration Settings</h4>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Registration Settings') }}</h4>
 
                         {{-- Expiration --}}
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Expiration Date & Time</label>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Expiration Date & Time') }}</label>
                             <input
                                 type="datetime-local"
                                 x-model="qrSettings.expires_at"
@@ -1117,21 +1117,21 @@
 
                         {{-- Max Attendees --}}
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Max Attendees <span class="text-gray-400">(optional)</span></label>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Max Attendees') }} <span class="text-gray-400">{{ __('(optional)') }}</span></label>
                             <input
                                 type="number"
                                 min="1"
                                 x-model="qrSettings.max_attendees"
-                                placeholder="Unlimited"
+                                placeholder="{{ __('Unlimited') }}"
                                 class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             />
                         </div>
 
                         {{-- Required Fields --}}
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Required Fields</label>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Required Fields') }}</label>
                             <div class="grid grid-cols-2 gap-2">
-                                <template x-for="field in [{key: 'name', label: 'Name'}, {key: 'email', label: 'Email'}, {key: 'phone', label: 'Phone'}, {key: 'company', label: 'Company'}]" :key="field.key">
+                                <template x-for="field in [{key: 'name', label: '{{ __("Name") }}'}, {key: 'email', label: '{{ __("Email") }}'}, {key: 'phone', label: '{{ __("Phone") }}'}, {key: 'company', label: '{{ __("Company") }}'}]" :key="field.key">
                                     <label class="flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors"
                                            :class="qrSettings.required_fields.includes(field.key) ? 'border-violet-300 dark:border-violet-600 bg-violet-50 dark:bg-violet-900/20' : 'border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-gray-700'">
                                         <input
@@ -1148,12 +1148,12 @@
 
                         {{-- Welcome Message --}}
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Welcome Message <span class="text-gray-400">(optional)</span></label>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Welcome Message') }} <span class="text-gray-400">{{ __('(optional)') }}</span></label>
                             <textarea
                                 x-model="qrSettings.welcome_message"
                                 rows="3"
                                 maxlength="500"
-                                placeholder="Welcome to the meeting! Please register below."
+                                placeholder="{{ __('Welcome to the meeting! Please register below.') }}"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
                             ></textarea>
                             <p class="text-xs text-gray-400 mt-1 text-right" x-text="(qrSettings.welcome_message?.length || 0) + '/500'"></p>
@@ -1165,7 +1165,7 @@
                                 type="button"
                                 @click="qrSetupMode = false"
                                 class="flex-1 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                            >Cancel</button>
+                            >{{ __('Cancel') }}</button>
                             <button
                                 type="button"
                                 @click="generateQr()"
@@ -1187,7 +1187,7 @@
                         <button type="button" @click="openLobby()"
                             class="group w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-200 hover:-translate-y-0.5">
                             <svg class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2m8-16h2a2 2 0 012 2v2m-4 12h2a2 2 0 002-2v-2"/></svg>
-                            Present Live Lobby
+                            {{ __('Present Live Lobby') }}
                         </button>
 
                         {{-- Share Live Lobby (for projector / client screen) --}}
@@ -1198,7 +1198,7 @@
                             </p>
                             <div class="flex items-center gap-2">
                                 <input type="text" :value="lobbyShareUrl" readonly class="flex-1 px-3 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 truncate" />
-                                <button type="button" @click="copyLobbyUrl()" class="flex-shrink-0 p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 rounded-md hover:bg-violet-100 dark:hover:bg-violet-900/20 transition-colors" title="Copy live screen link">
+                                <button type="button" @click="copyLobbyUrl()" class="flex-shrink-0 p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 rounded-md hover:bg-violet-100 dark:hover:bg-violet-900/20 transition-colors" title="{{ __('Copy live screen link') }}">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                 </button>
                             </div>
@@ -1226,10 +1226,10 @@
                         {{-- Join Code --}}
                         <div class="flex items-center justify-between p-2.5 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
                             <div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Join Code</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Join Code') }}</p>
                                 <p class="text-lg font-bold font-mono tracking-widest text-gray-900 dark:text-white" x-text="qrData?.join_code"></p>
                             </div>
-                            <button type="button" @click="copyJoinCode()" class="p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 rounded-md hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors" title="Copy code">
+                            <button type="button" @click="copyJoinCode()" class="p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 rounded-md hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors" title="{{ __('Copy code') }}">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             </button>
                         </div>
@@ -1237,7 +1237,7 @@
                         {{-- Registration URL --}}
                         <div class="flex items-center gap-2">
                             <input type="text" :value="qrUrl" readonly class="flex-1 px-3 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-gray-300 truncate" />
-                            <button type="button" @click="copyQrUrl()" class="flex-shrink-0 p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 rounded-md hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors" title="Copy link">
+                            <button type="button" @click="copyQrUrl()" class="flex-shrink-0 p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 rounded-md hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors" title="{{ __('Copy link') }}">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             </button>
                         </div>
@@ -1268,15 +1268,15 @@
                         <div class="flex gap-2 pt-1">
                             <a :href="'https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=png&download=1&data=' + encodeURIComponent(qrUrl)" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                Download QR
+                                {{ __('Download QR') }}
                             </a>
                             <button type="button" @click="qrData = null; qrSetupMode = true; qrView = 'setup'" class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                Regenerate
+                                {{ __('Regenerate') }}
                             </button>
                         </div>
                         <button type="button" @click="disableQr()" :disabled="qrLoading" class="w-full px-3 py-1.5 text-xs font-medium rounded-lg text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50">
-                            Disable Registration
+                            {{ __('Disable Registration') }}
                         </button>
                     </div>
                 </div>
@@ -1289,8 +1289,8 @@
                         <svg class="mx-auto h-8 w-8 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Meeting is not editable</p>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Attendees can only be modified in Draft or In Progress status.</p>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('Meeting is not editable') }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('Attendees can only be modified in Draft or In Progress status.') }}</p>
                     </div>
                 </div>
             </div>

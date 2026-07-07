@@ -45,7 +45,7 @@ class SmtpController extends Controller
         );
 
         return redirect()->route('admin.smtp.index')
-            ->with('success', 'Global SMTP configuration saved successfully.');
+            ->with('success', __('Global SMTP configuration saved successfully.'));
     }
 
     public function testGlobal(Request $request): RedirectResponse
@@ -58,7 +58,7 @@ class SmtpController extends Controller
 
         if (! $config) {
             return redirect()->route('admin.smtp.index')
-                ->with('error', 'No global SMTP configuration found. Please save a configuration first.');
+                ->with('error', __('No global SMTP configuration found. Please save a configuration first.'));
         }
 
         $success = $this->smtpService->testConnection($config, $request->input('test_email'));
@@ -66,7 +66,7 @@ class SmtpController extends Controller
         return redirect()->route('admin.smtp.index')
             ->with(
                 $success ? 'success' : 'error',
-                $success ? 'Test email sent successfully.' : 'Failed to send test email. Please check your SMTP settings.',
+                $success ? __('Test email sent successfully.') : __('Failed to send test email. Please check your SMTP settings.'),
             );
     }
 
@@ -104,7 +104,7 @@ class SmtpController extends Controller
         );
 
         return redirect()->route('admin.smtp.org-index')
-            ->with('success', "SMTP configuration for {$organization->name} saved successfully.");
+            ->with('success', __('SMTP configuration for :name saved successfully.', ['name' => $organization->name]));
     }
 
     public function testOrg(Request $request, Organization $organization): RedirectResponse
@@ -119,7 +119,7 @@ class SmtpController extends Controller
 
         if (! $config) {
             return redirect()->route('admin.smtp.org-index')
-                ->with('error', "No SMTP configuration found for {$organization->name}.");
+                ->with('error', __('No SMTP configuration found for :name.', ['name' => $organization->name]));
         }
 
         $success = $this->smtpService->testConnection($config, $request->input('test_email'));
@@ -127,7 +127,7 @@ class SmtpController extends Controller
         return redirect()->route('admin.smtp.org-index')
             ->with(
                 $success ? 'success' : 'error',
-                $success ? 'Test email sent successfully.' : 'Failed to send test email. Please check the SMTP settings.',
+                $success ? __('Test email sent successfully.') : __('Failed to send test email. Please check the SMTP settings.'),
             );
     }
 }

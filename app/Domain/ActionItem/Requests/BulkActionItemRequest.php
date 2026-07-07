@@ -37,10 +37,10 @@ class BulkActionItemRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'ids.required' => 'At least one item must be selected.',
-            'ids.min' => 'At least one item must be selected.',
-            'action.in' => 'The action must be status, priority, or delete.',
-            'value.required_if' => 'A value is required for status and priority actions.',
+            'ids.required' => __('At least one item must be selected.'),
+            'ids.min' => __('At least one item must be selected.'),
+            'action.in' => __('The action must be status, priority, or delete.'),
+            'value.required_if' => __('A value is required for status and priority actions.'),
         ];
     }
 }

@@ -13,9 +13,9 @@ enum VoteChoice: string
     public function label(): string
     {
         return match ($this) {
-            self::For => 'For',
-            self::Against => 'Against',
-            self::Abstain => 'Abstain',
+            self::For => __('For'),
+            self::Against => __('Against'),
+            self::Abstain => __('Abstain'),
         };
     }
 }

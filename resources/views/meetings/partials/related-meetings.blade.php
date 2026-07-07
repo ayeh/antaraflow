@@ -1,9 +1,9 @@
 {{-- Related Meetings via Knowledge Graph --}}
 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Related Meetings</h3>
+    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">{{ __('Related Meetings') }}</h3>
 
     @if($relatedMeetings->isEmpty())
-        <p class="text-sm text-gray-500 dark:text-gray-400 italic">No related meetings found.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 italic">{{ __('No related meetings found.') }}</p>
     @else
         <div class="space-y-3">
             @foreach($relatedMeetings as $related)

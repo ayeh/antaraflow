@@ -86,7 +86,7 @@
                 this.$dispatch('action-item-status-changed', { id: itemId, status: newStatus });
             } catch {
                 item.status = prev;
-                alert('Failed to update status. Please try again.');
+                alert('{{ __('Failed to update status. Please try again.') }}');
             }
         }
     }"

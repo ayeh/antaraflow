@@ -76,7 +76,7 @@ class ResellerController extends Controller
             $this->resellerService->createSubOrganization($organization, $request->validated());
 
             return redirect()->route('reseller.sub-organizations')
-                ->with('success', 'Sub-organization created successfully.');
+                ->with('success', __('Sub-organization created successfully.'));
         } catch (\RuntimeException $e) {
             return redirect()->route('reseller.sub-organizations')
                 ->with('error', $e->getMessage());

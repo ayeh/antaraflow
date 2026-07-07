@@ -25,9 +25,9 @@ class UploadDocumentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'document.required' => 'A document file is required.',
-            'document.file' => 'The uploaded file is invalid.',
-            'document.max' => 'The document must not exceed 50MB.',
+            'document.required' => __('A document file is required.'),
+            'document.file' => __('The uploaded file is invalid.'),
+            'document.max' => __('The document must not exceed 50MB.'),
         ];
     }
 }

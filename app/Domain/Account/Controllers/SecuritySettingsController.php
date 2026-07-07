@@ -25,6 +25,6 @@ class SecuritySettingsController extends Controller
             'remember_token' => Str::random(60),
         ]);
 
-        return redirect()->route('settings.security')->with('success', 'Password updated.');
+        return redirect()->route('settings.security')->with('success', __('Password updated.'));
     }
 }

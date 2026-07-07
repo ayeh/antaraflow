@@ -28,11 +28,11 @@ class ExtractionFailedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("AI Extraction Failed: {$this->meeting->title}")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("AI extraction failed for meeting: **{$this->meeting->title}**.")
-            ->line('Please try running the extraction again.')
-            ->action('View Meeting', route('meetings.show', $this->meeting));
+            ->subject(__('AI Extraction Failed: :title', ['title' => $this->meeting->title]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__('AI extraction failed for meeting: **:title**.', ['title' => $this->meeting->title]))
+            ->line(__('Please try running the extraction again.'))
+            ->action(__('View Meeting'), route('meetings.show', $this->meeting));
     }
 
     /** @return array<string, mixed> */
@@ -43,7 +43,7 @@ class ExtractionFailedNotification extends Notification implements ShouldQueue
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
             'error' => $this->error,
-            'message' => "AI extraction failed for \"{$this->meeting->title}\"",
+            'message' => __('AI extraction failed for ":title"', ['title' => $this->meeting->title]),
         ];
     }
 }

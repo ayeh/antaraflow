@@ -3,16 +3,16 @@
 @section('content')
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Organizations</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Organizations') }}</h1>
         <a href="{{ route('organizations.create') }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Create Organization
+            {{ __('Create Organization') }}
         </a>
     </div>
 
     @if($organizations->isEmpty())
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-12 text-center">
-            <p class="text-sm text-gray-500 dark:text-gray-400">No organizations found.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No organizations found.') }}</p>
         </div>
     @else
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

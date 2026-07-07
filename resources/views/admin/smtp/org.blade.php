@@ -1,15 +1,15 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Per-Organization SMTP')
-@section('page-title', 'Per-Organization SMTP')
+@section('title', __('Per-Organization SMTP'))
+@section('page-title', __('Per-Organization SMTP'))
 
 @section('breadcrumbs')
     <nav class="text-sm text-slate-400 mb-1">
-        <a href="{{ route('admin.dashboard') }}" class="hover:text-white">Dashboard</a>
+        <a href="{{ route('admin.dashboard') }}" class="hover:text-white">{{ __('Dashboard') }}</a>
         <span class="mx-1">/</span>
-        <a href="{{ route('admin.smtp.index') }}" class="hover:text-white">SMTP Configuration</a>
+        <a href="{{ route('admin.smtp.index') }}" class="hover:text-white">{{ __('SMTP Configuration') }}</a>
         <span class="mx-1">/</span>
-        <span class="text-slate-200">Per-Organization</span>
+        <span class="text-slate-200">{{ __('Per-Organization') }}</span>
     </nav>
 @endsection
 
@@ -18,11 +18,11 @@
     <div class="flex items-center gap-1 mb-6 border-b border-slate-700">
         <a href="{{ route('admin.smtp.index') }}"
            class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors border-transparent text-slate-400 hover:text-white">
-            Global SMTP
+            {{ __('Global SMTP') }}
         </a>
         <a href="{{ route('admin.smtp.org-index') }}"
            class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors border-blue-500 text-blue-400">
-            Per-Organization SMTP
+            {{ __('Per-Organization SMTP') }}
         </a>
     </div>
 
@@ -31,11 +31,11 @@
         <table class="w-full text-sm text-left">
             <thead>
                 <tr class="bg-slate-700/50 text-slate-300 text-xs uppercase tracking-wider">
-                    <th class="px-6 py-3">Organization</th>
-                    <th class="px-6 py-3">SMTP Status</th>
-                    <th class="px-6 py-3">Host</th>
-                    <th class="px-6 py-3">From Address</th>
-                    <th class="px-6 py-3 text-right">Actions</th>
+                    <th class="px-6 py-3">{{ __('Organization') }}</th>
+                    <th class="px-6 py-3">{{ __('SMTP Status') }}</th>
+                    <th class="px-6 py-3">{{ __('Host') }}</th>
+                    <th class="px-6 py-3">{{ __('From Address') }}</th>
+                    <th class="px-6 py-3 text-right">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-700">
@@ -47,11 +47,11 @@
                         <td class="px-6 py-4 text-white font-medium">{{ $organization->name }}</td>
                         <td class="px-6 py-4">
                             @if($smtpConfig && $smtpConfig->is_active)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900/30 text-green-400 border border-green-800">Configured</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900/30 text-green-400 border border-green-800">{{ __('Configured') }}</span>
                             @elseif($smtpConfig)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 border border-yellow-800">Inactive</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900/30 text-yellow-400 border border-yellow-800">{{ __('Inactive') }}</span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-700/50 text-slate-400 border border-slate-600">Not Configured</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-700/50 text-slate-400 border border-slate-600">{{ __('Not Configured') }}</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 text-slate-300">{{ $smtpConfig?->host ?? '—' }}</td>
@@ -60,13 +60,13 @@
                             <button type="button"
                                     onclick="document.getElementById('org-form-{{ $organization->id }}').classList.toggle('hidden')"
                                     class="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                                {{ $smtpConfig ? 'Edit' : 'Configure' }}
+                                {{ $smtpConfig ? __('Edit') : __('Configure') }}
                             </button>
                             @if($smtpConfig)
                                 <button type="button"
                                         onclick="document.getElementById('org-test-{{ $organization->id }}').classList.toggle('hidden')"
                                         class="ml-3 text-sm text-green-400 hover:text-green-300 transition-colors">
-                                    Test
+                                    {{ __('Test') }}
                                 </button>
                             @endif
                         </td>
@@ -80,21 +80,21 @@
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-300 mb-1">Host</label>
+                                        <label class="block text-sm font-medium text-slate-300 mb-1">{{ __('Host') }}</label>
                                         <input type="text" name="host"
                                                value="{{ old('host', $smtpConfig?->host) }}"
                                                placeholder="smtp.example.com"
                                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-300 mb-1">Port</label>
+                                        <label class="block text-sm font-medium text-slate-300 mb-1">{{ __('Port') }}</label>
                                         <input type="number" name="port"
                                                value="{{ old('port', $smtpConfig?->port ?? 587) }}"
                                                min="1" max="65535"
                                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-300 mb-1">Encryption</label>
+                                        <label class="block text-sm font-medium text-slate-300 mb-1">{{ __('Encryption') }}</label>
                                         <select name="encryption"
                                                 class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                                             <option value="tls" @selected(old('encryption', $smtpConfig?->encryption) === 'tls')>TLS</option>
@@ -103,30 +103,30 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-300 mb-1">Username</label>
+                                        <label class="block text-sm font-medium text-slate-300 mb-1">{{ __('Username') }}</label>
                                         <input type="text" name="username"
                                                value="{{ old('username', $smtpConfig ? $smtpConfig->decrypted_username : '') }}"
                                                placeholder="user@example.com"
                                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-300 mb-1">Password</label>
+                                        <label class="block text-sm font-medium text-slate-300 mb-1">{{ __('Password') }}</label>
                                         <input type="password" name="password"
                                                value="{{ old('password', $smtpConfig ? $smtpConfig->decrypted_password : '') }}"
                                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-300 mb-1">From Address</label>
+                                        <label class="block text-sm font-medium text-slate-300 mb-1">{{ __('From Address') }}</label>
                                         <input type="email" name="from_address"
                                                value="{{ old('from_address', $smtpConfig?->from_address) }}"
                                                placeholder="noreply@org.com"
                                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-300 mb-1">From Name</label>
+                                        <label class="block text-sm font-medium text-slate-300 mb-1">{{ __('From Name') }}</label>
                                         <input type="text" name="from_name"
                                                value="{{ old('from_name', $smtpConfig?->from_name) }}"
-                                               placeholder="Organization Name"
+                                               placeholder="{{ __('Organization Name') }}"
                                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                                     </div>
                                     <div class="flex items-end">
@@ -135,7 +135,7 @@
                                             <input type="checkbox" name="is_active" value="1"
                                                    @checked(old('is_active', $smtpConfig?->is_active ?? true))
                                                    class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-0">
-                                            <span class="text-sm text-slate-300">Active</span>
+                                            <span class="text-sm text-slate-300">{{ __('Active') }}</span>
                                         </label>
                                     </div>
                                 </div>
@@ -143,12 +143,12 @@
                                 <div class="flex items-center gap-3">
                                     <button type="submit"
                                             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                        Save
+                                        {{ __('Save') }}
                                     </button>
                                     <button type="button"
                                             onclick="document.getElementById('org-form-{{ $organization->id }}').classList.add('hidden')"
                                             class="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors">
-                                        Cancel
+                                        {{ __('Cancel') }}
                                     </button>
                                 </div>
                             </form>
@@ -161,19 +161,19 @@
                                 <form method="POST" action="{{ route('admin.smtp.test-org', $organization) }}" class="flex items-end gap-4">
                                     @csrf
                                     <div class="flex-1">
-                                        <label class="block text-sm font-medium text-slate-300 mb-1">Send Test Email To</label>
+                                        <label class="block text-sm font-medium text-slate-300 mb-1">{{ __('Send Test Email To') }}</label>
                                         <input type="email" name="test_email"
                                                placeholder="your@email.com"
                                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                                     </div>
                                     <button type="submit"
                                             class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap">
-                                        Send Test
+                                        {{ __('Send Test') }}
                                     </button>
                                     <button type="button"
                                             onclick="document.getElementById('org-test-{{ $organization->id }}').classList.add('hidden')"
                                             class="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors">
-                                        Cancel
+                                        {{ __('Cancel') }}
                                     </button>
                                 </form>
                             </td>
@@ -182,7 +182,7 @@
                 @empty
                     <tr>
                         <td colspan="5" class="px-6 py-12 text-center text-slate-400">
-                            No organizations found.
+                            {{ __('No organizations found.') }}
                         </td>
                     </tr>
                 @endforelse

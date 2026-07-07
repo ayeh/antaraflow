@@ -28,11 +28,11 @@ class CreateApiKeyRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'The API key name is required.',
-            'permissions.required' => 'At least one permission is required.',
-            'permissions.min' => 'At least one permission must be selected.',
-            'permissions.*.in' => 'Permissions must be one of: read, write, delete.',
-            'expires_at.after' => 'The expiration date must be after today.',
+            'name.required' => __('The API key name is required.'),
+            'permissions.required' => __('At least one permission is required.'),
+            'permissions.min' => __('At least one permission must be selected.'),
+            'permissions.*.in' => __('Permissions must be one of: read, write, delete.'),
+            'expires_at.after' => __('The expiration date must be after today.'),
         ];
     }
 }

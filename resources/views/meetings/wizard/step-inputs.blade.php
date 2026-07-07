@@ -133,7 +133,7 @@
                             created_at: new Date().toISOString(),
                         });
                     }
-                    this.successMessage = 'Audio uploaded. Transcription processing will begin shortly.';
+                    this.successMessage = '{{ __('Audio uploaded. Transcription processing will begin shortly.') }}';
                     setTimeout(() => this.successMessage = '', 4000);
                 } else {
                     const data = await response.json().catch(() => null);
@@ -142,7 +142,7 @@
                 }
             } catch (e) {
                 console.error('Upload failed:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -179,7 +179,7 @@
                     this.manualNoteText = '';
                     const editorEl = document.querySelector('[x-ref=editor]');
                     if (editorEl) editorEl.innerHTML = '';
-                    this.successMessage = 'Note saved successfully.';
+                    this.successMessage = '{{ __('Note saved successfully.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 } else {
                     const data = await response.json().catch(() => null);
@@ -188,7 +188,7 @@
                 }
             } catch (e) {
                 console.error('Save note failed:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -196,7 +196,7 @@
         },
 
         async deleteTranscription(id) {
-            if (!(await window.antaraConfirm('Remove this transcription?', {title: 'Remove Audio'}))) return;
+            if (!(await window.antaraConfirm('{{ __("Remove this transcription?") }}', {title: '{{ __("Remove Audio") }}'}))) return;
             this.loading = true;
 
             try {
@@ -210,15 +210,15 @@
 
                 if (response.ok) {
                     this.transcriptions = this.transcriptions.filter(t => t.id !== id);
-                    this.successMessage = 'Transcription removed.';
+                    this.successMessage = '{{ __('Transcription removed.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 } else {
-                    this.errorMessage = 'Failed to remove transcription.';
+                    this.errorMessage = '{{ __('Failed to remove transcription.') }}';
                     setTimeout(() => this.errorMessage = '', 4000);
                 }
             } catch (e) {
                 console.error('Delete failed:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -256,7 +256,7 @@
                         status: 'uploaded',
                         created_at: new Date().toISOString(),
                     });
-                    this.successMessage = 'Document uploaded successfully.';
+                    this.successMessage = '{{ __('Document uploaded successfully.') }}';
                     setTimeout(() => this.successMessage = '', 4000);
                 } else {
                     const data = await response.json().catch(() => null);
@@ -265,7 +265,7 @@
                 }
             } catch (e) {
                 console.error('Upload failed:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -274,7 +274,7 @@
         },
 
         async deleteDocument(id) {
-            if (!(await window.antaraConfirm('Remove this document?', {title: 'Remove Document'}))) return;
+            if (!(await window.antaraConfirm('{{ __("Remove this document?") }}', {title: '{{ __("Remove Document") }}'}))) return;
             this.loading = true;
 
             try {
@@ -288,7 +288,7 @@
 
                 if (response.ok) {
                     this.documents = this.documents.filter(d => d.id !== id);
-                    this.successMessage = 'Document removed.';
+                    this.successMessage = '{{ __('Document removed.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 }
             } catch (e) {
@@ -299,7 +299,7 @@
         },
 
         async deleteManualNote(id) {
-            if (!(await window.antaraConfirm('Remove this note?', {title: 'Remove Note'}))) return;
+            if (!(await window.antaraConfirm('{{ __("Remove this note?") }}', {title: '{{ __("Remove Note") }}'}))) return;
             this.loading = true;
 
             try {
@@ -313,15 +313,15 @@
 
                 if (response.ok) {
                     this.manualNotes = this.manualNotes.filter(n => n.id !== id);
-                    this.successMessage = 'Note removed.';
+                    this.successMessage = '{{ __('Note removed.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 } else {
-                    this.errorMessage = 'Failed to remove note.';
+                    this.errorMessage = '{{ __('Failed to remove note.') }}';
                     setTimeout(() => this.errorMessage = '', 4000);
                 }
             } catch (e) {
                 console.error('Delete failed:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -331,7 +331,7 @@
         handleRecordingComplete(detail) {
             if (detail?.transcription) {
                 this.transcriptions.push(detail.transcription);
-                this.successMessage = 'Browser recording uploaded. Transcription processing...';
+                this.successMessage = '{{ __('Browser recording uploaded. Transcription processing...') }}';
                 setTimeout(() => this.successMessage = '', 4000);
             }
         },
@@ -408,23 +408,23 @@
     {{-- Stats Row --}}
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Total Inputs</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Total Inputs') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="stats.total"></p>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Processed</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Processed') }}</p>
             <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1" x-text="stats.processed"></p>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Audio Files</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Audio Files') }}</p>
             <p class="text-2xl font-bold text-violet-600 dark:text-violet-400 mt-1" x-text="stats.audio"></p>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Documents</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Documents') }}</p>
             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1" x-text="stats.documents"></p>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Notes</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Notes') }}</p>
             <p class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1" x-text="stats.notes"></p>
         </div>
     </div>
@@ -437,13 +437,13 @@
             {{-- Header --}}
             <div class="p-6 pb-4">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Inputs</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Inputs') }}</h2>
                     <span class="text-sm text-gray-500 dark:text-gray-400" x-text="stats.total + ' total'"></span>
                 </div>
 
                 {{-- Filter Tabs --}}
                 <div class="flex gap-1 bg-gray-100 dark:bg-slate-700/50 rounded-lg p-1">
-                    <template x-for="tab in [{key: 'all', label: 'All'}, {key: 'audio', label: 'Audio'}, {key: 'documents', label: 'Documents'}, {key: 'notes', label: 'Notes'}]" :key="tab.key">
+                    <template x-for="tab in [{key: 'all', label: '{{ __("All") }}'}, {key: 'audio', label: '{{ __("Audio") }}'}, {key: 'documents', label: '{{ __("Documents") }}'}, {key: 'notes', label: '{{ __("Notes") }}'}]" :key="tab.key">
                         <button
                             type="button"
                             @click="activeTab = tab.key"
@@ -465,8 +465,8 @@
                         <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
-                        <h3 class="mt-3 text-sm font-medium text-gray-900 dark:text-white">No inputs yet</h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Upload audio files, documents, or add manual notes using the panel on the right.</p>
+                        <h3 class="mt-3 text-sm font-medium text-gray-900 dark:text-white">{{ __('No inputs yet') }}</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Upload audio files, documents, or add manual notes using the panel on the right.') }}</p>
                     </div>
                 </template>
 
@@ -526,7 +526,7 @@
                                             @click="deleteTranscription(item.id)"
                                             :disabled="loading"
                                             class="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
-                                            title="Remove"
+                                            title="{{ __('Remove') }}"
                                         >
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -555,8 +555,8 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                             </svg>
                                             <div>
-                                                <p class="text-xs font-medium text-amber-700 dark:text-amber-300">Taking longer than expected</p>
-                                                <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Queue worker may be stuck. Check <a href="{{ route('admin.system.index') }}" class="underline font-medium">Admin → System</a> for queue status, or delete and re-upload this file.</p>
+                                                <p class="text-xs font-medium text-amber-700 dark:text-amber-300">{{ __('Taking longer than expected') }}</p>
+                                                <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">{{ __('Queue worker may be stuck. Check') }} <a href="{{ route('admin.system.index') }}" class="underline font-medium">{{ __('Admin → System') }}</a> {{ __('for queue status, or delete and re-upload this file.') }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -570,9 +570,9 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                             <div class="min-w-0">
-                                                <p class="text-xs font-medium text-red-700 dark:text-red-300">Transcription failed</p>
+                                                <p class="text-xs font-medium text-red-700 dark:text-red-300">{{ __('Transcription failed') }}</p>
                                                 <p x-show="item.error_message" class="text-xs text-red-600 dark:text-red-400 mt-0.5 line-clamp-2" x-text="item.error_message" x-cloak></p>
-                                                <p class="text-xs text-red-500 dark:text-red-400 mt-1">Delete this file and re-upload to try again.</p>
+                                                <p class="text-xs text-red-500 dark:text-red-400 mt-1">{{ __('Delete this file and re-upload to try again.') }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -605,7 +605,7 @@
                                         @click="deleteDocument(item.id)"
                                         :disabled="loading"
                                         class="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
-                                        title="Remove"
+                                        title="{{ __('Remove') }}"
                                     >
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -635,7 +635,7 @@
                                         @click="deleteManualNote(item.id)"
                                         :disabled="loading"
                                         class="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
-                                        title="Remove"
+                                        title="{{ __('Remove') }}"
                                     >
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -653,11 +653,11 @@
         @if($isEditable)
             <div class="lg:col-span-1 space-y-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Add Input</h3>
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">{{ __('Add Input') }}</h3>
 
                     {{-- Mode Toggle Pills --}}
                     <div class="flex gap-1 mb-5">
-                        <template x-for="mode in [{key: 'audio', label: 'Audio'}, {key: 'document', label: 'Document'}, {key: 'note', label: 'Note'}]" :key="mode.key">
+                        <template x-for="mode in [{key: 'audio', label: '{{ __("Audio") }}'}, {key: 'document', label: '{{ __("Document") }}'}, {key: 'note', label: '{{ __("Note") }}'}]" :key="mode.key">
                             <button
                                 type="button"
                                 @click="addMode = mode.key"
@@ -680,13 +680,13 @@
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Uploading audio...</p>
+                                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Uploading audio...') }}</p>
                                 </div>
                                 <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                                 </svg>
-                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Drop audio file here or click to browse</p>
-                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">MP3, WAV, M4A, OGG, WebM (max 500MB)</p>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Drop audio file here or click to browse') }}</p>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('MP3, WAV, M4A, OGG, WebM (max 500MB)') }}</p>
                                 <input
                                     type="file"
                                     accept=".mp3,.wav,.m4a,.ogg,.webm,audio/*"
@@ -706,6 +706,21 @@
                                 finalizeUrl: '{{ route('meetings.audio-chunks.finalize', $meeting) }}',
                                 cancelUrl: '{{ route('meetings.audio-chunks.destroy', $meeting) }}',
                                 meetingId: {{ $meeting->id }},
+                                i18n: {
+                                    recordingInProgress: '{{ __('Recording is in progress. Are you sure you want to leave?') }}',
+                                    micDenied: '{{ __('Microphone access denied. Please allow microphone access in your browser settings.') }}',
+                                    micNotFound: '{{ __('No microphone found. Please connect a microphone and try again.') }}',
+                                    micInUse: '{{ __('Microphone is in use by another application. Please close it and try again.') }}',
+                                    micError: '{{ __('Could not access microphone. Please try again.') }}',
+                                    recordingFailed: '{{ __('Recording failed. Please try again.') }}',
+                                    recordingStopped: '{{ __('Recording stopped. Audio chunks have been sent for transcription.') }}',
+                                    noAudioData: '{{ __('Recording produced no audio data. Please try again.') }}',
+                                    recordingUploaded: '{{ __('Recording uploaded. Transcription in progress...') }}',
+                                    finalizeFailed: '{{ __('Failed to finalize recording. Please try again.') }}',
+                                    uploadRetrying: '{{ __('Upload failed. Retrying in {seconds}s...') }}',
+                                    uploadFailed: '{{ __('Upload failed after multiple attempts. Your recording is saved locally — click Retry to try again.') }}',
+                                    recoverFailed: '{{ __('Could not recover recording.') }}',
+                                },
                             })"
                             class="mt-4 rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden"
                         >
@@ -717,12 +732,12 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                         </svg>
                                         <span class="text-xs text-amber-700 dark:text-amber-300">
-                                            Unsaved recording found from <span x-text="new Date(recoveryTimestamp).toLocaleString()"></span>
+                                            {{ __('Unsaved recording found from') }} <span x-text="new Date(recoveryTimestamp).toLocaleString()"></span>
                                         </span>
                                     </div>
                                     <div class="flex gap-2">
-                                        <button @click="recoverRecording()" class="text-xs font-medium text-amber-700 dark:text-amber-300 hover:underline">Recover</button>
-                                        <button @click="discardRecovery()" class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">Discard</button>
+                                        <button @click="recoverRecording()" class="text-xs font-medium text-amber-700 dark:text-amber-300 hover:underline">{{ __('Recover') }}</button>
+                                        <button @click="discardRecovery()" class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">{{ __('Discard') }}</button>
                                     </div>
                                 </div>
                             </template>
@@ -761,7 +776,7 @@
                                                      'bg-blue-500': isProcessing,
                                                  }"></div>
                                         </div>
-                                        <p class="text-sm font-medium text-gray-900 dark:text-white">Browser Recording</p>
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ __('Browser Recording') }}</p>
                                     </div>
 
                                     {{-- Timer --}}
@@ -817,14 +832,14 @@
                                                     <rect x="6" y="4" width="4" height="16" />
                                                     <rect x="14" y="4" width="4" height="16" />
                                                 </svg>
-                                                Pause
+                                                {{ __('Pause') }}
                                             </button>
                                             <button @click="stopRecording()"
                                                     class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-slate-600 hover:bg-gray-900 dark:hover:bg-gray-500 transition-colors">
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                                     <rect x="6" y="6" width="12" height="12" rx="1" />
                                                 </svg>
-                                                Stop
+                                                {{ __('Stop') }}
                                             </button>
                                         </div>
                                     </template>
@@ -837,14 +852,14 @@
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                                     <polygon points="5,3 19,12 5,21" />
                                                 </svg>
-                                                Resume
+                                                {{ __('Resume') }}
                                             </button>
                                             <button @click="stopRecording()"
                                                     class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-slate-600 hover:bg-gray-900 dark:hover:bg-gray-500 transition-colors">
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                                     <rect x="6" y="6" width="12" height="12" rx="1" />
                                                 </svg>
-                                                Stop
+                                                {{ __('Stop') }}
                                             </button>
                                         </div>
                                     </template>
@@ -856,7 +871,7 @@
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                             </svg>
-                                            Finalizing audio...
+                                            {{ __('Finalizing audio...') }}
                                         </div>
                                     </template>
 
@@ -866,7 +881,7 @@
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                             </svg>
-                                            Processing audio...
+                                            {{ __('Processing audio...') }}
                                         </div>
                                     </template>
 
@@ -874,7 +889,7 @@
                                     <template x-if="state === 'uploading'">
                                         <div class="flex-1">
                                             <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                                <span>Uploading...</span>
+                                                <span>{{ __('Uploading...') }}</span>
                                                 <span x-text="uploadProgress + '%'"></span>
                                             </div>
                                             <div class="h-1.5 rounded-full bg-gray-200 dark:bg-slate-700 overflow-hidden">
@@ -898,7 +913,7 @@
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                                     <circle cx="12" cy="12" r="6" />
                                                 </svg>
-                                                Record Another
+                                                {{ __('Record Another') }}
                                             </button>
                                         </div>
                                     </template>
@@ -978,13 +993,13 @@
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Uploading document...</p>
+                                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Uploading document...') }}</p>
                             </div>
                             <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
-                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Drop document here or click to browse</p>
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">PDF, Word, Text, Images (max 50MB)</p>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Drop document here or click to browse') }}</p>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('PDF, Word, Text, Images (max 50MB)') }}</p>
                             <input
                                 type="file"
                                 accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"
@@ -1106,7 +1121,7 @@
                         <div :class="isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-slate-900 flex flex-col p-6' : 'space-y-3'">
                             {{-- Fullscreen Header --}}
                             <div x-show="isFullscreen" class="flex items-center justify-between mb-4" x-cloak>
-                                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Note Editor</h2>
+                                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Note Editor') }}</h2>
                                 <button type="button" @click="toggleFullscreen()" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
@@ -1114,37 +1129,37 @@
 
                             {{-- Toolbar --}}
                             <div class="flex flex-wrap items-center gap-0.5 p-1.5 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600">
-                                <button type="button" @click="execCmd('bold')" :class="isActive('bold') ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'" class="p-1.5 rounded" title="Bold">
+                                <button type="button" @click="execCmd('bold')" :class="isActive('bold') ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'" class="p-1.5 rounded" title="{{ __('Bold') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z"/><path d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z"/></svg>
                                 </button>
-                                <button type="button" @click="execCmd('italic')" :class="isActive('italic') ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'" class="p-1.5 rounded" title="Italic">
+                                <button type="button" @click="execCmd('italic')" :class="isActive('italic') ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'" class="p-1.5 rounded" title="{{ __('Italic') }}">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
                                 </button>
-                                <button type="button" @click="execCmd('underline')" :class="isActive('underline') ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'" class="p-1.5 rounded" title="Underline">
+                                <button type="button" @click="execCmd('underline')" :class="isActive('underline') ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'" class="p-1.5 rounded" title="{{ __('Underline') }}">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v7a6 6 0 006 6 6 6 0 006-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
                                 </button>
 
                                 <div class="w-px h-5 bg-gray-300 dark:bg-slate-600 mx-1"></div>
 
-                                <button type="button" @click="execCmd('justifyLeft')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="Align Left">
+                                <button type="button" @click="execCmd('justifyLeft')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="{{ __('Align Left') }}">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
                                 </button>
-                                <button type="button" @click="execCmd('justifyCenter')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="Align Center">
+                                <button type="button" @click="execCmd('justifyCenter')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="{{ __('Align Center') }}">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
                                 </button>
-                                <button type="button" @click="execCmd('justifyRight')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="Align Right">
+                                <button type="button" @click="execCmd('justifyRight')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="{{ __('Align Right') }}">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
                                 </button>
 
                                 <div class="w-px h-5 bg-gray-300 dark:bg-slate-600 mx-1"></div>
 
-                                <button type="button" @click="execCmd('insertUnorderedList')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="Bullet List">
+                                <button type="button" @click="execCmd('insertUnorderedList')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="{{ __('Bullet List') }}">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
                                 </button>
-                                <button type="button" @click="execCmd('insertOrderedList')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="Numbered List">
+                                <button type="button" @click="execCmd('insertOrderedList')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="{{ __('Numbered List') }}">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="20" y2="6"/><line x1="10" y1="12" x2="20" y2="12"/><line x1="10" y1="18" x2="20" y2="18"/><text x="2" y="8" fill="currentColor" font-size="7" font-weight="bold" style="font-family:sans-serif">1</text><text x="2" y="14" fill="currentColor" font-size="7" font-weight="bold" style="font-family:sans-serif">2</text><text x="2" y="20" fill="currentColor" font-size="7" font-weight="bold" style="font-family:sans-serif">3</text></svg>
                                 </button>
-                                <button type="button" @click="execCmd('formatBlock', 'blockquote')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="Blockquote">
+                                <button type="button" @click="execCmd('formatBlock', 'blockquote')" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="{{ __('Blockquote') }}">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C9.591 11.69 11 13.21 11 15c0 1.854-1.5 3.36-3.354 3.36-1.137 0-2.213-.537-3.063-1.039zM14.583 17.321C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C19.591 11.69 21 13.21 21 15c0 1.854-1.5 3.36-3.354 3.36-1.137 0-2.213-.537-3.063-1.039z"/></svg>
                                 </button>
 
@@ -1165,7 +1180,7 @@
                                     @keydown="handleEditorKeydown($event)"
                                     :class="isFullscreen ? 'flex-1 min-h-[300px]' : 'min-h-[150px]'"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none overflow-y-auto prose prose-sm dark:prose-invert max-w-none [&_blockquote]:border-l-4 [&_blockquote]:border-violet-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:dark:text-gray-400"
-                                    data-placeholder="Type your meeting notes... Use @ to mention team members"
+                                    data-placeholder="{{ __('Type your meeting notes... Use @ to mention team members') }}"
                                     style="empty-cells:show"
                                 ></div>
 
@@ -1187,7 +1202,7 @@
                                         </button>
                                     </template>
                                     <template x-if="filteredMembers.length === 0">
-                                        <p class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">No members found</p>
+                                        <p class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">{{ __('No members found') }}</p>
                                     </template>
                                 </div>
                             </div>
@@ -1315,7 +1330,7 @@
                         <span class="text-xs font-medium" x-text="generationError"></span>
                     </div>
 
-                    <p x-show="!generating && !generationError" class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">Generate summary, action items, and decisions from all inputs.</p>
+                    <p x-show="!generating && !generationError" class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">{{ __('Generate summary, action items, and decisions from all inputs.') }}</p>
                 </div>
             </div>
         @else
@@ -1325,8 +1340,8 @@
                         <svg class="mx-auto h-8 w-8 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Meeting is not editable</p>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Inputs can only be added in Draft or In Progress status.</p>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('Meeting is not editable') }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('Inputs can only be added in Draft or In Progress status.') }}</p>
                     </div>
                 </div>
             </div>

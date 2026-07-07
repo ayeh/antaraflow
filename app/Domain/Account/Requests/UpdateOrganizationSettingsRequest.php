@@ -50,7 +50,7 @@ class UpdateOrganizationSettingsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Organization name is required.',
+            'name.required' => __('Organization name is required.'),
         ];
     }
 }

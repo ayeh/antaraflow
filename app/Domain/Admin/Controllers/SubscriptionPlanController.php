@@ -33,7 +33,7 @@ class SubscriptionPlanController extends Controller
         SubscriptionPlan::query()->create($request->validated());
 
         return redirect()->route('admin.plans.index')
-            ->with('success', 'Plan created successfully.');
+            ->with('success', __('Plan created successfully.'));
     }
 
     public function edit(SubscriptionPlan $plan): View
@@ -46,19 +46,19 @@ class SubscriptionPlanController extends Controller
         $plan->update($request->validated());
 
         return redirect()->route('admin.plans.index')
-            ->with('success', 'Plan updated successfully.');
+            ->with('success', __('Plan updated successfully.'));
     }
 
     public function destroy(SubscriptionPlan $plan): RedirectResponse
     {
         if ($plan->subscriptions()->withoutGlobalScopes()->exists()) {
             return redirect()->route('admin.plans.index')
-                ->with('error', 'Cannot delete a plan with active subscribers.');
+                ->with('error', __('Cannot delete a plan with active subscribers.'));
         }
 
         $plan->delete();
 
         return redirect()->route('admin.plans.index')
-            ->with('success', 'Plan deleted successfully.');
+            ->with('success', __('Plan deleted successfully.'));
     }
 }

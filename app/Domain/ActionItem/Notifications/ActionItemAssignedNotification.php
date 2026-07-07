@@ -27,23 +27,23 @@ class ActionItemAssignedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $message = (new MailMessage)
-            ->subject("New Action Item Assigned: {$this->actionItem->title}")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("You have been assigned a new action item: **{$this->actionItem->title}**.");
+            ->subject(__('New Action Item Assigned: :title', ['title' => $this->actionItem->title]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__('You have been assigned a new action item: **:title**.', ['title' => $this->actionItem->title]));
 
         if ($this->actionItem->description) {
             $message->line($this->actionItem->description);
         }
 
         if ($this->actionItem->due_date) {
-            $message->line("**Due Date:** {$this->actionItem->due_date->format('M d, Y')}");
+            $message->line(__('**Due Date:** :date', ['date' => $this->actionItem->due_date->format('M d, Y')]));
         }
 
         if ($this->actionItem->meeting) {
-            $message->action('View Meeting', route('meetings.show', $this->actionItem->meeting));
+            $message->action(__('View Meeting'), route('meetings.show', $this->actionItem->meeting));
         }
 
-        return $message->line('Please review and take action as needed.');
+        return $message->line(__('Please review and take action as needed.'));
     }
 
     /** @return array<string, mixed> */
@@ -54,7 +54,7 @@ class ActionItemAssignedNotification extends Notification implements ShouldQueue
             'action_item_id' => $this->actionItem->id,
             'title' => $this->actionItem->title,
             'meeting_title' => $this->actionItem->meeting?->title,
-            'message' => "You've been assigned: \"{$this->actionItem->title}\"",
+            'message' => __('You\'ve been assigned: ":title"', ['title' => $this->actionItem->title]),
         ];
     }
 }

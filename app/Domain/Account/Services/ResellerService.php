@@ -39,7 +39,7 @@ class ResellerService
                 ->count();
 
             if ($currentCount >= $resellerSetting->max_sub_organizations) {
-                throw new \RuntimeException('Maximum sub-organization limit reached.');
+                throw new \RuntimeException(__('Maximum sub-organization limit reached.'));
             }
         }
 

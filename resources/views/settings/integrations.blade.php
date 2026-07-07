@@ -3,8 +3,8 @@
 @section('content')
 <div class="max-w-3xl mx-auto space-y-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Integrations</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Connect third-party services to enhance your workflow</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Integrations') }}</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Connect third-party services to enhance your workflow') }}</p>
     </div>
 
     {{-- Google Calendar --}}
@@ -20,28 +20,28 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Google Calendar</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Sync meetings with your Google Calendar</p>
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Google Calendar') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Sync meetings with your Google Calendar') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-3 shrink-0">
                 @if($googleConnected)
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                        Connected
+                        {{ __('Connected') }}
                     </span>
                     <a href="{{ route('calendar.connections') }}"
                         class="text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium">
-                        Manage
+                        {{ __('Manage') }}
                     </a>
                 @else
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">
                         <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                        Disconnected
+                        {{ __('Disconnected') }}
                     </span>
                     <a href="{{ route('calendar.connect', 'google') }}"
                         class="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium">
-                        Connect
+                        {{ __('Connect') }}
                     </a>
                 @endif
             </div>
@@ -61,28 +61,28 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Microsoft Calendar</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Sync meetings with your Microsoft Outlook Calendar</p>
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Microsoft Calendar') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Sync meetings with your Microsoft Outlook Calendar') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-3 shrink-0">
                 @if($microsoftConnected)
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                        Connected
+                        {{ __('Connected') }}
                     </span>
                     <a href="{{ route('calendar.connections') }}"
                         class="text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium">
-                        Manage
+                        {{ __('Manage') }}
                     </a>
                 @else
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">
                         <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                        Disconnected
+                        {{ __('Disconnected') }}
                     </span>
                     <a href="{{ route('calendar.connect', 'outlook') }}"
                         class="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium">
-                        Connect
+                        {{ __('Connect') }}
                     </a>
                 @endif
             </div>
@@ -99,26 +99,26 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Microsoft Teams Webhook</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Send meeting notifications to a Teams channel</p>
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Microsoft Teams Webhook') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Send meeting notifications to a Teams channel') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-3 shrink-0">
                 @if($teamsWebhookConfigured)
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                        Configured
+                        {{ __('Configured') }}
                     </span>
                 @else
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">
                         <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                        Not configured
+                        {{ __('Not configured') }}
                     </span>
                 @endif
                 @if($org)
                     <a href="{{ route('organizations.settings.edit', $org) }}"
                         class="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 font-medium">
-                        Configure
+                        {{ __('Configure') }}
                     </a>
                 @endif
             </div>

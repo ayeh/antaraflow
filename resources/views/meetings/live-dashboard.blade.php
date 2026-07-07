@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Live Dashboard - ' . $meeting->title)
+@section('title', __('Live Dashboard') . ' - ' . $meeting->title)
 
 @section('content')
 <div class="max-w-[1600px] mx-auto"
@@ -14,6 +14,12 @@
         initialChunks: {!! \Illuminate\Support\Js::from($state['chunks']) !!},
         initialExtractions: {!! \Illuminate\Support\Js::from($state['extractions']) !!},
         sessionStatus: {!! \Illuminate\Support\Js::from($session->status->value) !!},
+        i18n: {
+            confirmEndSession: '{{ __('Are you sure you want to end this live session? This action cannot be undone.') }}',
+            failedEndSession: '{{ __('Failed to end session. Please try again.') }}',
+            networkError: '{{ __('Network error. Please check your connection and try again.') }}',
+            notYetUpdated: '{{ __('Not yet updated') }}',
+        },
         startedAt: {!! \Illuminate\Support\Js::from($session->started_at?->toIso8601String()) !!},
         attendees: {!! \Illuminate\Support\Js::from($meeting->attendees()->with('user')->get()) !!},
      })">
@@ -24,7 +30,7 @@
             <a :href="meetingUrl"
                class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                Back to Meeting
+                {{ __('Back to Meeting') }}
             </a>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $meeting->title }}</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">{{ $meeting->mom_number }}</p>
@@ -36,7 +42,7 @@
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                 </span>
-                <span class="text-sm font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide">Live</span>
+                <span class="text-sm font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide">{{ __('Live') }}</span>
             </div>
 
             {{-- Session Status Badge --}}
@@ -64,7 +70,7 @@
                         <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
                         </svg>
-                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Live Transcript</h2>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Live Transcript') }}</h2>
                     </div>
                     <span class="text-xs text-gray-500 dark:text-gray-400"
                           x-text="transcriptChunks.length + ' segment' + (transcriptChunks.length !== 1 ? 's' : '')">
@@ -81,8 +87,8 @@
                         <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
                         </svg>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Waiting for audio transcription...</p>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Transcripts will appear here as audio is processed.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Waiting for audio transcription...') }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('Transcripts will appear here as audio is processed.') }}</p>
                     </div>
 
                     {{-- Transcript Chunks --}}
@@ -91,7 +97,7 @@
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="text-xs font-semibold"
                                       :class="speakerColor(chunk.speaker)"
-                                      x-text="chunk.speaker || 'Speaker'">
+                                      x-text="chunk.speaker || '{{ __('Speaker') }}'">
                                 </span>
                                 <span class="text-xs text-gray-400 dark:text-gray-500"
                                       x-text="formatTimestamp(chunk.start_time) + ' - ' + formatTimestamp(chunk.end_time)">
@@ -112,7 +118,7 @@
                             <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-slate-500 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
                             <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-slate-500 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
                         </div>
-                        <span class="text-xs">Listening...</span>
+                        <span class="text-xs">{{ __('Listening...') }}</span>
                     </div>
                 </div>
 
@@ -123,7 +129,7 @@
                     <button @click="isAutoScroll = true; scrollToLatest()"
                             class="w-full text-center text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors">
                         <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-                        Jump to latest
+                        {{ __('Jump to latest') }}
                     </button>
                 </div>
             </div>
@@ -138,7 +144,7 @@
                         <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                         </svg>
-                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">AI Extractions</h2>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('AI Extractions') }}</h2>
                     </div>
                     <div class="flex items-center gap-2">
                         {{-- Loading Spinner --}}
@@ -146,7 +152,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
-                        <span class="text-xs text-gray-500 dark:text-gray-400" x-text="'Updated: ' + formatLastUpdate()"></span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400" x-text="'{{ __('Updated:') }} ' + formatLastUpdate()"></span>
                     </div>
                 </div>
 
@@ -158,8 +164,8 @@
                         <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                         </svg>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">No AI extractions yet</p>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Decisions, action items, and topics will appear as the AI processes the transcript.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No AI extractions yet') }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('Decisions, action items, and topics will appear as the AI processes the transcript.') }}</p>
                     </div>
 
                     {{-- Summary Section --}}
@@ -167,7 +173,7 @@
                         <div>
                             <button @click="toggleSection('summary')"
                                     class="flex items-center justify-between w-full text-left mb-2">
-                                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Summary</h3>
+                                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{{ __('Summary') }}</h3>
                                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': !isSectionCollapsed('summary') }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
@@ -195,7 +201,7 @@
                                     class="flex items-center justify-between w-full text-left mb-2">
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Decisions</h3>
+                                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{{ __('Decisions') }}</h3>
                                     <span class="text-xs text-gray-400 bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded" x-text="decisions.length"></span>
                                 </div>
                                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': !isSectionCollapsed('decisions') }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,7 +231,7 @@
                                     class="flex items-center justify-between w-full text-left mb-2">
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
-                                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Action Items</h3>
+                                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{{ __('Action Items') }}</h3>
                                     <span class="text-xs text-gray-400 bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded" x-text="actionItems.length"></span>
                                 </div>
                                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': !isSectionCollapsed('action_items') }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,7 +270,7 @@
                                     class="flex items-center justify-between w-full text-left mb-2">
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 bg-violet-500 rounded-full"></span>
-                                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Key Topics</h3>
+                                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{{ __('Key Topics') }}</h3>
                                     <span class="text-xs text-gray-400 bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded" x-text="topics.length"></span>
                                 </div>
                                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': !isSectionCollapsed('topics') }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,7 +297,7 @@
 
                 {{-- Session Timer Card --}}
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 px-5 py-5">
-                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Session Timer</h3>
+                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ __('Session Timer') }}</h3>
                     <div class="text-center">
                         <div class="text-4xl font-mono font-bold text-gray-900 dark:text-white mb-2"
                              x-text="formatTime(elapsedSeconds)">
@@ -305,7 +311,7 @@
 
                 {{-- Recording Controls Card --}}
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 px-5 py-5">
-                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Recording Controls</h3>
+                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ __('Recording Controls') }}</h3>
 
                     {{-- Active / Paused Controls --}}
                     <div x-show="sessionStatus !== 'ended'" class="space-y-3">
@@ -320,11 +326,26 @@
                             liveChunkUrl: '{{ route('meetings.live.chunk', [$meeting, $session]) }}',
                             liveSessionId: {{ $session->id }},
                             initialChunkCount: {{ $state['chunks']->count() }},
+                            i18n: {
+                                recordingInProgress: '{{ __('Recording is in progress. Are you sure you want to leave?') }}',
+                                micDenied: '{{ __('Microphone access denied. Please allow microphone access in your browser settings.') }}',
+                                micNotFound: '{{ __('No microphone found. Please connect a microphone and try again.') }}',
+                                micInUse: '{{ __('Microphone is in use by another application. Please close it and try again.') }}',
+                                micError: '{{ __('Could not access microphone. Please try again.') }}',
+                                recordingFailed: '{{ __('Recording failed. Please try again.') }}',
+                                recordingStopped: '{{ __('Recording stopped. Audio chunks have been sent for transcription.') }}',
+                                noAudioData: '{{ __('Recording produced no audio data. Please try again.') }}',
+                                recordingUploaded: '{{ __('Recording uploaded. Transcription in progress...') }}',
+                                finalizeFailed: '{{ __('Failed to finalize recording. Please try again.') }}',
+                                uploadRetrying: '{{ __('Upload failed. Retrying in {seconds}s...') }}',
+                                uploadFailed: '{{ __('Upload failed after multiple attempts. Your recording is saved locally — click Retry to try again.') }}',
+                                recoverFailed: '{{ __('Could not recover recording.') }}',
+                            },
                         })">
                             <template x-if="['recording', 'paused'].includes(state)">
                                 <div class="mb-2 flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
                                     <div class="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse flex-shrink-0"></div>
-                                    Recording continues even when switching tabs or apps.
+                                    {{ __('Recording continues even when switching tabs or apps.') }}
                                 </div>
                             </template>
                             <div class="flex items-center gap-2">
@@ -332,7 +353,7 @@
                                     <button @click="startRecording()"
                                             class="flex-1 inline-flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
-                                        <span x-text="transcriptChunks.length > 0 ? 'Continue Recording' : 'Start Recording'"></span>
+                                        <span x-text="transcriptChunks.length > 0 ? '{{ __('Continue Recording') }}' : '{{ __('Start Recording') }}'"></span>
                                     </button>
                                 </template>
                                 <template x-if="state === 'recording'">
@@ -340,12 +361,12 @@
                                         <button @click="pauseRecording()"
                                                 class="flex-1 inline-flex items-center justify-center gap-2 bg-yellow-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6"/></svg>
-                                            Pause
+                                            {{ __('Pause') }}
                                         </button>
                                         <button @click="stopRecording()"
                                                 class="flex-1 inline-flex items-center justify-center gap-2 bg-gray-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
-                                            Stop
+                                            {{ __('Stop') }}
                                         </button>
                                     </div>
                                 </template>
@@ -354,12 +375,12 @@
                                         <button @click="resumeRecording()"
                                                 class="flex-1 inline-flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
-                                            Resume
+                                            {{ __('Resume') }}
                                         </button>
                                         <button @click="stopRecording()"
                                                 class="flex-1 inline-flex items-center justify-center gap-2 bg-gray-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
-                                            Stop
+                                            {{ __('Stop') }}
                                         </button>
                                     </div>
                                 </template>
@@ -369,7 +390,7 @@
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                         </svg>
-                                        <span class="text-sm">Processing...</span>
+                                        <span class="text-sm">{{ __('Processing...') }}</span>
                                     </div>
                                 </template>
                             </div>
@@ -377,10 +398,10 @@
                             {{-- Recording Timer --}}
                             <div x-show="state === 'recording' || state === 'paused'" x-cloak class="mt-2 text-center">
                                 <span class="text-xs font-mono text-gray-500 dark:text-gray-400"
-                                      x-text="'Rec: ' + formattedTimer">
+                                      x-text="'{{ __('Rec') }}: ' + formattedTimer">
                                 </span>
                                 <span x-show="isLongRecording" class="text-xs text-gray-400 dark:text-gray-500 ml-2"
-                                      x-text="'(' + uploadedChunks + ' chunks sent)'">
+                                      x-text="'(' + uploadedChunks + ' {{ __('chunks sent') }})'">
                                 </span>
                             </div>
 
@@ -408,7 +429,7 @@
                                 class="w-full inline-flex items-center justify-center gap-2 bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg x-show="!isEndingSession" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
                             <svg x-show="isEndingSession" x-cloak class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                            <span x-text="isEndingSession ? 'Ending...' : 'End Session'"></span>
+                            <span x-text="isEndingSession ? '{{ __('Ending...') }}' : '{{ __('End Session') }}'"></span>
                         </button>
                     </div>
 
@@ -416,11 +437,11 @@
                     <div x-show="sessionStatus === 'ended'" x-cloak class="text-center py-3">
                         <div class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-3">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span class="text-sm font-medium">Session Ended</span>
+                            <span class="text-sm font-medium">{{ __('Session Ended') }}</span>
                         </div>
                         <a :href="meetingUrl"
                            class="block w-full text-center bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
-                            View Meeting Summary
+                            {{ __('View Meeting Summary') }}
                         </a>
                     </div>
                 </div>
@@ -428,9 +449,9 @@
                 {{-- Attendees Card --}}
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 px-5 py-5">
                     <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Attendees</h3>
+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Attendees') }}</h3>
                         <span class="text-xs text-gray-500 dark:text-gray-400"
-                              x-text="presentCount + '/' + attendees.length + ' present'">
+                              x-text="presentCount + '/' + attendees.length + ' {{ __('present') }}'">
                         </span>
                     </div>
 
@@ -443,43 +464,43 @@
                                           :class="attendee.is_present ? 'bg-green-500' : 'bg-gray-300 dark:bg-slate-600'">
                                     </span>
                                     <span class="text-sm text-gray-700 dark:text-gray-300 truncate"
-                                          x-text="attendee.user?.name || attendee.name || 'Unknown'">
+                                          x-text="attendee.user?.name || attendee.name || '{{ __('Unknown') }}'">
                                     </span>
                                 </div>
                                 <span class="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
                                       :class="attendee.is_present
                                           ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                                           : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400'"
-                                      x-text="attendee.is_present ? 'Present' : 'Absent'">
+                                      x-text="attendee.is_present ? '{{ __('Present') }}' : '{{ __('Absent') }}'">
                                 </span>
                             </div>
                         </template>
 
                         {{-- Empty Attendees State --}}
                         <div x-show="attendees.length === 0" class="text-center py-3">
-                            <p class="text-xs text-gray-400 dark:text-gray-500">No attendees registered.</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">{{ __('No attendees registered.') }}</p>
                         </div>
                     </div>
                 </div>
 
                 {{-- Quick Info Card --}}
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 px-5 py-5">
-                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Session Info</h3>
+                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ __('Session Info') }}</h3>
                     <dl class="space-y-2 text-sm">
                         <div class="flex justify-between">
-                            <dt class="text-gray-500 dark:text-gray-400">Session ID</dt>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Session ID') }}</dt>
                             <dd class="text-gray-900 dark:text-white font-mono">#{{ $session->id }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-gray-500 dark:text-gray-400">Started by</dt>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Started by') }}</dt>
                             <dd class="text-gray-900 dark:text-white">{{ $session->startedBy?->name ?? 'Unknown' }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-gray-500 dark:text-gray-400">Started at</dt>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Started at') }}</dt>
                             <dd class="text-gray-900 dark:text-white">{{ $session->started_at?->format('g:i A') }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-gray-500 dark:text-gray-400">Chunks</dt>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Chunks') }}</dt>
                             <dd class="text-gray-900 dark:text-white" x-text="transcriptChunks.length"></dd>
                         </div>
                     </dl>

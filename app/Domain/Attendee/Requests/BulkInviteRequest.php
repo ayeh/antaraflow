@@ -25,8 +25,8 @@ class BulkInviteRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'group_id.required' => 'An attendee group must be selected.',
-            'group_id.exists' => 'The selected attendee group does not exist.',
+            'group_id.required' => __('An attendee group must be selected.'),
+            'group_id.exists' => __('The selected attendee group does not exist.'),
         ];
     }
 }

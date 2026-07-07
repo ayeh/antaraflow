@@ -44,7 +44,7 @@ class OrganizationController extends Controller
         );
 
         return redirect()->route('organizations.show', $organization)
-            ->with('success', 'Organization created successfully.');
+            ->with('success', __('Organization created successfully.'));
     }
 
     public function show(Organization $organization): View
@@ -71,7 +71,7 @@ class OrganizationController extends Controller
         $organization->update($request->validated());
 
         return redirect()->route('organizations.show', $organization)
-            ->with('success', 'Organization updated successfully.');
+            ->with('success', __('Organization updated successfully.'));
     }
 
     public function destroy(Organization $organization): RedirectResponse
@@ -81,6 +81,6 @@ class OrganizationController extends Controller
         $organization->delete();
 
         return redirect()->route('organizations.index')
-            ->with('success', 'Organization deleted successfully.');
+            ->with('success', __('Organization deleted successfully.'));
     }
 }

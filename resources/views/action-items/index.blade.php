@@ -7,7 +7,7 @@
             <a href="{{ route('meetings.show', $meeting) }}" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </a>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Action Items &mdash; {{ $meeting->title }}</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Action Items') }} &mdash; {{ $meeting->title }}</h1>
         </div>
         <div class="flex items-center gap-3">
             <x-action-items.view-toggle
@@ -17,7 +17,7 @@
             />
             <a href="{{ route('meetings.action-items.create', $meeting) }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                New Action Item
+                {{ __('New Action Item') }}
             </a>
         </div>
     </div>
@@ -46,7 +46,7 @@
                 },
                 async applyBulk(action, value = null) {
                     if (this.selected.length === 0) { return; }
-                    if (action === 'delete' && !(await window.antaraConfirm(`Delete ${this.selected.length} item(s)? This cannot be undone.`, {title: 'Delete Items'}))) { return; }
+                    if (action === 'delete' && !(await window.antaraConfirm(`{{ __('Delete') }} ${this.selected.length} {{ __('item(s)? This cannot be undone.') }}`, {title: '{{ __("Delete Items") }}'}))) { return; }
                     try {
                         const res = await fetch('{{ route('action-items.bulk') }}', {
                             method: 'POST',
@@ -60,7 +60,7 @@
                         if (!res.ok) { throw new Error('Failed'); }
                         window.location.reload();
                     } catch {
-                        alert('Bulk action failed. Please try again.');
+                        alert('{{ __('Bulk action failed. Please try again.') }}');
                     }
                 }
             }"
@@ -76,21 +76,21 @@
                                         :checked="allSelected"
                                         :indeterminate="selected.length > 0 && !allSelected"
                                         @change="toggleAll()"
-                                        title="Select all for bulk actions"
+                                        title="{{ __('Select all for bulk actions') }}"
                                         class="w-4 h-4 rounded accent-violet-600 cursor-pointer focus:ring-violet-500 dark:border-slate-500 dark:bg-slate-700"
                                     >
                                 </th>
-                                <th class="w-10 px-2 py-3" title="Mark as complete">
+                                <th class="w-10 px-2 py-3" title="{{ __('Mark as complete') }}">
                                     <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Priority</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assignee</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Due Date</th>
-                                <th class="text-center px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Client</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Title') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Status') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Priority') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Assignee') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Due Date') }}</th>
+                                <th class="text-center px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Client') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
@@ -129,7 +129,7 @@
                                             type="checkbox"
                                             :checked="selected.includes({{ $item->id }})"
                                             @change="toggle({{ $item->id }})"
-                                            title="Select for bulk actions"
+                                            title="{{ __('Select for bulk actions') }}"
                                             class="w-4 h-4 rounded accent-violet-600 cursor-pointer focus:ring-violet-500 dark:border-slate-500 dark:bg-slate-700"
                                         >
                                     </td>
@@ -154,11 +154,11 @@
                                                         $dispatch('action-item-status-changed', { id: {{ $item->id }}, status: completed ? 'completed' : 'open' });
                                                     } else {
                                                         completed = !completed;
-                                                        alert('Failed to update. Please try again.');
+                                                        alert('{{ __('Failed to update. Please try again.') }}');
                                                     }
-                                                }).catch(() => { completed = !completed; alert('Failed to update. Please try again.'); })
+                                                }).catch(() => { completed = !completed; alert('{{ __('Failed to update. Please try again.') }}'); })
                                             "
-                                            title="Mark as complete"
+                                            title="{{ __('Mark as complete') }}"
                                             class="w-4 h-4 accent-green-600 cursor-pointer focus:ring-green-500"
                                         >
                                     </td>
@@ -205,7 +205,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No action items yet.</td>
+                                    <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('No action items yet.') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -225,14 +225,14 @@
                 class="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl shadow-xl px-4 py-3"
                 style="display: none;"
             >
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="selected.length + ' selected'"></span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="selected.length + ' {{ __('selected') }}'"></span>
                 <div class="h-4 w-px bg-gray-200 dark:bg-slate-600"></div>
 
                 <select
                     @change="if ($event.target.value) { applyBulk('status', $event.target.value); $event.target.value = ''; }"
                     class="text-sm rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 >
-                    <option value="">Set status…</option>
+                    <option value="">{{ __('Set status…') }}</option>
                     @foreach(\App\Support\Enums\ActionItemStatus::cases() as $status)
                         <option value="{{ $status->value }}">{{ $status->label() }}</option>
                     @endforeach
@@ -242,7 +242,7 @@
                     @change="if ($event.target.value) { applyBulk('priority', $event.target.value); $event.target.value = ''; }"
                     class="text-sm rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 >
-                    <option value="">Set priority…</option>
+                    <option value="">{{ __('Set priority…') }}</option>
                     @foreach(\App\Support\Enums\ActionItemPriority::cases() as $priority)
                         <option value="{{ $priority->value }}">{{ $priority->label() }}</option>
                     @endforeach
@@ -253,7 +253,7 @@
                     @click="applyBulk('delete')"
                     class="text-sm font-medium px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
                 >
-                    Delete
+                    {{ __('Delete') }}
                 </button>
 
                 <div class="h-4 w-px bg-gray-200 dark:bg-slate-600"></div>

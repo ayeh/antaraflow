@@ -26,8 +26,8 @@ class CreateManualNoteRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'content.required' => 'The note content is required.',
-            'title.max' => 'The title cannot exceed 255 characters.',
+            'content.required' => __('The note content is required.'),
+            'title.max' => __('The title cannot exceed 255 characters.'),
         ];
     }
 }

@@ -7,8 +7,8 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </a>
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Send Agenda</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Review and send the agenda for {{ $meeting->title }}</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Send Agenda') }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Review and send the agenda for :title', ['title' => $meeting->title]) }}</p>
         </div>
     </div>
 
@@ -53,7 +53,7 @@
 
         {{-- Recipients --}}
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recipients</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Recipients') }}</h2>
 
             <div class="flex flex-wrap gap-2 mb-3">
                 <template x-for="(email, index) in recipients" :key="index">
@@ -68,20 +68,20 @@
             </div>
 
             <div class="flex gap-2">
-                <input type="email" x-model="newRecipient" @keydown.enter.prevent="addRecipient()" placeholder="Add email address..."
+                <input type="email" x-model="newRecipient" @keydown.enter.prevent="addRecipient()" placeholder="{{ __('Add email address...') }}"
                     class="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
-                <button type="button" @click="addRecipient()" class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">Add</button>
+                <button type="button" @click="addRecipient()" class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">{{ __('Add') }}</button>
                 <button type="button" @click="showMembers = !showMembers"
                     class="inline-flex items-center gap-1.5 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors whitespace-nowrap">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-3-6.65"/></svg>
-                    Import members
+                    {{ __('Import members') }}
                 </button>
             </div>
 
             {{-- Member import panel --}}
             <div x-show="showMembers" x-cloak x-transition class="mt-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/40 p-3">
                 <div class="flex items-center gap-2 mb-2">
-                    <input type="text" x-model="memberSearch" placeholder="Search team / organization members..."
+                    <input type="text" x-model="memberSearch" placeholder="{{ __('Search team / organization members...') }}"
                         class="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-1.5 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                     <button type="button" @click="addAllMembers()" x-show="availableMembers().length > 0"
                         class="text-sm font-medium text-violet-600 dark:text-violet-400 hover:underline whitespace-nowrap">
@@ -100,7 +100,7 @@
                         </button>
                     </template>
                     <p x-show="availableMembers().length === 0" class="px-2 py-3 text-sm text-gray-500 dark:text-slate-400">
-                        No members to add.
+                        {{ __('No members to add.') }}
                     </p>
                 </div>
             </div>
@@ -111,7 +111,7 @@
 
         {{-- Subject --}}
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-            <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subject</label>
+            <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Subject') }}</label>
             <input type="text" name="subject" id="subject" value="{{ old('subject', $subject) }}"
                 class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
             @error('subject')
@@ -121,7 +121,7 @@
 
         {{-- Body --}}
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-            <label for="body" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Body</label>
+            <label for="body" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Email Body') }}</label>
             <textarea name="body" id="body" rows="16"
                 class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none resize-y font-mono">{{ old('body', $body) }}</textarea>
             @error('body')
@@ -131,12 +131,12 @@
 
         {{-- Actions --}}
         <div class="flex items-center justify-between">
-            <a href="{{ route('meetings.show', $meeting) }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Cancel</a>
+            <a href="{{ route('meetings.show', $meeting) }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">{{ __('Cancel') }}</a>
             <div class="flex items-center gap-3">
-                <a href="{{ route('meetings.agenda-email.generate', $meeting) }}" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Regenerate</a>
+                <a href="{{ route('meetings.agenda-email.generate', $meeting) }}" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">{{ __('Regenerate') }}</a>
                 <button type="submit" class="bg-violet-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors inline-flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                    Send Agenda
+                    {{ __('Send Agenda') }}
                 </button>
             </div>
         </div>

@@ -30,15 +30,15 @@ class StoreAudioChunkRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'chunk.required' => 'An audio chunk file is required.',
-            'chunk.file' => 'The chunk must be a valid file.',
-            'chunk.max' => 'The audio chunk must not exceed 50MB.',
-            'session_id.required' => 'A session ID is required.',
-            'session_id.uuid' => 'The session ID must be a valid UUID.',
-            'chunk_index.required' => 'A chunk index is required.',
-            'chunk_index.integer' => 'The chunk index must be an integer.',
-            'chunk_index.min' => 'The chunk index must be at least 0.',
-            'mime_type.required' => 'A MIME type is required.',
+            'chunk.required' => __('An audio chunk file is required.'),
+            'chunk.file' => __('The chunk must be a valid file.'),
+            'chunk.max' => __('The audio chunk must not exceed 50MB.'),
+            'session_id.required' => __('A session ID is required.'),
+            'session_id.uuid' => __('The session ID must be a valid UUID.'),
+            'chunk_index.required' => __('A chunk index is required.'),
+            'chunk_index.integer' => __('The chunk index must be an integer.'),
+            'chunk_index.min' => __('The chunk index must be at least 0.'),
+            'mime_type.required' => __('A MIME type is required.'),
         ];
     }
 }

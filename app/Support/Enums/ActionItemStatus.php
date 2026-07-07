@@ -15,11 +15,11 @@ enum ActionItemStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Open => 'Open',
-            self::InProgress => 'In Progress',
-            self::Completed => 'Completed',
-            self::Cancelled => 'Cancelled',
-            self::CarriedForward => 'Carried Forward',
+            self::Open => __('Open'),
+            self::InProgress => __('In Progress'),
+            self::Completed => __('Completed'),
+            self::Cancelled => __('Cancelled'),
+            self::CarriedForward => __('Carried Forward'),
         };
     }
 

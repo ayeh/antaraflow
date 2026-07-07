@@ -29,20 +29,20 @@ class ActionItemOverdueNotification extends Notification implements ShouldQueue
         $daysOverdue = (int) $this->actionItem->due_date->diffInDays(now());
 
         $message = (new MailMessage)
-            ->subject("Overdue Action Item: {$this->actionItem->title}")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("Your action item **{$this->actionItem->title}** is overdue by {$daysOverdue} day(s).")
-            ->line("**Due Date:** {$this->actionItem->due_date->format('M d, Y')}");
+            ->subject(__('Overdue Action Item: :title', ['title' => $this->actionItem->title]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__('Your action item **:title** is overdue by :days day(s).', ['title' => $this->actionItem->title, 'days' => $daysOverdue]))
+            ->line(__('**Due Date:** :date', ['date' => $this->actionItem->due_date->format('M d, Y')]));
 
         if ($this->actionItem->description) {
             $message->line($this->actionItem->description);
         }
 
         if ($this->actionItem->meeting) {
-            $message->action('View Meeting', route('meetings.show', $this->actionItem->meeting));
+            $message->action(__('View Meeting'), route('meetings.show', $this->actionItem->meeting));
         }
 
-        return $message->line('Please update the status or complete this action item.');
+        return $message->line(__('Please update the status or complete this action item.'));
     }
 
     /** @return array<string, mixed> */
@@ -56,7 +56,7 @@ class ActionItemOverdueNotification extends Notification implements ShouldQueue
             'title' => $this->actionItem->title,
             'due_date' => $this->actionItem->due_date->toIso8601String(),
             'days_overdue' => $daysOverdue,
-            'message' => "Action item overdue by {$daysOverdue} day".($daysOverdue === 1 ? '' : 's').": \"{$this->actionItem->title}\"",
+            'message' => __('Action item overdue by :days day(s): ":title"', ['days' => $daysOverdue, 'title' => $this->actionItem->title]),
         ];
     }
 }

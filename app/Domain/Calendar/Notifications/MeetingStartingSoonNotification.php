@@ -27,12 +27,12 @@ class MeetingStartingSoonNotification extends Notification implements ShouldQueu
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Meeting Starting Soon: {$this->meeting->title}")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("Your meeting **{$this->meeting->title}** is starting soon.")
-            ->line('Auto-recording is enabled for this calendar connection. You can start live recording now.')
-            ->action('Start Live Recording', route('meetings.show', $this->meeting))
-            ->line('Thank you for using antaraNote.');
+            ->subject(__('Meeting Starting Soon: :title', ['title' => $this->meeting->title]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__('Your meeting **:title** is starting soon.', ['title' => $this->meeting->title]))
+            ->line(__('Auto-recording is enabled for this calendar connection. You can start live recording now.'))
+            ->action(__('Start Live Recording'), route('meetings.show', $this->meeting))
+            ->line(__('Thank you for using antaraNote.'));
     }
 
     /** @return array<string, mixed> */
@@ -42,7 +42,7 @@ class MeetingStartingSoonNotification extends Notification implements ShouldQueu
             'type' => 'meeting_starting_soon',
             'meeting_id' => $this->meeting->id,
             'meeting_title' => $this->meeting->title,
-            'message' => "\"{$this->meeting->title}\" is starting soon",
+            'message' => __('":title" is starting soon', ['title' => $this->meeting->title]),
         ];
     }
 }

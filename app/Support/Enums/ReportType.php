@@ -15,11 +15,11 @@ enum ReportType: string
     public function label(): string
     {
         return match ($this) {
-            self::MonthlySummary => 'Monthly Summary',
-            self::ActionItemStatus => 'Action Item Status',
-            self::AttendanceReport => 'Attendance Report',
-            self::GovernanceCompliance => 'Governance Compliance',
-            self::MeetingTrend => 'Meeting Trend & Pattern',
+            self::MonthlySummary => __('Monthly Summary'),
+            self::ActionItemStatus => __('Action Item Status'),
+            self::AttendanceReport => __('Attendance Report'),
+            self::GovernanceCompliance => __('Governance Compliance'),
+            self::MeetingTrend => __('Meeting Trend & Pattern'),
         };
     }
 }

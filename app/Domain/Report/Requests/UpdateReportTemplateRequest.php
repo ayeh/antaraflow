@@ -35,9 +35,9 @@ class UpdateReportTemplateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Report template name is required.',
-            'type.required' => 'Report type is required.',
-            'recipients.*.email' => 'Each recipient must be a valid email address.',
+            'name.required' => __('Report template name is required.'),
+            'type.required' => __('Report type is required.'),
+            'recipients.*.email' => __('Each recipient must be a valid email address.'),
         ];
     }
 }

@@ -3,10 +3,10 @@
 @section('content')
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Meeting Templates</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Meeting Templates') }}</h1>
         <a href="{{ route('meeting-templates.create') }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            New Template
+            {{ __('New Template') }}
         </a>
     </div>
 
@@ -15,11 +15,11 @@
             <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No templates yet</h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create templates to reuse meeting structures and save time.</p>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">{{ __('No templates yet') }}</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Create templates to reuse meeting structures and save time.') }}</p>
             <div class="mt-6">
                 <a href="{{ route('meeting-templates.create') }}" class="inline-flex items-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700">
-                    New Template
+                    {{ __('New Template') }}
                 </a>
             </div>
         </div>
@@ -32,10 +32,10 @@
                             <a href="{{ route('meeting-templates.show', $template) }}" class="text-sm font-semibold text-gray-900 dark:text-white hover:text-violet-600 dark:hover:text-violet-400 line-clamp-1">{{ $template->name }}</a>
                             <div class="flex items-center gap-1.5 mt-1 flex-wrap">
                                 @if($template->is_default)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700">Default</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700">{{ __('Default') }}</span>
                                 @endif
                                 @if(!$template->is_shared)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">Private</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">{{ __('Private') }}</span>
                                 @endif
                             </div>
                         </div>
@@ -46,17 +46,17 @@
                     @endif
 
                     @if($template->createdBy)
-                        <p class="text-xs text-gray-400 dark:text-gray-500">by {{ $template->createdBy->name }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">{{ __('by') }} {{ $template->createdBy->name }}</p>
                     @endif
 
                     <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-slate-700">
-                        <a href="{{ route('meeting-templates.show', $template) }}" class="text-xs font-medium text-violet-600 hover:text-violet-700">View</a>
+                        <a href="{{ route('meeting-templates.show', $template) }}" class="text-xs font-medium text-violet-600 hover:text-violet-700">{{ __('View') }}</a>
                         <div class="flex items-center gap-2">
-                            <a href="{{ route('meeting-templates.edit', $template) }}" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Edit</a>
-                            <form method="POST" action="{{ route('meeting-templates.destroy', $template) }}" onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this template?')">
+                            <a href="{{ route('meeting-templates.edit', $template) }}" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">{{ __('Edit') }}</a>
+                            <form method="POST" action="{{ route('meeting-templates.destroy', $template) }}" onsubmit="confirmThenSubmit(event, '{{ __('Are you sure you want to delete this template?') }}')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">Delete</button>
+                                <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">{{ __('Delete') }}</button>
                             </form>
                         </div>
                     </div>

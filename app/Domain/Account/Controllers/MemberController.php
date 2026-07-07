@@ -55,7 +55,7 @@ class MemberController extends Controller
         );
 
         return redirect()->route('organizations.members.index', $organization)
-            ->with('success', 'Invitation sent successfully.');
+            ->with('success', __('Invitation sent successfully.'));
     }
 
     public function update(Request $request, User $member): RedirectResponse
@@ -80,13 +80,13 @@ class MemberController extends Controller
 
         if ($newRole !== UserRole::Owner && $this->isLastOwner($organization, $member)) {
             return redirect()->back()->withErrors([
-                'role' => 'You cannot change the role of the last owner.',
+                'role' => __('You cannot change the role of the last owner.'),
             ]);
         }
 
         $this->organizationService->changeRole($organization, $member, $newRole);
 
-        return redirect()->back()->with('success', 'Member role updated successfully.');
+        return redirect()->back()->with('success', __('Member role updated successfully.'));
     }
 
     public function destroy(Request $request, User $member): RedirectResponse
@@ -104,13 +104,13 @@ class MemberController extends Controller
 
         if ($this->isLastOwner($organization, $member)) {
             return redirect()->back()->withErrors([
-                'member' => 'You cannot remove the last owner of the organization.',
+                'member' => __('You cannot remove the last owner of the organization.'),
             ]);
         }
 
         $this->organizationService->removeMember($organization, $member);
 
-        return redirect()->back()->with('success', 'Member removed successfully.');
+        return redirect()->back()->with('success', __('Member removed successfully.'));
     }
 
     private function isLastOwner(Organization $organization, User $member): bool

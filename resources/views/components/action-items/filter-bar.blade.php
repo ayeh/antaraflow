@@ -43,7 +43,7 @@
 
             {{-- Status Filter --}}
             <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</span>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Status') }}</span>
                 @foreach ($statusOptions as $status)
                     <button
                         type="button"
@@ -63,7 +63,7 @@
 
             {{-- Priority Filter --}}
             <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Priority</span>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Priority') }}</span>
                 @foreach ($priorityOptions as $priority)
                     <button
                         type="button"
@@ -83,14 +83,14 @@
 
             {{-- Assignee Filter --}}
             <div class="flex items-center gap-2">
-                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assignee</span>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Assignee') }}</span>
                 <button
                     type="button"
                     @click="toggleAssignee()"
                     :class="assignee === 'me' ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 ring-2 ring-offset-1 ring-violet-500' : 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-gray-400'"
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all cursor-pointer"
                 >
-                    Assigned to me
+                    {{ __('Assigned to me') }}
                 </button>
                 <input type="hidden" name="assignee" value="me" :disabled="assignee !== 'me'">
             </div>
@@ -98,7 +98,7 @@
             {{-- Clear All --}}
             @if ($hasActiveFilters)
                 <a href="{{ route('action-items.dashboard') }}" class="ml-auto text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                    Clear all
+                    {{ __('Clear all') }}
                 </a>
             @endif
 

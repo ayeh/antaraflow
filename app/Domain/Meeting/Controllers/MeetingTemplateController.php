@@ -51,7 +51,7 @@ class MeetingTemplateController extends Controller
         $template = $this->meetingTemplateService->create($data, $request->user());
 
         return redirect()->route('meeting-templates.show', $template)
-            ->with('success', 'Template created successfully.');
+            ->with('success', __('Template created successfully.'));
     }
 
     public function show(MeetingTemplate $meetingTemplate): View
@@ -81,7 +81,7 @@ class MeetingTemplateController extends Controller
         $this->meetingTemplateService->update($meetingTemplate, $data);
 
         return redirect()->route('meeting-templates.show', $meetingTemplate)
-            ->with('success', 'Template updated successfully.');
+            ->with('success', __('Template updated successfully.'));
     }
 
     public function destroy(MeetingTemplate $meetingTemplate): RedirectResponse
@@ -91,6 +91,6 @@ class MeetingTemplateController extends Controller
         $this->meetingTemplateService->delete($meetingTemplate);
 
         return redirect()->route('meeting-templates.index')
-            ->with('success', 'Template deleted successfully.');
+            ->with('success', __('Template deleted successfully.'));
     }
 }

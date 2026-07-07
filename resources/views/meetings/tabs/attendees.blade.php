@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h3 class="text-lg font-medium text-gray-900">Attendees</h3>
+        <h3 class="text-lg font-medium text-gray-900">{{ __('Attendees') }}</h3>
     </div>
 
     @php
@@ -10,7 +10,7 @@
 
     <div x-data="{ showAddForm: false }" class="space-y-4">
         <div class="flex items-center gap-3">
-            <button @click="showAddForm = !showAddForm" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Add Attendee</button>
+            <button @click="showAddForm = !showAddForm" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">{{ __('Add Attendee') }}</button>
 
             @if($groups->isNotEmpty())
                 <form method="POST" action="{{ route('meetings.attendees.bulk-invite', $meeting) }}" class="flex items-center gap-2">
@@ -20,7 +20,7 @@
                             <option value="{{ $group->id }}">{{ $group->name }}</option>
                         @endforeach
                     </select>
-                    <button type="submit" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">Bulk Invite</button>
+                    <button type="submit" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">{{ __('Bulk Invite') }}</button>
                 </form>
             @endif
         </div>
@@ -30,15 +30,15 @@
                 @csrf
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
-                        <label for="attendee_name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <label for="attendee_name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Name') }}</label>
                         <input type="text" name="name" id="attendee_name" required class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
-                        <label for="attendee_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <label for="attendee_email" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Email') }}</label>
                         <input type="email" name="email" id="attendee_email" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
-                        <label for="attendee_role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                        <label for="attendee_role" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Role') }}</label>
                         <select name="role" id="attendee_role" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
                             @foreach(\App\Support\Enums\AttendeeRole::cases() as $role)
                                 <option value="{{ $role->value }}">{{ ucfirst(str_replace('_', ' ', $role->value)) }}</option>
@@ -46,18 +46,18 @@
                         </select>
                     </div>
                     <div>
-                        <label for="attendee_dept" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <label for="attendee_dept" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Department') }}</label>
                         <input type="text" name="department" id="attendee_dept" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
                     </div>
                 </div>
                 <div class="flex items-center gap-3 mt-4">
                     <label class="flex items-center gap-2 text-sm text-gray-700">
                         <input type="checkbox" name="is_external" value="1" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        External attendee
+                        {{ __('External attendee') }}
                     </label>
                 </div>
                 <div class="mt-4 flex justify-end">
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Add</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">{{ __('Add') }}</button>
                 </div>
             </form>
         </div>
@@ -68,12 +68,12 @@
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                        <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">RSVP</th>
-                        <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Present</th>
-                        <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Name') }}</th>
+                        <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Email') }}</th>
+                        <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Role') }}</th>
+                        <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('RSVP') }}</th>
+                        <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Present') }}</th>
+                        <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -82,7 +82,7 @@
                             <td class="px-4 py-3 text-sm text-gray-900">
                                 {{ $attendee->name }}
                                 @if($attendee->is_external)
-                                    <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">External</span>
+                                    <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">{{ __('External') }}</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-500">{{ $attendee->email ?? '-' }}</td>
@@ -106,15 +106,15 @@
                                     @method('PATCH')
                                     <input type="hidden" name="is_present" value="{{ $attendee->is_present ? '0' : '1' }}">
                                     <button type="submit" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $attendee->is_present ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
-                                        {{ $attendee->is_present ? 'Present' : 'Absent' }}
+                                        {{ $attendee->is_present ? __('Present') : __('Absent') }}
                                     </button>
                                 </form>
                             </td>
                             <td class="px-4 py-3 text-right">
-                                <form method="POST" action="{{ route('meetings.attendees.destroy', [$meeting, $attendee]) }}" class="inline" onsubmit="confirmThenSubmit(event, 'Remove this attendee?')">
+                                <form method="POST" action="{{ route('meetings.attendees.destroy', [$meeting, $attendee]) }}" class="inline" onsubmit="confirmThenSubmit(event, '{{ __('Remove this attendee?') }}')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-700 text-sm">Remove</button>
+                                    <button type="submit" class="text-red-600 hover:text-red-700 text-sm">{{ __('Remove') }}</button>
                                 </form>
                             </td>
                         </tr>
@@ -123,6 +123,6 @@
             </table>
         </div>
     @else
-        <p class="text-sm text-gray-500 text-center py-8">No attendees added yet.</p>
+        <p class="text-sm text-gray-500 text-center py-8">{{ __('No attendees added yet.') }}</p>
     @endif
 </div>

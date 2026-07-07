@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Dashboard')
-@section('page-title', 'Dashboard')
+@section('title', __('Dashboard'))
+@section('page-title', __('Dashboard'))
 
 @section('content')
     {{-- Stat Cards --}}
@@ -14,7 +14,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
                     </svg>
                 </div>
-                <span class="text-sm text-slate-400">Total Users</span>
+                <span class="text-sm text-slate-400">{{ __('Total Users') }}</span>
             </div>
             <p class="text-2xl font-bold text-white">{{ number_format($stats['total_users']) }}</p>
         </div>
@@ -27,7 +27,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                 </div>
-                <span class="text-sm text-slate-400">Total Organizations</span>
+                <span class="text-sm text-slate-400">{{ __('Total Organizations') }}</span>
             </div>
             <p class="text-2xl font-bold text-white">{{ number_format($stats['total_organizations']) }}</p>
         </div>
@@ -40,7 +40,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
-                <span class="text-sm text-slate-400">Total Meetings</span>
+                <span class="text-sm text-slate-400">{{ __('Total Meetings') }}</span>
             </div>
             <p class="text-2xl font-bold text-white">{{ number_format($stats['total_meetings']) }}</p>
         </div>
@@ -53,7 +53,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                     </svg>
                 </div>
-                <span class="text-sm text-slate-400">Active Subscriptions</span>
+                <span class="text-sm text-slate-400">{{ __('Active Subscriptions') }}</span>
             </div>
             <p class="text-2xl font-bold text-white">{{ number_format($stats['active_subscriptions']) }}</p>
         </div>
@@ -66,7 +66,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <span class="text-sm text-slate-400">MRR</span>
+                <span class="text-sm text-slate-400">{{ __('MRR') }}</span>
             </div>
             <p class="text-2xl font-bold text-white">RM {{ number_format($stats['mrr'], 2) }}</p>
         </div>
@@ -74,8 +74,8 @@
 
     {{-- Period Toggle --}}
     <div class="flex items-center gap-2 mb-6">
-        <span class="text-sm text-slate-400 mr-2">Period:</span>
-        @foreach(['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly'] as $value => $label)
+        <span class="text-sm text-slate-400 mr-2">{{ __('Period:') }}</span>
+        @foreach(['daily' => __('Daily'), 'weekly' => __('Weekly'), 'monthly' => __('Monthly')] as $value => $label)
             <a href="{{ route('admin.dashboard', ['period' => $value]) }}"
                class="px-4 py-1.5 text-sm font-medium rounded-lg transition-colors {{ $period === $value ? 'bg-violet-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600' }}">
                 {{ $label }}
@@ -87,7 +87,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {{-- User Growth Chart --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-sm font-semibold text-slate-200 mb-4">User Growth</h3>
+            <h3 class="text-sm font-semibold text-slate-200 mb-4">{{ __('User Growth') }}</h3>
             <div class="relative h-64">
                 <canvas id="userGrowthChart"></canvas>
             </div>
@@ -95,7 +95,7 @@
 
         {{-- Organization Growth Chart --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-sm font-semibold text-slate-200 mb-4">Organization Growth</h3>
+            <h3 class="text-sm font-semibold text-slate-200 mb-4">{{ __('Organization Growth') }}</h3>
             <div class="relative h-64">
                 <canvas id="orgGrowthChart"></canvas>
             </div>
@@ -106,19 +106,19 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {{-- Subscription Distribution --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-sm font-semibold text-slate-200 mb-4">Subscription Distribution</h3>
+            <h3 class="text-sm font-semibold text-slate-200 mb-4">{{ __('Subscription Distribution') }}</h3>
             @if(count($subscriptionDistribution) > 0)
                 <div class="relative h-64">
                     <canvas id="subscriptionChart"></canvas>
                 </div>
             @else
-                <p class="text-slate-400 text-sm py-8 text-center">No active subscriptions.</p>
+                <p class="text-slate-400 text-sm py-8 text-center">{{ __('No active subscriptions.') }}</p>
             @endif
         </div>
 
         {{-- Activity Heatmap --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-sm font-semibold text-slate-200 mb-4">Meeting Activity by Day (Last 90 Days)</h3>
+            <h3 class="text-sm font-semibold text-slate-200 mb-4">{{ __('Meeting Activity by Day (Last 90 Days)') }}</h3>
             @php
                 $maxActivity = max(array_values($activityHeatmap)) ?: 1;
             @endphp
@@ -150,14 +150,14 @@
         {{-- Recent Registrations --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-700">
-                <h3 class="text-sm font-semibold text-slate-200">Recent Registrations</h3>
+                <h3 class="text-sm font-semibold text-slate-200">{{ __('Recent Registrations') }}</h3>
             </div>
             <table class="w-full text-sm text-left">
                 <thead>
                     <tr class="bg-slate-700/50 text-slate-300 text-xs uppercase tracking-wider">
-                        <th class="px-6 py-3">Name</th>
-                        <th class="px-6 py-3">Email</th>
-                        <th class="px-6 py-3">Date</th>
+                        <th class="px-6 py-3">{{ __('Name') }}</th>
+                        <th class="px-6 py-3">{{ __('Email') }}</th>
+                        <th class="px-6 py-3">{{ __('Date') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-700">
@@ -169,7 +169,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="px-6 py-8 text-center text-slate-400">No users yet.</td>
+                            <td colspan="3" class="px-6 py-8 text-center text-slate-400">{{ __('No users yet.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -179,13 +179,13 @@
         {{-- Top Organizations --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-700">
-                <h3 class="text-sm font-semibold text-slate-200">Top Organizations</h3>
+                <h3 class="text-sm font-semibold text-slate-200">{{ __('Top Organizations') }}</h3>
             </div>
             <table class="w-full text-sm text-left">
                 <thead>
                     <tr class="bg-slate-700/50 text-slate-300 text-xs uppercase tracking-wider">
-                        <th class="px-6 py-3">Name</th>
-                        <th class="px-6 py-3 text-right">Members</th>
+                        <th class="px-6 py-3">{{ __('Name') }}</th>
+                        <th class="px-6 py-3 text-right">{{ __('Members') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-700">
@@ -196,7 +196,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="2" class="px-6 py-8 text-center text-slate-400">No organizations yet.</td>
+                            <td colspan="2" class="px-6 py-8 text-center text-slate-400">{{ __('No organizations yet.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -233,7 +233,7 @@
                 data: {
                     labels: @json(array_keys($userGrowth)),
                     datasets: [{
-                        label: 'New Users',
+                        label: '{{ __('New Users') }}',
                         data: @json(array_values($userGrowth)),
                         borderColor: '#7c3aed',
                         backgroundColor: 'rgba(124, 58, 237, 0.1)',
@@ -250,7 +250,7 @@
                 data: {
                     labels: @json(array_keys($orgGrowth)),
                     datasets: [{
-                        label: 'New Organizations',
+                        label: '{{ __('New Organizations') }}',
                         data: @json(array_values($orgGrowth)),
                         borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',

@@ -12,7 +12,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $actionItem->meeting->title }}</p>
             </div>
         </div>
-        <a href="{{ route('meetings.action-items.edit', [$actionItem->meeting, $actionItem]) }}" class="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">Edit</a>
+        <a href="{{ route('meetings.action-items.edit', [$actionItem->meeting, $actionItem]) }}" class="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">{{ __('Edit') }}</a>
     </div>
 
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-6">
@@ -32,25 +32,25 @@
                 @elseif($actionItem->priority === \App\Support\Enums\ActionItemPriority::High) bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300
                 @elseif($actionItem->priority === \App\Support\Enums\ActionItemPriority::Critical) bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300
                 @endif">
-                {{ ucfirst($actionItem->priority->value) }} Priority
+                {{ ucfirst($actionItem->priority->value) }} {{ __('Priority') }}
             </span>
         </div>
 
         @if($actionItem->description)
             <div>
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</h3>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Description') }}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ $actionItem->description }}</p>
             </div>
         @endif
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-200 dark:border-slate-700">
             <div>
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assigned To</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $actionItem->assignedTo?->name ?? 'Unassigned' }}</p>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Assigned To') }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $actionItem->assignedTo?->name ?? __('Unassigned') }}</p>
             </div>
             <div>
-                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $actionItem->due_date?->format('M j, Y') ?? 'No due date' }}</p>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Due Date') }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $actionItem->due_date?->format('M j, Y') ?? __('No due date') }}</p>
             </div>
         </div>
     </div>
@@ -58,7 +58,7 @@
     {{-- Activity / History --}}
     @if($actionItem->histories->isNotEmpty())
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Activity</h2>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">{{ __('Activity') }}</h2>
             <ol class="relative border-l border-gray-200 dark:border-slate-600 space-y-5 ml-2">
                 @foreach($actionItem->histories->sortByDesc('created_at') as $history)
                     <li class="ml-4">
@@ -72,7 +72,7 @@
                             <p class="text-sm text-gray-700 dark:text-gray-300">
                                 <span class="font-medium">{{ $history->changedBy?->name ?? 'Someone' }}</span>
                                 @if($history->old_value !== $history->new_value)
-                                    changed status from
+                                    {{ __('changed status from') }}
                                     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-gray-400">
                                         {{ \App\Support\Enums\ActionItemStatus::tryFrom($history->old_value)?->label() ?? $history->old_value }}
                                     </span>
@@ -81,7 +81,7 @@
                                         {{ \App\Support\Enums\ActionItemStatus::tryFrom($history->new_value)?->label() ?? $history->new_value }}
                                     </span>
                                 @else
-                                    added a note
+                                    {{ __('added a note') }}
                                 @endif
                             </p>
 

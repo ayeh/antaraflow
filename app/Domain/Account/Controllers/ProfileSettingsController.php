@@ -36,7 +36,7 @@ class ProfileSettingsController extends Controller
             ]
         );
 
-        return redirect()->route('settings.profile')->with('success', 'Profile updated.');
+        return redirect()->route('settings.profile')->with('success', __('Profile updated.'));
     }
 
     public function updateAvatar(Request $request): RedirectResponse
@@ -54,7 +54,7 @@ class ProfileSettingsController extends Controller
         $path = $request->file('avatar')->store('avatars', 'public');
         $user->update(['avatar_path' => $path]);
 
-        return redirect()->route('settings.profile')->with('success', 'Profile photo updated.');
+        return redirect()->route('settings.profile')->with('success', __('Profile photo updated.'));
     }
 
     public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
@@ -64,6 +64,6 @@ class ProfileSettingsController extends Controller
             'remember_token' => Str::random(60),
         ]);
 
-        return redirect()->route('settings.profile')->with('success', 'Password updated.');
+        return redirect()->route('settings.profile')->with('success', __('Password updated.'));
     }
 }

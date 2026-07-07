@@ -50,7 +50,7 @@ class ManualNoteController extends Controller
         }
 
         return redirect()->route('meetings.manual-notes.index', $meeting)
-            ->with('success', 'Note added successfully.');
+            ->with('success', __('Note added successfully.'));
     }
 
     public function show(MinutesOfMeeting $meeting, MomManualNote $manualNote): View
@@ -67,7 +67,7 @@ class ManualNoteController extends Controller
         $manualNote->update($request->validated());
 
         return redirect()->route('meetings.manual-notes.show', [$meeting, $manualNote])
-            ->with('success', 'Note updated successfully.');
+            ->with('success', __('Note updated successfully.'));
     }
 
     public function destroy(MinutesOfMeeting $meeting, MomManualNote $manualNote): RedirectResponse|JsonResponse
@@ -82,10 +82,10 @@ class ManualNoteController extends Controller
         $manualNote->delete();
 
         if (request()->wantsJson()) {
-            return response()->json(['message' => 'Note deleted successfully.']);
+            return response()->json(['message' => __('Note deleted successfully.')]);
         }
 
         return redirect()->route('meetings.manual-notes.index', $meeting)
-            ->with('success', 'Note deleted successfully.');
+            ->with('success', __('Note deleted successfully.'));
     }
 }

@@ -30,7 +30,7 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
             ]);
 
         if ($response->failed()) {
-            $error = $response->json('error.message', 'Whisper API request failed with status '.$response->status());
+            $error = $response->json('error.message', __('Whisper API request failed with status :status', ['status' => $response->status()]));
             throw new \RuntimeException($error);
         }
 

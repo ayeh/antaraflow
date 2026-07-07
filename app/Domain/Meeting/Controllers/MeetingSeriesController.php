@@ -51,7 +51,7 @@ class MeetingSeriesController extends Controller
         $series = $this->meetingSeriesService->create($data, $request->user());
 
         return redirect()->route('meeting-series.show', $series)
-            ->with('success', 'Meeting series created successfully.');
+            ->with('success', __('Meeting series created successfully.'));
     }
 
     public function show(MeetingSeries $meetingSeries): View
@@ -82,7 +82,7 @@ class MeetingSeriesController extends Controller
         $this->meetingSeriesService->update($meetingSeries, $data);
 
         return redirect()->route('meeting-series.show', $meetingSeries)
-            ->with('success', 'Meeting series updated successfully.');
+            ->with('success', __('Meeting series updated successfully.'));
     }
 
     public function destroy(MeetingSeries $meetingSeries): RedirectResponse
@@ -92,7 +92,7 @@ class MeetingSeriesController extends Controller
         $this->meetingSeriesService->delete($meetingSeries);
 
         return redirect()->route('meeting-series.index')
-            ->with('success', 'Meeting series deleted successfully.');
+            ->with('success', __('Meeting series deleted successfully.'));
     }
 
     public function generateMeetings(Request $request, MeetingSeries $meetingSeries): RedirectResponse
@@ -110,6 +110,6 @@ class MeetingSeriesController extends Controller
         );
 
         return redirect()->route('meeting-series.show', $meetingSeries)
-            ->with('success', "Generated {$request->integer('count')} upcoming meetings.");
+            ->with('success', __('Generated :count upcoming meetings.', ['count' => $request->integer('count')]));
     }
 }

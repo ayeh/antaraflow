@@ -36,7 +36,7 @@
                 @keydown.arrow-up.prevent="navigateCommand('up')"
                 @keydown.enter.prevent="executeCommand()"
                 type="text"
-                placeholder="Search meetings, action items, projects..."
+                placeholder="{{ __('Search meetings, action items, projects...') }}"
                 class="flex-1 bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 text-sm outline-none"
                 autocomplete="off"
             >
@@ -57,7 +57,7 @@
             {{-- Navigation section --}}
             <template x-if="filteredCommands.nav.length > 0">
                 <div class="pt-3 pb-2 px-4">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Navigation</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">{{ __('Navigation') }}</p>
                     <template x-for="(item, idx) in filteredCommands.nav" :key="item.label">
                         <button
                             @click="executeCommand(idx)"
@@ -78,7 +78,7 @@
             {{-- Meetings section --}}
             <template x-if="filteredCommands.meetings.length > 0">
                 <div class="pt-3 pb-2 px-4 border-t border-slate-100 dark:border-slate-700">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Meetings</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">{{ __('Meetings') }}</p>
                     <template x-for="(meeting, idx) in filteredCommands.meetings" :key="'meeting-' + (meeting.id || idx)">
                         <button
                             @click="executeCommand(filteredCommands.nav.length + idx)"
@@ -103,7 +103,7 @@
             {{-- Action Items section --}}
             <template x-if="filteredCommands.action_items && filteredCommands.action_items.length > 0">
                 <div class="pt-3 pb-2 px-4 border-t border-slate-100 dark:border-slate-700">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Action Items</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">{{ __('Action Items') }}</p>
                     <template x-for="(item, idx) in filteredCommands.action_items" :key="'ai-' + item.id">
                         <button
                             @click="executeCommand(filteredCommands.nav.length + filteredCommands.meetings.length + idx)"
@@ -128,7 +128,7 @@
             {{-- Projects section --}}
             <template x-if="filteredCommands.projects && filteredCommands.projects.length > 0">
                 <div class="pt-3 pb-2 px-4 border-t border-slate-100 dark:border-slate-700">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Projects</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">{{ __('Projects') }}</p>
                     <template x-for="(project, idx) in filteredCommands.projects" :key="'proj-' + project.id">
                         <button
                             @click="executeCommand(filteredCommands.nav.length + filteredCommands.meetings.length + (filteredCommands.action_items?.length || 0) + idx)"
@@ -153,7 +153,7 @@
             <template x-if="commandResultCount === 0 && !searchLoading">
                 <div class="py-8 text-center">
                     <p class="text-sm text-slate-400 dark:text-slate-500">
-                        No results for "<span x-text="commandQuery"></span>"
+                        {{ __('No results for') }} "<span x-text="commandQuery"></span>"
                     </p>
                 </div>
             </template>

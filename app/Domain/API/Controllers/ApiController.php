@@ -38,7 +38,7 @@ abstract class ApiController extends Controller
             ?? $org->members()->first();
 
         if ($owner === null) {
-            abort(422, 'Organization has no members.');
+            abort(422, __('Organization has no members.'));
         }
 
         return $owner->id;

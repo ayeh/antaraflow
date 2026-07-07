@@ -73,7 +73,13 @@
 </head>
 <body class="h-full bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
     <div
-        x-data="appState"
+        x-data="appState({ i18n: {
+            dashboard:   '{{ __('Dashboard') }}',
+            meetings:    '{{ __('Meetings') }}',
+            newMeeting:  '{{ __('New Meeting') }}',
+            actionItems: '{{ __('Action Items') }}',
+            settings:    '{{ __('Settings') }}',
+        } })"
         x-init="recentMeetings = {!! \Illuminate\Support\Js::from($recentMeetings ?? []) !!}"
         class="min-h-full"
     >

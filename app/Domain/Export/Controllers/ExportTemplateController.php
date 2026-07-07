@@ -40,7 +40,7 @@ class ExportTemplateController
             ['organization_id' => $orgId, 'is_default' => $request->boolean('is_default')]
         ));
 
-        return redirect()->route('settings.export-templates.index')->with('success', 'Template created.');
+        return redirect()->route('settings.export-templates.index')->with('success', __('Template created.'));
     }
 
     public function edit(Request $request, ExportTemplate $exportTemplate): View
@@ -74,7 +74,7 @@ class ExportTemplateController
             ['is_default' => $request->boolean('is_default')]
         ));
 
-        return redirect()->route('settings.export-templates.index')->with('success', 'Template updated.');
+        return redirect()->route('settings.export-templates.index')->with('success', __('Template updated.'));
     }
 
     public function destroy(Request $request, ExportTemplate $exportTemplate): RedirectResponse
@@ -86,6 +86,6 @@ class ExportTemplateController
 
         $exportTemplate->delete();
 
-        return redirect()->route('settings.export-templates.index')->with('success', 'Template deleted.');
+        return redirect()->route('settings.export-templates.index')->with('success', __('Template deleted.'));
     }
 }

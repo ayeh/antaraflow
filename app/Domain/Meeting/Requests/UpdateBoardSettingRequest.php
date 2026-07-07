@@ -31,12 +31,12 @@ class UpdateBoardSettingRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'quorum_type.required' => 'The quorum type is required.',
-            'quorum_type.in' => 'The quorum type must be either percentage or count.',
-            'quorum_value.required' => 'The quorum value is required.',
-            'quorum_value.integer' => 'The quorum value must be a whole number.',
-            'quorum_value.min' => 'The quorum value must be at least 1.',
-            'quorum_value.max' => 'The quorum value cannot exceed 100.',
+            'quorum_type.required' => __('The quorum type is required.'),
+            'quorum_type.in' => __('The quorum type must be either percentage or count.'),
+            'quorum_value.required' => __('The quorum value is required.'),
+            'quorum_value.integer' => __('The quorum value must be a whole number.'),
+            'quorum_value.min' => __('The quorum value must be at least 1.'),
+            'quorum_value.max' => __('The quorum value cannot exceed 100.'),
         ];
     }
 }

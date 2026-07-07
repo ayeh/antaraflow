@@ -53,7 +53,7 @@ class WebhookEndpointController extends Controller
         WebhookEndpoint::query()->create($data);
 
         return redirect()->route('webhooks.index')
-            ->with('success', 'Webhook endpoint created successfully.');
+            ->with('success', __('Webhook endpoint created successfully.'));
     }
 
     public function show(WebhookEndpoint $webhook): View
@@ -87,7 +87,7 @@ class WebhookEndpointController extends Controller
         $webhook->update($data);
 
         return redirect()->route('webhooks.index')
-            ->with('success', 'Webhook endpoint updated successfully.');
+            ->with('success', __('Webhook endpoint updated successfully.'));
     }
 
     public function destroy(WebhookEndpoint $webhook): RedirectResponse
@@ -97,7 +97,7 @@ class WebhookEndpointController extends Controller
         $webhook->delete();
 
         return redirect()->route('webhooks.index')
-            ->with('success', 'Webhook endpoint deleted.');
+            ->with('success', __('Webhook endpoint deleted.'));
     }
 
     public function ping(WebhookEndpoint $webhook): RedirectResponse
@@ -110,6 +110,6 @@ class WebhookEndpointController extends Controller
         ]);
 
         return redirect()->route('webhooks.show', $webhook)
-            ->with('success', 'Test ping sent.');
+            ->with('success', __('Test ping sent.'));
     }
 }

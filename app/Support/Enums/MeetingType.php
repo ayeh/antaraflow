@@ -17,13 +17,13 @@ enum MeetingType: string
     public function label(): string
     {
         return match ($this) {
-            self::General => 'General',
-            self::StandUp => 'Stand-up',
-            self::Retrospective => 'Retrospective',
-            self::ClientCall => 'Client Call',
-            self::BoardMeeting => 'Board Meeting',
+            self::General => __('General'),
+            self::StandUp => __('Stand-up'),
+            self::Retrospective => __('Retrospective'),
+            self::ClientCall => __('Client Call'),
+            self::BoardMeeting => __('Board Meeting'),
             self::OneOnOne => '1-on-1',
-            self::Workshop => 'Workshop',
+            self::Workshop => __('Workshop'),
         };
     }
 }

@@ -22,7 +22,7 @@ class AdminSwitchController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('admin.dashboard')
-            ->with('success', 'Switched to Admin Panel.');
+            ->with('success', __('Switched to Admin Panel.'));
     }
 
     public function toUser(Request $request): RedirectResponse
@@ -35,6 +35,6 @@ class AdminSwitchController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('dashboard')
-            ->with('success', 'Switched back to your account.');
+            ->with('success', __('Switched back to your account.'));
     }
 }

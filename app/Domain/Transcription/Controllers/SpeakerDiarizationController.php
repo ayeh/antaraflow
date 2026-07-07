@@ -25,6 +25,6 @@ class SpeakerDiarizationController extends Controller
 
         $updated = $this->diarizationService->diarize($transcription);
 
-        return back()->with('success', "AI speaker analysis complete. {$updated} segments updated.");
+        return back()->with('success', __('AI speaker analysis complete. :count segments updated.', ['count' => $updated]));
     }
 }

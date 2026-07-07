@@ -39,7 +39,7 @@ class GuestAccessController
         ]);
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Guest access link created.');
+            ->with('success', __('Guest access link created.'));
     }
 
     /** Revoke a guest access link */
@@ -54,7 +54,7 @@ class GuestAccessController
         $guestAccess->delete();
 
         return redirect()->route('meetings.show', $meetingId)
-            ->with('success', 'Guest access link revoked.');
+            ->with('success', __('Guest access link revoked.'));
     }
 
     /** Public guest view — no auth required */

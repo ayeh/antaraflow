@@ -58,6 +58,6 @@ class DocumentController extends Controller
 
         $document->delete();
 
-        return response()->json(['message' => 'Document deleted successfully.']);
+        return response()->json(['message' => __('Document deleted successfully.')]);
     }
 }

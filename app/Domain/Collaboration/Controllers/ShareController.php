@@ -49,7 +49,7 @@ class ShareController extends Controller
         }
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Meeting shared successfully.');
+            ->with('success', __('Meeting shared successfully.'));
     }
 
     public function destroy(MinutesOfMeeting $meeting, MeetingShare $share): RedirectResponse
@@ -59,6 +59,6 @@ class ShareController extends Controller
         $this->shareService->revokeShare($share);
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Share revoked.');
+            ->with('success', __('Share revoked.'));
     }
 }

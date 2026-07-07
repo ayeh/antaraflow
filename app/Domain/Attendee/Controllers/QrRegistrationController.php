@@ -71,7 +71,7 @@ class QrRegistrationController extends Controller
             ->where('is_active', true)
             ->update(['is_active' => false]);
 
-        return response()->json(['message' => 'QR registration disabled.']);
+        return response()->json(['message' => __('QR registration disabled.')]);
     }
 
     public function liveAttendees(MinutesOfMeeting $meeting): JsonResponse
@@ -107,7 +107,7 @@ class QrRegistrationController extends Controller
         $meeting = $qrToken->meeting;
 
         if (! $meeting) {
-            abort(410, 'This meeting no longer exists.');
+            abort(410, __('This meeting no longer exists.'));
         }
 
         $organization = $meeting->organization;
@@ -133,7 +133,7 @@ class QrRegistrationController extends Controller
         $meeting = $qrToken->meeting;
 
         if (! $meeting) {
-            abort(410, 'This meeting no longer exists.');
+            abort(410, __('This meeting no longer exists.'));
         }
 
         $attendees = $meeting->attendees()
@@ -161,17 +161,17 @@ class QrRegistrationController extends Controller
         $qrToken = QrRegistrationToken::where('token', $token)->firstOrFail();
 
         if (! $qrToken->isValid()) {
-            abort(410, 'This registration link has expired.');
+            abort(410, __('This registration link has expired.'));
         }
 
         if ($qrToken->isFull()) {
-            abort(410, 'Registration is full. No more spots available.');
+            abort(410, __('Registration is full. No more spots available.'));
         }
 
         $meeting = $qrToken->meeting;
 
         if (! $meeting) {
-            abort(410, 'This meeting no longer exists.');
+            abort(410, __('This meeting no longer exists.'));
         }
 
         return view('qr-registration.form', compact('meeting', 'qrToken'));
@@ -183,11 +183,11 @@ class QrRegistrationController extends Controller
             $qrToken = QrRegistrationToken::where('token', $token)->lockForUpdate()->firstOrFail();
 
             if (! $qrToken->isValid()) {
-                abort(410, 'This registration link has expired.');
+                abort(410, __('This registration link has expired.'));
             }
 
             if ($qrToken->isFull()) {
-                abort(410, 'Registration is full. No more spots available.');
+                abort(410, __('Registration is full. No more spots available.'));
             }
 
             $requiredFields = $qrToken->required_fields ?? ['name'];
@@ -222,7 +222,7 @@ class QrRegistrationController extends Controller
             $meeting = $qrToken->meeting;
 
             if (! $meeting) {
-                abort(410, 'This meeting no longer exists.');
+                abort(410, __('This meeting no longer exists.'));
             }
 
             $meeting->attendees()->create([
@@ -253,7 +253,7 @@ class QrRegistrationController extends Controller
         $registration = session('registration', []);
 
         if (! $meeting) {
-            abort(410, 'This meeting no longer exists.');
+            abort(410, __('This meeting no longer exists.'));
         }
 
         return view('qr-registration.success', compact('meeting', 'qrToken', 'registration'));

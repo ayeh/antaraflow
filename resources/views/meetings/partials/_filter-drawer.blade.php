@@ -22,16 +22,16 @@
      x-transition:leave-start="translate-x-0"
      x-transition:leave-end="translate-x-full"
      @keydown.escape.window="filterOpen = false"
-     role="dialog" aria-modal="true" aria-label="Filter meetings"
+     role="dialog" aria-modal="true" aria-label="{{ __('Filter meetings') }}"
      class="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-white dark:bg-slate-800 shadow-2xl z-50 flex flex-col"
      x-cloak>
 
     {{-- Header --}}
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Filter Meetings</h2>
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Filter Meetings') }}</h2>
         <button @click="filterOpen = false"
                 class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                aria-label="Close filter drawer">
+                aria-label="{{ __('Close filter drawer') }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -47,7 +47,7 @@
 
         {{-- Search --}}
         <div>
-            <label for="drawer-search" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Search</label>
+            <label for="drawer-search" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ __('Search') }}</label>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,18 +55,18 @@
                     </svg>
                 </div>
                 <input type="text" id="drawer-search" name="search" value="{{ request('search') }}"
-                       placeholder="Title or MOM number..."
+                       placeholder="{{ __('Title or MOM number...') }}"
                        class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors">
             </div>
         </div>
 
         {{-- Project --}}
         <div>
-            <label for="drawer-project" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Project</label>
+            <label for="drawer-project" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ __('Project') }}</label>
             <div class="relative">
                 <select id="drawer-project" name="project_id"
                         class="w-full appearance-none bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 pr-9 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors">
-                    <option value="">All Projects</option>
+                    <option value="">{{ __('All Projects') }}</option>
                     @foreach($projects as $project)
                         <option value="{{ $project->id }}" {{ request('project_id') == $project->id ? 'selected' : '' }}>
                             {{ $project->name }} ({{ $project->code }})
@@ -83,11 +83,11 @@
 
         {{-- Status --}}
         <div>
-            <label for="drawer-status" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
+            <label for="drawer-status" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ __('Status') }}</label>
             <div class="relative">
                 <select id="drawer-status" name="status"
                         class="w-full appearance-none bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 pr-9 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors">
-                    <option value="">All Statuses</option>
+                    <option value="">{{ __('All Statuses') }}</option>
                     @foreach(\App\Support\Enums\MeetingStatus::cases() as $status)
                         <option value="{{ $status->value }}" {{ request('status') === $status->value ? 'selected' : '' }}>
                             {{ ucfirst(str_replace('_', ' ', $status->value)) }}
@@ -105,12 +105,12 @@
         {{-- Date range --}}
         <div class="grid grid-cols-2 gap-3">
             <div>
-                <label for="drawer-date-from" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">From</label>
+                <label for="drawer-date-from" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ __('From') }}</label>
                 <input type="date" id="drawer-date-from" name="date_from" value="{{ request('date_from') }}"
                        class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors">
             </div>
             <div>
-                <label for="drawer-date-to" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">To</label>
+                <label for="drawer-date-to" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ __('To') }}</label>
                 <input type="date" id="drawer-date-to" name="date_to" value="{{ request('date_to') }}"
                        class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors">
             </div>
@@ -120,11 +120,11 @@
         <div class="sticky bottom-0 bg-white dark:bg-slate-800 pt-4 pb-1 border-t border-gray-200 dark:border-slate-700 -mx-6 px-6 mt-6 flex gap-3">
             <button type="submit"
                     class="flex-1 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2">
-                Apply Filters
+                {{ __('Apply Filters') }}
             </button>
             <a href="{{ route('meetings.index', request('view') ? ['view' => request('view')] : []) }}"
                class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl transition-colors">
-                Clear
+                {{ __('Clear') }}
             </a>
         </div>
     </form>

@@ -45,11 +45,11 @@ class CreateShareRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'permission.required' => 'A permission level is required.',
-            'permission.in' => 'The permission must be one of: view, comment, edit.',
-            'expires_at.date' => 'The expiration date must be a valid date.',
-            'expires_at.after' => 'The expiration date must be in the future.',
-            'shared_with_user_id.exists' => 'The selected user does not exist.',
+            'permission.required' => __('A permission level is required.'),
+            'permission.in' => __('The permission must be one of: view, comment, edit.'),
+            'expires_at.date' => __('The expiration date must be a valid date.'),
+            'expires_at.after' => __('The expiration date must be in the future.'),
+            'shared_with_user_id.exists' => __('The selected user does not exist.'),
         ];
     }
 }

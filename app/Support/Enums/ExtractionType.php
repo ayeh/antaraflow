@@ -18,14 +18,14 @@ enum ExtractionType: string
     public function label(): string
     {
         return match ($this) {
-            self::Summary => 'Summary',
-            self::ActionItems => 'Action Items',
-            self::Decisions => 'Decisions',
-            self::Topics => 'Topics',
-            self::Risks => 'Risks',
-            self::FollowUpEmail => 'Follow-up Email',
-            self::MeetingPreparation => 'Meeting Preparation',
-            self::AgendaEmail => 'Agenda Email',
+            self::Summary => __('Summary'),
+            self::ActionItems => __('Action Items'),
+            self::Decisions => __('Decisions'),
+            self::Topics => __('Topics'),
+            self::Risks => __('Risks'),
+            self::FollowUpEmail => __('Follow-up Email'),
+            self::MeetingPreparation => __('Meeting Preparation'),
+            self::AgendaEmail => __('Agenda Email'),
         };
     }
 }

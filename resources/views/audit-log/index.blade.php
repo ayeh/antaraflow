@@ -4,8 +4,8 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Audit Log</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Track all activity within your organization.</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Audit Log') }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Track all activity within your organization.') }}</p>
         </div>
     </div>
 
@@ -13,35 +13,35 @@
     <form method="GET" action="{{ route('audit-log.index') }}" class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Action</label>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Action') }}</label>
                 <select name="action" class="w-full text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500">
-                    <option value="">All Actions</option>
+                    <option value="">{{ __('All Actions') }}</option>
                     @foreach($actions as $action)
-                        <option value="{{ $action }}" {{ request('action') === $action ? 'selected' : '' }}>{{ $action }}</option>
+                        <option value="{{ $action }}" {{ request('action') === $action ? 'selected' : '' }}>{{ __(ucfirst($action)) }}</option>
                     @endforeach
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">User</label>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('User') }}</label>
                 <select name="user_id" class="w-full text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500">
-                    <option value="">All Users</option>
+                    <option value="">{{ __('All Users') }}</option>
                     @foreach($orgUsers as $orgUser)
                         <option value="{{ $orgUser->id }}" {{ request('user_id') == $orgUser->id ? 'selected' : '' }}>{{ $orgUser->name }}</option>
                     @endforeach
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">From</label>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('From') }}</label>
                 <input type="date" name="date_from" value="{{ request('date_from') }}" class="w-full text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500">
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('To') }}</label>
                 <input type="date" name="date_to" value="{{ request('date_to') }}" class="w-full text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500">
             </div>
         </div>
         <div class="mt-3 flex gap-2">
-            <button type="submit" class="bg-violet-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors">Filter</button>
-            <a href="{{ route('audit-log.index') }}" class="text-sm font-medium text-gray-600 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">Clear</a>
+            <button type="submit" class="bg-violet-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors">{{ __('Filter') }}</button>
+            <a href="{{ route('audit-log.index') }}" class="text-sm font-medium text-gray-600 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">{{ __('Clear') }}</a>
         </div>
     </form>
 
@@ -52,30 +52,30 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
-                <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No audit log entries</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Activity within your organization will be tracked here.</p>
+                <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">{{ __('No audit log entries') }}</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Activity within your organization will be tracked here.') }}</p>
             </div>
         @else
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                     <thead class="bg-gray-50 dark:bg-slate-700/50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Resource Type</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Resource ID</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">IP Address</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Details</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Date') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('User') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Action') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Resource Type') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Resource ID') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('IP Address') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Details') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
                         @foreach($logs as $log)
                             <tr x-data="{ expanded: false }" class="hover:bg-gray-50 dark:hover:bg-slate-700/30">
                                 <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $log->created_at->format('d M Y H:i') }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $log->user?->name ?? 'System' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ $log->user?->name ?? __('System') }}</td>
                                 <td class="px-4 py-3">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">{{ $log->action }}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">{{ __(ucfirst($log->action)) }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                                     @if($log->auditable_type)
@@ -97,7 +97,7 @@
                                         <button
                                             @click="expanded = !expanded"
                                             class="text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-200 transition-colors"
-                                            x-text="expanded ? 'Hide' : 'Show'"
+                                            x-text="expanded ? '{{ __('Hide') }}' : '{{ __('Show') }}'"
                                         ></button>
                                     @else
                                         <span class="text-xs text-gray-300 dark:text-gray-600">&mdash;</span>
@@ -110,13 +110,13 @@
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mt-2">
                                             @if($log->old_values)
                                                 <div>
-                                                    <p class="font-medium text-gray-500 dark:text-gray-400 mb-1">Before</p>
+                                                    <p class="font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Before') }}</p>
                                                     <pre class="bg-gray-100 dark:bg-slate-800 rounded-lg p-3 overflow-x-auto text-gray-700 dark:text-gray-300">{{ json_encode($log->old_values, JSON_PRETTY_PRINT) }}</pre>
                                                 </div>
                                             @endif
                                             @if($log->new_values)
                                                 <div>
-                                                    <p class="font-medium text-gray-500 dark:text-gray-400 mb-1">After</p>
+                                                    <p class="font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('After') }}</p>
                                                     <pre class="bg-gray-100 dark:bg-slate-800 rounded-lg p-3 overflow-x-auto text-gray-700 dark:text-gray-300">{{ json_encode($log->new_values, JSON_PRETTY_PRINT) }}</pre>
                                                 </div>
                                             @endif

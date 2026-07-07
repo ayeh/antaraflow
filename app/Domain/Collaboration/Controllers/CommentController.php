@@ -35,7 +35,7 @@ class CommentController extends Controller
         );
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Comment added.');
+            ->with('success', __('Comment added.'));
     }
 
     public function update(UpdateCommentRequest $request, Comment $comment): RedirectResponse
@@ -46,7 +46,7 @@ class CommentController extends Controller
 
         $this->commentService->updateComment($comment, $validated['body']);
 
-        return redirect()->back()->with('success', 'Comment updated.');
+        return redirect()->back()->with('success', __('Comment updated.'));
     }
 
     public function destroy(Comment $comment): RedirectResponse
@@ -55,6 +55,6 @@ class CommentController extends Controller
 
         $this->commentService->deleteComment($comment);
 
-        return redirect()->back()->with('success', 'Comment deleted.');
+        return redirect()->back()->with('success', __('Comment deleted.'));
     }
 }

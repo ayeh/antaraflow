@@ -61,6 +61,6 @@ class AgendaEmailController extends Controller
         Mail::to($validated['recipients'])->send($mailable);
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Agenda email sent successfully to '.count($validated['recipients']).' recipient(s).');
+            ->with('success', __('Agenda email sent successfully to :count recipient(s).', ['count' => count($validated['recipients'])]));
     }
 }

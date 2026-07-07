@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <title>{{ $meeting->title }}</title>
@@ -41,52 +41,52 @@
     {{-- Header --}}
     <h1>{{ $meeting->title }}</h1>
     @if($meeting->mom_number)
-        <p class="meta"><strong>Ref No:</strong> {{ $meeting->mom_number }}</p>
+        <p class="meta"><strong>{{ __('Ref No:') }}</strong> {{ $meeting->mom_number }}</p>
     @endif
     @if($meeting->meeting_date)
-        <p class="meta"><strong>Tarikh:</strong> {{ $meeting->meeting_date->format('d F Y') }}
+        <p class="meta"><strong>{{ __('Date:') }}</strong> {{ $meeting->meeting_date->format('d F Y') }}
             @if($meeting->start_time) &nbsp;|&nbsp; {{ \Carbon\Carbon::parse($meeting->start_time)->format('g:i A') }}
                 @if($meeting->end_time) – {{ \Carbon\Carbon::parse($meeting->end_time)->format('g:i A') }} @endif
             @endif
         </p>
     @endif
     @if($meeting->location)
-        <p class="meta"><strong>Tempat:</strong> {{ $meeting->location }}</p>
+        <p class="meta"><strong>{{ __('Venue:') }}</strong> {{ $meeting->location }}</p>
     @endif
     @if($meeting->duration_minutes)
-        <p class="meta"><strong>Tempoh:</strong> {{ $meeting->duration_minutes }} minit</p>
+        <p class="meta"><strong>{{ __('Duration:') }}</strong> {{ $meeting->duration_minutes }} {{ __('minutes') }}</p>
     @endif
     @if($meeting->createdBy)
-        <p class="meta"><strong>Pengerusi:</strong> {{ $meeting->createdBy->name }}</p>
+        <p class="meta"><strong>{{ __('Chairperson:') }}</strong> {{ $meeting->createdBy->name }}</p>
     @endif
     @if($meeting->prepared_by)
-        <p class="meta"><strong>Disediakan oleh:</strong> {{ $meeting->prepared_by }}</p>
+        <p class="meta"><strong>{{ __('Prepared by:') }}</strong> {{ $meeting->prepared_by }}</p>
     @endif
     <p class="meta">
-        <strong>Status:</strong> <span class="status status-{{ str_replace(' ', '_', $meeting->status->value) }}">{{ ucfirst(str_replace('_', ' ', $meeting->status->value)) }}</span>
+        <strong>{{ __('Status:') }}</strong> <span class="status status-{{ str_replace(' ', '_', $meeting->status->value) }}">{{ ucfirst(str_replace('_', ' ', $meeting->status->value)) }}</span>
     </p>
 
     <hr>
 
     {{-- Attendees --}}
     @if($meeting->attendees->isNotEmpty())
-        <h2>Senarai Peserta</h2>
+        <h2>{{ __('Attendees') }}</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Nama</th>
-                    <th>E-mel</th>
-                    <th>RSVP</th>
-                    <th>Hadir</th>
+                    <th>{{ __('Name') }}</th>
+                    <th>{{ __('Email') }}</th>
+                    <th>{{ __('RSVP') }}</th>
+                    <th>{{ __('Present') }}</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($meeting->attendees as $attendee)
                     <tr>
-                        <td>{{ $attendee->user?->name ?? $attendee->name ?? 'Unknown' }}</td>
+                        <td>{{ $attendee->user?->name ?? $attendee->name ?? __('Unknown') }}</td>
                         <td>{{ $attendee->user?->email ?? $attendee->email ?? '—' }}</td>
                         <td>{{ $attendee->rsvp_status ? ucfirst($attendee->rsvp_status->value) : '—' }}</td>
-                        <td>{{ $attendee->is_present ? 'Ya' : 'Tidak' }}</td>
+                        <td>{{ $attendee->is_present ? __('Yes') : __('No') }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -95,7 +95,7 @@
 
     {{-- Agenda --}}
     @if($meeting->topics->isNotEmpty())
-        <h2>Agenda</h2>
+        <h2>{{ __('Agenda') }}</h2>
         @foreach($meeting->topics->sortBy('sort_order') as $i => $item)
             <div class="agenda-item">
                 <strong>{{ $i + 1 }}. {{ $item->title }}</strong>
@@ -103,7 +103,7 @@
                     <br><span style="color:#6b7280">{{ $item->description }}</span>
                 @endif
                 @if($item->duration_minutes)
-                    <span style="color:#9ca3af; float:right">{{ $item->duration_minutes }} min</span>
+                    <span style="color:#9ca3af; float:right">{{ $item->duration_minutes }} {{ __('min') }}</span>
                 @endif
             </div>
         @endforeach
@@ -117,12 +117,12 @@
         $risks      = $extractionsByType->get('risks')?->sortByDesc('created_at')->first();
     @endphp
 
-    {{-- Summary / Rumusan --}}
+    {{-- Summary --}}
     @if($summary && $summary->content)
-        <h2>Rumusan</h2>
+        <h2>{{ __('Summary') }}</h2>
         <div class="box">{{ $summary->content }}</div>
         @if(!empty($summary->structured_data['key_points']))
-            <h3>Perkara Utama</h3>
+            <h3>{{ __('Key Points') }}</h3>
             @php
                 $keyPoints = is_array($summary->structured_data['key_points'])
                     ? $summary->structured_data['key_points']
@@ -134,18 +134,18 @@
         @endif
     @endif
 
-    {{-- Meeting Notes / Content --}}
+    {{-- Meeting Notes --}}
     @if($meeting->content)
-        <h2>Nota Mesyuarat</h2>
+        <h2>{{ __('Meeting Notes') }}</h2>
         <div class="box">{{ strip_tags($meeting->content) }}</div>
     @endif
 
     {{-- Manual Notes --}}
     @if($meeting->manualNotes->isNotEmpty())
-        <h2>Nota Manual</h2>
+        <h2>{{ __('Manual Notes') }}</h2>
         @foreach($meeting->manualNotes as $note)
             <div class="note-box">
-                <strong>{{ $note->createdBy?->name ?? 'Unknown' }}</strong>
+                <strong>{{ $note->createdBy?->name ?? __('Unknown') }}</strong>
                 @if($note->created_at) &mdash; {{ $note->created_at->format('d M Y g:i A') }} @endif
                 <br>{{ strip_tags($note->content ?? '') }}
             </div>
@@ -154,7 +154,7 @@
 
     {{-- Topics Discussed --}}
     @if($topics && !empty($topics->structured_data) && !isset($topics->structured_data['custom_template']))
-        <h2>Perkara yang Dibincangkan</h2>
+        <h2>{{ __('Topics Discussed') }}</h2>
         @foreach($topics->structured_data as $topic)
             <div class="topic-item">
                 @if(is_array($topic))
@@ -168,13 +168,13 @@
             </div>
         @endforeach
     @elseif($topics && $topics->content)
-        <h2>Perkara yang Dibincangkan</h2>
+        <h2>{{ __('Topics Discussed') }}</h2>
         <div class="box">{{ $topics->content }}</div>
     @endif
 
     {{-- Decisions --}}
     @if($decisions && !empty($decisions->structured_data) && !isset($decisions->structured_data['custom_template']))
-        <h2>Keputusan</h2>
+        <h2>{{ __('Decisions') }}</h2>
         @foreach($decisions->structured_data as $decision)
             <div class="decision-item">
                 @if(is_array($decision))
@@ -188,13 +188,13 @@
             </div>
         @endforeach
     @elseif($decisions && $decisions->content)
-        <h2>Keputusan</h2>
+        <h2>{{ __('Decisions') }}</h2>
         <div class="box">{{ $decisions->content }}</div>
     @endif
 
     {{-- Risks --}}
     @if($risks && !empty($risks->structured_data) && !isset($risks->structured_data['custom_template']))
-        <h2>Risiko &amp; Isu</h2>
+        <h2>{{ __('Risks & Issues') }}</h2>
         @foreach($risks->structured_data as $risk)
             <div class="risk-item">
                 @if(is_array($risk))
@@ -208,28 +208,28 @@
             </div>
         @endforeach
     @elseif($risks && $risks->content)
-        <h2>Risiko &amp; Isu</h2>
+        <h2>{{ __('Risks & Issues') }}</h2>
         <div class="box">{{ $risks->content }}</div>
     @endif
 
     {{-- Action Items --}}
     @if($meeting->actionItems->isNotEmpty())
-        <h2>Tindakan Susulan</h2>
+        <h2>{{ __('Action Items') }}</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Tindakan</th>
-                    <th>Tanggungjawab</th>
-                    <th>Keutamaan</th>
-                    <th>Status</th>
-                    <th>Tarikh Siap</th>
+                    <th>{{ __('Action') }}</th>
+                    <th>{{ __('Responsible') }}</th>
+                    <th>{{ __('Priority') }}</th>
+                    <th>{{ __('Status') }}</th>
+                    <th>{{ __('Due Date') }}</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($meeting->actionItems as $item)
                     <tr>
                         <td>{{ $item->title }}</td>
-                        <td>{{ $item->assignedTo?->name ?? 'Belum Ditetapkan' }}</td>
+                        <td>{{ $item->assignedTo?->name ?? __('Unassigned') }}</td>
                         <td class="priority-{{ $item->priority?->value ?? 'low' }}">{{ ucfirst($item->priority?->value ?? '—') }}</td>
                         <td>{{ ucfirst(str_replace('_', ' ', $item->status->value)) }}</td>
                         <td>{{ $item->due_date?->format('d M Y') ?? '—' }}</td>
@@ -239,51 +239,51 @@
         </table>
     @endif
 
-    {{-- Mesyuarat Seterusnya --}}
-    <h2>Mesyuarat Seterusnya</h2>
+    {{-- Next Meeting --}}
+    <h2>{{ __('Next Meeting') }}</h2>
     <div class="next-meeting-box">
         <table style="width:100%; border:none;">
             <tr>
-                <td style="border:none; width:20%; color:#6b7280;">Tarikh &amp; Masa:</td>
+                <td style="border:none; width:20%; color:#6b7280;">{{ __('Date & Time:') }}</td>
                 <td style="border:none; border-bottom:1px solid #d1d5db;">&nbsp;</td>
             </tr>
             <tr><td colspan="2" style="border:none; height:8px;"></td></tr>
             <tr>
-                <td style="border:none; color:#6b7280;">Tempat:</td>
+                <td style="border:none; color:#6b7280;">{{ __('Venue:') }}</td>
                 <td style="border:none; border-bottom:1px solid #d1d5db;">&nbsp;</td>
             </tr>
         </table>
     </div>
 
     {{-- Signature --}}
-    <h2>Pengesahan</h2>
+    <h2>{{ __('Verification') }}</h2>
     <table class="signature-table">
         <tr>
             <td>
                 <div class="signature-line"></div>
                 <strong>{{ $meeting->prepared_by ?? $meeting->createdBy?->name ?? '________________' }}</strong><br>
-                <span style="color:#6b7280">Disediakan oleh / Setiausaha</span>
+                <span style="color:#6b7280">{{ __('Prepared by / Secretary') }}</span>
             </td>
             <td>
                 <div class="signature-line"></div>
                 <strong>{{ $meeting->createdBy?->name ?? '________________' }}</strong><br>
-                <span style="color:#6b7280">Disahkan oleh / Pengerusi</span>
+                <span style="color:#6b7280">{{ __('Verified by / Chairperson') }}</span>
             </td>
         </tr>
         <tr>
             <td style="padding-top:12px;">
-                <span style="color:#6b7280">Tarikh: </span>
+                <span style="color:#6b7280">{{ __('Date:') }} </span>
                 <span style="border-bottom:1px solid #374151; display:inline-block; width:120px;">&nbsp;</span>
             </td>
             <td style="padding-top:12px;">
-                <span style="color:#6b7280">Tarikh: </span>
+                <span style="color:#6b7280">{{ __('Date:') }} </span>
                 <span style="border-bottom:1px solid #374151; display:inline-block; width:120px;">&nbsp;</span>
             </td>
         </tr>
     </table>
 
     <div class="footer">
-        Dijana oleh antaraNote pada {{ now()->format('d F Y g:i A') }}
+        {{ __('Generated by antaraNote on') }} {{ now()->format('d F Y g:i A') }}
     </div>
 </body>
 </html>

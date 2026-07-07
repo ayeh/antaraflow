@@ -55,11 +55,11 @@
 
         statusLabel(status) {
             const map = {
-                open: 'Open',
-                in_progress: 'In Progress',
-                completed: 'Completed',
-                cancelled: 'Cancelled',
-                carried_forward: 'Carried Forward',
+                open: '{{ __("Open") }}',
+                in_progress: '{{ __("In Progress") }}',
+                completed: '{{ __("Completed") }}',
+                cancelled: '{{ __("Cancelled") }}',
+                carried_forward: '{{ __("Carried Forward") }}',
             };
             return map[status] || status;
         },
@@ -135,7 +135,7 @@
                     };
                     this.actionItems.push(created);
                     this.resetNewItem();
-                    this.successMessage = 'Action item added.';
+                    this.successMessage = '{{ __('Action item added.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 } else {
                     const data = await response.json().catch(() => null);
@@ -144,7 +144,7 @@
                 }
             } catch (e) {
                 console.error('Add action item failed:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -191,7 +191,7 @@
                         };
                     }
                     this.editingItemId = null;
-                    this.successMessage = 'Action item updated.';
+                    this.successMessage = '{{ __('Action item updated.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 } else {
                     const data = await response.json().catch(() => null);
@@ -200,7 +200,7 @@
                 }
             } catch (e) {
                 console.error('Update failed:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -208,7 +208,7 @@
         },
 
         async deleteActionItem(id) {
-            if (!(await window.antaraConfirm('Delete this action item?', {title: 'Delete Action Item'}))) return;
+            if (!(await window.antaraConfirm('{{ __("Delete this action item?") }}', {title: '{{ __("Delete Action Item") }}'}))) return;
             this.loading = true;
 
             try {
@@ -223,7 +223,7 @@
 
                 if (response.ok || response.redirected) {
                     this.actionItems = this.actionItems.filter(i => i.id !== id);
-                    this.successMessage = 'Action item removed.';
+                    this.successMessage = '{{ __('Action item removed.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 }
             } catch (e) {
@@ -260,7 +260,7 @@
                         replies: [],
                     });
                     this.commentBody = '';
-                    this.successMessage = 'Comment added.';
+                    this.successMessage = '{{ __('Comment added.') }}';
                     setTimeout(() => this.successMessage = '', 3000);
                 } else {
                     const data = await response.json().catch(() => null);
@@ -269,7 +269,7 @@
                 }
             } catch (e) {
                 console.error('Comment failed:', e);
-                this.errorMessage = 'Network error. Please try again.';
+                this.errorMessage = '{{ __('Network error. Please try again.') }}';
                 setTimeout(() => this.errorMessage = '', 4000);
             }
 
@@ -347,11 +347,11 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Meeting Content Preview</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Review the content from your meeting inputs before generating action items</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Meeting Content Preview') }}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Review the content from your meeting inputs before generating action items') }}</p>
                 </div>
             </div>
-            <button @click="expanded = !expanded" class="text-sm font-medium text-violet-600 dark:text-violet-400 hover:underline" x-text="expanded ? 'Collapse' : 'Expand'">
+            <button @click="expanded = !expanded" class="text-sm font-medium text-violet-600 dark:text-violet-400 hover:underline" x-text="expanded ? '{{ __('Collapse') }}' : '{{ __('Expand') }}'">
                 Expand
             </button>
         </div>
@@ -373,7 +373,7 @@
             @if($wordCount > 0)
                 <span class="inline-flex items-center gap-1">
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
-                    {{ number_format($wordCount) }} words
+                    {{ number_format($wordCount) }} {{ __('words') }}
                 </span>
             @endif
         </div>
@@ -393,7 +393,7 @@
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
-                    AI Summary
+                    {{ __('AI Summary') }}
                 </h4>
                 <p class="text-sm text-violet-700 dark:text-violet-200 leading-relaxed">{{ $summary->content }}</p>
             </div>
@@ -406,7 +406,7 @@
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Key Decisions
+                    {{ __('Key Decisions') }}
                 </h4>
                 <ul class="space-y-2">
                     @foreach($decisions->structured_data as $decision)
@@ -443,9 +443,9 @@
                         <svg class="h-4 w-4" :class="reExtracting && 'animate-spin'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        <span x-text="reExtracting ? 'Re-extracting...' : 'Extract Action Items with AI'"></span>
+                        <span x-text="reExtracting ? '{{ __('Re-extracting...') }}' : '{{ __('Extract Action Items with AI') }}'"></span>
                     </button>
-                    <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">Clear existing items to extract again.</span>
+                    <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">{{ __('Clear existing items to extract again.') }}</span>
                 </form>
             </div>
         @endif
@@ -455,20 +455,20 @@
     {{-- Stats Row --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Total') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="stats.total"></p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">action items</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ __('action items') }}</p>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Completed</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Completed') }}</p>
             <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1" x-text="stats.completed"></p>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">In Progress</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('In Progress') }}</p>
             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1" x-text="stats.inProgress"></p>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Overdue</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Overdue') }}</p>
             <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1" x-text="stats.overdue"></p>
         </div>
     </div>
@@ -480,7 +480,7 @@
         <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
             <div class="p-6 pb-4">
                 <div class="flex items-center justify-between mb-2">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Action Items</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Action Items') }}</h2>
                     @if($isEditable)
                         <button
                             type="button"
@@ -490,7 +490,7 @@
                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            Add Item
+                            {{ __('Add Item') }}
                         </button>
                     @endif
                 </div>
@@ -503,8 +503,8 @@
                         <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                         </svg>
-                        <h3 class="mt-3 text-sm font-medium text-gray-900 dark:text-white">No action items</h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Add action items manually or run AI extraction from the Inputs step.</p>
+                        <h3 class="mt-3 text-sm font-medium text-gray-900 dark:text-white">{{ __('No action items') }}</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Add action items manually or run AI extraction from the Inputs step.') }}</p>
                     </div>
                 </template>
 
@@ -515,7 +515,7 @@
                             <input
                                 type="text"
                                 x-model="newItem.title"
-                                placeholder="Action item title *"
+                                placeholder="{{ __('Action item title *') }}"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                             />
                         </div>
@@ -523,36 +523,36 @@
                             <textarea
                                 x-model="newItem.description"
                                 rows="2"
-                                placeholder="Description (optional)"
+                                placeholder="{{ __('Description (optional)') }}"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
                             ></textarea>
                         </div>
                         <div class="grid grid-cols-3 gap-3">
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Assignee</label>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('Assignee') }}</label>
                                 <select x-model="newItem.assigned_to" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                                    <option value="">Unassigned</option>
+                                    <option value="">{{ __('Unassigned') }}</option>
                                     <template x-for="member in orgMembers" :key="member.id">
                                         <option :value="member.id" x-text="member.name"></option>
                                     </template>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Due Date</label>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('Due Date') }}</label>
                                 <input type="date" x-model="newItem.due_date" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Priority</label>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('Priority') }}</label>
                                 <select x-model="newItem.priority" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
-                                    <option value="critical">Critical</option>
+                                    <option value="low">{{ __('Low') }}</option>
+                                    <option value="medium">{{ __('Medium') }}</option>
+                                    <option value="high">{{ __('High') }}</option>
+                                    <option value="critical">{{ __('Critical') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="flex justify-end gap-2">
-                            <button type="button" @click="resetNewItem()" class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Cancel</button>
+                            <button type="button" @click="resetNewItem()" class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">{{ __('Cancel') }}</button>
                             <button
                                 type="button"
                                 @click="addActionItem()"
@@ -616,7 +616,7 @@
                                                 type="button"
                                                 @click="startEdit(item)"
                                                 class="p-1.5 text-gray-400 hover:text-violet-500 rounded-md hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
-                                                title="Edit"
+                                                title="{{ __('Edit') }}"
                                             >
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                             </button>
@@ -625,7 +625,7 @@
                                                 @click="deleteActionItem(item.id)"
                                                 :disabled="loading"
                                                 class="p-1.5 text-gray-400 hover:text-red-500 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
-                                                title="Delete"
+                                                title="{{ __('Delete') }}"
                                             >
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                             </button>
@@ -637,43 +637,43 @@
                                 @if($isEditable)
                                     <div x-show="editingItemId === item.id" x-cloak class="p-4 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/10">
                                         <div class="space-y-3">
-                                            <input type="text" x-model="editItem.title" placeholder="Title *" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
-                                            <textarea x-model="editItem.description" rows="2" placeholder="Description" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"></textarea>
+                                            <input type="text" x-model="editItem.title" placeholder="{{ __('Title *') }}" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
+                                            <textarea x-model="editItem.description" rows="2" placeholder="{{ __('Description') }}" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"></textarea>
                                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                                 <div>
-                                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Assignee</label>
+                                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('Assignee') }}</label>
                                                     <select x-model="editItem.assigned_to" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                                                        <option value="">Unassigned</option>
+                                                        <option value="">{{ __('Unassigned') }}</option>
                                                         <template x-for="member in orgMembers" :key="member.id">
                                                             <option :value="member.id" x-text="member.name"></option>
                                                         </template>
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Due Date</label>
+                                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('Due Date') }}</label>
                                                     <input type="date" x-model="editItem.due_date" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent" />
                                                 </div>
                                                 <div>
-                                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Priority</label>
+                                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('Priority') }}</label>
                                                     <select x-model="editItem.priority" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                                                        <option value="low">Low</option>
-                                                        <option value="medium">Medium</option>
-                                                        <option value="high">High</option>
-                                                        <option value="critical">Critical</option>
+                                                        <option value="low">{{ __('Low') }}</option>
+                                                        <option value="medium">{{ __('Medium') }}</option>
+                                                        <option value="high">{{ __('High') }}</option>
+                                                        <option value="critical">{{ __('Critical') }}</option>
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Status</label>
+                                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('Status') }}</label>
                                                     <select x-model="editItem.status" class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                                                        <option value="open">Open</option>
-                                                        <option value="in_progress">In Progress</option>
-                                                        <option value="completed">Completed</option>
-                                                        <option value="cancelled">Cancelled</option>
+                                                        <option value="open">{{ __('Open') }}</option>
+                                                        <option value="in_progress">{{ __('In Progress') }}</option>
+                                                        <option value="completed">{{ __('Completed') }}</option>
+                                                        <option value="cancelled">{{ __('Cancelled') }}</option>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="flex justify-end gap-2">
-                                                <button type="button" @click="cancelEdit()" class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Cancel</button>
+                                                <button type="button" @click="cancelEdit()" class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">{{ __('Cancel') }}</button>
                                                 <button
                                                     type="button"
                                                     @click="updateActionItem(item.id)"
@@ -702,7 +702,7 @@
             {{-- Comments Section --}}
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                    Comments & Feedback
+                    {{ __('Comments & Feedback') }}
                     <span class="text-sm font-normal text-gray-500 dark:text-gray-400" x-text="'(' + comments.length + ')'"></span>
                 </h3>
 
@@ -713,7 +713,7 @@
                             <svg class="mx-auto h-8 w-8 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
-                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No comments yet</p>
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('No comments yet') }}</p>
                         </div>
                     </template>
 
@@ -771,7 +771,7 @@
                     <textarea
                         x-model="commentBody"
                         rows="3"
-                        placeholder="Add a comment..."
+                        placeholder="{{ __('Add a comment...') }}"
                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
                     ></textarea>
                     <button
@@ -784,7 +784,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span x-text="loading ? 'Posting...' : 'Post Comment'"></span>
+                        <span x-text="loading ? '{{ __('Posting...') }}' : '{{ __('Post Comment') }}'"></span>
                     </button>
                 </div>
             </div>

@@ -33,10 +33,10 @@ class UpdateExtractionTemplateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Template name is required.',
-            'extraction_type.required' => 'Extraction type is required.',
-            'prompt_template.required' => 'Prompt template is required.',
-            'prompt_template.min' => 'Prompt template must be at least 10 characters.',
+            'name.required' => __('Template name is required.'),
+            'extraction_type.required' => __('Extraction type is required.'),
+            'prompt_template.required' => __('Prompt template is required.'),
+            'prompt_template.min' => __('Prompt template must be at least 10 characters.'),
         ];
     }
 }

@@ -16,12 +16,12 @@ enum WebhookEvent: string
     public function label(): string
     {
         return match ($this) {
-            self::MeetingCreated => 'Meeting Created',
-            self::MeetingFinalized => 'Meeting Finalized',
-            self::MeetingApproved => 'Meeting Approved',
-            self::TranscriptionCompleted => 'Transcription Completed',
-            self::ExtractionCompleted => 'Extraction Completed',
-            self::ActionItemCreated => 'Action Item Created',
+            self::MeetingCreated => __('Meeting Created'),
+            self::MeetingFinalized => __('Meeting Finalized'),
+            self::MeetingApproved => __('Meeting Approved'),
+            self::TranscriptionCompleted => __('Transcription Completed'),
+            self::ExtractionCompleted => __('Extraction Completed'),
+            self::ActionItemCreated => __('Action Item Created'),
         };
     }
 }

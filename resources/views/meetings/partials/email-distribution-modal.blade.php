@@ -6,7 +6,7 @@
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
-        Email MOM
+        {{ __('Email MOM') }}
     </button>
 
     {{-- Modal Overlay --}}
@@ -36,7 +36,7 @@
                 class="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-lg">
 
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Email Minutes of Meeting</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Email Minutes of Meeting') }}</h3>
                     <button @click="open = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -49,27 +49,27 @@
                     <div class="px-6 py-4 space-y-4">
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Recipients</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{{ __('Recipients') }}</label>
                             <textarea name="recipients_raw" rows="3"
                                 class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                 placeholder="email1@example.com&#10;email2@example.com">{{ $meeting->attendees->pluck('email')->filter()->implode("\n") }}</textarea>
-                            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">One email per line or comma-separated</p>
+                            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ __('One email per line or comma-separated') }}</p>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Subject</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{{ __('Subject') }}</label>
                             <input type="text" name="subject" value="Minutes of Meeting — {{ $meeting->title }}"
                                 class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Note <span class="text-gray-400 dark:text-slate-500 font-normal">(optional)</span></label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{{ __('Note') }} <span class="text-gray-400 dark:text-slate-500 font-normal">{{ __('(optional)') }}</span></label>
                             <textarea name="body_note" rows="2"
                                 class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Format</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">{{ __('Format') }}</label>
                             <div class="flex gap-4">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name="export_format" value="pdf" checked class="text-indigo-600 border-gray-300 dark:border-slate-600">
@@ -87,11 +87,11 @@
                     <div class="px-6 py-4 border-t border-gray-200 dark:border-slate-700 flex justify-end gap-3">
                         <button type="button" @click="open = false"
                             class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
-                            Cancel
+                            {{ __('Cancel') }}
                         </button>
                         <button type="submit"
                             class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
-                            Send Email
+                            {{ __('Send Email') }}
                         </button>
                     </div>
                 </form>

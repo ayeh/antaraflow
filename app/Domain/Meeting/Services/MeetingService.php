@@ -78,7 +78,7 @@ class MeetingService
     public function update(MinutesOfMeeting $mom, array $data): MinutesOfMeeting
     {
         if ($mom->status === MeetingStatus::Approved) {
-            throw new \DomainException('Cannot edit an approved meeting.');
+            throw new \DomainException(__('Cannot edit an approved meeting.'));
         }
 
         $tags = array_key_exists('tags', $data) ? $data['tags'] : false;
@@ -120,7 +120,7 @@ class MeetingService
     public function finalize(MinutesOfMeeting $mom, User $user): MinutesOfMeeting
     {
         if (! in_array($mom->status, [MeetingStatus::Draft, MeetingStatus::InProgress])) {
-            throw new \DomainException('Only draft or in-progress meetings can be finalized.');
+            throw new \DomainException(__('Only draft or in-progress meetings can be finalized.'));
         }
 
         // Board meeting quorum check
@@ -131,7 +131,7 @@ class MeetingService
                 $quorumService = app(QuorumService::class);
 
                 if (! $quorumService->isQuorumMet($mom)) {
-                    throw new \DomainException('Cannot finalize: quorum is not met for this board meeting.');
+                    throw new \DomainException(__('Cannot finalize: quorum is not met for this board meeting.'));
                 }
             }
         }
@@ -150,7 +150,7 @@ class MeetingService
     public function approve(MinutesOfMeeting $mom, User $user): MinutesOfMeeting
     {
         if ($mom->status !== MeetingStatus::Finalized) {
-            throw new \DomainException('Only finalized meetings can be approved.');
+            throw new \DomainException(__('Only finalized meetings can be approved.'));
         }
 
         $mom->update(['status' => MeetingStatus::Approved]);
@@ -165,7 +165,7 @@ class MeetingService
     public function revertToDraft(MinutesOfMeeting $mom, User $user): MinutesOfMeeting
     {
         if ($mom->status !== MeetingStatus::Finalized) {
-            throw new \DomainException('Only finalized meetings can be reverted to draft.');
+            throw new \DomainException(__('Only finalized meetings can be reverted to draft.'));
         }
 
         $this->versionService->createVersion($mom, $user, 'Reverted to draft');

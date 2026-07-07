@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $meeting->title }} — Minutes of Meeting</title>
+    <title>{{ $meeting->title }} — {{ __('Minutes of Meeting') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50 dark:bg-slate-900 min-h-screen">
@@ -25,11 +25,11 @@
                 <span class="font-semibold text-sm tracking-tight">
                     <span style="font-weight:400;">antara</span><span style="font-weight:700;">Note</span>
                 </span>
-                <span class="text-white/50 text-sm">&mdash; Minutes of Meeting</span>
+                <span class="text-white/50 text-sm">&mdash; {{ __('Minutes of Meeting') }}</span>
             </div>
             @if($access->expires_at)
                 <span class="text-white/70 text-xs">
-                    Expires {{ $access->expires_at->format('M j, Y') }}
+                    {{ __('Expires') }} {{ $access->expires_at->format('M j, Y') }}
                 </span>
             @endif
         </div>
@@ -71,14 +71,14 @@
                 @endif
             </div>
             @if($meeting->prepared_by)
-                <div class="mt-2 text-xs text-gray-400 dark:text-slate-500">Prepared by {{ $meeting->prepared_by }}</div>
+                <div class="mt-2 text-xs text-gray-400 dark:text-slate-500">{{ __('Prepared by') }} {{ $meeting->prepared_by }}</div>
             @endif
         </div>
 
         {{-- Summary --}}
         @if($meeting->summary)
             <section class="mb-6 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Summary</h2>
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">{{ __('Summary') }}</h2>
                 <p class="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">{{ $meeting->summary }}</p>
             </section>
         @endif
@@ -86,7 +86,7 @@
         {{-- Topics / Agenda --}}
         @if($meeting->topics->isNotEmpty())
             <section class="mb-6 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Topics Discussed</h2>
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">{{ __('Topics Discussed') }}</h2>
                 <div class="space-y-3">
                     @foreach($meeting->topics as $topic)
                         <div>
@@ -108,7 +108,7 @@
         {{-- Meeting Content / Minutes --}}
         @if($meeting->content)
             <section class="mb-6 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Minutes</h2>
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">{{ __('Minutes') }}</h2>
                 <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-slate-400">
                     {!! nl2br(e($meeting->content)) !!}
                 </div>
@@ -118,14 +118,14 @@
         {{-- Attendees --}}
         @if($meeting->attendees->isNotEmpty())
             <section class="mb-6 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Attendees</h2>
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">{{ __('Attendees') }}</h2>
                 <div class="flex flex-wrap gap-2">
                     @foreach($meeting->attendees as $attendee)
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-slate-700 rounded-full text-sm text-gray-700 dark:text-slate-300">
                             <span class="w-5 h-5 rounded-full bg-violet-200 dark:bg-violet-900 text-violet-700 dark:text-violet-300 text-xs font-medium flex items-center justify-center">
                                 {{ strtoupper(substr($attendee->name ?? 'G', 0, 1)) }}
                             </span>
-                            {{ $attendee->name ?? 'Guest' }}
+                            {{ $attendee->name ?? __('Guest') }}
                             @if($attendee->role)
                                 <span class="text-xs text-gray-400 dark:text-slate-500">({{ $attendee->role }})</span>
                             @endif
@@ -138,15 +138,15 @@
         {{-- Action Items (client_visible only) --}}
         @if($meeting->actionItems->isNotEmpty())
             <section class="mb-6 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Action Items</h2>
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">{{ __('Action Items') }}</h2>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-100 dark:divide-slate-700">
                         <thead>
                             <tr>
-                                <th class="py-2 pr-4 text-left text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">Task</th>
-                                <th class="py-2 pr-4 text-left text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">Assignee</th>
-                                <th class="py-2 pr-4 text-left text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">Due Date</th>
-                                <th class="py-2 text-left text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">Status</th>
+                                <th class="py-2 pr-4 text-left text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">{{ __('Task') }}</th>
+                                <th class="py-2 pr-4 text-left text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">{{ __('Assignee') }}</th>
+                                <th class="py-2 pr-4 text-left text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">{{ __('Due Date') }}</th>
+                                <th class="py-2 text-left text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wider">{{ __('Status') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-slate-700/50">
@@ -183,7 +183,7 @@
         {{-- Notes / Comments (client_visible only) --}}
         @if($comments->isNotEmpty())
             <section class="mb-6 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Notes</h2>
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">{{ __('Notes') }}</h2>
                 <div class="space-y-3">
                     @foreach($comments as $comment)
                         <div class="text-sm">

@@ -32,11 +32,11 @@ class CreateAiProviderConfigRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'provider.required' => 'The provider is required.',
-            'provider.in' => 'The provider must be one of: openai, anthropic, google, ollama.',
-            'display_name.required' => 'The display name is required.',
-            'model.required' => 'The model is required.',
-            'base_url.url' => 'The base URL must be a valid URL.',
+            'provider.required' => __('The provider is required.'),
+            'provider.in' => __('The provider must be one of: openai, anthropic, google, ollama.'),
+            'display_name.required' => __('The display name is required.'),
+            'model.required' => __('The model is required.'),
+            'base_url.url' => __('The base URL must be a valid URL.'),
         ];
     }
 }

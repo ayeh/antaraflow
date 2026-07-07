@@ -3,19 +3,19 @@
 @section('content')
 <div class="space-y-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Subscription Plans</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">View and manage your organization's subscription.</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Subscription Plans') }}</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __("View and manage your organization's subscription.") }}</p>
     </div>
 
     {{-- Current Plan --}}
     @if($currentSubscription)
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-violet-200 dark:border-violet-800 p-5">
-            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Your Current Plan</h2>
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">{{ __('Your Current Plan') }}</h2>
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <p class="text-xl font-bold text-gray-900 dark:text-white">{{ $currentSubscription->subscriptionPlan?->name ?? 'Unknown Plan' }}</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white">{{ $currentSubscription->subscriptionPlan?->name ?? __('Unknown Plan') }}</p>
                     <p class="text-sm mt-1">
-                        Status:
+                        {{ __('Status:') }}
                         <span class="font-semibold @if($currentSubscription->status === 'active') text-emerald-600 dark:text-emerald-400 @else text-amber-600 dark:text-amber-400 @endif">
                             {{ ucfirst($currentSubscription->status) }}
                         </span>
@@ -26,30 +26,30 @@
                 </div>
                 <div class="text-right text-sm text-gray-500 dark:text-gray-400 space-y-1">
                     @if($currentSubscription->starts_at)
-                        <p>Started: <span class="font-medium text-gray-700 dark:text-gray-300">{{ $currentSubscription->starts_at->format('d M Y') }}</span></p>
+                        <p>{{ __('Started:') }} <span class="font-medium text-gray-700 dark:text-gray-300">{{ $currentSubscription->starts_at->format('d M Y') }}</span></p>
                     @endif
                     @if($currentSubscription->ends_at)
-                        <p>Ends: <span class="font-medium text-gray-700 dark:text-gray-300">{{ $currentSubscription->ends_at->format('d M Y') }}</span></p>
+                        <p>{{ __('Ends:') }} <span class="font-medium text-gray-700 dark:text-gray-300">{{ $currentSubscription->ends_at->format('d M Y') }}</span></p>
                     @endif
                     @if($currentSubscription->trial_ends_at && $currentSubscription->trial_ends_at->isFuture())
-                        <p class="text-amber-600 dark:text-amber-400 font-medium">Trial ends: {{ $currentSubscription->trial_ends_at->format('d M Y') }}</p>
+                        <p class="text-amber-600 dark:text-amber-400 font-medium">{{ __('Trial ends:') }} {{ $currentSubscription->trial_ends_at->format('d M Y') }}</p>
                     @endif
                     @if($currentSubscription->cancelled_at)
-                        <p class="text-red-500 dark:text-red-400 font-medium">Cancelled: {{ $currentSubscription->cancelled_at->format('d M Y') }}</p>
+                        <p class="text-red-500 dark:text-red-400 font-medium">{{ __('Cancelled:') }} {{ $currentSubscription->cancelled_at->format('d M Y') }}</p>
                     @endif
                 </div>
             </div>
         </div>
     @else
         <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800 p-5 text-sm text-amber-800 dark:text-amber-300">
-            You do not have an active subscription. Choose a plan below to get started.
+            {{ __('You do not have an active subscription. Choose a plan below to get started.') }}
         </div>
     @endif
 
     {{-- Plans Grid --}}
     @if($plans->isNotEmpty())
         <div>
-            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-4">Available Plans</h2>
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-4">{{ __('Available Plans') }}</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($plans as $plan)
                     @php
@@ -57,7 +57,7 @@
                     @endphp
                     <div class="relative bg-white dark:bg-slate-800 rounded-xl border {{ $isCurrent ? 'border-violet-400 dark:border-violet-600 ring-2 ring-violet-400 dark:ring-violet-600' : 'border-gray-200 dark:border-slate-700' }} p-5 flex flex-col">
                         @if($isCurrent)
-                            <span class="absolute top-4 right-4 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">Current</span>
+                            <span class="absolute top-4 right-4 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">{{ __('Current') }}</span>
                         @endif
 
                         <div class="mb-4">
@@ -70,10 +70,10 @@
                         <div class="mb-4">
                             <div class="flex items-baseline gap-1">
                                 <span class="text-3xl font-extrabold text-gray-900 dark:text-white">${{ number_format((float) $plan->price_monthly, 0) }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">/month</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('/month') }}</span>
                             </div>
                             @if($plan->price_yearly > 0)
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">${{ number_format((float) $plan->price_yearly, 0) }}/year</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">${{ number_format((float) $plan->price_yearly, 0) }}{{ __('/year') }}</p>
                             @endif
                         </div>
 
@@ -81,19 +81,19 @@
                         <ul class="mb-4 space-y-1.5 text-sm text-gray-600 dark:text-gray-300">
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                {{ $plan->max_users === -1 ? 'Unlimited users' : 'Up to ' . $plan->max_users . ' user' . ($plan->max_users === 1 ? '' : 's') }}
+                                {{ $plan->max_users === -1 ? __('Unlimited users') : __('Up to :count user|Up to :count users', ['count' => $plan->max_users]) }}
                             </li>
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                {{ $plan->max_meetings_per_month === -1 ? 'Unlimited meetings' : $plan->max_meetings_per_month . ' meetings/month' }}
+                                {{ $plan->max_meetings_per_month === -1 ? __('Unlimited meetings') : $plan->max_meetings_per_month . ' ' . __('meetings/month') }}
                             </li>
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                {{ $plan->max_audio_minutes_per_month === -1 ? 'Unlimited audio minutes' : $plan->max_audio_minutes_per_month . ' audio minutes/month' }}
+                                {{ $plan->max_audio_minutes_per_month === -1 ? __('Unlimited audio minutes') : $plan->max_audio_minutes_per_month . ' ' . __('audio minutes/month') }}
                             </li>
                             <li class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                {{ $plan->max_storage_mb === -1 ? 'Unlimited storage' : number_format($plan->max_storage_mb) . ' MB storage' }}
+                                {{ $plan->max_storage_mb === -1 ? __('Unlimited storage') : number_format($plan->max_storage_mb) . ' MB ' . __('storage') }}
                             </li>
                         </ul>
 
@@ -114,11 +114,11 @@
                         <div class="mt-auto">
                             @if($isCurrent)
                                 <button disabled class="w-full text-center text-sm font-medium px-4 py-2 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed">
-                                    Current Plan
+                                    {{ __('Current Plan') }}
                                 </button>
                             @else
                                 <a href="#" class="block w-full text-center text-sm font-medium px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition-colors">
-                                    Upgrade
+                                    {{ __('Upgrade') }}
                                 </a>
                             @endif
                         </div>
@@ -128,12 +128,12 @@
         </div>
     @else
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-            No subscription plans are currently available.
+            {{ __('No subscription plans are currently available.') }}
         </div>
     @endif
 
     <p class="text-sm text-center text-gray-400 dark:text-gray-500">
-        To upgrade or change your plan, please <a href="mailto:support@example.com" class="text-violet-600 dark:text-violet-400 hover:underline">contact us</a>.
+        {{ __('To upgrade or change your plan, please') }} <a href="mailto:support@example.com" class="text-violet-600 dark:text-violet-400 hover:underline">{{ __('contact us') }}</a>.
     </p>
 </div>
 @endsection

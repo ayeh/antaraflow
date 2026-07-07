@@ -50,7 +50,7 @@ class BrandingController extends Controller
         $this->brandingService->clearCache();
 
         return redirect()->route('admin.branding.index')
-            ->with('success', 'Branding settings updated successfully.');
+            ->with('success', __('Branding settings updated successfully.'));
     }
 
     public function storePreset(StoreBrandingPresetRequest $request): JsonResponse

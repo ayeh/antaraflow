@@ -35,7 +35,7 @@
                 };
             } catch {
                 this.open = false;
-                alert('Failed to load item. Please try again.');
+                alert('{{ __('Failed to load item. Please try again.') }}');
             } finally {
                 this.loading = false;
             }
@@ -67,7 +67,7 @@
                 }
                 this.close();
             } catch {
-                alert('Failed to save. Please try again.');
+                alert('{{ __('Failed to save. Please try again.') }}');
             } finally {
                 this.saving = false;
             }
@@ -123,7 +123,7 @@
             {{-- Header --}}
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex-shrink-0">
                 <a :href="item ? item.show_url : '#'" class="text-xs text-violet-600 dark:text-violet-400 hover:underline">
-                    Open full page →
+                    {{ __('Open full page →') }}
                 </a>
                 <button
                     type="button"
@@ -141,7 +141,7 @@
 
                 {{-- Title --}}
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Title</label>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Title') }}</label>
                     <input
                         type="text"
                         x-model="form.title"
@@ -151,11 +151,11 @@
 
                 {{-- Description --}}
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Description</label>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Description') }}</label>
                     <textarea
                         x-model="form.description"
                         rows="3"
-                        placeholder="No description"
+                        placeholder="{{ __('No description') }}"
                         class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 resize-none"
                     ></textarea>
                 </div>
@@ -163,7 +163,7 @@
                 {{-- Status + Priority --}}
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Status') }}</label>
                         <select x-model="form.status" class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500">
                             @foreach(\App\Support\Enums\ActionItemStatus::cases() as $status)
                                 <option value="{{ $status->value }}">{{ $status->label() }}</option>
@@ -171,7 +171,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Priority</label>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Priority') }}</label>
                         <select x-model="form.priority" class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500">
                             @foreach(\App\Support\Enums\ActionItemPriority::cases() as $priority)
                                 <option value="{{ $priority->value }}">{{ $priority->label() }}</option>
@@ -183,16 +183,16 @@
                 {{-- Assignee + Due Date --}}
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Assignee</label>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Assignee') }}</label>
                         <select x-model="form.assigned_to" class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500">
-                            <option value="">Unassigned</option>
+                            <option value="">{{ __('Unassigned') }}</option>
                             <template x-for="u in users" :key="u.id">
                                 <option :value="u.id" x-text="u.name"></option>
                             </template>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Due Date</label>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Due Date') }}</label>
                         <input
                             type="date"
                             x-model="form.due_date"
@@ -208,7 +208,7 @@
                         @click="close()"
                         class="text-sm px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
-                        Cancel
+                        {{ __('Cancel') }}
                     </button>
                     <button
                         type="button"
@@ -216,13 +216,13 @@
                         :disabled="saving"
                         class="text-sm px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors"
                     >
-                        <span x-text="saving ? 'Saving...' : 'Save'"></span>
+                        <span x-text="saving ? '{{ __('Saving...') }}' : '{{ __('Save') }}'"></span>
                     </button>
                 </div>
 
                 {{-- Activity timeline --}}
                 <div x-show="history.length > 0" class="border-t border-gray-200 dark:border-slate-700 pt-4">
-                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Activity</h3>
+                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ __('Activity') }}</h3>
                     <ol class="relative border-l border-gray-200 dark:border-slate-600 space-y-4 ml-2">
                         <template x-for="entry in history" :key="entry.id">
                             <li class="ml-4">
@@ -235,7 +235,7 @@
                                         <span class="font-medium" x-text="entry.changed_by_name"></span>
                                         <template x-if="entry.status_changed">
                                             <span>
-                                                changed status from
+                                                {{ __('changed status from') }}
                                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-gray-400" x-text="entry.old_label"></span>
                                                 <span class="text-gray-400 mx-0.5">→</span>
                                                 <span :class="entry.new_color_class" class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium" x-text="entry.new_label"></span>

@@ -91,7 +91,7 @@ class AiProviderConfigController extends Controller
         });
 
         return redirect()->route('ai-provider-configs.index')
-            ->with('success', 'AI provider configuration created successfully.');
+            ->with('success', __('AI provider configuration created successfully.'));
     }
 
     public function edit(Request $request, AiProviderConfig $aiProviderConfig): View
@@ -148,7 +148,7 @@ class AiProviderConfigController extends Controller
         });
 
         return redirect()->route('ai-provider-configs.index')
-            ->with('success', 'AI provider configuration updated successfully.');
+            ->with('success', __('AI provider configuration updated successfully.'));
     }
 
     public function destroy(Request $request, AiProviderConfig $aiProviderConfig): RedirectResponse
@@ -167,6 +167,6 @@ class AiProviderConfigController extends Controller
         $aiProviderConfig->delete();
 
         return redirect()->route('ai-provider-configs.index')
-            ->with('success', 'AI provider configuration deleted successfully.');
+            ->with('success', __('AI provider configuration deleted successfully.'));
     }
 }

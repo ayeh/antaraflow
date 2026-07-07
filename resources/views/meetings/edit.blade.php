@@ -6,7 +6,7 @@
         <a href="{{ route('meetings.show', $meeting) }}" class="text-gray-400 hover:text-gray-600">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </a>
-        <h1 class="text-2xl font-bold text-gray-900">Edit Meeting</h1>
+        <h1 class="text-2xl font-bold text-gray-900">{{ __('Edit Meeting') }}</h1>
     </div>
 
     <form method="POST" action="{{ route('meetings.update', $meeting) }}" class="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
@@ -24,35 +24,35 @@
         @endif
 
         <div>
-            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
+            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Title') }} <span class="text-red-500">*</span></label>
             <input type="text" name="title" id="title" value="{{ old('title', $meeting->title) }}" required class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-                <label for="meeting_date" class="block text-sm font-medium text-gray-700 mb-1">Meeting Date</label>
+                <label for="meeting_date" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Meeting Date') }}</label>
                 <input type="datetime-local" name="meeting_date" id="meeting_date" value="{{ old('meeting_date', $meeting->meeting_date?->format('Y-m-d\TH:i')) }}" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
             </div>
             <div>
-                <label for="duration_minutes" class="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
+                <label for="duration_minutes" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Duration (minutes)') }}</label>
                 <input type="number" name="duration_minutes" id="duration_minutes" value="{{ old('duration_minutes', $meeting->duration_minutes) }}" min="1" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
             </div>
         </div>
 
         <div>
-            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Location') }}</label>
             <input type="text" name="location" id="location" value="{{ old('location', $meeting->location) }}" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
         </div>
 
         <div>
-            <label for="summary" class="block text-sm font-medium text-gray-700 mb-1">Summary</label>
+            <label for="summary" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Summary') }}</label>
             <textarea name="summary" id="summary" rows="3" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">{{ old('summary', $meeting->summary) }}</textarea>
         </div>
 
         @if($availableTags->isNotEmpty())
             @php $selectedTagIds = old('tags', $meeting->tags->pluck('id')->toArray()); @endphp
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Tags') }}</label>
                 <div class="flex flex-wrap gap-2">
                     @foreach($availableTags as $tag)
                         @php $isChecked = in_array($tag->id, $selectedTagIds); @endphp
@@ -75,12 +75,12 @@
         @endif
 
         <div>
-            <label for="content" class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+            <label for="content" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Content') }}</label>
             <textarea name="content" id="content" rows="6" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">{{ old('content', $meeting->content) }}</textarea>
         </div>
 
         <div class="border border-gray-200 rounded-lg p-4 space-y-3">
-            <h3 class="text-sm font-medium text-gray-900">Join Settings</h3>
+            <h3 class="text-sm font-medium text-gray-900">{{ __('Join Settings') }}</h3>
             <div class="space-y-3">
                 <label class="flex items-center gap-3 cursor-pointer">
                     <input type="hidden" name="allow_external_join" value="0">
@@ -88,8 +88,8 @@
                         {{ old('allow_external_join', $meeting->joinSetting?->allow_external_join) ? 'checked' : '' }}
                         class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                     <div>
-                        <span class="text-sm font-medium text-gray-700">Allow External Join</span>
-                        <p class="text-xs text-gray-500">Allow people outside the organization to join this meeting.</p>
+                        <span class="text-sm font-medium text-gray-700">{{ __('Allow External Join') }}</span>
+                        <p class="text-xs text-gray-500">{{ __('Allow people outside the organization to join this meeting.') }}</p>
                     </div>
                 </label>
                 <label class="flex items-center gap-3 cursor-pointer">
@@ -98,8 +98,8 @@
                         {{ old('require_rsvp', $meeting->joinSetting?->require_rsvp) ? 'checked' : '' }}
                         class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                     <div>
-                        <span class="text-sm font-medium text-gray-700">Require RSVP</span>
-                        <p class="text-xs text-gray-500">Attendees must confirm attendance before joining.</p>
+                        <span class="text-sm font-medium text-gray-700">{{ __('Require RSVP') }}</span>
+                        <p class="text-xs text-gray-500">{{ __('Attendees must confirm attendance before joining.') }}</p>
                     </div>
                 </label>
                 <label class="flex items-center gap-3 cursor-pointer">
@@ -108,16 +108,16 @@
                         {{ old('auto_notify', $meeting->joinSetting?->auto_notify ?? true) ? 'checked' : '' }}
                         class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                     <div>
-                        <span class="text-sm font-medium text-gray-700">Auto-notify Attendees</span>
-                        <p class="text-xs text-gray-500">Automatically notify attendees when the meeting is updated.</p>
+                        <span class="text-sm font-medium text-gray-700">{{ __('Auto-notify Attendees') }}</span>
+                        <p class="text-xs text-gray-500">{{ __('Automatically notify attendees when the meeting is updated.') }}</p>
                     </div>
                 </label>
             </div>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
-            <a href="{{ route('meetings.show', $meeting) }}" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">Cancel</a>
-            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Update Meeting</button>
+            <a href="{{ route('meetings.show', $meeting) }}" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">{{ __('Cancel') }}</a>
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">{{ __('Update Meeting') }}</button>
         </div>
     </form>
 </div>

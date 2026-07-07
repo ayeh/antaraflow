@@ -34,9 +34,9 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Your name is required.',
-            'email.required' => 'Your email address is required.',
-            'email.unique' => 'This email address is already in use.',
+            'name.required' => __('Your name is required.'),
+            'email.required' => __('Your email address is required.'),
+            'email.unique' => __('This email address is already in use.'),
         ];
     }
 }

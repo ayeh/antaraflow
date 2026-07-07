@@ -5,7 +5,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
             </svg>
-            Voice Notes
+            {{ __('Voice Notes') }}
         </h3>
 
         {{-- Record Button --}}
@@ -40,7 +40,7 @@
     {{-- Upload progress --}}
     <template x-if="uploading">
         <div class="mb-3 p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
-            <p class="text-xs text-violet-600 dark:text-violet-400 font-medium">Uploading & transcribing...</p>
+            <p class="text-xs text-violet-600 dark:text-violet-400 font-medium">{{ __('Uploading & transcribing...') }}</p>
         </div>
     </template>
 
@@ -54,7 +54,7 @@
     {{-- Notes List --}}
     <div class="space-y-3">
         <template x-if="notes.length === 0 && !uploading">
-            <p class="text-xs text-gray-400 dark:text-gray-500 italic">No voice notes yet. Click "Record Note" to add one.</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 italic">{{ __('No voice notes yet. Click "Record Note" to add one.') }}</p>
         </template>
         <template x-for="note in notes" :key="note.id">
             <div class="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
@@ -75,7 +75,7 @@
                         </div>
                         <p x-show="note.transcript" class="text-sm text-gray-600 dark:text-gray-300" x-text="note.transcript"></p>
                         <p x-show="!note.transcript && note.status === 'pending'"
-                           class="text-xs text-gray-400 italic">Waiting for transcription...</p>
+                           class="text-xs text-gray-400 italic">{{ __('Waiting for transcription...') }}</p>
                     </div>
                     @can('update', $meeting)
                     <button @click="deleteNote(note.id)"
@@ -189,7 +189,7 @@ function voiceNotes(meetingId) {
         },
 
         async deleteNote(noteId) {
-            if (!(await window.antaraConfirm('Delete this voice note?', {title: 'Delete Voice Note'}))) return;
+            if (!(await window.antaraConfirm('{{ __("Delete this voice note?") }}', {title: '{{ __("Delete Voice Note") }}'}))) return;
             try {
                 await fetch(`/meetings/${meetingId}/voice-notes/${noteId}`, {
                     method: 'DELETE',

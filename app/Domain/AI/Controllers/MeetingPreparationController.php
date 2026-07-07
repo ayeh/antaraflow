@@ -26,7 +26,7 @@ class MeetingPreparationController extends Controller
 
         if (! in_array($meeting->status, [MeetingStatus::Draft, MeetingStatus::InProgress], true)) {
             return response()->json([
-                'error' => 'Meeting preparation is only available for draft or in-progress meetings.',
+                'error' => __('Meeting preparation is only available for draft or in-progress meetings.'),
             ], 422);
         }
 

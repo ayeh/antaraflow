@@ -1,4 +1,5 @@
-export default function appState() {
+export default function appState(config = {}) {
+    const i18n = config.i18n || {};
     return {
         activeFlyout: null,
         commandPaletteOpen: false,
@@ -13,11 +14,11 @@ export default function appState() {
         searchLoading: false,
         searchDebounceTimer: null,
         navCommands: [
-            { label: 'Dashboard',    href: '/dashboard' },
-            { label: 'Meetings',     href: '/meetings' },
-            { label: 'New Meeting',  href: '/meetings/create' },
-            { label: 'Action Items', href: '/action-items' },
-            { label: 'Settings',     href: '/organizations' },
+            { label: i18n.dashboard    || 'Dashboard',    href: '/dashboard' },
+            { label: i18n.meetings     || 'Meetings',     href: '/meetings' },
+            { label: i18n.newMeeting   || 'New Meeting',  href: '/meetings/create' },
+            { label: i18n.actionItems  || 'Action Items', href: '/action-items' },
+            { label: i18n.settings     || 'Settings',     href: '/organizations' },
         ],
 
         init() {

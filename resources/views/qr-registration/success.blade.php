@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Registration Successful</title>
+    <title>{{ __('Registration Successful') }}</title>
     @vite(['resources/css/app.css'])
 </head>
 <body class="bg-gray-50 dark:bg-slate-900 min-h-screen flex items-center justify-center p-4">
@@ -33,8 +33,8 @@
                 </svg>
             </div>
 
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Registration Successful</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">You have been registered for the meeting.</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ __('Registration Successful') }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('You have been registered for the meeting.') }}</p>
 
             {{-- Meeting Details Card --}}
             <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-5 mb-6 text-left">
@@ -74,7 +74,7 @@
                         <span class="text-sm font-bold text-white">{{ strtoupper(substr($registration['name'] ?? 'G', 0, 1)) }}</span>
                     </div>
                     <div class="text-left">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $registration['name'] ?? 'Guest' }}</p>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $registration['name'] ?? __('Guest') }}</p>
                         @if(!empty($registration['email']))
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ $registration['email'] }}</p>
                         @endif
@@ -99,11 +99,11 @@
                    onmouseover="this.style.backgroundColor='#d0eaea'" onmouseout="this.style.backgroundColor='#E6F4F4'"
                 >
                     <svg class="w-4 h-4" style="color:#0D7377;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    Add to Calendar
+                    {{ __('Add to Calendar') }}
                 </a>
             @endif
 
-            <p class="text-xs text-gray-400 dark:text-gray-500">You can now close this page.</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500">{{ __('You can now close this page.') }}</p>
         </div>
         <x-antara-note-footer />
     </div>

@@ -15,11 +15,11 @@ enum ResolutionStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Proposed => 'Proposed',
-            self::Passed => 'Passed',
-            self::Failed => 'Failed',
-            self::Tabled => 'Tabled',
-            self::Withdrawn => 'Withdrawn',
+            self::Proposed => __('Proposed'),
+            self::Passed => __('Passed'),
+            self::Failed => __('Failed'),
+            self::Tabled => __('Tabled'),
+            self::Withdrawn => __('Withdrawn'),
         };
     }
 }

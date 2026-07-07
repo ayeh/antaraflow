@@ -33,21 +33,21 @@ class StaleDecisionNotification extends Notification implements ShouldQueue
         $count = count($this->staleDecisions);
 
         $message = (new MailMessage)
-            ->subject("Stale Decisions: {$this->meeting->title}")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("{$count} decision(s) from **{$this->meeting->title}** have no follow-up action items.");
+            ->subject(__('Stale Decisions: :title', ['title' => $this->meeting->title]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__(':count decision(s) from **:title** have no follow-up action items.', ['count' => $count, 'title' => $this->meeting->title]));
 
         foreach (array_slice($this->staleDecisions, 0, 3) as $decision) {
-            $message->line("• {$decision['decision']} ({$decision['days_since']} days ago)");
+            $message->line(__('• :decision (:days days ago)', ['decision' => $decision['decision'], 'days' => $decision['days_since']]));
         }
 
         if ($count > 3) {
-            $message->line('...and '.($count - 3).' more.');
+            $message->line(__('...and :more more.', ['more' => $count - 3]));
         }
 
         return $message
-            ->action('View Meeting', route('meetings.show', $this->meeting))
-            ->line('Please create action items or update the meeting to address these decisions.');
+            ->action(__('View Meeting'), route('meetings.show', $this->meeting))
+            ->line(__('Please create action items or update the meeting to address these decisions.'));
     }
 
     /** @return array<string, mixed> */
@@ -61,7 +61,7 @@ class StaleDecisionNotification extends Notification implements ShouldQueue
             'meeting_title' => $this->meeting->title,
             'stale_count' => $count,
             'decisions' => array_map(fn ($d) => $d['decision'], array_slice($this->staleDecisions, 0, 5)),
-            'message' => "{$count} stale decision".($count === 1 ? '' : 's')." in \"{$this->meeting->title}\"",
+            'message' => __(':count stale decision(s) in ":title"', ['count' => $count, 'title' => $this->meeting->title]),
         ];
     }
 }

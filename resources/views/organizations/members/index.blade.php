@@ -7,7 +7,7 @@
             <a href="{{ route('organizations.show', $organization) }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </a>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Members of {{ $organization->name }}</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Members of :name', ['name' => $organization->name]) }}</h1>
         </div>
     </div>
 
@@ -33,16 +33,16 @@
 
     @can('manageMembers', $organization)
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Invite a member</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Invite a member') }}</h2>
             <form method="POST" action="{{ route('organizations.members.store', $organization) }}" class="flex flex-col sm:flex-row gap-3 sm:items-end">
                 @csrf
                 <div class="flex-1">
-                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email address</label>
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Email address') }}</label>
                     <input type="email" id="email" name="email" value="{{ old('email') }}" required placeholder="person@example.com"
                         class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                 </div>
                 <div class="sm:w-48">
-                    <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                    <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Role') }}</label>
                     <select id="role" name="role"
                         class="w-full rounded-lg border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                         @foreach ($assignableRoles as $role)
@@ -50,9 +50,9 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="submit" class="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors whitespace-nowrap">Send invitation</button>
+                <button type="submit" class="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors whitespace-nowrap">{{ __('Send invitation') }}</button>
             </form>
-            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">If the person doesn't have an account yet, they'll be able to create one when they accept.</p>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __("If the person doesn't have an account yet, they'll be able to create one when they accept.") }}</p>
         </div>
     @endcan
 
@@ -61,10 +61,10 @@
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
                     <tr>
-                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Name') }}</th>
+                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Role') }}</th>
                         @can('manageMembers', $organization)
-                            <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Actions') }}</th>
                         @endcan
                     </tr>
                 </thead>
@@ -104,13 +104,13 @@
                             @can('manageMembers', $organization)
                                 <td class="px-6 py-4 text-right">
                                     @if ($canManage)
-                                        <form method="POST" action="{{ route('members.destroy', $member) }}" onsubmit="return confirm('Remove {{ $member->name }} from this organization?')">
+                                        <form method="POST" action="{{ route('members.destroy', $member) }}" onsubmit="return confirm('{{ __('Remove :name from this organization?', ['name' => $member->name]) }}')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">Remove</button>
+                                            <button type="submit" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">{{ __('Remove') }}</button>
                                         </form>
                                     @elseif ($isLastOwner)
-                                        <span class="text-xs text-gray-400 dark:text-gray-500">Last owner</span>
+                                        <span class="text-xs text-gray-400 dark:text-gray-500">{{ __('Last owner') }}</span>
                                     @else
                                         <span class="text-xs text-gray-400 dark:text-gray-500">&mdash;</span>
                                     @endif
@@ -119,7 +119,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No members found.</td>
+                            <td colspan="3" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('No members found.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -131,16 +131,16 @@
         @if ($invitations->isNotEmpty())
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Pending invitations</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Pending invitations') }}</h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
                             <tr>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Expires</th>
-                                <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Email') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Role') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Expires') }}</th>
+                                <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
@@ -153,12 +153,12 @@
                                         <div class="flex items-center justify-end gap-4">
                                             <form method="POST" action="{{ route('organizations.invitations.resend', [$organization, $invitation]) }}">
                                                 @csrf
-                                                <button type="submit" class="text-sm text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 transition-colors">Resend</button>
+                                                <button type="submit" class="text-sm text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 transition-colors">{{ __('Resend') }}</button>
                                             </form>
-                                            <form method="POST" action="{{ route('organizations.invitations.destroy', [$organization, $invitation]) }}" onsubmit="return confirm('Revoke the invitation for {{ $invitation->email }}?')">
+                                            <form method="POST" action="{{ route('organizations.invitations.destroy', [$organization, $invitation]) }}" onsubmit="return confirm('{{ __('Revoke the invitation for :email?', ['email' => $invitation->email]) }}')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">Revoke</button>
+                                                <button type="submit" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">{{ __('Revoke') }}</button>
                                             </form>
                                         </div>
                                     </td>

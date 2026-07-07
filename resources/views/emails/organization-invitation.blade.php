@@ -14,19 +14,19 @@
 </head>
 <body>
     <div class="header">
-        <h2>Join {{ $organizationName }}</h2>
+        <h2>{{ __('Join :org', ['org' => $organizationName]) }}</h2>
     </div>
 
     <div class="body-content">
-        <p>You've been invited to join <strong>{{ $organizationName }}</strong> on {{ config('app.name') }} as a <strong>{{ ucfirst($role) }}</strong>.</p>
-        <p>Click the button below to accept the invitation. If you don't have an account yet, you'll be able to create one.</p>
+        <p>{{ __("You've been invited to join") }} <strong>{{ $organizationName }}</strong> {{ __('on :app as a', ['app' => config('app.name')]) }} <strong>{{ ucfirst($role) }}</strong>.</p>
+        <p>{{ __('Click the button below to accept the invitation. If you don\'t have an account yet, you\'ll be able to create one.') }}</p>
     </div>
 
-    <p><a href="{{ $acceptUrl }}" class="btn">Accept invitation</a></p>
+    <p><a href="{{ $acceptUrl }}" class="btn">{{ __('Accept invitation') }}</a></p>
 
     <div class="footer">
-        <p>This invitation expires on {{ $expiresAt->format('M j, Y \a\t g:i A') }}.</p>
-        <p>If you weren't expecting this invitation, you can safely ignore this email.</p>
+        <p>{{ __('This invitation expires on :date.', ['date' => $expiresAt->format('M j, Y \a\t g:i A')]) }}</p>
+        <p>{{ __("If you weren't expecting this invitation, you can safely ignore this email.") }}</p>
     </div>
 </body>
 </html>

@@ -51,7 +51,7 @@ class ActionItemController extends Controller
         $this->actionItemService->create($request->validated(), $meeting, $request->user());
 
         return redirect()->route('meetings.action-items.index', $meeting)
-            ->with('success', 'Action item created successfully.');
+            ->with('success', __('Action item created successfully.'));
     }
 
     public function show(\Illuminate\Http\Request $request, MinutesOfMeeting $meeting, ActionItem $actionItem): \Illuminate\View\View|\Illuminate\Http\JsonResponse
@@ -135,7 +135,7 @@ class ActionItemController extends Controller
         }
 
         return redirect()->route('meetings.action-items.show', [$meeting, $actionItem])
-            ->with('success', 'Action item updated successfully.');
+            ->with('success', __('Action item updated successfully.'));
     }
 
     public function destroy(MinutesOfMeeting $meeting, ActionItem $actionItem): RedirectResponse
@@ -145,7 +145,7 @@ class ActionItemController extends Controller
         $actionItem->delete();
 
         return redirect()->route('meetings.action-items.index', $meeting)
-            ->with('success', 'Action item deleted successfully.');
+            ->with('success', __('Action item deleted successfully.'));
     }
 
     public function carryForward(Request $request, MinutesOfMeeting $meeting, ActionItem $actionItem): RedirectResponse
@@ -161,7 +161,7 @@ class ActionItemController extends Controller
         $this->actionItemService->carryForward($actionItem, $newMom, $request->user());
 
         return redirect()->route('meetings.action-items.index', $meeting)
-            ->with('success', 'Action item carried forward successfully.');
+            ->with('success', __('Action item carried forward successfully.'));
     }
 
     public function createAllTasks(MinutesOfMeeting $meeting, Request $request): RedirectResponse
@@ -171,7 +171,7 @@ class ActionItemController extends Controller
         $count = $this->actionItemService->createAllTasks($meeting, $request->user());
 
         return redirect()->route('meetings.show', ['meeting' => $meeting, 'step' => 4])
-            ->with('success', "{$count} action item(s) marked as tasks created.");
+            ->with('success', __(':count action item(s) marked as tasks created.', ['count' => $count]));
     }
 
     /**

@@ -22,18 +22,18 @@
     {{-- ── Page Header ── --}}
     <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Meetings</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Meetings') }}</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ number_format($stats['total']) }} total</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
             {{-- Filter button --}}
             <button @click="filterOpen = true"
                     class="inline-flex items-center gap-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-600 px-4 py-2 rounded-xl text-sm font-medium transition-colors relative"
-                    aria-label="Open filters">
+                    aria-label="{{ __('Open filters') }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                 </svg>
-                Filters
+                {{ __('Filters') }}
                 @if($activeFilterCount > 0)
                     <span class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-violet-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                         {{ $activeFilterCount }}
@@ -46,14 +46,14 @@
                 <div class="flex rounded-xl border border-gray-200 dark:border-slate-600 overflow-hidden">
                     <button @click="dense = false"
                             :class="!dense ? 'bg-violet-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-600'"
-                            class="p-2 transition-colors" aria-label="Card grid view" :aria-pressed="!dense">
+                            class="p-2 transition-colors" aria-label="{{ __('Card grid view') }}" :aria-pressed="!dense">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                         </svg>
                     </button>
                     <button @click="dense = true"
                             :class="dense ? 'bg-violet-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-600'"
-                            class="p-2 border-l border-gray-200 dark:border-slate-600 transition-colors" aria-label="Table view" :aria-pressed="dense">
+                            class="p-2 border-l border-gray-200 dark:border-slate-600 transition-colors" aria-label="{{ __('Table view') }}" :aria-pressed="dense">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                         </svg>
@@ -66,12 +66,12 @@
                 <a href="{{ route('meetings.index', array_merge(request()->except(['view', 'page']), ['view' => 'list'])) }}"
                    class="px-4 py-2 transition-colors {{ !$isCalendar ? 'bg-violet-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-600' }}"
                    aria-pressed="{{ !$isCalendar ? 'true' : 'false' }}">
-                    List
+                    {{ __('List') }}
                 </a>
                 <a href="{{ route('meetings.index', array_merge(request()->except(['view', 'page']), ['view' => 'calendar'])) }}"
                    class="px-4 py-2 border-l border-gray-200 dark:border-slate-600 transition-colors {{ $isCalendar ? 'bg-violet-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-600' }}"
                    aria-pressed="{{ $isCalendar ? 'true' : 'false' }}">
-                    Calendar
+                    {{ __('Calendar') }}
                 </a>
             </div>
 
@@ -82,7 +82,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    New MOM
+                    {{ __('New MOM') }}
                 </a>
             @endcan
         </div>
@@ -97,12 +97,12 @@
             $currentSort = request('sort_by', 'meeting_date');
             $currentDir  = request('sort_dir', 'desc');
             $sortColumns = [
-                'mom_number'   => ['label' => 'MOM No.',   'class' => ''],
-                'title'        => ['label' => 'Title',     'class' => ''],
-                'project'      => ['label' => 'Project',   'class' => 'hidden md:table-cell'],
-                'meeting_date' => ['label' => 'Date',      'class' => 'hidden sm:table-cell'],
-                'status'       => ['label' => 'Status',    'class' => ''],
-                'items'        => ['label' => 'Items',     'class' => 'hidden lg:table-cell'],
+                'mom_number'   => ['label' => __('MOM No.'),   'class' => ''],
+                'title'        => ['label' => __('Title'),     'class' => ''],
+                'project'      => ['label' => __('Project'),   'class' => 'hidden md:table-cell'],
+                'meeting_date' => ['label' => __('Date'),      'class' => 'hidden sm:table-cell'],
+                'status'       => ['label' => __('Status'),    'class' => ''],
+                'items'        => ['label' => __('Items'),     'class' => 'hidden lg:table-cell'],
             ];
         @endphp
         <div>
@@ -165,13 +165,13 @@
                                         {{ $meeting->project?->name ?? '—' }}
                                     </td>
                                     <td class="px-6 py-4 hidden sm:table-cell text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                                        {{ $meeting->meeting_date?->format('j M Y') ?? 'Not set' }}
+                                        {{ $meeting->meeting_date?->format('j M Y') ?? __('Not set') }}
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-1.5 flex-wrap">
                                             @include('meetings.partials._status-badge', ['status' => $meeting->status])
                                             @if($meeting->share_with_client)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">Shared</span>
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">{{ __('Shared') }}</span>
                                             @endif
                                         </div>
                                     </td>
@@ -184,10 +184,10 @@
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="flex items-center justify-end gap-3">
-                                            <a href="{{ route('meetings.show', $meeting) }}" class="text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline">View</a>
+                                            <a href="{{ route('meetings.show', $meeting) }}" class="text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline">{{ __('View') }}</a>
                                             @can('update', $meeting)
                                                 @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft)
-                                                    <a href="{{ route('meetings.edit', $meeting) }}" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:underline">Edit</a>
+                                                    <a href="{{ route('meetings.edit', $meeting) }}" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:underline">{{ __('Edit') }}</a>
                                                 @endif
                                             @endcan
                                             @can('delete', $meeting)
@@ -195,7 +195,7 @@
                                                       onsubmit="confirmThenSubmit(event, 'Delete this meeting permanently? This cannot be undone.')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="text-xs font-medium text-red-500 dark:text-red-400 hover:underline">Delete</button>
+                                                    <button type="submit" class="text-xs font-medium text-red-500 dark:text-red-400 hover:underline">{{ __('Delete') }}</button>
                                                 </form>
                                             @endcan
                                         </div>

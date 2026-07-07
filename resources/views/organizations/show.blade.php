@@ -20,14 +20,14 @@
         </div>
         <div class="flex items-center gap-3">
             @can('manageMembers', $organization)
-            <a href="{{ route('organizations.members.index', $organization) }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Members</a>
+            <a href="{{ route('organizations.members.index', $organization) }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">{{ __('Members') }}</a>
             @endcan
             @can('manageSettings', $organization)
-            <a href="{{ route('organizations.settings.edit', $organization) }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">Settings</a>
+            <a href="{{ route('organizations.settings.edit', $organization) }}" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">{{ __('Settings') }}</a>
             @endcan
             @can('update', $organization)
             <a href="{{ route('organizations.edit', $organization) }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
-                Edit
+                {{ __('Edit') }}
             </a>
             @endcan
         </div>
@@ -36,23 +36,23 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {{-- About --}}
         <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">About</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('About') }}</h2>
             <div class="border-t border-gray-200 dark:border-slate-700 mt-4 pt-4 space-y-4">
                 <div>
-                    <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description</h3>
-                    <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $organization->description ?: 'No description provided.' }}</p>
+                    <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Description') }}</h3>
+                    <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $organization->description ?: __('No description provided.') }}</p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Slug</h3>
+                        <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Slug') }}</h3>
                         <p class="mt-1 text-sm text-gray-900 dark:text-gray-100 font-mono">{{ $organization->slug }}</p>
                     </div>
                     <div>
-                        <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Timezone</h3>
+                        <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Timezone') }}</h3>
                         <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $organization->timezone ?? 'UTC' }}</p>
                     </div>
                     <div>
-                        <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Language</h3>
+                        <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Language') }}</h3>
                         <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">
                             @if($organization->language === 'ms') Bahasa Melayu
                             @else English
@@ -61,7 +61,7 @@
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</h3>
+                    <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Created') }}</h3>
                     <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $organization->created_at->format('M j, Y') }}</p>
                 </div>
             </div>
@@ -70,11 +70,11 @@
         {{-- Quick Stats --}}
         <div class="space-y-6">
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Plan</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Plan') }}</h2>
                 <div class="border-t border-gray-200 dark:border-slate-700 mt-4 pt-4">
                     @if($subscription)
                         <div class="flex items-center justify-between">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $subscription->subscriptionPlan->name ?? 'Current Plan' }}</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $subscription->subscriptionPlan->name ?? __('Current Plan') }}</p>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                 {{ $subscription->status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300' }}">
                                 {{ ucfirst($subscription->status) }}
@@ -82,8 +82,8 @@
                         </div>
                     @else
                         <div class="flex items-center justify-between">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">Free Plan</p>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300">Free</span>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ __('Free Plan') }}</p>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-300">{{ __('Free') }}</span>
                         </div>
                     @endif
                 </div>
@@ -91,12 +91,12 @@
 
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Members</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Members') }}</h2>
                     <span class="text-sm text-gray-500 dark:text-gray-400">{{ $members->count() }}</span>
                 </div>
                 <div class="border-t border-gray-200 dark:border-slate-700 mt-4 pt-4">
                     @if($members->isEmpty())
-                        <p class="text-sm text-gray-500 dark:text-gray-400">No members.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No members.') }}</p>
                     @else
                         <ul class="space-y-3">
                             @foreach($members->take(5) as $member)
@@ -123,7 +123,7 @@
                         </ul>
                         @if($members->count() > 5)
                             <a href="{{ route('organizations.members.index', $organization) }}" class="block mt-3 text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium transition-colors">
-                                View all {{ $members->count() }} members
+                                {{ __('View all :count members', ['count' => $members->count()]) }}
                             </a>
                         @endif
                     @endif

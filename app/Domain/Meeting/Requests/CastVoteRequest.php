@@ -28,10 +28,10 @@ class CastVoteRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'attendee_id.required' => 'The attendee is required.',
-            'attendee_id.exists' => 'The selected attendee is not valid.',
-            'vote.required' => 'A vote choice is required.',
-            'vote.enum' => 'The selected vote choice is invalid.',
+            'attendee_id.required' => __('The attendee is required.'),
+            'attendee_id.exists' => __('The selected attendee is not valid.'),
+            'vote.required' => __('A vote choice is required.'),
+            'vote.enum' => __('The selected vote choice is invalid.'),
         ];
     }
 }

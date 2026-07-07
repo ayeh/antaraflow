@@ -13,6 +13,6 @@
     @if($distribution->body_note)
         <p>{{ $distribution->body_note }}</p>
     @endif
-    <p>Please find the Minutes of Meeting attached.</p>
+    <p>{{ __('Please find the Minutes of Meeting attached.') }}</p>
 </body>
 </html>

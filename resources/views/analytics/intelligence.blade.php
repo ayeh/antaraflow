@@ -7,8 +7,8 @@
     {{-- Page Header --}}
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Cross-meeting intelligence and insights</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Analytics') }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Cross-meeting intelligence and insights') }}</p>
         </div>
     </div>
 
@@ -16,15 +16,15 @@
     <div class="flex gap-1 p-1 bg-gray-100 dark:bg-slate-800 rounded-xl w-fit">
         <a href="{{ route('analytics.index') }}"
            class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-slate-700/60">
-            Overview
+            {{ __('Overview') }}
         </a>
         <a href="{{ route('analytics.governance') }}"
            class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-slate-700/60">
-            Governance
+            {{ __('Governance') }}
         </a>
         <a href="{{ route('analytics.intelligence') }}"
            class="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-white dark:bg-slate-700 text-violet-600 dark:text-violet-400 shadow-sm">
-            Intelligence
+            {{ __('Intelligence') }}
         </a>
     </div>
 
@@ -32,12 +32,12 @@
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
         <div class="flex flex-wrap items-center gap-4">
             <div>
-                <label for="start_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Start Date</label>
+                <label for="start_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Start Date') }}</label>
                 <input type="date" id="start_date" x-model="startDate" @change="fetchData()"
                     class="block rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white text-sm px-3 py-1.5 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
             </div>
             <div>
-                <label for="end_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">End Date</label>
+                <label for="end_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('End Date') }}</label>
                 <input type="date" id="end_date" x-model="endDate" @change="fetchData()"
                     class="block rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white text-sm px-3 py-1.5 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
             </div>
@@ -59,24 +59,24 @@
             {{-- Summary stat cards --}}
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
-                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Topics</div>
+                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Total Topics') }}</div>
                     <div class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="(data.topic_frequency || []).length"></div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Unique topics discussed</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ __('Unique topics discussed') }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
-                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Follow-Through Rate</div>
+                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Follow-Through Rate') }}</div>
                     <div class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1"><span x-text="data.decision_follow_through?.follow_through_rate ?? 0"></span>%</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5"><span x-text="data.decision_follow_through?.total_decisions ?? 0"></span> decisions tracked</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5"><span x-text="data.decision_follow_through?.total_decisions ?? 0"></span> {{ __('decisions tracked') }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
-                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Risks</div>
+                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Total Risks') }}</div>
                     <div class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1" x-text="data.risk_summary?.total ?? 0"></div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5"><span x-text="data.risk_summary?.by_severity?.high ?? 0"></span> high severity</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5"><span x-text="data.risk_summary?.by_severity?.high ?? 0"></span> {{ __('high severity') }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
-                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unresolved Patterns</div>
+                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Unresolved Patterns') }}</div>
                     <div class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1" x-text="(data.unresolved_patterns || []).length"></div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Topics in 3+ meetings without decisions</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ __('Topics in 3+ meetings without decisions') }}</div>
                 </div>
             </div>
 
@@ -85,7 +85,7 @@
                 {{-- Topic Frequency (horizontal bar) --}}
                 <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Topic Frequency</h2>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Topic Frequency') }}</h2>
                     </div>
                     <div class="p-6">
                         <div class="relative h-64">
@@ -97,7 +97,7 @@
                 {{-- Decision Follow-Through (donut) --}}
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Decision Follow-Through</h2>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Decision Follow-Through') }}</h2>
                     </div>
                     <div class="p-6">
                         <div class="relative h-64">
@@ -110,18 +110,18 @@
             {{-- Assignee Performance Table --}}
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Assignee Performance</h2>
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Assignee Performance') }}</h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b border-gray-200 dark:border-slate-700">
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assignee</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Completed</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Completion Rate</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">On-Time Rate</th>
-                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Days</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Assignee') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Total') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Completed') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Completion Rate') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('On-Time Rate') }}</th>
+                                <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Avg Days') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
@@ -152,7 +152,7 @@
                         </tbody>
                     </table>
                     <template x-if="(data.assignee_performance || []).length === 0">
-                        <div class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">No assignee data available.</div>
+                        <div class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('No assignee data available.') }}</div>
                     </template>
                 </div>
             </div>
@@ -162,7 +162,7 @@
                 {{-- Risk Summary (bar chart by severity) --}}
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Risk Summary</h2>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Risk Summary') }}</h2>
                     </div>
                     <div class="p-6">
                         <div class="relative h-48">
@@ -174,8 +174,8 @@
                 {{-- Unresolved Patterns (list) --}}
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Unresolved Patterns</h2>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Topics discussed in 3+ meetings without decisions</p>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Unresolved Patterns') }}</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Topics discussed in 3+ meetings without decisions') }}</p>
                     </div>
                     <div class="divide-y divide-gray-200 dark:divide-slate-700">
                         <template x-for="(pattern, idx) in (data.unresolved_patterns || [])" :key="idx">
@@ -183,7 +183,7 @@
                                 <div>
                                     <div class="text-sm font-medium text-gray-900 dark:text-white" x-text="pattern.topic"></div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                        Discussed in <span class="font-medium" x-text="pattern.occurrences"></span> meetings
+                                        {{ __('Discussed in') }} <span class="font-medium" x-text="pattern.occurrences"></span> {{ __('meetings') }}
                                     </div>
                                 </div>
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
@@ -192,7 +192,7 @@
                             </div>
                         </template>
                         <template x-if="(data.unresolved_patterns || []).length === 0">
-                            <div class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">No unresolved patterns detected.</div>
+                            <div class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('No unresolved patterns detected.') }}</div>
                         </template>
                     </div>
                 </div>
@@ -246,7 +246,7 @@ function intelligenceAnalytics() {
                 data: {
                     labels: topics.map(t => t.topic.length > 30 ? t.topic.substring(0, 30) + '...' : t.topic),
                     datasets: [{
-                        label: 'Occurrences',
+                        label: '{{ __("Occurrences") }}',
                         data: topics.map(t => t.count),
                         backgroundColor: '#7c3aed',
                         borderRadius: 4,
@@ -271,7 +271,7 @@ function intelligenceAnalytics() {
             this.decisionChartInstance = new Chart(canvas, {
                 type: 'doughnut',
                 data: {
-                    labels: ['With Follow-Up', 'Without Follow-Up'],
+                    labels: ['{{ __("With Follow-Up") }}', '{{ __("Without Follow-Up") }}'],
                     datasets: [{
                         data: [dt.with_action_items || 0, dt.without_action_items || 0],
                         backgroundColor: ['#22c55e', '#ef4444'],
@@ -295,9 +295,9 @@ function intelligenceAnalytics() {
             this.riskChartInstance = new Chart(canvas, {
                 type: 'bar',
                 data: {
-                    labels: ['High', 'Medium', 'Low'],
+                    labels: ['{{ __("High") }}', '{{ __("Medium") }}', '{{ __("Low") }}'],
                     datasets: [{
-                        label: 'Risks',
+                        label: '{{ __("Risks") }}',
                         data: [severity.high || 0, severity.medium || 0, severity.low || 0],
                         backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6'],
                         borderRadius: 6,

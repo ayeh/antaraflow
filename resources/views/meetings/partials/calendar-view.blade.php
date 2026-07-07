@@ -8,7 +8,7 @@
 
             {{-- Header --}}
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                <h2 class="text-base font-semibold text-gray-900 dark:text-white">Activity Calendar</h2>
+                <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Activity Calendar') }}</h2>
                 <div class="flex items-center gap-2">
                     {{-- Loading indicator --}}
                     <svg x-show="loading" class="animate-spin w-4 h-4 text-violet-600" fill="none" viewBox="0 0 24 24" x-cloak>
@@ -16,10 +16,10 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                     </svg>
                     {{-- Navigation --}}
-                    <button @click="prevMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-gray-500 dark:text-gray-400" aria-label="Previous month">
+                    <button @click="prevMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-gray-500 dark:text-gray-400" aria-label="{{ __('Previous month') }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     </button>
-                    <button @click="nextMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-gray-500 dark:text-gray-400" aria-label="Next month">
+                    <button @click="nextMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-gray-500 dark:text-gray-400" aria-label="{{ __('Next month') }}">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </button>
                 </div>
@@ -124,14 +124,14 @@
             {{-- Upcoming events --}}
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
                 <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-slate-700">
-                    <span class="text-xs font-semibold text-gray-900 dark:text-white">Upcoming events</span>
+                    <span class="text-xs font-semibold text-gray-900 dark:text-white">{{ __('Upcoming events') }}</span>
                     <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                     </svg>
                 </div>
                 <div class="divide-y divide-gray-50 dark:divide-slate-700">
                     <template x-if="upcomingMeetings.length === 0">
-                        <div class="px-4 py-6 text-center text-xs text-gray-400 dark:text-slate-500">No upcoming events</div>
+                        <div class="px-4 py-6 text-center text-xs text-gray-400 dark:text-slate-500">{{ __('No upcoming events') }}</div>
                     </template>
                     <template x-for="meeting in upcomingMeetings" :key="meeting.id">
                         <a :href="meeting.url"
@@ -182,13 +182,13 @@
                         {{-- Project (MOM only) --}}
                         <template x-if="modal.meeting.source !== 'external' && modal.meeting.project">
                             <div class="flex items-center gap-2 text-sm">
-                                <span class="text-gray-400 w-14 shrink-0 text-xs">Project</span>
+                                <span class="text-gray-400 w-14 shrink-0 text-xs">{{ __('Project') }}</span>
                                 <span class="text-gray-700 dark:text-gray-300 font-medium text-xs" x-text="modal.meeting.project.name"></span>
                             </div>
                         </template>
                         {{-- Status (MOM only) --}}
                         <div x-show="modal.meeting.source !== 'external'" class="flex items-center gap-2">
-                            <span class="text-gray-400 w-14 shrink-0 text-xs">Status</span>
+                            <span class="text-gray-400 w-14 shrink-0 text-xs">{{ __('Status') }}</span>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
                                   :class="statusClass(modal.meeting.status)"
                                   x-text="modal.meeting.status ? modal.meeting.status.replace('_', ' ') : ''">
@@ -197,7 +197,7 @@
                         {{-- Time (MOM only — external already shows it in subtitle) --}}
                         <template x-if="modal.meeting.source !== 'external' && modal.meeting.start_time">
                             <div class="flex items-center gap-2 text-xs">
-                                <span class="text-gray-400 w-14 shrink-0">Time</span>
+                                <span class="text-gray-400 w-14 shrink-0">{{ __('Time') }}</span>
                                 <span class="text-gray-700 dark:text-gray-300" x-text="modal.meeting.start_time + (modal.meeting.end_time ? ' – ' + modal.meeting.end_time : '')"></span>
                             </div>
                         </template>
@@ -206,7 +206,7 @@
                     <a x-show="modal.meeting.source !== 'external'"
                        :href="modal.meeting.url"
                        class="block w-full text-center bg-violet-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
-                        View Meeting
+                        {{ __('View Meeting') }}
                     </a>
                 </div>
             </template>
@@ -333,7 +333,7 @@ function calendarView() {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 this.meetings = await res.json();
             } catch (e) {
-                this.error = 'Could not load meetings. Please refresh.';
+                this.error = '{{ __('Could not load meetings. Please refresh.') }}';
                 this.meetings = [];
             } finally {
                 this.loading = false;
@@ -400,7 +400,7 @@ function calendarView() {
         daysLeftLabel(dateStr) {
             if (!dateStr) return '';
             const diff = Math.ceil((new Date(dateStr) - new Date()) / 86400000);
-            if (diff === 0) return 'Today';
+            if (diff === 0) return '{{ __('Today') }}';
             if (diff === 1) return '1 day';
             if (diff < 0) return `${Math.abs(diff)}d ago`;
             return `${diff} days`;

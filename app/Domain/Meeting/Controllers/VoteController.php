@@ -32,6 +32,6 @@ class VoteController extends Controller
         );
 
         return redirect()->route('meetings.show', ['meeting' => $meeting, 'step' => 5])
-            ->with('success', 'Vote recorded successfully.');
+            ->with('success', __('Vote recorded successfully.'));
     }
 }

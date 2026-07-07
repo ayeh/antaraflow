@@ -38,7 +38,7 @@ class NotificationSettingsController extends Controller
             ['notification_preferences' => $prefs]
         );
 
-        return redirect()->route('settings.notifications')->with('success', 'Notification preferences saved.');
+        return redirect()->route('settings.notifications')->with('success', __('Notification preferences saved.'));
     }
 
     /** @return array<string, array<string, bool>> */

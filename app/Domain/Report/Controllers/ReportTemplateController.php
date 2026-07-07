@@ -51,7 +51,7 @@ class ReportTemplateController extends Controller
         ReportTemplate::query()->create($data);
 
         return redirect()->route('reports.index')
-            ->with('success', 'Report template created successfully.');
+            ->with('success', __('Report template created successfully.'));
     }
 
     public function show(ReportTemplate $report): View
@@ -86,7 +86,7 @@ class ReportTemplateController extends Controller
         $report->update($data);
 
         return redirect()->route('reports.index')
-            ->with('success', 'Report template updated successfully.');
+            ->with('success', __('Report template updated successfully.'));
     }
 
     public function destroy(ReportTemplate $report): RedirectResponse
@@ -96,7 +96,7 @@ class ReportTemplateController extends Controller
         $report->delete();
 
         return redirect()->route('reports.index')
-            ->with('success', 'Report template deleted.');
+            ->with('success', __('Report template deleted.'));
     }
 
     public function generate(ReportTemplate $report): RedirectResponse
@@ -106,6 +106,6 @@ class ReportTemplateController extends Controller
         GenerateReportJob::dispatch($report);
 
         return redirect()->route('reports.index')
-            ->with('success', 'Report generation has been queued. You will be notified when it is ready.');
+            ->with('success', __('Report generation has been queued. You will be notified when it is ready.'));
     }
 }

@@ -34,7 +34,7 @@ class LiveMeetingService
                 ->exists();
 
             if ($existingActiveSession) {
-                throw new \RuntimeException('Meeting already has an active live session.');
+                throw new \RuntimeException(__('Meeting already has an active live session.'));
             }
 
             $defaultConfig = ['chunk_interval' => 30, 'extraction_interval' => 300];

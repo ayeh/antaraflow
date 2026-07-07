@@ -64,7 +64,7 @@ class MeetingApiController extends ApiController
             ->firstOrFail();
 
         if ($meeting->status === MeetingStatus::Approved) {
-            return response()->json(['message' => 'Cannot update an approved meeting.'], 422);
+            return response()->json(['message' => __('Cannot update an approved meeting.')], 422);
         }
 
         $meeting->update($request->validated());
@@ -80,7 +80,7 @@ class MeetingApiController extends ApiController
             ->firstOrFail();
 
         if (in_array($meeting->status, [MeetingStatus::Finalized, MeetingStatus::Approved], true)) {
-            return response()->json(['message' => 'Cannot delete a finalized or approved meeting.'], 422);
+            return response()->json(['message' => __('Cannot delete a finalized or approved meeting.')], 422);
         }
 
         $meeting->delete();

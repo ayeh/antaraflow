@@ -15,7 +15,7 @@
             <span class="text-sm font-medium text-slate-700 dark:text-slate-300
                          bg-white dark:bg-slate-800 rounded-xl px-3 py-1.5
                          shadow-md border border-slate-200 dark:border-slate-700">
-                New Action Item
+                {{ __('New Action Item') }}
             </span>
             <a
                 href="{{ route('action-items.dashboard') }}"
@@ -42,7 +42,7 @@
             <span class="text-sm font-medium text-slate-700 dark:text-slate-300
                          bg-white dark:bg-slate-800 rounded-xl px-3 py-1.5
                          shadow-md border border-slate-200 dark:border-slate-700">
-                New Meeting
+                {{ __('New Meeting') }}
             </span>
             <a
                 href="{{ route('meetings.create') }}"

@@ -94,7 +94,7 @@ class LiveMeetingController extends Controller
 
         $this->liveMeetingService->endSession($session);
 
-        return response()->json(['message' => 'Session ended successfully.']);
+        return response()->json(['message' => __('Session ended successfully.')]);
     }
 
     public function state(Request $request, MinutesOfMeeting $meeting, LiveMeetingSession $session): JsonResponse

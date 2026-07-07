@@ -26,9 +26,9 @@ class CreateCommentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'body.required' => 'A comment body is required.',
-            'body.max' => 'The comment may not be greater than 2000 characters.',
-            'parent_id.exists' => 'The parent comment does not exist.',
+            'body.required' => __('A comment body is required.'),
+            'body.max' => __('The comment may not be greater than 2000 characters.'),
+            'parent_id.exists' => __('The parent comment does not exist.'),
         ];
     }
 }

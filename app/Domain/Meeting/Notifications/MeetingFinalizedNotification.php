@@ -36,21 +36,21 @@ class MeetingFinalizedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Meeting Finalized: {$this->meeting->title}")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("The meeting **{$this->meeting->title}** has been finalized by {$this->finalizedBy->name}.")
-            ->line('Please review and take action on your assigned items.')
-            ->action('View Meeting', route('meetings.show', $this->meeting));
+            ->subject(__('Meeting Finalized: :title', ['title' => $this->meeting->title]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__('The meeting **:title** has been finalized by :finalizer.', ['title' => $this->meeting->title, 'finalizer' => $this->finalizedBy->name]))
+            ->line(__('Please review and take action on your assigned items.'))
+            ->action(__('View Meeting'), route('meetings.show', $this->meeting));
     }
 
     public function toTeams(object $notifiable): TeamsMessage
     {
         return (new TeamsMessage)
-            ->title('Meeting Finalized')
-            ->content("The meeting **{$this->meeting->title}** has been finalized by {$this->finalizedBy->name}.")
-            ->fact('Meeting', $this->meeting->title)
-            ->fact('Finalized By', $this->finalizedBy->name)
-            ->action('View Meeting', route('meetings.show', $this->meeting));
+            ->title(__('Meeting Finalized'))
+            ->content(__('The meeting **:title** has been finalized by :name.', ['title' => $this->meeting->title, 'name' => $this->finalizedBy->name]))
+            ->fact(__('Meeting'), $this->meeting->title)
+            ->fact(__('Finalized By'), $this->finalizedBy->name)
+            ->action(__('View Meeting'), route('meetings.show', $this->meeting));
     }
 
     /** @return array<string, mixed> */
@@ -61,7 +61,7 @@ class MeetingFinalizedNotification extends Notification implements ShouldQueue
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
             'finalized_by' => $this->finalizedBy->name,
-            'message' => "\"{$this->meeting->title}\" was finalized by {$this->finalizedBy->name}",
+            'message' => __('":title" was finalized by :name', ['title' => $this->meeting->title, 'name' => $this->finalizedBy->name]),
         ];
     }
 }

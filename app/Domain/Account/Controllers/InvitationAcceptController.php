@@ -41,23 +41,23 @@ class InvitationAcceptController extends Controller
 
         if (! $invitation || ! $invitation->isValid()) {
             return redirect()->route('invitations.accept.show', ['token' => $token])
-                ->withErrors(['invitation' => 'This invitation is no longer valid.']);
+                ->withErrors(['invitation' => __('This invitation is no longer valid.')]);
         }
 
         if (Auth::check()) {
             if (Auth::user()->email !== $invitation->email) {
                 return redirect()->route('invitations.accept.show', ['token' => $token])
-                    ->withErrors(['invitation' => 'This invitation was sent to a different email address. Please sign out and try again.']);
+                    ->withErrors(['invitation' => __('This invitation was sent to a different email address. Please sign out and try again.')]);
             }
 
             $this->organizationService->acceptInvitation($invitation, Auth::user());
 
-            return redirect()->route('dashboard')->with('success', 'You have joined '.$invitation->organization->name.'.');
+            return redirect()->route('dashboard')->with('success', __('You have joined :name.', ['name' => $invitation->organization->name]));
         }
 
         if (User::query()->where('email', $invitation->email)->exists()) {
             return redirect()->route('login')
-                ->with('info', 'Please sign in to accept your invitation to '.$invitation->organization->name.'.');
+                ->with('info', __('Please sign in to accept your invitation to :name.', ['name' => $invitation->organization->name]));
         }
 
         $validated = $request->validate([
@@ -77,6 +77,6 @@ class InvitationAcceptController extends Controller
 
         $this->organizationService->acceptInvitation($invitation, $user);
 
-        return redirect()->route('dashboard')->with('success', 'Welcome to '.$invitation->organization->name.'!');
+        return redirect()->route('dashboard')->with('success', __('Welcome to :name!', ['name' => $invitation->organization->name]));
     }
 }

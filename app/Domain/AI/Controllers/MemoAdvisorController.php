@@ -26,13 +26,13 @@ class MemoAdvisorController extends Controller
     {
         $insight->update(['is_read' => true]);
 
-        return redirect()->back()->with('success', 'Insight marked as read.');
+        return redirect()->back()->with('success', __('Insight marked as read.'));
     }
 
     public function dismiss(ProactiveInsight $insight): RedirectResponse
     {
         $insight->update(['is_dismissed' => true]);
 
-        return redirect()->back()->with('success', 'Insight dismissed.');
+        return redirect()->back()->with('success', __('Insight dismissed.'));
     }
 }

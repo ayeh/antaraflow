@@ -7,12 +7,12 @@
     {{-- Page Header --}}
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Governance and compliance metrics</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Analytics') }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Governance and compliance metrics') }}</p>
         </div>
         <a :href="exportUrl" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            Export CSV
+            {{ __('Export CSV') }}
         </a>
     </div>
 
@@ -20,15 +20,15 @@
     <div class="flex gap-1 p-1 bg-gray-100 dark:bg-slate-800 rounded-xl w-fit">
         <a href="{{ route('analytics.index') }}"
            class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-slate-700/60">
-            Overview
+            {{ __('Overview') }}
         </a>
         <a href="{{ route('analytics.governance') }}"
            class="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-white dark:bg-slate-700 text-violet-600 dark:text-violet-400 shadow-sm">
-            Governance
+            {{ __('Governance') }}
         </a>
         <a href="{{ route('analytics.intelligence') }}"
            class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-slate-700/60">
-            Intelligence
+            {{ __('Intelligence') }}
         </a>
     </div>
 
@@ -36,12 +36,12 @@
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
         <div class="flex flex-wrap items-center gap-4">
             <div>
-                <label for="start_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Start Date</label>
+                <label for="start_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('Start Date') }}</label>
                 <input type="date" id="start_date" x-model="startDate" @change="fetchData()"
                     class="block rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white text-sm px-3 py-1.5 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
             </div>
             <div>
-                <label for="end_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">End Date</label>
+                <label for="end_date" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('End Date') }}</label>
                 <input type="date" id="end_date" x-model="endDate" @change="fetchData()"
                     class="block rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white text-sm px-3 py-1.5 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
             </div>
@@ -63,21 +63,21 @@
             {{-- Summary stat cards --}}
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
-                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Meeting Cost</div>
+                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Total Meeting Cost') }}</div>
                     <div class="text-2xl font-bold text-gray-900 dark:text-white mt-1">$<span x-text="formatNumber(data.cost_estimate?.total_cost ?? 0)"></span></div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5"><span x-text="data.cost_estimate?.meeting_count ?? 0"></span> meetings</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5"><span x-text="data.cost_estimate?.meeting_count ?? 0"></span> {{ __('meetings') }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
-                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Attendance</div>
+                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Avg Attendance') }}</div>
                     <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1"><span x-text="avgAttendanceRate"></span>%</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
-                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Compliance Score</div>
+                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Compliance Score') }}</div>
                     <div class="text-2xl font-bold mt-1" :class="complianceScoreColor"><span x-text="data.compliance_score?.overall_score ?? 0"></span>%</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
-                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Approval</div>
-                    <div class="text-2xl font-bold text-gray-900 dark:text-white mt-1"><span x-text="data.approval_turnaround?.avg_days ?? 0"></span> <span class="text-base font-normal text-gray-500 dark:text-gray-400">days</span></div>
+                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Avg Approval') }}</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white mt-1"><span x-text="data.approval_turnaround?.avg_days ?? 0"></span> <span class="text-base font-normal text-gray-500 dark:text-gray-400">{{ __('days') }}</span></div>
                 </div>
             </div>
 
@@ -86,7 +86,7 @@
                 {{-- Attendance rate trends --}}
                 <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Attendance Rate Trends</h2>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Attendance Rate Trends') }}</h2>
                     </div>
                     <div class="p-6">
                         <div class="relative h-64">
@@ -98,7 +98,7 @@
                 {{-- Meeting type distribution --}}
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">Meeting Types</h2>
+                        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Meeting Types') }}</h2>
                     </div>
                     <div class="p-6">
                         <div class="relative h-64">
@@ -111,7 +111,7 @@
             {{-- Action item completion trends --}}
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Action Item Completion Trends</h2>
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Action Item Completion Trends') }}</h2>
                 </div>
                 <div class="p-6">
                     <div class="relative h-64">
@@ -123,19 +123,19 @@
             {{-- Compliance breakdown --}}
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Compliance Breakdown</h2>
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Compliance Breakdown') }}</h2>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200 dark:divide-slate-700">
                     <div class="px-6 py-6">
-                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Approved Meetings</div>
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Approved Meetings') }}</div>
                         <div class="text-3xl font-bold text-green-600 dark:text-green-400 mt-1"><span x-text="data.compliance_score?.approved_percentage ?? 0"></span>%</div>
                     </div>
                     <div class="px-6 py-6">
-                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Action Items Assigned</div>
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Action Items Assigned') }}</div>
                         <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1"><span x-text="data.compliance_score?.action_items_assigned_percentage ?? 0"></span>%</div>
                     </div>
                     <div class="px-6 py-6">
-                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">On-Time Completion</div>
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('On-Time Completion') }}</div>
                         <div class="text-3xl font-bold text-violet-600 dark:text-violet-400 mt-1"><span x-text="data.compliance_score?.on_time_completion_percentage ?? 0"></span>%</div>
                     </div>
                 </div>
@@ -144,7 +144,21 @@
     </template>
 </div>
 
+@php
+$meetingTypeLabels = [
+    'general' => __('General'),
+    'standup' => __('Stand-up'),
+    'retrospective' => __('Retrospective'),
+    'client_call' => __('Client Call'),
+    'board_meeting' => __('Board Meeting'),
+    'one_on_one' => '1-on-1',
+    'workshop' => __('Workshop'),
+    'unspecified' => __('Unspecified'),
+];
+@endphp
 <script>
+const MEETING_TYPE_LABELS = {!! json_encode($meetingTypeLabels) !!};
+
 function governanceAnalytics() {
     return {
         loading: true,
@@ -215,7 +229,7 @@ function governanceAnalytics() {
                 data: {
                     labels: trends.map(t => t.month),
                     datasets: [{
-                        label: 'Attendance Rate (%)',
+                        label: '{{ __("Attendance Rate (%)") }}',
                         data: trends.map(t => t.rate),
                         borderColor: '#7c3aed',
                         backgroundColor: 'rgba(124, 58, 237, 0.1)',
@@ -238,7 +252,7 @@ function governanceAnalytics() {
             if (!canvas) return;
 
             const distribution = this.data.meeting_type_distribution || {};
-            const labels = Object.keys(distribution).map(l => l.charAt(0).toUpperCase() + l.slice(1).replace(/_/g, ' '));
+            const labels = Object.keys(distribution).map(l => MEETING_TYPE_LABELS[l] || (l.charAt(0).toUpperCase() + l.slice(1).replace(/_/g, ' ')));
             const values = Object.values(distribution);
 
             this.meetingTypeChartInstance = new Chart(canvas, {
@@ -271,19 +285,19 @@ function governanceAnalytics() {
                     labels: trends.map(t => t.month),
                     datasets: [
                         {
-                            label: 'On Time',
+                            label: '{{ __("On Time") }}',
                             data: trends.map(t => t.completed_on_time),
                             backgroundColor: '#22c55e',
                             borderRadius: 4,
                         },
                         {
-                            label: 'Overdue',
+                            label: '{{ __("Overdue") }}',
                             data: trends.map(t => t.completed_overdue),
                             backgroundColor: '#ef4444',
                             borderRadius: 4,
                         },
                         {
-                            label: 'Still Open',
+                            label: '{{ __("Still Open") }}',
                             data: trends.map(t => t.still_open),
                             backgroundColor: '#f59e0b',
                             borderRadius: 4,

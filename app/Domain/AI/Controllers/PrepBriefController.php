@@ -48,7 +48,7 @@ class PrepBriefController extends Controller
 
         $this->briefService->generateForUser($meeting, $request->user());
 
-        return redirect()->back()->with('success', 'Prep brief generated successfully.');
+        return redirect()->back()->with('success', __('Prep brief generated successfully.'));
     }
 
     public function markSectionRead(Request $request, MinutesOfMeeting $meeting, MeetingPrepBrief $brief): JsonResponse

@@ -31,12 +31,12 @@ class CreateActionItemRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'The action item title is required.',
-            'title.max' => 'The action item title cannot exceed 255 characters.',
-            'priority.Illuminate\Validation\Rules\Enum' => 'The priority must be one of: low, medium, high, critical.',
-            'assigned_to.exists' => 'The selected assignee does not exist.',
-            'due_date.date' => 'The due date must be a valid date.',
-            'due_date.after' => 'The due date must be in the future.',
+            'title.required' => __('The action item title is required.'),
+            'title.max' => __('The action item title cannot exceed 255 characters.'),
+            'priority.Illuminate\Validation\Rules\Enum' => __('The priority must be one of: low, medium, high, critical.'),
+            'assigned_to.exists' => __('The selected assignee does not exist.'),
+            'due_date.date' => __('The due date must be a valid date.'),
+            'due_date.after' => __('The due date must be in the future.'),
         ];
     }
 }

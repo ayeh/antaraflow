@@ -7,7 +7,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </a>
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Version History</h1>
+            <h1 class="text-2xl font-bold text-gray-900">{{ __('Version History') }}</h1>
             <p class="text-sm text-gray-500 mt-1">{{ $meeting->title }}</p>
         </div>
     </div>
@@ -15,7 +15,7 @@
     @if($versions->isEmpty())
         <div class="bg-white rounded-xl border border-gray-200 px-6 py-16 text-center">
             <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <p class="text-sm text-gray-500">No versions have been recorded for this meeting.</p>
+            <p class="text-sm text-gray-500">{{ __('No versions have been recorded for this meeting.') }}</p>
         </div>
     @else
         <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
@@ -28,7 +28,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-gray-900">
-                            {{ $version->change_summary ?? 'Auto-saved' }}
+                            {{ $version->change_summary ?? __('Auto-saved') }}
                         </p>
                         <div class="flex items-center gap-2 mt-1 text-xs text-gray-500">
                             @if($version->createdBy)
@@ -41,21 +41,21 @@
                     <div class="flex items-center gap-2 flex-shrink-0">
                         <a href="{{ route('meetings.versions.show', [$meeting, $version]) }}"
                            class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-                            View
+                            {{ __('View') }}
                         </a>
                         @if(!$loop->first)
                             <form method="POST" action="{{ route('meetings.revert', $meeting) }}"
-                                  onsubmit="confirmThenSubmit(event, 'Are you sure you want to revert this meeting to draft?')">
+                                  onsubmit="confirmThenSubmit(event, '{{ __('Are you sure you want to revert this meeting to draft?') }}')">
                                 @csrf
                                 <input type="hidden" name="version_id" value="{{ $version->id }}">
                                 <button type="submit"
                                         class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-violet-600 text-white hover:bg-violet-700 transition-colors">
-                                    Restore
+                                    {{ __('Restore') }}
                                 </button>
                             </form>
                         @else
                             <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-400">
-                                Current
+                                {{ __('Current') }}
                             </span>
                         @endif
                     </div>

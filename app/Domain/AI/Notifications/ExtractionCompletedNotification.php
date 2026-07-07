@@ -33,10 +33,10 @@ class ExtractionCompletedNotification extends Notification implements ShouldQueu
     public function toTeams(object $notifiable): TeamsMessage
     {
         return (new TeamsMessage)
-            ->title('AI Extraction Completed')
-            ->content("AI extraction has been completed for **{$this->meeting->title}**. Summary, action items, and decisions are now available.")
-            ->fact('Meeting', $this->meeting->title)
-            ->action('View Extractions', route('meetings.show', $this->meeting));
+            ->title(__('AI Extraction Completed'))
+            ->content(__('AI extraction has been completed for **:title**. Summary, action items, and decisions are now available.', ['title' => $this->meeting->title]))
+            ->fact(__('Meeting'), $this->meeting->title)
+            ->action(__('View Extractions'), route('meetings.show', $this->meeting));
     }
 
     /** @return array<string, mixed> */
@@ -46,7 +46,7 @@ class ExtractionCompletedNotification extends Notification implements ShouldQueu
             'type' => 'extraction_completed',
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
-            'message' => "AI extraction completed for \"{$this->meeting->title}\"",
+            'message' => __('AI extraction completed for ":title"', ['title' => $this->meeting->title]),
         ];
     }
 }

@@ -2,14 +2,14 @@
 $navItems = [
     [
         'key'    => 'home',
-        'label'  => 'Dashboard',
+        'label'  => __('Dashboard'),
         'href'   => route('dashboard'),
         'active' => request()->routeIs('dashboard'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
     ],
     [
         'key'    => 'meetings',
-        'label'  => 'Meetings',
+        'label'  => __('Meetings'),
         'href'   => route('meetings.index'),
         'active' => request()->routeIs('meetings.*')
                     && ! request()->routeIs('meetings.extractions.*', 'meetings.chat.*', 'meetings.transcriptions.*'),
@@ -17,36 +17,36 @@ $navItems = [
     ],
     [
         'key'    => 'tasks',
-        'label'  => 'Action Items',
+        'label'  => __('Action Items'),
         'href'   => route('action-items.dashboard'),
         'active' => request()->routeIs('action-items.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
     ],
     [
         'key'    => 'projects',
-        'label'  => 'Projects',
+        'label'  => __('Projects'),
         'href'   => route('projects.index'),
         'active' => request()->routeIs('projects.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>',
     ],
     [
         'key'    => 'ai',
-        'label'  => 'AI Tools',
+        'label'  => __('AI Tools'),
         'href'   => null,
         'active' => request()->routeIs('meetings.extractions.*', 'meetings.chat.*', 'meetings.transcriptions.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>',
-        'note'   => 'Open a meeting to access AI features',
+        'note'   => __('Open a meeting to access AI features'),
     ],
     [
         'key'    => 'analytics',
-        'label'  => 'Analytics',
+        'label'  => __('Analytics'),
         'href'   => route('analytics.index'),
         'active' => request()->routeIs('analytics.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
     ],
     [
         'key'    => 'insights',
-        'label'  => 'Insights',
+        'label'  => __('Insights'),
         'href'   => route('insights.index'),
         'active' => request()->routeIs('insights.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>',
@@ -54,7 +54,7 @@ $navItems = [
     ],
     [
         'key'    => 'reports',
-        'label'  => 'Reports',
+        'label'  => __('Reports'),
         'href'   => route('reports.index'),
         'active' => request()->routeIs('reports.*'),
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
@@ -71,7 +71,7 @@ $isSettingsActive = request()->routeIs(
 @endphp
 
 <nav
-    aria-label="Main navigation"
+    aria-label="{{ __('Main navigation') }}"
     :class="sidebarCollapsed ? 'w-14' : 'w-56'"
     class="fixed left-3 top-3 bottom-3 z-50 flex flex-col
            bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl
@@ -107,8 +107,8 @@ $isSettingsActive = request()->routeIs(
             @click.stop="toggleSidebar()"
             class="shrink-0 flex items-center justify-center w-7 h-7 rounded-xl
                    bg-violet-600 hover:bg-violet-700 text-white transition-colors"
-            :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-            :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+            :title="sidebarCollapsed ? '{{ __('Expand sidebar') }}' : '{{ __('Collapse sidebar') }}'"
+            :aria-label="sidebarCollapsed ? '{{ __('Expand sidebar') }}' : '{{ __('Collapse sidebar') }}'"
         >
             <svg class="w-3.5 h-3.5 transition-transform duration-300" :class="sidebarCollapsed ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
@@ -211,7 +211,7 @@ $isSettingsActive = request()->routeIs(
                     x-transition:leave-start="opacity-100"
                     x-transition:leave-end="opacity-0"
                     class="text-sm truncate flex-1 text-left"
-                >Settings</span>
+                >{{ __('Settings') }}</span>
                 <svg
                     x-show="!sidebarCollapsed"
                     x-transition:enter="transition ease-out duration-150 delay-75"
@@ -290,32 +290,32 @@ $isSettingsActive = request()->routeIs(
     </div>
     {{-- Personal Settings --}}
     <div class="px-4 pt-2 pb-1">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Personal</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('Personal') }}</span>
     </div>
     <div class="mx-2 space-y-0.5">
         <a href="{{ route('settings.profile') }}"
            class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
                   {{ request()->routeIs('settings.profile') ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700' }} transition-colors">
             <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            Profile
+            {{ __('Profile') }}
         </a>
         <a href="{{ route('settings.notifications') }}"
            class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
                   {{ request()->routeIs('settings.notifications') ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700' }} transition-colors">
             <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-            Notifications
+            {{ __('Notifications') }}
         </a>
         <a href="{{ route('settings.api-keys') }}"
            class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
                   {{ request()->routeIs('settings.api-keys*') ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700' }} transition-colors">
             <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-            API Keys
+            {{ __('API Keys') }}
         </a>
         <a href="{{ route('calendar.connections') }}"
            class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
                   {{ request()->routeIs('calendar.*') ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700' }} transition-colors">
             <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            Calendar Connections
+            {{ __('Calendar Connections') }}
         </a>
     </div>
 
@@ -327,7 +327,7 @@ $isSettingsActive = request()->routeIs(
                     class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-left
                            text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                Admin Panel
+                {{ __('Admin Panel') }}
             </button>
         </form>
     </div>
@@ -341,7 +341,7 @@ $isSettingsActive = request()->routeIs(
                    text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
         >
             <span class="w-4 h-4 flex items-center justify-center text-slate-400" x-text="theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '💻'"></span>
-            <span x-text="'Theme: ' + (theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'System')"></span>
+            <span x-text="'{{ __('Theme') }}: ' + (theme === 'light' ? '{{ __('Light') }}' : theme === 'dark' ? '{{ __('Dark') }}' : '{{ __('System') }}')"></span>
         </button>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
@@ -353,7 +353,7 @@ $isSettingsActive = request()->routeIs(
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                 </svg>
-                Logout
+                {{ __('Logout') }}
             </button>
         </form>
     </div>

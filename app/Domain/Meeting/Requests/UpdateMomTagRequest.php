@@ -46,9 +46,9 @@ class UpdateMomTagRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => 'A tag with this name already exists.',
-            'slug.unique' => 'A tag with a similar name (same slug) already exists.',
-            'color.regex' => 'Color must be a valid hex color (e.g. #A855F7).',
+            'name.unique' => __('A tag with this name already exists.'),
+            'slug.unique' => __('A tag with a similar name (same slug) already exists.'),
+            'color.regex' => __('Color must be a valid hex color (e.g. #A855F7).'),
         ];
     }
 }

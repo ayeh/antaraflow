@@ -37,14 +37,14 @@ class StoreSubscriptionPlanRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'The plan name is required.',
-            'slug.required' => 'The plan slug is required.',
-            'slug.unique' => 'This slug is already taken.',
-            'price_monthly.required' => 'Monthly price is required.',
-            'price_yearly.required' => 'Yearly price is required.',
-            'features.required' => 'At least one feature must be defined.',
-            'max_users.min' => 'Use -1 for unlimited.',
-            'max_meetings_per_month.min' => 'Use -1 for unlimited.',
+            'name.required' => __('The plan name is required.'),
+            'slug.required' => __('The plan slug is required.'),
+            'slug.unique' => __('This slug is already taken.'),
+            'price_monthly.required' => __('Monthly price is required.'),
+            'price_yearly.required' => __('Yearly price is required.'),
+            'features.required' => __('At least one feature must be defined.'),
+            'max_users.min' => __('Use -1 for unlimited.'),
+            'max_meetings_per_month.min' => __('Use -1 for unlimited.'),
         ];
     }
 }

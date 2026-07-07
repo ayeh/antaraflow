@@ -41,7 +41,7 @@ class AttendeeGroupController extends Controller
 
         AttendeeGroup::query()->create($data);
 
-        return redirect()->route('attendee-groups.index')->with('success', 'Group created.');
+        return redirect()->route('attendee-groups.index')->with('success', __('Group created.'));
     }
 
     public function edit(AttendeeGroup $attendeeGroup): View
@@ -57,7 +57,7 @@ class AttendeeGroupController extends Controller
 
         $attendeeGroup->update($request->validated());
 
-        return redirect()->route('attendee-groups.index')->with('success', 'Group updated.');
+        return redirect()->route('attendee-groups.index')->with('success', __('Group updated.'));
     }
 
     public function destroy(AttendeeGroup $attendeeGroup): RedirectResponse
@@ -66,6 +66,6 @@ class AttendeeGroupController extends Controller
 
         $attendeeGroup->delete();
 
-        return redirect()->route('attendee-groups.index')->with('success', 'Group deleted.');
+        return redirect()->route('attendee-groups.index')->with('success', __('Group deleted.'));
     }
 }

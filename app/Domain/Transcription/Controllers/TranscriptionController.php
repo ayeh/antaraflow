@@ -43,7 +43,7 @@ class TranscriptionController extends Controller
         }
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Audio uploaded and transcription started.');
+            ->with('success', __('Audio uploaded and transcription started.'));
     }
 
     public function show(MinutesOfMeeting $meeting, AudioTranscription $transcription): View
@@ -80,10 +80,10 @@ class TranscriptionController extends Controller
         $transcription->delete();
 
         if (request()->wantsJson()) {
-            return response()->json(['message' => 'Transcription deleted successfully.']);
+            return response()->json(['message' => __('Transcription deleted successfully.')]);
         }
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Transcription deleted successfully.');
+            ->with('success', __('Transcription deleted successfully.'));
     }
 }

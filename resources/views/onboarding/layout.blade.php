@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Welcome to antaraNote</title>
+    <title>{{ __('Welcome to') }} antaraNote</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
@@ -37,7 +37,7 @@
                 <form method="POST" action="{{ route('onboarding.skip') }}">
                     @csrf
                     <button type="submit" class="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                        Skip setup for now
+                        {{ __('Skip setup for now') }}
                     </button>
                 </form>
             </div>

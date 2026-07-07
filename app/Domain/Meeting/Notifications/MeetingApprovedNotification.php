@@ -36,20 +36,20 @@ class MeetingApprovedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Meeting Approved: {$this->meeting->title}")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("The meeting **{$this->meeting->title}** has been approved by {$this->approvedBy->name}.")
-            ->action('View Meeting', route('meetings.show', $this->meeting));
+            ->subject(__('Meeting Approved: :title', ['title' => $this->meeting->title]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__('The meeting **:title** has been approved by :approver.', ['title' => $this->meeting->title, 'approver' => $this->approvedBy->name]))
+            ->action(__('View Meeting'), route('meetings.show', $this->meeting));
     }
 
     public function toTeams(object $notifiable): TeamsMessage
     {
         return (new TeamsMessage)
-            ->title('Meeting Approved')
-            ->content("The meeting **{$this->meeting->title}** has been approved by {$this->approvedBy->name}.")
-            ->fact('Meeting', $this->meeting->title)
-            ->fact('Approved By', $this->approvedBy->name)
-            ->action('View Meeting', route('meetings.show', $this->meeting));
+            ->title(__('Meeting Approved'))
+            ->content(__('The meeting **:title** has been approved by :name.', ['title' => $this->meeting->title, 'name' => $this->approvedBy->name]))
+            ->fact(__('Meeting'), $this->meeting->title)
+            ->fact(__('Approved By'), $this->approvedBy->name)
+            ->action(__('View Meeting'), route('meetings.show', $this->meeting));
     }
 
     /** @return array<string, mixed> */
@@ -60,7 +60,7 @@ class MeetingApprovedNotification extends Notification implements ShouldQueue
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
             'approved_by' => $this->approvedBy->name,
-            'message' => "\"{$this->meeting->title}\" was approved by {$this->approvedBy->name}",
+            'message' => __('":title" was approved by :name', ['title' => $this->meeting->title, 'name' => $this->approvedBy->name]),
         ];
     }
 }

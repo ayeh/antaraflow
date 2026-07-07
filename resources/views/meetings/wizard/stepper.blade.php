@@ -1,6 +1,6 @@
 {{-- Meeting Stepper --}}
 @php
-    $steps = ['Setup', 'Attendees', 'Inputs', 'Review', 'Finalize'];
+    $steps = [__('Setup'), __('Attendees'), __('Inputs'), __('Review'), __('Finalize')];
 @endphp
 <div class="flex items-center mb-6">
     @foreach($steps as $index => $label)

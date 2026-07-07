@@ -13,11 +13,11 @@
         <div class="max-w-4xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <span class="font-semibold text-sm">antaraNote</span>
-                <span class="text-blue-200 text-sm">&mdash; Shared Meeting View</span>
+                <span class="text-blue-200 text-sm">&mdash; {{ __('Shared Meeting View') }}</span>
             </div>
             @if($share->expires_at)
                 <span class="text-blue-100 text-xs">
-                    Expires {{ $share->expires_at->format('M j, Y') }}
+                    {{ __('Expires') }} {{ $share->expires_at->format('M j, Y') }}
                 </span>
             @endif
         </div>
@@ -62,7 +62,7 @@
         {{-- Attendees --}}
         @if($meeting->attendees->isNotEmpty())
             <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 class="text-base font-semibold text-gray-900 mb-4">Attendees</h2>
+                <h2 class="text-base font-semibold text-gray-900 mb-4">{{ __('Attendees') }}</h2>
                 <div class="flex flex-wrap gap-2">
                     @foreach($meeting->attendees as $attendee)
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700">
@@ -79,7 +79,7 @@
         {{-- Summary --}}
         @if($meeting->summary)
             <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 class="text-base font-semibold text-gray-900 mb-3">Summary</h2>
+                <h2 class="text-base font-semibold text-gray-900 mb-3">{{ __('Summary') }}</h2>
                 <p class="text-sm text-gray-700 leading-relaxed">{{ $meeting->summary }}</p>
             </div>
         @endif
@@ -87,7 +87,7 @@
         {{-- Meeting Content --}}
         @if($meeting->content)
             <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 class="text-base font-semibold text-gray-900 mb-3">Meeting Notes</h2>
+                <h2 class="text-base font-semibold text-gray-900 mb-3">{{ __('Meeting Notes') }}</h2>
                 <div class="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none whitespace-pre-line">
                     {{ $meeting->content }}
                 </div>
@@ -97,15 +97,15 @@
         {{-- Action Items --}}
         @if($meeting->actionItems->isNotEmpty())
             <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 class="text-base font-semibold text-gray-900 mb-4">Action Items</h2>
+                <h2 class="text-base font-semibold text-gray-900 mb-4">{{ __('Action Items') }}</h2>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignee</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Task') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Assignee') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Due Date') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Status') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -142,9 +142,9 @@
         {{-- Footer --}}
         <div class="text-center py-6 border-t border-gray-200">
             <p class="text-sm text-gray-500">
-                This is a read-only view.
-                <a href="{{ route('register') }}" class="text-blue-600 hover:underline font-medium">Sign up</a>
-                to create your own meeting notes.
+                {{ __('This is a read-only view.') }}
+                <a href="{{ route('register') }}" class="text-blue-600 hover:underline font-medium">{{ __('Sign up') }}</a>
+                {{ __('to create your own meeting notes.') }}
             </p>
         </div>
 

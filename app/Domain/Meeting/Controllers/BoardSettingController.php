@@ -50,6 +50,6 @@ class BoardSettingController extends Controller
         );
 
         return redirect()->route('settings.board.edit')
-            ->with('success', 'Board settings updated successfully.');
+            ->with('success', __('Board settings updated successfully.'));
     }
 }

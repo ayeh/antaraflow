@@ -42,7 +42,7 @@ class EmailTemplateController extends Controller
         ]);
 
         return redirect()->route('admin.email-templates.index')
-            ->with('success', "Template '{$emailTemplate->name}' updated successfully.");
+            ->with('success', __("Template ':name' updated successfully.", ['name' => $emailTemplate->name]));
     }
 
     public function preview(Request $request, EmailTemplate $emailTemplate): JsonResponse

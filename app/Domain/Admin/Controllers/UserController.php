@@ -51,7 +51,7 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users.show', $user)
-            ->with('success', "User {$user->name} has been suspended.");
+            ->with('success', __('User :name has been suspended.', ['name' => $user->name]));
     }
 
     public function unsuspend(User $user): RedirectResponse
@@ -59,7 +59,7 @@ class UserController extends Controller
         $user->restore();
 
         return redirect()->route('admin.users.show', $user)
-            ->with('success', "User {$user->name} has been unsuspended.");
+            ->with('success', __('User :name has been unsuspended.', ['name' => $user->name]));
     }
 
     public function impersonate(Request $request, User $user): RedirectResponse
@@ -69,7 +69,7 @@ class UserController extends Controller
         auth('web')->loginUsingId($user->id);
 
         return redirect()->route('dashboard')
-            ->with('success', "Now impersonating {$user->name}. Use the banner to return.");
+            ->with('success', __('Now impersonating :name. Use the banner to return.', ['name' => $user->name]));
     }
 
     public function exportCsv(Request $request): StreamedResponse

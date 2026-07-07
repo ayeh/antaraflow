@@ -61,11 +61,11 @@ class InviteMemberRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'An email address is required.',
-            'email.email' => 'Please provide a valid email address.',
-            'email.unique' => 'An invitation has already been sent to this email address.',
-            'role.required' => 'A role is required.',
-            'role.in' => 'The selected role is invalid.',
+            'email.required' => __('An email address is required.'),
+            'email.email' => __('Please provide a valid email address.'),
+            'email.unique' => __('An invitation has already been sent to this email address.'),
+            'role.required' => __('A role is required.'),
+            'role.in' => __('The selected role is invalid.'),
         ];
     }
 }

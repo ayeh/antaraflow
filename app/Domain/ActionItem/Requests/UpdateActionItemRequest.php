@@ -33,11 +33,11 @@ class UpdateActionItemRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.max' => 'The action item title cannot exceed 255 characters.',
-            'priority.Illuminate\Validation\Rules\Enum' => 'The priority must be one of: low, medium, high, critical.',
-            'status.Illuminate\Validation\Rules\Enum' => 'The status is not valid.',
-            'assigned_to.exists' => 'The selected assignee does not exist.',
-            'due_date.date' => 'The due date must be a valid date.',
+            'title.max' => __('The action item title cannot exceed 255 characters.'),
+            'priority.Illuminate\Validation\Rules\Enum' => __('The priority must be one of: low, medium, high, critical.'),
+            'status.Illuminate\Validation\Rules\Enum' => __('The status is not valid.'),
+            'assigned_to.exists' => __('The selected assignee does not exist.'),
+            'due_date.date' => __('The due date must be a valid date.'),
         ];
     }
 }

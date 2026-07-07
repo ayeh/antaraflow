@@ -33,14 +33,14 @@
 
                 lobbyAppName: config.appName,
                 lobbyTaglines: @js([
-                    'Every meeting, minuted by AI.',
-                    'Turn conversations into decisions — automatically.',
-                    'This live check-in is just one small feature.',
-                    'Smart minutes & action items, handled for you.',
-                    'Meetings that write their own notes.',
-                    'From discussion to decisions in seconds.',
-                    "There's a smarter way to run meetings.",
-                    'Curious what else it can do?',
+                    __('Every meeting, minuted by AI.'),
+                    __('Turn conversations into decisions — automatically.'),
+                    __('This live check-in is just one small feature.'),
+                    __('Smart minutes & action items, handled for you.'),
+                    __('Meetings that write their own notes.'),
+                    __('From discussion to decisions in seconds.'),
+                    __("There's a smarter way to run meetings."),
+                    __('Curious what else it can do?'),
                 ]),
                 lobbyTagline: '',
                 lobbyTaglineTimer: null,
@@ -122,7 +122,7 @@
 
                         if (data.is_active === false && !this.lobbyEnded) {
                             this.lobbyEnded = true;
-                            this.celebrate('Registration closed');
+                            this.celebrate('{{ __("Registration closed") }}');
                         }
                     } catch (e) {
                         console.error('Lobby poll failed:', e);
@@ -140,10 +140,10 @@
                     if (!this.lobbyMax || count <= prev) return;
                     const half = Math.ceil(this.lobbyMax / 2);
                     if (this.lobbyMax >= 4 && count >= half && prev < half && count < this.lobbyMax) {
-                        this.celebrate('Halfway there!');
+                        this.celebrate('{{ __("Halfway there!") }}');
                     }
                     if (count >= this.lobbyMax && prev < this.lobbyMax) {
-                        this.celebrate('We\'re full! 🎉');
+                        this.celebrate('{{ __("We\'re full! 🎉") }}');
                     }
                 },
 

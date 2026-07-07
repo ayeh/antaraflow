@@ -30,8 +30,8 @@ class CreateMeetingTemplateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Template name is required.',
-            'structure.required' => 'Template structure is required.',
+            'name.required' => __('Template name is required.'),
+            'structure.required' => __('Template structure is required.'),
         ];
     }
 }

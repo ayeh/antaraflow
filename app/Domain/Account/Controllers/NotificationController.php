@@ -69,6 +69,6 @@ class NotificationController extends Controller
         $user = $request->user();
         $this->notificationService->markAllAsRead($user);
 
-        return back()->with('success', 'All notifications marked as read.');
+        return back()->with('success', __('All notifications marked as read.'));
     }
 }

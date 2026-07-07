@@ -31,7 +31,7 @@ class WhisperLocalTranscriber implements TranscriberInterface
             ]);
 
         if ($response->failed()) {
-            $error = $response->json('error.message', 'Local Whisper API request failed with status '.$response->status());
+            $error = $response->json('error.message', __('Local Whisper API request failed with status :status', ['status' => $response->status()]));
             throw new \RuntimeException($error);
         }
 

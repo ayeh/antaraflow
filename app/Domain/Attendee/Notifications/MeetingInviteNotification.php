@@ -27,25 +27,25 @@ class MeetingInviteNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $message = (new MailMessage)
-            ->subject("Meeting Invitation: {$this->meeting->title}")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("You have been invited to a meeting: **{$this->meeting->title}**.");
+            ->subject(__('Meeting Invitation: :title', ['title' => $this->meeting->title]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__('You have been invited to a meeting: **:title**.', ['title' => $this->meeting->title]));
 
         if ($this->meeting->meeting_date) {
-            $message->line("**Date:** {$this->meeting->meeting_date->format('M d, Y \\a\\t g:i A')}");
+            $message->line(__('**Date:** :date', ['date' => $this->meeting->meeting_date->format('M d, Y \a\t g:i A')]));
         }
 
         if ($this->meeting->location) {
-            $message->line("**Location:** {$this->meeting->location}");
+            $message->line(__('**Location:** :location', ['location' => $this->meeting->location]));
         }
 
         if ($this->meeting->duration_minutes) {
-            $message->line("**Duration:** {$this->meeting->duration_minutes} minutes");
+            $message->line(__('**Duration:** :minutes minutes', ['minutes' => $this->meeting->duration_minutes]));
         }
 
         return $message
-            ->action('View Meeting', route('meetings.show', $this->meeting))
-            ->line('Please RSVP at your earliest convenience.');
+            ->action(__('View Meeting'), route('meetings.show', $this->meeting))
+            ->line(__('Please RSVP at your earliest convenience.'));
     }
 
     /** @return array<string, mixed> */
@@ -56,7 +56,7 @@ class MeetingInviteNotification extends Notification implements ShouldQueue
             'meeting_id' => $this->meeting->id,
             'title' => $this->meeting->title,
             'meeting_date' => $this->meeting->meeting_date?->toIso8601String(),
-            'message' => "You've been invited to \"{$this->meeting->title}\"",
+            'message' => __('You\'ve been invited to ":title"', ['title' => $this->meeting->title]),
         ];
     }
 }

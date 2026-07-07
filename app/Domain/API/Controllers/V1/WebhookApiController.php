@@ -50,6 +50,6 @@ class WebhookApiController extends ApiController
 
         $webhookEndpoint->delete();
 
-        return response()->json(['message' => 'Webhook deleted.']);
+        return response()->json(['message' => __('Webhook deleted.')]);
     }
 }

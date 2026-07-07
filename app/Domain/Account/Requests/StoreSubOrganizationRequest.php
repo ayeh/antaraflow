@@ -28,10 +28,10 @@ class StoreSubOrganizationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Organization name is required.',
-            'owner_name.required' => 'The sub-organization owner name is required.',
-            'owner_email.required' => 'The sub-organization owner email is required.',
-            'owner_email.email' => 'Please provide a valid email address for the owner.',
+            'name.required' => __('Organization name is required.'),
+            'owner_name.required' => __('The sub-organization owner name is required.'),
+            'owner_email.required' => __('The sub-organization owner email is required.'),
+            'owner_email.email' => __('Please provide a valid email address for the owner.'),
         ];
     }
 }

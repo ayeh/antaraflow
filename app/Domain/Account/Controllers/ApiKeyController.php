@@ -68,7 +68,7 @@ class ApiKeyController extends Controller
 
         return redirect()->route('api-keys.index')
             ->with('api_key_created', $fullKey)
-            ->with('success', 'API key created. Copy it now — it will not be shown again.');
+            ->with('success', __('API key created. Copy it now — it will not be shown again.'));
     }
 
     public function destroy(Request $request, ApiKey $apiKey): RedirectResponse
@@ -87,6 +87,6 @@ class ApiKeyController extends Controller
         $apiKey->delete();
 
         return redirect()->route('api-keys.index')
-            ->with('success', 'API key revoked successfully.');
+            ->with('success', __('API key revoked successfully.'));
     }
 }

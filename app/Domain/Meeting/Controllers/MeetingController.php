@@ -144,7 +144,7 @@ class MeetingController extends Controller
         }
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Meeting created successfully.');
+            ->with('success', __('Meeting created successfully.'));
     }
 
     public function show(MinutesOfMeeting $meeting, Request $request): View
@@ -214,7 +214,7 @@ class MeetingController extends Controller
         $this->meetingService->update($meeting, $request->validated());
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Meeting updated successfully.');
+            ->with('success', __('Meeting updated successfully.'));
     }
 
     public function destroy(MinutesOfMeeting $meeting): RedirectResponse
@@ -224,7 +224,7 @@ class MeetingController extends Controller
         $this->meetingService->delete($meeting);
 
         return redirect()->route('meetings.index')
-            ->with('success', 'Meeting deleted successfully.');
+            ->with('success', __('Meeting deleted successfully.'));
     }
 
     public function finalize(MinutesOfMeeting $meeting, Request $request): RedirectResponse
@@ -239,7 +239,7 @@ class MeetingController extends Controller
         }
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Meeting finalized successfully.');
+            ->with('success', __('Meeting finalized successfully.'));
     }
 
     public function approve(MinutesOfMeeting $meeting, Request $request): RedirectResponse
@@ -254,7 +254,7 @@ class MeetingController extends Controller
         }
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Meeting approved successfully.');
+            ->with('success', __('Meeting approved successfully.'));
     }
 
     public function revert(MinutesOfMeeting $meeting, Request $request): RedirectResponse
@@ -269,7 +269,7 @@ class MeetingController extends Controller
         }
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Meeting reverted to draft.');
+            ->with('success', __('Meeting reverted to draft.'));
     }
 
     public function duplicate(MinutesOfMeeting $meeting): RedirectResponse
@@ -295,6 +295,6 @@ class MeetingController extends Controller
         }
 
         return redirect()->route('meetings.show', $duplicate)
-            ->with('success', 'Meeting duplicated successfully.');
+            ->with('success', __('Meeting duplicated successfully.'));
     }
 }

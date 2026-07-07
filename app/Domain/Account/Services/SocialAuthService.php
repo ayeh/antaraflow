@@ -84,7 +84,7 @@ class SocialAuthService
         $hasPassword = $user->password !== null;
 
         if (! $hasPassword && $socialAccountCount <= 1) {
-            throw new \RuntimeException('Cannot unlink the only authentication method. Please set a password first.');
+            throw new \RuntimeException(__('Cannot unlink the only authentication method. Please set a password first.'));
         }
 
         $user->socialAccounts()

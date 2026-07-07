@@ -6,13 +6,13 @@
     {{-- Page Header --}}
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Projects</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage your organization's projects</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Projects') }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __("Manage your organization's projects") }}</p>
         </div>
         @can('create', \App\Domain\Project\Models\Project::class)
         <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            New Project
+            {{ __('New Project') }}
         </a>
         @endcan
     </div>
@@ -25,7 +25,7 @@
             </div>
             <div>
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total'] }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total Projects</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Total Projects') }}</div>
             </div>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 flex items-center gap-4">
@@ -34,7 +34,7 @@
             </div>
             <div>
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['active'] }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Active</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Active') }}</div>
             </div>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 flex items-center gap-4">
@@ -43,7 +43,7 @@
             </div>
             <div>
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['members'] }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total Members</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Total Members') }}</div>
             </div>
         </div>
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 flex items-center gap-4">
@@ -52,7 +52,7 @@
             </div>
             <div>
                 <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['meetings'] }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total Meetings</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Total Meetings') }}</div>
             </div>
         </div>
     </div>
@@ -63,12 +63,12 @@
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
                     <tr>
-                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
-                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Members</th>
-                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Meetings</th>
-                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                        <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Name') }}</th>
+                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Code') }}</th>
+                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Members') }}</th>
+                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Meetings') }}</th>
+                        <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Status') }}</th>
+                        <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
@@ -85,22 +85,22 @@
                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $project->meetings_count }}</td>
                             <td class="px-6 py-4">
                                 @if($project->is_active)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Active</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">{{ __('Active') }}</span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">Inactive</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">{{ __('Inactive') }}</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-3">
-                                    <a href="{{ route('projects.show', $project) }}" class="text-sm text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300 font-medium transition-colors">View</a>
+                                    <a href="{{ route('projects.show', $project) }}" class="text-sm text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300 font-medium transition-colors">{{ __('View') }}</a>
                                     @can('update', $project)
-                                    <a href="{{ route('projects.edit', $project) }}" class="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 font-medium transition-colors">Edit</a>
+                                    <a href="{{ route('projects.edit', $project) }}" class="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 font-medium transition-colors">{{ __('Edit') }}</a>
                                     @endcan
                                     @can('delete', $project)
                                     <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this project?')" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors">Delete</button>
+                                        <button type="submit" class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors">{{ __('Delete') }}</button>
                                     </form>
                                     @endcan
                                 </div>
@@ -112,13 +112,13 @@
                                 <div class="mx-auto w-12 h-12 bg-gray-100 dark:bg-slate-700 rounded-xl flex items-center justify-center mb-4">
                                     <svg class="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                                 </div>
-                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">No projects yet</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating your first project.</p>
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('No projects yet') }}</h3>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Get started by creating your first project.') }}</p>
                                 @can('create', \App\Domain\Project\Models\Project::class)
                                 <div class="mt-6">
                                     <a href="{{ route('projects.create') }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        New Project
+                                        {{ __('New Project') }}
                                     </a>
                                 </div>
                                 @endcan

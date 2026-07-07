@@ -1,5 +1,5 @@
 <div class="space-y-6">
-    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Comments</h2>
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Comments') }}</h2>
 
     @if($comments->isNotEmpty())
         <div class="space-y-4">
@@ -60,7 +60,7 @@
                                 </div>
 
                                 <div class="mt-2 flex items-center gap-3">
-                                    <button @click="showReply = !showReply" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Reply</button>
+                                    <button @click="showReply = !showReply" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">{{ __('Reply') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -69,7 +69,7 @@
                                 <button
                                     type="button"
                                     @click="fetch('{{ route('comments.toggle-visibility', $comment) }}', {method:'PATCH', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>r.json()).then(d=>{ clientVisible = d.client_visible })"
-                                    :title="clientVisible ? 'Visible to clients' : 'Internal only'"
+                                    :title="clientVisible ? '{{ __('Visible to clients') }}' : '{{ __('Internal only') }}'"
                                     :class="clientVisible ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-slate-500'"
                                     class="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                                 >
@@ -85,7 +85,7 @@
                                 <form method="POST" action="{{ route('comments.destroy', $comment) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:underline" onclick="event.preventDefault(); window.antaraConfirm('Delete this comment?').then(ok => ok && this.closest('form').submit())">Delete</button>
+                                    <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:underline" onclick="event.preventDefault(); window.antaraConfirm('{{ __('Delete this comment?') }}').then(ok => ok && this.closest('form').submit())">{{ __('Delete') }}</button>
                                 </form>
                             @endif
                         </div>
@@ -112,7 +112,7 @@
                                         <form method="POST" action="{{ route('comments.destroy', $reply) }}" class="flex-shrink-0">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:underline" onclick="event.preventDefault(); window.antaraConfirm('Delete this reply?').then(ok => ok && this.closest('form').submit())">Delete</button>
+                                            <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:underline" onclick="event.preventDefault(); window.antaraConfirm('{{ __('Delete this reply?') }}').then(ok => ok && this.closest('form').submit())">{{ __('Delete') }}</button>
                                         </form>
                                     @endif
                                 </div>
@@ -125,27 +125,27 @@
                         <form method="POST" action="{{ route('meetings.comments.store', $meeting) }}" class="flex gap-2">
                             @csrf
                             <input type="hidden" name="parent_id" value="{{ $comment->id }}">
-                            <input type="text" name="body" placeholder="Write a reply..." required maxlength="2000"
+                            <input type="text" name="body" placeholder="{{ __('Write a reply...') }}" required maxlength="2000"
                                 class="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <button type="submit" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Reply</button>
-                            <button type="button" @click="showReply = false" class="px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">Cancel</button>
+                            <button type="submit" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">{{ __('Reply') }}</button>
+                            <button type="button" @click="showReply = false" class="px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">{{ __('Cancel') }}</button>
                         </form>
                     </div>
                 </div>
             @endforeach
         </div>
     @else
-        <p class="text-sm text-gray-500 dark:text-gray-400">No comments yet. Be the first to comment.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No comments yet. Be the first to comment.') }}</p>
     @endif
 
     <div class="border border-gray-200 dark:border-slate-700 rounded-lg p-4 bg-gray-50 dark:bg-slate-800">
-        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Add a Comment</h3>
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('Add a Comment') }}</h3>
         <form method="POST" action="{{ route('meetings.comments.store', $meeting) }}" class="space-y-3">
             @csrf
-            <textarea name="body" rows="3" required maxlength="2000" placeholder="Write your comment..."
+            <textarea name="body" rows="3" required maxlength="2000" placeholder="{{ __('Write your comment...') }}"
                 class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
             <div>
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Post Comment</button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">{{ __('Post Comment') }}</button>
             </div>
         </form>
     </div>

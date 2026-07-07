@@ -25,8 +25,8 @@ class UpdateCommentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'body.required' => 'A comment body is required.',
-            'body.max' => 'The comment may not be greater than 2000 characters.',
+            'body.required' => __('A comment body is required.'),
+            'body.max' => __('The comment may not be greater than 2000 characters.'),
         ];
     }
 }

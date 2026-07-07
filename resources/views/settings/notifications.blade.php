@@ -3,8 +3,8 @@
 @section('content')
 <div class="max-w-3xl mx-auto space-y-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Notification Settings</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Choose how and when you want to be notified</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Notification Settings') }}</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Choose how and when you want to be notified') }}</p>
     </div>
 
     <form method="POST" action="{{ route('settings.notifications.update') }}">
@@ -14,18 +14,18 @@
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
                 <div class="grid grid-cols-3 gap-4 items-center">
-                    <div class="col-span-1 text-sm font-semibold text-gray-700 dark:text-gray-300">Event</div>
-                    <div class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300">Email</div>
-                    <div class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300">In-App</div>
+                    <div class="col-span-1 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Event') }}</div>
+                    <div class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Email') }}</div>
+                    <div class="text-center text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('In-App') }}</div>
                 </div>
             </div>
 
             @php
             $eventLabels = [
-                'mention_in_comment' => ['label' => 'Mention in Comment', 'description' => 'When someone mentions you in a comment'],
-                'action_item_assigned' => ['label' => 'Action Item Assigned', 'description' => 'When an action item is assigned to you'],
-                'meeting_finalized' => ['label' => 'Meeting Finalized', 'description' => 'When a meeting you attend is finalized'],
-                'action_item_overdue' => ['label' => 'Action Item Overdue', 'description' => 'When your action items become overdue'],
+                'mention_in_comment' => ['label' => __('Mention in Comment'), 'description' => __('When someone mentions you in a comment')],
+                'action_item_assigned' => ['label' => __('Action Item Assigned'), 'description' => __('When an action item is assigned to you')],
+                'meeting_finalized' => ['label' => __('Meeting Finalized'), 'description' => __('When a meeting you attend is finalized')],
+                'action_item_overdue' => ['label' => __('Action Item Overdue'), 'description' => __('When your action items become overdue')],
             ];
             @endphp
 
@@ -62,7 +62,7 @@
         <div class="flex justify-end mt-6">
             <button type="submit"
                 class="bg-violet-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
-                Save Preferences
+                {{ __('Save Preferences') }}
             </button>
         </div>
     </form>

@@ -27,9 +27,9 @@
                 @endif
             </a>
             <nav class="flex items-center gap-5 text-sm">
-                <a href="{{ route('privacy') }}" class="text-gray-600 hover:text-gray-900">Privacy</a>
-                <a href="{{ route('terms') }}" class="text-gray-600 hover:text-gray-900">Terms</a>
-                <a href="{{ route('login') }}" class="rounded-lg px-4 py-2 text-white text-sm font-medium bg-primary hover:brightness-90 transition">Sign in</a>
+                <a href="{{ route('privacy') }}" class="text-gray-600 hover:text-gray-900">{{ __('Privacy') }}</a>
+                <a href="{{ route('terms') }}" class="text-gray-600 hover:text-gray-900">{{ __('Terms') }}</a>
+                <a href="{{ route('login') }}" class="rounded-lg px-4 py-2 text-white text-sm font-medium bg-primary hover:brightness-90 transition">{{ __('Sign in') }}</a>
             </nav>
         </div>
     </header>
@@ -42,11 +42,11 @@
 
     <footer class="border-t border-gray-200 bg-white">
         <div class="mx-auto max-w-4xl px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-gray-500">
-            <span>&copy; {{ now()->year }} {{ $branding->appName() }}. All rights reserved.</span>
+            <span>&copy; {{ now()->year }} {{ $branding->appName() }}. {{ __('All rights reserved.') }}</span>
             <nav class="flex items-center gap-4">
-                <a href="{{ route('about') }}" class="hover:text-gray-800">Home</a>
-                <a href="{{ route('privacy') }}" class="hover:text-gray-800">Privacy Policy</a>
-                <a href="{{ route('terms') }}" class="hover:text-gray-800">Terms of Service</a>
+                <a href="{{ route('about') }}" class="hover:text-gray-800">{{ __('Home') }}</a>
+                <a href="{{ route('privacy') }}" class="hover:text-gray-800">{{ __('Privacy Policy') }}</a>
+                <a href="{{ route('terms') }}" class="hover:text-gray-800">{{ __('Terms of Service') }}</a>
             </nav>
         </div>
     </footer>

@@ -66,10 +66,10 @@ class ExtractionController extends Controller
         ExtractMeetingDataJob::dispatch($meeting);
 
         if ($request->wantsJson()) {
-            return response()->json(['message' => 'AI extraction started.'], 202);
+            return response()->json(['message' => __('AI extraction started.')], 202);
         }
 
-        return back()->with('success', 'AI extraction started.');
+        return back()->with('success', __('AI extraction started.'));
     }
 
     public function index(MinutesOfMeeting $meeting): View
@@ -116,7 +116,7 @@ class ExtractionController extends Controller
 
         $extraction->save();
 
-        return back()->with('success', ucfirst($type).' updated.');
+        return back()->with('success', __(':type updated.', ['type' => ucfirst($type)]));
     }
 
     /**

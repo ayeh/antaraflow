@@ -26,11 +26,11 @@ class UploadAudioRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'audio.required' => 'An audio file is required.',
-            'audio.file' => 'The audio must be a valid file.',
-            'audio.mimes' => 'The file must be an audio file (MP3, WAV, M4A, OGG, or WebM).',
-            'audio.max' => 'The audio file must not exceed 500MB.',
-            'language.max' => 'The language code must not exceed 5 characters.',
+            'audio.required' => __('An audio file is required.'),
+            'audio.file' => __('The audio must be a valid file.'),
+            'audio.mimes' => __('The file must be an audio file (MP3, WAV, M4A, OGG, or WebM).'),
+            'audio.max' => __('The audio file must not exceed 500MB.'),
+            'language.max' => __('The language code must not exceed 5 characters.'),
         ];
     }
 }

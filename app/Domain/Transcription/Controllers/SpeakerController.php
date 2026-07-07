@@ -25,7 +25,7 @@ class SpeakerController extends Controller
             ->where('speaker', $validated['old_speaker'])
             ->update(['speaker' => $validated['new_speaker'], 'is_edited' => true]);
 
-        return response()->json(['message' => 'Speaker renamed successfully.']);
+        return response()->json(['message' => __('Speaker renamed successfully.')]);
     }
 
     public function suggestions(MinutesOfMeeting $meeting, AudioTranscription $transcription): JsonResponse

@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $manualNote->title }}</h1>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('meetings.manual-notes.edit', [$meeting, $manualNote]) }}" class="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">Edit</a>
+            <a href="{{ route('meetings.manual-notes.edit', [$meeting, $manualNote]) }}" class="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">{{ __('Edit') }}</a>
         </div>
     </div>
 

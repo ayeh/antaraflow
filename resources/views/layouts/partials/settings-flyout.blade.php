@@ -1,26 +1,26 @@
 @php
 $organizationItems = [
-    ['label' => 'Organizations',        'route' => route('organizations.index'),             'active' => request()->routeIs('organizations.index', 'organizations.create')],
-    ['label' => 'Meeting Templates',    'route' => route('meeting-templates.index'),         'active' => request()->routeIs('meeting-templates.*')],
-    ['label' => 'Meeting Series',       'route' => route('meeting-series.index'),            'active' => request()->routeIs('meeting-series.*')],
-    ['label' => 'Export Templates',     'route' => route('settings.export-templates.index'), 'active' => request()->routeIs('settings.export-templates.*')],
-    ['label' => 'Extraction Templates', 'route' => route('extraction-templates.index'),      'active' => request()->routeIs('extraction-templates.*')],
-    ['label' => 'Tags',                 'route' => route('tags.index'),                      'active' => request()->routeIs('tags.*')],
-    ['label' => 'Attendee Groups',      'route' => route('attendee-groups.index'),           'active' => request()->routeIs('attendee-groups.*')],
-    ['label' => 'Integrations',         'route' => route('settings.integrations'),           'active' => request()->routeIs('settings.integrations')],
-    ['label' => 'AI Providers',         'route' => route('ai-provider-configs.index'),       'active' => request()->routeIs('ai-provider-configs.*')],
-    ['label' => 'Webhooks',             'route' => route('webhooks.index'),                  'active' => request()->routeIs('webhooks.*')],
+    ['label' => __('Organizations'),        'route' => route('organizations.index'),             'active' => request()->routeIs('organizations.index', 'organizations.create')],
+    ['label' => __('Meeting Templates'),    'route' => route('meeting-templates.index'),         'active' => request()->routeIs('meeting-templates.*')],
+    ['label' => __('Meeting Series'),       'route' => route('meeting-series.index'),            'active' => request()->routeIs('meeting-series.*')],
+    ['label' => __('Export Templates'),     'route' => route('settings.export-templates.index'), 'active' => request()->routeIs('settings.export-templates.*')],
+    ['label' => __('Extraction Templates'), 'route' => route('extraction-templates.index'),      'active' => request()->routeIs('extraction-templates.*')],
+    ['label' => __('Tags'),                 'route' => route('tags.index'),                      'active' => request()->routeIs('tags.*')],
+    ['label' => __('Attendee Groups'),      'route' => route('attendee-groups.index'),           'active' => request()->routeIs('attendee-groups.*')],
+    ['label' => __('Integrations'),         'route' => route('settings.integrations'),           'active' => request()->routeIs('settings.integrations')],
+    ['label' => __('AI Providers'),         'route' => route('ai-provider-configs.index'),       'active' => request()->routeIs('ai-provider-configs.*')],
+    ['label' => __('Webhooks'),             'route' => route('webhooks.index'),                  'active' => request()->routeIs('webhooks.*')],
 ];
 
 $accountItems = [
-    ['label' => 'Subscription', 'route' => route('subscription.index'), 'active' => request()->routeIs('subscription.*')],
-    ['label' => 'Usage',        'route' => route('usage.index'),        'active' => request()->routeIs('usage.*')],
-    ['label' => 'Audit Log',    'route' => route('audit-log.index'),    'active' => request()->routeIs('audit-log.*')],
+    ['label' => __('Subscription'), 'route' => route('subscription.index'), 'active' => request()->routeIs('subscription.*')],
+    ['label' => __('Usage'),        'route' => route('usage.index'),        'active' => request()->routeIs('usage.*')],
+    ['label' => __('Audit Log'),    'route' => route('audit-log.index'),    'active' => request()->routeIs('audit-log.*')],
 ];
 
 $allSections = [
-    ['label' => 'Organization', 'items' => $organizationItems],
-    ['label' => 'Account',      'items' => $accountItems],
+    ['label' => __('Organization'), 'items' => $organizationItems],
+    ['label' => __('Account'),      'items' => $accountItems],
 ];
 
 $globalIndex = 0;

@@ -32,10 +32,10 @@ class StoreExportTemplateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'The template name is required.',
-            'name.max' => 'The template name cannot exceed 255 characters.',
-            'primary_color.max' => 'The primary color value cannot exceed 20 characters.',
-            'font_family.max' => 'The font family cannot exceed 100 characters.',
+            'name.required' => __('The template name is required.'),
+            'name.max' => __('The template name cannot exceed 255 characters.'),
+            'primary_color.max' => __('The primary color value cannot exceed 20 characters.'),
+            'font_family.max' => __('The font family cannot exceed 100 characters.'),
         ];
     }
 }

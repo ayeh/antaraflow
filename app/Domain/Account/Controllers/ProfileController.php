@@ -34,7 +34,7 @@ class ProfileController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
+        return redirect()->route('profile.edit')->with('success', __('Profile updated successfully.'));
     }
 
     public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
@@ -43,7 +43,7 @@ class ProfileController extends Controller
             'password' => Hash::make($request->validated('password')),
         ]);
 
-        return redirect()->route('profile.edit')->with('success', 'Password updated successfully.');
+        return redirect()->route('profile.edit')->with('success', __('Password updated successfully.'));
     }
 
     public function updatePreferences(Request $request): RedirectResponse
@@ -59,7 +59,7 @@ class ProfileController extends Controller
         $preferences = array_merge($user->preferences ?? [], $data['preferences']);
         $user->update(['preferences' => $preferences]);
 
-        return redirect()->route('profile.edit')->with('success', 'Preferences updated successfully.');
+        return redirect()->route('profile.edit')->with('success', __('Preferences updated successfully.'));
     }
 
     public function connectedAccounts(): View
@@ -84,6 +84,6 @@ class ProfileController extends Controller
         $path = $request->file('avatar')->store('avatars', 'public');
         $user->update(['avatar_path' => $path]);
 
-        return redirect()->route('profile.edit')->with('success', 'Avatar updated successfully.');
+        return redirect()->route('profile.edit')->with('success', __('Avatar updated successfully.'));
     }
 }

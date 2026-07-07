@@ -88,6 +88,6 @@ class VoiceNoteController extends Controller
 
         $voiceNote->delete();
 
-        return response()->json(['message' => 'Voice note deleted.']);
+        return response()->json(['message' => __('Voice note deleted.')]);
     }
 }

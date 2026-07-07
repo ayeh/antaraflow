@@ -4,13 +4,13 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">AI Extraction Templates</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Customize AI prompts for different meeting types and extraction types.</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('AI Extraction Templates') }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Customize AI prompts for different meeting types and extraction types.') }}</p>
         </div>
         @can('create', \App\Domain\AI\Models\ExtractionTemplate::class)
         <a href="{{ route('extraction-templates.create') }}" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            New Template
+            {{ __('New Template') }}
         </a>
         @endcan
     </div>
@@ -20,12 +20,12 @@
             <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
             </svg>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No extraction templates yet</h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create custom AI prompts to tailor extractions for your meeting types.</p>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">{{ __('No extraction templates yet') }}</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Create custom AI prompts to tailor extractions for your meeting types.') }}</p>
             @can('create', \App\Domain\AI\Models\ExtractionTemplate::class)
             <div class="mt-6">
                 <a href="{{ route('extraction-templates.create') }}" class="inline-flex items-center rounded-md bg-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700">
-                    New Template
+                    {{ __('New Template') }}
                 </a>
             </div>
             @endcan
@@ -42,10 +42,10 @@
                                 @if($template->meeting_type)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">{{ $template->meeting_type->label() }}</span>
                                 @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">All Types</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">{{ __('All Types') }}</span>
                                 @endif
                                 @if(!$template->is_active)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">Inactive</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">{{ __('Inactive') }}</span>
                                 @endif
                             </div>
                         </div>
@@ -54,18 +54,18 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 font-mono">{{ Str::limit($template->prompt_template, 100) }}</p>
 
                     @if($template->createdBy)
-                        <p class="text-xs text-gray-400 dark:text-gray-500">by {{ $template->createdBy->name }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">{{ __('by') }} {{ $template->createdBy->name }}</p>
                     @endif
 
                     <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-slate-700">
                         @can('update', $template)
-                        <a href="{{ route('extraction-templates.edit', $template) }}" class="text-xs font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">Edit</a>
+                        <a href="{{ route('extraction-templates.edit', $template) }}" class="text-xs font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">{{ __('Edit') }}</a>
                         @endcan
                         @can('delete', $template)
                         <form method="POST" action="{{ route('extraction-templates.destroy', $template) }}" onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this template?')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">Delete</button>
+                            <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700">{{ __('Delete') }}</button>
                         </form>
                         @endcan
                     </div>

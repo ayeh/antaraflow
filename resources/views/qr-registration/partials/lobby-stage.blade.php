@@ -23,11 +23,11 @@
         <div class="lobby-hero-card relative text-center px-8">
             <div class="mx-auto w-28 h-28 md:w-40 md:h-40 rounded-full bg-gradient-to-br flex items-center justify-center text-4xl md:text-6xl font-black text-white shadow-2xl ring-4 ring-white/20"
                 :class="lobbyAvatarColor(lobbyHero.name)" x-text="lobbyInitials(lobbyHero.name)"></div>
-            <p class="mt-6 text-xl md:text-3xl font-semibold" style="color: color-mix(in srgb, var(--lobby-primary) 45%, white);">Welcome,</p>
+            <p class="mt-6 text-xl md:text-3xl font-semibold" style="color: color-mix(in srgb, var(--lobby-primary) 45%, white);">{{ __('Welcome,') }}</p>
             <p class="mt-1 text-4xl md:text-7xl font-black leading-tight" x-text="lobbyHero.name"></p>
             <p x-show="lobbyHero.company" class="mt-2 text-lg md:text-2xl text-white/60" x-text="lobbyHero.company"></p>
             <p x-show="lobbyHero.extra > 0" class="mt-3 text-base md:text-xl font-semibold" style="color: color-mix(in srgb, var(--lobby-secondary) 55%, white);">
-                + <span x-text="lobbyHero.extra"></span> more just joined
+                + <span x-text="lobbyHero.extra"></span> {{ __('more just joined') }}
             </p>
         </div>
     </template>
@@ -43,7 +43,7 @@
     <div class="flex items-center gap-2">
         {{-- (#2) Sound toggle --}}
         <button type="button" @click="toggleLobbySound()"
-            :title="lobbySoundOn ? 'Sound on' : 'Sound off'"
+            :title="lobbySoundOn ? '{{ __('Sound on') }}' : '{{ __('Sound off') }}'"
             class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white backdrop-blur transition-colors">
             <svg x-show="lobbySoundOn" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M5 9v6h4l5 4V5L9 9H5z"/></svg>
             <svg x-show="!lobbySoundOn" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l4-4m0 4l-4-4M5 9v6h4l5 4V5L9 9H5z"/></svg>
@@ -54,13 +54,13 @@
                 class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white backdrop-blur transition-colors">
                 <svg x-show="!isFullscreen" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2m8-16h2a2 2 0 012 2v2m-4 12h2a2 2 0 002-2v-2"/></svg>
                 <svg x-show="isFullscreen" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9L4 4m0 0v3m0-3h3m8 5l5-5m0 0v3m0-3h-3M9 15l-5 5m0 0v-3m0 3h3m8-5l5 5m0 0v-3m0 3h-3"/></svg>
-                <span x-text="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'"></span>
+                <span x-text="isFullscreen ? '{{ __('Exit fullscreen') }}' : '{{ __('Fullscreen') }}'"></span>
             </button>
         @else
             <button type="button" @click="closeLobby()"
                 class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white backdrop-blur transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                Exit
+                {{ __('Exit') }}
             </button>
         @endif
     </div>
@@ -71,7 +71,7 @@
     <div class="text-center shrink-0">
         {{-- (#6) Cycling multi-language welcome --}}
         <p class="text-xs md:text-sm font-semibold uppercase tracking-[0.3em]" style="color: color-mix(in srgb, var(--lobby-primary) 60%, white);">
-            <span x-text="lobbyWelcomeWord"></span> · Scan to Join
+            <span x-text="lobbyWelcomeWord"></span>· {{ __('Scan to Join') }}
         </p>
         <h1 class="mt-2 text-2xl md:text-4xl lg:text-5xl font-bold leading-tight" x-text="lobbyTitle"></h1>
         <p x-show="qrData?.welcome_message" x-cloak class="mt-2 text-sm md:text-lg text-white/60 max-w-2xl mx-auto" x-text="qrData?.welcome_message"></p>
@@ -85,16 +85,16 @@
             <div class="lobby-qr-glow relative rounded-3xl">
                 <div class="relative bg-white rounded-3xl p-5 md:p-7 shadow-2xl shadow-violet-900/40">
                     <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=480x480&margin=8&data=' + encodeURIComponent(qrUrl)"
-                        alt="Scan to register" class="w-52 h-52 md:w-72 md:h-72 lg:w-80 lg:h-80" />
+                        alt="{{ __('Scan to register') }}" class="w-52 h-52 md:w-72 md:h-72 lg:w-80 lg:h-80" />
                 </div>
             </div>
             {{-- (#6) Idle bobbing scan prompt --}}
             <div x-show="lobbyAttendees.length === 0" class="mt-5 lobby-bob inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm md:text-base font-medium" style="background-color: color-mix(in srgb, var(--lobby-primary) 20%, transparent); border-color: color-mix(in srgb, var(--lobby-primary) 35%, transparent); color: color-mix(in srgb, var(--lobby-primary) 45%, white);">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>
-                Point your camera here to check in
+                {{ __('Point your camera here to check in') }}
             </div>
             <div class="mt-6 text-center">
-                <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">Or enter join code</p>
+                <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">{{ __('Or enter join code') }}</p>
                 <p class="mt-1 text-4xl md:text-6xl font-black font-mono tracking-[0.2em] text-transparent bg-clip-text" style="background-image: linear-gradient(to right, color-mix(in srgb, var(--lobby-primary) 55%, white), color-mix(in srgb, var(--lobby-secondary) 55%, white));" x-text="qrData?.join_code"></p>
             </div>
         </div>
@@ -119,20 +119,20 @@
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                         <span class="text-4xl md:text-5xl font-black tabular-nums transition-transform duration-300"
                             :class="countPulse ? 'scale-125 text-emerald-300' : 'text-white'" x-text="lobbyCount"></span>
-                        <span class="text-xs md:text-sm text-white/40">of <span x-text="lobbyMax"></span></span>
+                        <span class="text-xs md:text-sm text-white/40">{{ __('of') }} <span x-text="lobbyMax"></span></span>
                     </div>
                 </div>
                 {{-- Without max: plain big counter --}}
                 <div x-show="!lobbyMax" class="text-center md:text-left">
-                    <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">Registered</p>
+                    <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">{{ __('Registered') }}</p>
                     <span class="text-5xl md:text-7xl font-black tabular-nums transition-transform duration-300 inline-block"
                         :class="countPulse ? 'scale-125 text-emerald-300' : 'text-white'" x-text="lobbyCount"></span>
                 </div>
                 {{-- Label beside ring --}}
                 <div x-show="lobbyMax" x-cloak>
-                    <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">Checked In</p>
+                    <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">{{ __('Checked In') }}</p>
                     <p class="text-lg md:text-2xl font-bold text-white" x-text="(lobbyProgress ?? 0) + '%'"></p>
-                    <p class="text-xs md:text-sm text-white/40" x-show="lobbyProgress >= 100">Registration full</p>
+                    <p class="text-xs md:text-sm text-white/40" x-show="lobbyProgress >= 100">{{ __('Registration full') }}</p>
                 </div>
             </div>
 
@@ -144,7 +144,7 @@
                     <div class="mt-5 w-14 h-14 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center animate-pulse">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                     </div>
-                    <p class="mt-3 text-sm md:text-base">Waiting for the first guest to scan…</p>
+                    <p class="mt-3 text-sm md:text-base">{{ __('Waiting for the first guest to scan…') }}</p>
                 </div>
 
                 <div x-show="lobbyAttendees.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -158,7 +158,7 @@
                                 <p class="font-semibold truncate text-base md:text-lg" x-text="att.name"></p>
                                 <p x-show="att.company" class="text-xs md:text-sm text-white/50 truncate" x-text="att.company"></p>
                             </div>
-                            <span x-show="lobbyNewIds.includes(att.id)" class="ml-auto shrink-0 px-2 py-0.5 text-[10px] md:text-xs font-bold uppercase tracking-wide rounded-full bg-emerald-400/20 text-emerald-300">New</span>
+                            <span x-show="lobbyNewIds.includes(att.id)" class="ml-auto shrink-0 px-2 py-0.5 text-[10px] md:text-xs font-bold uppercase tracking-wide rounded-full bg-emerald-400/20 text-emerald-300">{{ __('New') }}</span>
                         </div>
                     </template>
                 </div>
@@ -170,7 +170,7 @@
 {{-- Subtle platform attribution + rotating curiosity tagline --}}
 <div class="absolute bottom-0 inset-x-0 z-[65] px-5 py-3 md:py-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center pointer-events-none select-none">
     <span class="text-[11px] md:text-sm text-white/35">
-        Powered by <span class="font-semibold text-white/55" x-text="lobbyAppName"></span>
+        {{ __('Powered by') }} <span class="font-semibold text-white/55" x-text="lobbyAppName"></span>
     </span>
     <span class="text-white/20 hidden sm:inline">·</span>
     <span class="text-[11px] md:text-sm italic text-white/45 transition-opacity duration-700" x-text="lobbyTagline"></span>

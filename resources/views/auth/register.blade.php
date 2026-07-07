@@ -1,7 +1,7 @@
 @extends('layouts.guest')
 
 @section('content')
-<h2 class="text-xl font-bold text-gray-900 mb-6">Register</h2>
+<h2 class="text-xl font-bold text-gray-900 mb-6">{{ __('Register') }}</h2>
 
 @if($errors->any())
     <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -17,35 +17,35 @@
     @csrf
 
     <div>
-        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Name') }}</label>
         <input type="text" id="name" name="name" value="{{ old('name') }}" required autofocus class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus-primary outline-none">
     </div>
 
     <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Email') }}</label>
         <input type="email" id="email" name="email" value="{{ old('email') }}" required class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus-primary outline-none">
     </div>
 
     <div>
-        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Password') }}</label>
         <input type="password" id="password" name="password" required class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus-primary outline-none">
     </div>
 
     <div>
-        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Confirm Password') }}</label>
         <input type="password" id="password_confirmation" name="password_confirmation" required class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus-primary outline-none">
     </div>
 
-    <button type="submit" class="btn-primary w-full text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Register</button>
+    <button type="submit" class="btn-primary w-full text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">{{ __('Register') }}</button>
 </form>
 
 <div class="relative my-4">
     <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
-    <div class="relative flex justify-center text-xs"><span class="bg-white px-2 text-gray-500">or continue with</span></div>
+    <div class="relative flex justify-center text-xs"><span class="bg-white px-2 text-gray-500">{{ __('or continue with') }}</span></div>
 </div>
 @include('auth.partials.social-buttons')
 
 <p class="mt-4 text-center text-sm text-gray-500">
-    Already have an account? <a href="{{ route('login') }}" class="link-primary font-medium hover:opacity-80">Login</a>
+    {{ __('Already have an account?') }} <a href="{{ route('login') }}" class="link-primary font-medium hover:opacity-80">{{ __('Login') }}</a>
 </p>
 @endsection

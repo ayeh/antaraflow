@@ -61,7 +61,7 @@
                 type="button"
                 @click="$store.confirmDialog.resolve(false)"
                 class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl transition-colors"
-            >Cancel</button>
+            >{{ __('Cancel') }}</button>
             <button
                 type="button"
                 @click="$store.confirmDialog.resolve(true)"
@@ -79,16 +79,16 @@
 function _registerConfirmStore() {
     Alpine.store('confirmDialog', {
         open: false,
-        title: 'Confirm',
+        title: '{{ __("Confirm") }}',
         message: '',
-        confirmLabel: 'Confirm',
+        confirmLabel: '{{ __("Confirm") }}',
         isDanger: true,
         _resolve: null,
 
         show(message, options = {}) {
             this.message = message;
-            this.title = options.title || 'Confirm';
-            this.confirmLabel = options.confirmLabel || (options.isDanger !== false ? 'Delete' : 'Continue');
+            this.title = options.title || '{{ __('Confirm') }}';
+            this.confirmLabel = options.confirmLabel || (options.isDanger !== false ? '{{ __('Delete') }}' : '{{ __('Continue') }}');
             this.isDanger = options.isDanger !== false;
             this.open = true;
         },

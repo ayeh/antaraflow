@@ -14,7 +14,7 @@
             {{-- Logo area --}}
             <div class="p-6 border-b border-slate-700">
                 <h1 class="text-lg font-bold text-white">antaraNote</h1>
-                <p class="text-xs text-slate-400 mt-1">Super Admin</p>
+                <p class="text-xs text-slate-400 mt-1">{{ __('Super Admin') }}</p>
             </div>
 
             {{-- Navigation --}}
@@ -22,49 +22,49 @@
                 @php
                     $navItems = [
                         [
-                            'label' => 'Dashboard',
+                            'label' => __('Dashboard'),
                             'route' => 'admin.dashboard',
                             'active' => 'admin.dashboard',
                             'icon' => 'chart-bar',
                         ],
                         [
-                            'label' => 'Subscription Plans',
+                            'label' => __('Subscription Plans'),
                             'route' => 'admin.plans.index',
                             'active' => 'admin.plans.*',
                             'icon' => 'credit-card',
                         ],
                         [
-                            'label' => 'Users',
+                            'label' => __('Users'),
                             'route' => 'admin.users.index',
                             'active' => 'admin.users.*',
                             'icon' => 'users',
                         ],
                         [
-                            'label' => 'Organizations',
+                            'label' => __('Organizations'),
                             'route' => 'admin.organizations.index',
                             'active' => 'admin.organizations.*',
                             'icon' => 'building-office',
                         ],
                         [
-                            'label' => 'Branding',
+                            'label' => __('Branding'),
                             'route' => 'admin.branding.index',
                             'active' => 'admin.branding.*',
                             'icon' => 'paint-brush',
                         ],
                         [
-                            'label' => 'SMTP',
+                            'label' => __('SMTP'),
                             'route' => 'admin.smtp.index',
                             'active' => 'admin.smtp.*',
                             'icon' => 'envelope',
                         ],
                         [
-                            'label' => 'Email Templates',
+                            'label' => __('Email Templates'),
                             'route' => 'admin.email-templates.index',
                             'active' => 'admin.email-templates.*',
                             'icon' => 'document-text',
                         ],
                         [
-                            'label' => 'System',
+                            'label' => __('System'),
                             'route' => 'admin.system.index',
                             'active' => 'admin.system.*',
                             'icon' => 'cog',
@@ -89,12 +89,12 @@
                         @if(auth('admin')->user()->user)
                         <form method="POST" action="{{ route('admin.switch-to-user') }}">
                             @csrf
-                            <button type="submit" class="text-sm text-slate-400 hover:text-violet-400 transition-colors">My Account</button>
+                            <button type="submit" class="text-sm text-slate-400 hover:text-violet-400 transition-colors">{{ __('My Account') }}</button>
                         </form>
                         @endif
                         <form method="POST" action="{{ route('admin.logout') }}">
                             @csrf
-                            <button type="submit" class="text-sm text-slate-400 hover:text-red-400 transition-colors">Logout</button>
+                            <button type="submit" class="text-sm text-slate-400 hover:text-red-400 transition-colors">{{ __('Logout') }}</button>
                         </form>
                     </div>
                 </div>

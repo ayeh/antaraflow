@@ -27,7 +27,7 @@ class InvitationController extends Controller
 
         $this->organizationService->resendInvitation($invitation);
 
-        return redirect()->back()->with('success', 'Invitation resent successfully.');
+        return redirect()->back()->with('success', __('Invitation resent successfully.'));
     }
 
     public function destroy(Organization $organization, OrganizationInvitation $invitation): RedirectResponse
@@ -37,6 +37,6 @@ class InvitationController extends Controller
 
         $this->organizationService->revokeInvitation($invitation);
 
-        return redirect()->back()->with('success', 'Invitation revoked successfully.');
+        return redirect()->back()->with('success', __('Invitation revoked successfully.'));
     }
 }

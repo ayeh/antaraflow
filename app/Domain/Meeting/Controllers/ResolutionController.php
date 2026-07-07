@@ -28,7 +28,7 @@ class ResolutionController extends Controller
         $this->resolutionService->create($meeting, $request->validated());
 
         return redirect()->route('meetings.show', ['meeting' => $meeting, 'step' => 5])
-            ->with('success', 'Resolution created successfully.');
+            ->with('success', __('Resolution created successfully.'));
     }
 
     public function update(UpdateResolutionRequest $request, MinutesOfMeeting $meeting, MeetingResolution $resolution): RedirectResponse
@@ -38,7 +38,7 @@ class ResolutionController extends Controller
         $this->resolutionService->update($resolution, $request->validated());
 
         return redirect()->route('meetings.show', ['meeting' => $meeting, 'step' => 5])
-            ->with('success', 'Resolution updated successfully.');
+            ->with('success', __('Resolution updated successfully.'));
     }
 
     public function destroy(MinutesOfMeeting $meeting, MeetingResolution $resolution): RedirectResponse
@@ -48,6 +48,6 @@ class ResolutionController extends Controller
         $this->resolutionService->delete($resolution);
 
         return redirect()->route('meetings.show', ['meeting' => $meeting, 'step' => 5])
-            ->with('success', 'Resolution deleted successfully.');
+            ->with('success', __('Resolution deleted successfully.'));
     }
 }

@@ -29,12 +29,12 @@ class CalendarMeetingStartingNotification extends Notification implements Should
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Meeting Starting Soon: {$this->title}")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("Your {$this->provider} Calendar meeting **{$this->title}** starts at {$this->startsAt->copy()->setTimezone($notifiable->timezone ?: 'UTC')->format('g:i A')}.")
-            ->line('You can start a live recording in antaraNote now.')
-            ->action('Open antaraNote', route('calendar.connections'))
-            ->line('Thank you for using antaraNote.');
+            ->subject(__('Meeting Starting Soon: :title', ['title' => $this->title]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__('Your :provider Calendar meeting **:title** starts at :time.', ['provider' => $this->provider, 'title' => $this->title, 'time' => $this->startsAt->copy()->setTimezone($notifiable->timezone ?: 'UTC')->format('g:i A')]))
+            ->line(__('You can start a live recording in antaraNote now.'))
+            ->action(__('Open antaraNote'), route('calendar.connections'))
+            ->line(__('Thank you for using antaraNote.'));
     }
 
     /** @return array<string, mixed> */
@@ -45,7 +45,7 @@ class CalendarMeetingStartingNotification extends Notification implements Should
             'title' => $this->title,
             'provider' => $this->provider,
             'starts_at' => $this->startsAt->toIso8601String(),
-            'message' => "\"{$this->title}\" is starting soon",
+            'message' => __('":title" is starting soon', ['title' => $this->title]),
         ];
     }
 }

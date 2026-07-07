@@ -27,9 +27,9 @@ class MentionedInCommentNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('You were mentioned in a comment')
-            ->line('You were mentioned in a comment by '.$this->comment->user->name.'.')
-            ->action('View Comment', route('meetings.show', $this->comment->commentable_id));
+            ->subject(__('You were mentioned in a comment'))
+            ->line(__('You were mentioned in a comment by :name.', ['name' => $this->comment->user->name]))
+            ->action(__('View Comment'), route('meetings.show', $this->comment->commentable_id));
     }
 
     /** @return array<string, mixed> */
@@ -40,7 +40,7 @@ class MentionedInCommentNotification extends Notification
             'comment_id' => $this->comment->id,
             'commenter' => $this->comment->user->name,
             'meeting_id' => $this->comment->commentable_id,
-            'message' => "{$this->comment->user->name} mentioned you in a comment",
+            'message' => __(':name mentioned you in a comment', ['name' => $this->comment->user->name]),
         ];
     }
 }

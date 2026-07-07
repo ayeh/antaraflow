@@ -59,7 +59,7 @@ class ProjectController extends Controller
         $project = $this->projectService->create($data, $request->user());
 
         return redirect()->route('projects.show', $project)
-            ->with('success', 'Project created successfully.');
+            ->with('success', __('Project created successfully.'));
     }
 
     public function show(Project $project): View
@@ -93,7 +93,7 @@ class ProjectController extends Controller
         $this->projectService->update($project, $data);
 
         return redirect()->route('projects.show', $project)
-            ->with('success', 'Project updated successfully.');
+            ->with('success', __('Project updated successfully.'));
     }
 
     public function destroy(Project $project): RedirectResponse
@@ -103,7 +103,7 @@ class ProjectController extends Controller
         $this->projectService->delete($project);
 
         return redirect()->route('projects.index')
-            ->with('success', 'Project deleted successfully.');
+            ->with('success', __('Project deleted successfully.'));
     }
 
     public function addMember(Request $request, Project $project): RedirectResponse
@@ -119,7 +119,7 @@ class ProjectController extends Controller
         $this->projectService->addMember($project, $user, $request->input('role', 'member'));
 
         return redirect()->route('projects.show', $project)
-            ->with('success', 'Member added successfully.');
+            ->with('success', __('Member added successfully.'));
     }
 
     public function removeMember(Project $project, User $user): RedirectResponse
@@ -129,6 +129,6 @@ class ProjectController extends Controller
         $this->projectService->removeMember($project, $user);
 
         return redirect()->route('projects.show', $project)
-            ->with('success', 'Member removed successfully.');
+            ->with('success', __('Member removed successfully.'));
     }
 }

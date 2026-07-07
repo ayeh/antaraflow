@@ -120,7 +120,7 @@ class OrganizationController extends Controller
         ]);
 
         return redirect()->route('admin.organizations.show', $organization)
-            ->with('success', "Organization \"{$organization->name}\" has been suspended.");
+            ->with('success', __('Organization ":name" has been suspended.', ['name' => $organization->name]));
     }
 
     public function unsuspend(Organization $organization): RedirectResponse
@@ -137,7 +137,7 @@ class OrganizationController extends Controller
         ]);
 
         return redirect()->route('admin.organizations.show', $organization)
-            ->with('success', "Organization \"{$organization->name}\" has been unsuspended.");
+            ->with('success', __('Organization ":name" has been unsuspended.', ['name' => $organization->name]));
     }
 
     public function changePlan(Request $request, Organization $organization): RedirectResponse
@@ -171,6 +171,6 @@ class OrganizationController extends Controller
         ]);
 
         return redirect()->route('admin.organizations.show', $organization)
-            ->with('success', 'Subscription plan has been updated.');
+            ->with('success', __('Subscription plan has been updated.'));
     }
 }

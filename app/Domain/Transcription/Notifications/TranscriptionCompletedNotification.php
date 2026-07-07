@@ -32,26 +32,26 @@ class TranscriptionCompletedNotification extends Notification implements ShouldQ
 
     public function toTeams(object $notifiable): TeamsMessage
     {
-        $meetingTitle = $this->transcription->minutesOfMeeting?->title ?? 'Unknown Meeting';
+        $meetingTitle = $this->transcription->minutesOfMeeting?->title ?? __('Unknown Meeting');
 
         return (new TeamsMessage)
-            ->title('Transcription Completed')
-            ->content("Audio transcription has been completed for **{$meetingTitle}**.")
-            ->fact('Meeting', $meetingTitle)
-            ->action('View Meeting', route('meetings.show', $this->transcription->minutes_of_meeting_id));
+            ->title(__('Transcription Completed'))
+            ->content(__('Audio transcription has been completed for **:title**.', ['title' => $meetingTitle]))
+            ->fact(__('Meeting'), $meetingTitle)
+            ->action(__('View Meeting'), route('meetings.show', $this->transcription->minutes_of_meeting_id));
     }
 
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
-        $meetingTitle = $this->transcription->minutesOfMeeting?->title ?? 'Unknown Meeting';
+        $meetingTitle = $this->transcription->minutesOfMeeting?->title ?? __('Unknown Meeting');
 
         return [
             'type' => 'transcription_completed',
             'transcription_id' => $this->transcription->id,
             'meeting_id' => $this->transcription->minutes_of_meeting_id,
             'meeting_title' => $this->transcription->minutesOfMeeting?->title,
-            'message' => "Transcription completed for \"{$meetingTitle}\"",
+            'message' => __('Transcription completed for ":title"', ['title' => $meetingTitle]),
         ];
     }
 }

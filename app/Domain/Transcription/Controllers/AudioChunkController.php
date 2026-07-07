@@ -98,6 +98,6 @@ class AudioChunkController extends Controller
             $validated['session_id'],
         );
 
-        return response()->json(['message' => 'Chunks deleted.']);
+        return response()->json(['message' => __('Chunks deleted.')]);
     }
 }

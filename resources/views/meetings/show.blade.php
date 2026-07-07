@@ -11,7 +11,7 @@
     <div class="mb-4">
         <a href="{{ route('meetings.index') }}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            Back to Meetings
+            {{ __('Back to Meetings') }}
         </a>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $meeting->title }}</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">{{ $meeting->mom_number }}</p>
@@ -52,7 +52,7 @@
             {{-- [•••] Overflow Dropdown --}}
             <div class="relative" x-data="{ moreOpen: false }">
                 <button @click="moreOpen = !moreOpen" @keydown.escape.window="moreOpen = false"
-                        title="More actions"
+                        title="{{ __('More actions') }}"
                         class="inline-flex items-center justify-center w-9 h-9 text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <circle cx="4" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="16" cy="10" r="1.5"/>
@@ -64,26 +64,26 @@
                      class="absolute right-0 mt-1 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 py-1 z-30">
 
                     {{-- Export section --}}
-                    <div class="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Export</div>
+                    <div class="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">{{ __('Export') }}</div>
                     <a href="{{ route('meetings.export.pdf', $meeting) }}" @click="moreOpen = false"
                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                         <svg class="w-4 h-4 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                        PDF
+                        {{ __('PDF') }}
                     </a>
                     <a href="{{ route('meetings.export.word', $meeting) }}" @click="moreOpen = false"
                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                         <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                        Word (.docx)
+                        {{ __('Word (.docx)') }}
                     </a>
                     <a href="{{ route('meetings.export.csv', $meeting) }}" @click="moreOpen = false"
                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                         <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        CSV (Action Items)
+                        {{ __('CSV (Action Items)') }}
                     </a>
                     <a href="{{ route('meetings.export.json', $meeting) }}" @click="moreOpen = false"
                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                         <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                        JSON
+                        {{ __('JSON') }}
                     </a>
 
                     <div class="my-1 border-t border-gray-100 dark:border-slate-700"></div>
@@ -94,7 +94,7 @@
                         <button type="submit"
                                 class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 text-left">
                             <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                            Duplicate
+                            {{ __('Duplicate') }}
                         </button>
                     </form>
 
@@ -102,7 +102,7 @@
                     <a href="{{ route('meetings.versions.index', $meeting) }}" @click="moreOpen = false"
                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                         <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        History
+                        {{ __('History') }}
                     </a>
 
                     {{-- Follow-up Email (conditional) --}}
@@ -110,7 +110,7 @@
                         <a href="{{ route('meetings.follow-up-email.generate', $meeting) }}" @click="moreOpen = false"
                            class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                             <svg class="w-4 h-4 text-violet-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            Follow-up Email
+                            {{ __('Follow-up Email') }}
                         </a>
                     @endif
 
@@ -121,7 +121,7 @@
                             <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                             </svg>
-                            AI Prepare Agenda
+                            {{ __('AI Prepare Agenda') }}
                         </button>
                     @endif
 
@@ -130,7 +130,7 @@
                         <a href="{{ route('meetings.agenda-email.generate', $meeting) }}" @click="moreOpen = false"
                            class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                             <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            Send Agenda
+                            {{ __('Send Agenda') }}
                         </a>
                     @endif
 
@@ -142,7 +142,7 @@
                             <button type="submit"
                                     class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-left">
                                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
-                                Revert to Draft
+                                {{ __('Revert to Draft') }}
                             </button>
                         </form>
                     @endif
@@ -157,7 +157,7 @@
                             <button type="submit"
                                     class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-left">
                                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                Delete Meeting
+                                {{ __('Delete Meeting') }}
                             </button>
                         </form>
                     @endcan
@@ -186,7 +186,7 @@
                                 if (data.session) {
                                     window.location.href = '{{ url('meetings/' . $meeting->id . '/live') }}/' + data.session.id;
                                 } else {
-                                    alert(data.error || 'Failed to start live session.');
+                                    alert(data.error || '{{ __('Failed to start live session.') }}');
                                     starting = false;
                                 }
                             })
@@ -196,7 +196,7 @@
                         class="h-9 px-4 border border-red-300 dark:border-red-700/60 text-red-600 dark:text-red-400 rounded-xl text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors inline-flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                        <span x-text="starting ? 'Starting...' : 'Live Meeting'"></span>
+                        <span x-text="starting ? '{{ __('Starting...') }}' : '{{ __('Live Meeting') }}'"></span>
                     </button>
                 @endif
             @endcan
@@ -205,7 +205,7 @@
             @if($meeting->status === \App\Support\Enums\MeetingStatus::Draft || $meeting->status === \App\Support\Enums\MeetingStatus::InProgress)
                 <form method="POST" action="{{ route('meetings.finalize', $meeting) }}" class="inline">
                     @csrf
-                    <button type="submit" class="h-9 px-4 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center justify-center whitespace-nowrap">Finalize</button>
+                    <button type="submit" class="h-9 px-4 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center justify-center whitespace-nowrap">{{ __('Finalize') }}</button>
                 </form>
             @endif
 
@@ -213,7 +213,7 @@
             @if($meeting->status === \App\Support\Enums\MeetingStatus::Finalized)
                 <form method="POST" action="{{ route('meetings.approve', $meeting) }}" class="inline">
                     @csrf
-                    <button type="submit" class="h-9 px-4 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 transition-colors inline-flex items-center justify-center whitespace-nowrap">Approve</button>
+                    <button type="submit" class="h-9 px-4 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 transition-colors inline-flex items-center justify-center whitespace-nowrap">{{ __('Approve') }}</button>
                 </form>
             @endif
             </div>
@@ -250,18 +250,18 @@
         <button x-show="activeStep > 1" @click="activeStep--" x-cloak
             class="h-9 px-3 inline-flex items-center gap-1 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            <span x-text="['', 'Setup', 'Attendees', 'Inputs', 'Review'][activeStep - 1]"></span>
+            <span x-text="['', '{{ __('Setup') }}', '{{ __('Attendees') }}', '{{ __('Inputs') }}', '{{ __('Review') }}'][activeStep - 1]"></span>
         </button>
         <div x-show="activeStep === 1" class="h-9"></div>
 
         {{-- Step indicator (center) --}}
         <span class="text-xs font-medium text-gray-400 dark:text-slate-500 whitespace-nowrap"
-              x-text="'Step ' + activeStep + ' of 5'"></span>
+              x-text="'{{ __('Step') }} ' + activeStep + ' {{ __('of 5') }}'"></span>
 
         {{-- Next (right) — single primary action of the wizard --}}
         <button x-show="activeStep < 5" @click="activeStep++" x-cloak
             class="h-9 px-4 inline-flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-medium transition-colors whitespace-nowrap">
-            <span x-text="'Next: ' + ['Attendees', 'Inputs', 'Review', 'Finalize', ''][activeStep - 1]"></span>
+            <span x-text="'{{ __('Next:') }} ' + ['{{ __('Attendees') }}', '{{ __('Inputs') }}', '{{ __('Review') }}', '{{ __('Finalize') }}', ''][activeStep - 1]"></span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
         <div x-show="activeStep === 5" class="h-9"></div>

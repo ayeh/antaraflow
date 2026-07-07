@@ -31,7 +31,7 @@
             @include('meetings.partials._status-badge', ['status' => $meeting->status])
             @if($meeting->share_with_client)
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
-                    Shared
+                    {{ __('Shared') }}
                 </span>
             @endif
         </div>
@@ -118,10 +118,10 @@
         {{-- Action items --}}
         @if($totalActions > 0)
             <span class="text-xs font-medium {{ $allDone ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400' }}">
-                {{ $doneActions }}/{{ $totalActions }} items
+                {{ $doneActions }}/{{ $totalActions }} {{ __('Items') }}
             </span>
         @else
-            <span class="text-xs text-gray-400 dark:text-gray-500">No action items</span>
+            <span class="text-xs text-gray-400 dark:text-gray-500">{{ __('No action items') }}</span>
         @endif
     </div>
 </a>

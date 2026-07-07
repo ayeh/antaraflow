@@ -3,8 +3,8 @@
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">API Keys</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage API keys to access your organization's data programmatically</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('API Keys') }}</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Manage API keys to access your organization\'s data programmatically') }}</p>
     </div>
 
     @if($newKey)
@@ -12,7 +12,7 @@
             <div class="flex items-start gap-3">
                 <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">Copy your API key now — it will not be shown again.</p>
+                    <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">{{ __('Copy your API key now — it will not be shown again.') }}</p>
                     <div class="mt-2 flex items-center gap-2">
                         <code class="flex-1 bg-white dark:bg-slate-700 border border-amber-200 dark:border-slate-600 rounded px-3 py-2 text-sm font-mono text-gray-800 dark:text-gray-200 break-all">{{ $newKey }}</code>
                         <button
@@ -21,7 +21,7 @@
                         >
                             <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             <svg x-show="copied" class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span x-text="copied ? 'Copied!' : 'Copy'"></span>
+                            <span x-text="copied ? '{{ __('Copied!') }}' : '{{ __('Copy') }}'"></span>
                         </button>
                     </div>
                 </div>
@@ -45,11 +45,11 @@
 
     {{-- Create API Key Form --}}
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-        <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Create New API Key</h2>
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">{{ __('Create New API Key') }}</h2>
         <form method="POST" action="{{ route('settings.api-keys.store') }}" class="space-y-4">
             @csrf
             <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Name') }}</label>
                 <input
                     type="text"
                     id="name"
@@ -63,7 +63,7 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Permissions</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Permissions') }}</label>
                 <div class="flex flex-wrap gap-4">
                     @foreach(['read', 'write', 'delete'] as $permission)
                         <label class="inline-flex items-center gap-2 cursor-pointer">
@@ -74,14 +74,14 @@
                                 {{ in_array($permission, old('permissions', [])) ? 'checked' : '' }}
                                 class="rounded border-gray-300 text-violet-600 focus:ring-violet-500"
                             >
-                            <span class="text-sm text-gray-700 dark:text-gray-300 capitalize">{{ $permission }}</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300 capitalize">{{ __(ucfirst($permission)) }}</span>
                         </label>
                     @endforeach
                 </div>
             </div>
 
             <div>
-                <label for="expires_at" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expires At <span class="text-gray-400 font-normal">(optional)</span></label>
+                <label for="expires_at" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Expires At') }} <span class="text-gray-400 font-normal">{{ __('(optional)') }}</span></label>
                 <input
                     type="date"
                     id="expires_at"
@@ -95,7 +95,7 @@
             <div>
                 <button type="submit" class="inline-flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Generate API Key
+                    {{ __('Generate API Key') }}
                 </button>
             </div>
         </form>
@@ -107,21 +107,21 @@
             <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
             </svg>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No API keys yet</h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create an API key to access your data programmatically.</p>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">{{ __('No API keys yet') }}</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Create an API key to access your data programmatically.') }}</p>
         </div>
     @else
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                 <thead class="bg-gray-50 dark:bg-slate-700/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Key Prefix</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Permissions</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Expires</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Used</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Name') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Key Prefix') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Permissions') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Expires') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Last Used') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Status') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
@@ -138,7 +138,7 @@
                                             $permColors = ['read' => 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300', 'write' => 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', 'delete' => 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'];
                                         @endphp
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $permColors[$permission] ?? 'bg-gray-100 text-gray-700' }}">
-                                            {{ $permission }}
+                                            {{ __(ucfirst($permission)) }}
                                         </span>
                                     @endforeach
                                 </div>
@@ -147,20 +147,20 @@
                                 {{ $apiKey->expires_at ? $apiKey->expires_at->format('M j, Y') : '—' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $apiKey->last_used_at ? $apiKey->last_used_at->diffForHumans() : 'Never' }}
+                                {{ $apiKey->last_used_at ? $apiKey->last_used_at->diffForHumans() : __('Never') }}
                             </td>
                             <td class="px-6 py-4">
                                 @if($apiKey->is_active)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Active</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">{{ __('Active') }}</span>
                                 @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">Inactive</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">{{ __('Inactive') }}</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <form method="POST" action="{{ route('settings.api-keys.destroy', $apiKey) }}" onsubmit="confirmThenSubmit(event, 'Revoke this API key? This cannot be undone.')">
+                                <form method="POST" action="{{ route('settings.api-keys.destroy', $apiKey) }}" onsubmit="confirmThenSubmit(event, '{{ __('Revoke this API key? This cannot be undone.') }}')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700 transition-colors">Revoke</button>
+                                    <button type="submit" class="text-xs font-medium text-red-500 hover:text-red-700 transition-colors">{{ __('Revoke') }}</button>
                                 </form>
                             </td>
                         </tr>

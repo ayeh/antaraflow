@@ -27,11 +27,11 @@
     <div class="body-content">{!! Str::markdown($emailBody, ['html_input' => 'escape', 'allow_unsafe_links' => false]) !!}</div>
 
     @if($meetingUrl)
-        <p><a href="{{ $meetingUrl }}" class="btn">View Meeting Details</a></p>
+        <p><a href="{{ $meetingUrl }}" class="btn">{{ __('View Meeting Details') }}</a></p>
     @endif
 
     <div class="footer">
-        <p>This email was generated from {{ config('app.name') }}.</p>
+        <p>{{ __('This email was generated from :app.', ['app' => config('app.name')]) }}</p>
     </div>
 </body>
 </html>

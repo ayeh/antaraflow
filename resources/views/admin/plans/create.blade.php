@@ -1,15 +1,15 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Create Plan')
-@section('page-title', 'Create Plan')
+@section('title', __('Create Plan'))
+@section('page-title', __('Create Plan'))
 
 @section('breadcrumbs')
     <nav class="text-sm text-slate-400 mb-1">
-        <a href="{{ route('admin.dashboard') }}" class="hover:text-white">Dashboard</a>
+        <a href="{{ route('admin.dashboard') }}" class="hover:text-white">{{ __('Dashboard') }}</a>
         <span class="mx-1">/</span>
-        <a href="{{ route('admin.plans.index') }}" class="hover:text-white">Subscription Plans</a>
+        <a href="{{ route('admin.plans.index') }}" class="hover:text-white">{{ __('Subscription Plans') }}</a>
         <span class="mx-1">/</span>
-        <span class="text-slate-200">Create</span>
+        <span class="text-slate-200">{{ __('Create') }}</span>
     </nav>
 @endsection
 
@@ -19,22 +19,22 @@
 
         {{-- Basic Information --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">Basic Information</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">{{ __('Basic Information') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-slate-300 mb-1">Plan Name</label>
+                    <label for="name" class="block text-sm font-medium text-slate-300 mb-1">{{ __('Plan Name') }}</label>
                     <input type="text" name="name" id="name" value="{{ old('name') }}"
                            class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                     @error('name') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="slug" class="block text-sm font-medium text-slate-300 mb-1">Slug</label>
+                    <label for="slug" class="block text-sm font-medium text-slate-300 mb-1">{{ __('Slug') }}</label>
                     <input type="text" name="slug" id="slug" value="{{ old('slug') }}"
                            class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                     @error('slug') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
                 </div>
                 <div class="md:col-span-2">
-                    <label for="description" class="block text-sm font-medium text-slate-300 mb-1">Description</label>
+                    <label for="description" class="block text-sm font-medium text-slate-300 mb-1">{{ __('Description') }}</label>
                     <textarea name="description" id="description" rows="3"
                               class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">{{ old('description') }}</textarea>
                     @error('description') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
@@ -44,16 +44,16 @@
 
         {{-- Pricing --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">Pricing</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">{{ __('Pricing') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="price_monthly" class="block text-sm font-medium text-slate-300 mb-1">Monthly Price (RM)</label>
+                    <label for="price_monthly" class="block text-sm font-medium text-slate-300 mb-1">{{ __('Monthly Price (RM)') }}</label>
                     <input type="number" name="price_monthly" id="price_monthly" value="{{ old('price_monthly', '0.00') }}" step="0.01" min="0"
                            class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                     @error('price_monthly') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="price_yearly" class="block text-sm font-medium text-slate-300 mb-1">Yearly Price (RM)</label>
+                    <label for="price_yearly" class="block text-sm font-medium text-slate-300 mb-1">{{ __('Yearly Price (RM)') }}</label>
                     <input type="number" name="price_yearly" id="price_yearly" value="{{ old('price_yearly', '0.00') }}" step="0.01" min="0"
                            class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                     @error('price_yearly') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
@@ -63,17 +63,17 @@
 
         {{-- Features --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">Features</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">{{ __('Features') }}</h3>
             @error('features') <p class="mb-3 text-sm text-red-400">{{ $message }}</p> @enderror
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @php
                     $featureList = [
-                        'export' => 'Export',
-                        'ai_summaries' => 'AI Summaries',
-                        'custom_branding' => 'Custom Branding',
-                        'api_access' => 'API Access',
-                        'advanced_analytics' => 'Advanced Analytics',
-                        'priority_support' => 'Priority Support',
+                        'export' => __('Export'),
+                        'ai_summaries' => __('AI Summaries'),
+                        'custom_branding' => __('Custom Branding'),
+                        'api_access' => __('API Access'),
+                        'advanced_analytics' => __('Advanced Analytics'),
+                        'priority_support' => __('Priority Support'),
                     ];
                 @endphp
                 @foreach($featureList as $key => $label)
@@ -90,14 +90,14 @@
 
         {{-- Limits --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">Limits</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">{{ __('Limits') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 @php
                     $limits = [
-                        'max_users' => ['label' => 'Max Users', 'default' => 10],
-                        'max_meetings_per_month' => ['label' => 'Max Meetings / Month', 'default' => 50],
-                        'max_audio_minutes_per_month' => ['label' => 'Max Audio Minutes / Month', 'default' => 600],
-                        'max_storage_mb' => ['label' => 'Max Storage (MB)', 'default' => 5120],
+                        'max_users' => ['label' => __('Max Users'), 'default' => 10],
+                        'max_meetings_per_month' => ['label' => __('Max Meetings / Month'), 'default' => 50],
+                        'max_audio_minutes_per_month' => ['label' => __('Max Audio Minutes / Month'), 'default' => 600],
+                        'max_storage_mb' => ['label' => __('Max Storage (MB)'), 'default' => 5120],
                     ];
                 @endphp
                 @foreach($limits as $field => $config)
@@ -106,7 +106,7 @@
                         <label class="flex items-center gap-2 mb-2">
                             <input type="checkbox" x-model="unlimited"
                                    class="w-4 h-4 rounded bg-slate-600 border-slate-500 text-blue-600 focus:ring-blue-500">
-                            <span class="text-sm text-slate-400">Unlimited</span>
+                            <span class="text-sm text-slate-400">{{ __('Unlimited') }}</span>
                         </label>
                         <input type="number" name="{{ $field }}"
                                x-bind:value="unlimited ? -1 : {{ old($field, $config['default']) }}"
@@ -125,10 +125,10 @@
 
         {{-- Settings --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">Settings</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">{{ __('Settings') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="sort_order" class="block text-sm font-medium text-slate-300 mb-1">Sort Order</label>
+                    <label for="sort_order" class="block text-sm font-medium text-slate-300 mb-1">{{ __('Sort Order') }}</label>
                     <input type="number" name="sort_order" id="sort_order" value="{{ old('sort_order', 0) }}" min="0"
                            class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                     @error('sort_order') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
@@ -139,7 +139,7 @@
                         <input type="checkbox" name="is_active" value="1"
                                {{ old('is_active', true) ? 'checked' : '' }}
                                class="w-4 h-4 rounded bg-slate-600 border-slate-500 text-blue-600 focus:ring-blue-500">
-                        <span class="text-sm text-slate-200">Active</span>
+                        <span class="text-sm text-slate-200">{{ __('Active') }}</span>
                     </label>
                 </div>
             </div>
@@ -149,9 +149,9 @@
         <div class="flex items-center gap-4">
             <button type="submit"
                     class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                Create Plan
+                {{ __('Create Plan') }}
             </button>
-            <a href="{{ route('admin.plans.index') }}" class="text-sm text-slate-400 hover:text-white transition-colors">Cancel</a>
+            <a href="{{ route('admin.plans.index') }}" class="text-sm text-slate-400 hover:text-white transition-colors">{{ __('Cancel') }}</a>
         </div>
     </form>
 @endsection

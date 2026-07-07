@@ -32,11 +32,11 @@ class AddAttendeeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'The attendee name is required.',
-            'name.max' => 'The attendee name cannot exceed 255 characters.',
-            'email.email' => 'Please provide a valid email address.',
-            'role.in' => 'The selected role is invalid.',
-            'department.max' => 'The department name cannot exceed 255 characters.',
+            'name.required' => __('The attendee name is required.'),
+            'name.max' => __('The attendee name cannot exceed 255 characters.'),
+            'email.email' => __('Please provide a valid email address.'),
+            'role.in' => __('The selected role is invalid.'),
+            'department.max' => __('The department name cannot exceed 255 characters.'),
         ];
     }
 }

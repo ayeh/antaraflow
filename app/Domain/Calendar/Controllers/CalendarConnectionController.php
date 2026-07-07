@@ -48,7 +48,7 @@ class CalendarConnectionController extends Controller
     {
         if ($request->get('state') !== session('calendar_oauth_state')) {
             return redirect()->route('calendar.connections')
-                ->with('error', 'Invalid OAuth state. Please try again.');
+                ->with('error', __('Invalid OAuth state. Please try again.'));
         }
 
         session()->forget('calendar_oauth_state');
@@ -72,7 +72,7 @@ class CalendarConnectionController extends Controller
         );
 
         return redirect()->route('calendar.connections')
-            ->with('success', ucfirst($provider).' Calendar connected successfully.');
+            ->with('success', __(':provider Calendar connected successfully.', ['provider' => ucfirst($provider)]));
     }
 
     public function disconnect(Request $request, CalendarConnection $connection): RedirectResponse
@@ -84,7 +84,7 @@ class CalendarConnectionController extends Controller
         $connection->delete();
 
         return redirect()->route('calendar.connections')
-            ->with('success', 'Calendar disconnected.');
+            ->with('success', __('Calendar disconnected.'));
     }
 
     public function toggleAutoRecord(Request $request, CalendarConnection $connection): RedirectResponse
@@ -100,6 +100,6 @@ class CalendarConnectionController extends Controller
         $status = $connection->auto_record ? 'enabled' : 'disabled';
 
         return redirect()->route('calendar.connections')
-            ->with('success', "Meeting-start notifications {$status} for ".ucfirst($connection->provider).'.');
+            ->with('success', __('Meeting-start notifications :status for :provider.', ['status' => $status, 'provider' => ucfirst($connection->provider)]));
     }
 }

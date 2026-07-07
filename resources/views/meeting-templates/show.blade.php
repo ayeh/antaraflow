@@ -11,15 +11,15 @@
                 <div class="flex items-center gap-2">
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $meetingTemplate->name }}</h1>
                     @if($meetingTemplate->is_default)
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">Default</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">{{ __('Default') }}</span>
                     @endif
                     @if(!$meetingTemplate->is_shared)
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">Private</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">{{ __('Private') }}</span>
                     @endif
                 </div>
                 <div class="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
                     @if($meetingTemplate->createdBy)
-                        <span>by {{ $meetingTemplate->createdBy->name }}</span>
+                        <span>{{ __('by') }} {{ $meetingTemplate->createdBy->name }}</span>
                     @endif
                     <span>&middot; {{ $meetingTemplate->created_at->format('M j, Y') }}</span>
                 </div>
@@ -27,13 +27,13 @@
         </div>
         <div class="flex flex-wrap items-center gap-3">
             <a href="{{ route('meetings.create') }}?template_id={{ $meetingTemplate->id }}" class="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
-                Use this Template
+                {{ __('Use this Template') }}
             </a>
-            <a href="{{ route('meeting-templates.edit', $meetingTemplate) }}" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Edit</a>
-            <form method="POST" action="{{ route('meeting-templates.destroy', $meetingTemplate) }}" onsubmit="confirmThenSubmit(event, 'Are you sure you want to delete this template?')" class="inline">
+            <a href="{{ route('meeting-templates.edit', $meetingTemplate) }}" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">{{ __('Edit') }}</a>
+            <form method="POST" action="{{ route('meeting-templates.destroy', $meetingTemplate) }}" onsubmit="confirmThenSubmit(event, '{{ __('Are you sure you want to delete this template?') }}')" class="inline">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="bg-white dark:bg-slate-800 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">Delete</button>
+                <button type="submit" class="bg-white dark:bg-slate-800 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">{{ __('Delete') }}</button>
             </form>
         </div>
     </div>
@@ -42,47 +42,47 @@
         <div class="lg:col-span-2 space-y-6">
             @if($meetingTemplate->description)
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                    <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Description</h2>
+                    <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Description') }}</h2>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ $meetingTemplate->description }}</p>
                 </div>
             @endif
 
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Structure</h2>
+                <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('Structure') }}</h2>
                 @if(!empty($meetingTemplate->structure['sections']))
                     <ul class="space-y-2">
                         @foreach($meetingTemplate->structure['sections'] as $section)
                             <li class="flex items-center gap-3 py-2 border-b border-gray-100 dark:border-slate-700 last:border-0">
                                 <span class="w-2 h-2 rounded-full bg-violet-400 flex-shrink-0"></span>
-                                <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ $section['title'] ?? 'Untitled' }}</span>
+                                <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ $section['title'] ?? __('Untitled') }}</span>
                                 <span class="text-xs text-gray-400 dark:text-gray-500 ml-auto">{{ $section['type'] ?? '' }}</span>
                             </li>
                         @endforeach
                     </ul>
                 @else
-                    <p class="text-sm text-gray-400 dark:text-gray-500">No sections defined.</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-500">{{ __('No sections defined.') }}</p>
                 @endif
             </div>
         </div>
 
         <div class="space-y-4">
             <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
-                <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Details</h2>
+                <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ __('Details') }}</h2>
                 <dl class="space-y-2">
                     <div class="flex justify-between text-sm">
-                        <dt class="text-gray-500 dark:text-gray-400">Shared</dt>
-                        <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $meetingTemplate->is_shared ? 'Yes' : 'No' }}</dd>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Shared') }}</dt>
+                        <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $meetingTemplate->is_shared ? __('Yes') : __('No') }}</dd>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <dt class="text-gray-500 dark:text-gray-400">Default</dt>
-                        <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $meetingTemplate->is_default ? 'Yes' : 'No' }}</dd>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Default') }}</dt>
+                        <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $meetingTemplate->is_default ? __('Yes') : __('No') }}</dd>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <dt class="text-gray-500 dark:text-gray-400">Created</dt>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Created') }}</dt>
                         <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $meetingTemplate->created_at->format('M j, Y') }}</dd>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <dt class="text-gray-500 dark:text-gray-400">Updated</dt>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Updated') }}</dt>
                         <dd class="font-medium text-gray-800 dark:text-gray-200">{{ $meetingTemplate->updated_at->format('M j, Y') }}</dd>
                     </div>
                 </dl>

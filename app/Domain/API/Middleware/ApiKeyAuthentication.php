@@ -16,7 +16,7 @@ class ApiKeyAuthentication
         $bearerToken = $request->bearerToken();
 
         if (! $bearerToken) {
-            return response()->json(['error' => 'API key required.'], 401);
+            return response()->json(['error' => __('API key required.')], 401);
         }
 
         $hash = hash('sha256', $bearerToken);
@@ -27,17 +27,17 @@ class ApiKeyAuthentication
             ->first();
 
         if (! $apiKey) {
-            return response()->json(['error' => 'Invalid or inactive API key.'], 401);
+            return response()->json(['error' => __('Invalid or inactive API key.')], 401);
         }
 
         if ($apiKey->expires_at && $apiKey->expires_at->isPast()) {
-            return response()->json(['error' => 'API key has expired.'], 401);
+            return response()->json(['error' => __('API key has expired.')], 401);
         }
 
         // Enforce IP allowlist if configured on the key
         $allowedIps = $apiKey->allowed_ips ?? [];
         if (! empty($allowedIps) && ! in_array($request->ip(), $allowedIps, true)) {
-            return response()->json(['error' => 'Request IP is not allowed for this API key.'], 403);
+            return response()->json(['error' => __('Request IP is not allowed for this API key.')], 403);
         }
 
         // Debounce last_used_at update (only update if stale by 5+ minutes)
@@ -60,7 +60,7 @@ class ApiKeyAuthentication
             };
 
             if (! in_array($requiredPermission, $permissions, true) && ! in_array('*', $permissions, true)) {
-                return response()->json(['error' => 'API key does not have permission for this action.'], 403);
+                return response()->json(['error' => __('API key does not have permission for this action.')], 403);
             }
         }
 

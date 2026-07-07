@@ -16,23 +16,23 @@
 </head>
 <body>
     <div class="header">
-        <h2>Report Ready</h2>
+        <h2>{{ __('Report Ready') }}</h2>
     </div>
 
     <div class="body-content">
-        <p>Your report has been generated and is ready for download.</p>
+        <p>{{ __('Your report has been generated and is ready for download.') }}</p>
 
         <div class="info">
-            <p><strong>Report:</strong> {{ $reportName }}</p>
-            <p><strong>Type:</strong> {{ $reportType }}</p>
-            <p><strong>Generated:</strong> {{ $generatedAt->format('F j, Y g:i A') }}</p>
+            <p><strong>{{ __('Report:') }}</strong> {{ $reportName }}</p>
+            <p><strong>{{ __('Type:') }}</strong> {{ $reportType }}</p>
+            <p><strong>{{ __('Generated:') }}</strong> {{ $generatedAt->format('F j, Y g:i A') }}</p>
         </div>
 
-        <p><a href="{{ $downloadUrl }}" class="btn">Download Report</a></p>
+        <p><a href="{{ $downloadUrl }}" class="btn">{{ __('Download Report') }}</a></p>
     </div>
 
     <div class="footer">
-        <p>This email was generated from {{ config('app.name') }}.</p>
+        <p>{{ __('This email was generated from :app.', ['app' => config('app.name')]) }}</p>
     </div>
 </body>
 </html>

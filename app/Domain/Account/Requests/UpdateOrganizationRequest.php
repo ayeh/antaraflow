@@ -30,10 +30,10 @@ class UpdateOrganizationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'The organization name is required.',
-            'slug.required' => 'The organization slug is required.',
-            'slug.unique' => 'This slug is already taken.',
-            'slug.alpha_dash' => 'The slug may only contain letters, numbers, dashes, and underscores.',
+            'name.required' => __('The organization name is required.'),
+            'slug.required' => __('The organization slug is required.'),
+            'slug.unique' => __('This slug is already taken.'),
+            'slug.alpha_dash' => __('The slug may only contain letters, numbers, dashes, and underscores.'),
         ];
     }
 }

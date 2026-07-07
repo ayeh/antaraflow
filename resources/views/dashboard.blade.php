@@ -6,7 +6,7 @@
     {{-- Page Header --}}
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Dashboard') }}</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ now()->format('l, j F Y') }}</p>
         </div>
         <div class="flex items-center gap-3">
@@ -15,7 +15,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                 </svg>
-                Analytics
+                {{ __('Analytics') }}
             </a>
             @if($canCreateMeeting)
                 <a href="{{ route('meetings.create') }}"
@@ -23,7 +23,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    New MOM
+                    {{ __('New MOM') }}
                 </a>
             @endif
         </div>
@@ -33,35 +33,35 @@
     @php
     $statCards = [
         [
-            'label'  => 'My Actions',
+            'label'  => __('My Actions'),
             'count'  => $stats['my_actions'],
             'href'   => route('action-items.dashboard'),
             'color'  => 'violet',
             'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
         ],
         [
-            'label'  => 'Overdue',
+            'label'  => __('Overdue'),
             'count'  => $stats['my_overdue'],
             'href'   => route('action-items.dashboard'),
             'color'  => 'red',
             'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
         ],
         [
-            'label'  => 'This Week',
+            'label'  => __('This Week'),
             'count'  => $stats['meetings_this_week'],
             'href'   => route('meetings.index', ['view' => 'calendar']),
             'color'  => 'blue',
             'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
         ],
         [
-            'label'  => 'Pending Approval',
+            'label'  => __('Pending Approval'),
             'count'  => $stats['pending_approval'],
             'href'   => route('meetings.index', ['status' => 'finalized']),
             'color'  => 'amber',
             'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
         ],
         [
-            'label'  => 'Completion Rate',
+            'label'  => __('Completion Rate'),
             'count'  => $stats['my_completion_rate'] . '%',
             'href'   => route('action-items.dashboard'),
             'color'  => 'green',
@@ -103,7 +103,7 @@
                 <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
-                <span class="text-sm font-semibold text-amber-800 dark:text-amber-300">Needs Attention</span>
+                <span class="text-sm font-semibold text-amber-800 dark:text-amber-300">{{ __('Needs Attention') }}</span>
             </div>
             @if($myOverdueCount > 0)
                 <div class="flex items-center justify-between text-sm">
@@ -111,7 +111,7 @@
                         <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
                         {{ $myOverdueCount }} action {{ Str::plural('item', $myOverdueCount) }} overdue
                     </span>
-                    <a href="{{ route('action-items.dashboard') }}" class="text-amber-700 dark:text-amber-400 font-medium hover:underline text-xs">View all →</a>
+                    <a href="{{ route('action-items.dashboard') }}" class="text-amber-700 dark:text-amber-400 font-medium hover:underline text-xs">{{ __('View all →') }}</a>
                 </div>
             @endif
             @if($pendingApproval > 0)
@@ -120,7 +120,7 @@
                         <span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
                         {{ $pendingApproval }} {{ Str::plural('MOM', $pendingApproval) }} pending approval
                     </span>
-                    <a href="{{ route('meetings.index', ['status' => 'finalized']) }}" class="text-amber-700 dark:text-amber-400 font-medium hover:underline text-xs">Review now →</a>
+                    <a href="{{ route('meetings.index', ['status' => 'finalized']) }}" class="text-amber-700 dark:text-amber-400 font-medium hover:underline text-xs">{{ __('Review now →') }}</a>
                 </div>
             @endif
         </div>
@@ -135,9 +135,9 @@
             {{-- This Week's Meetings --}}
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
-                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">This Week's Meetings</h2>
+                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("This Week's Meetings") }}</h2>
                     <a href="{{ route('meetings.index', ['view' => 'calendar']) }}"
-                       class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">View calendar →</a>
+                       class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">{{ __('View calendar →') }}</a>
                 </div>
                 @forelse($thisWeekMeetings as $meeting)
                     <a href="{{ route('meetings.show', $meeting) }}"
@@ -194,7 +194,7 @@
                         <svg class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <p class="text-sm text-gray-400 dark:text-gray-500">No meetings scheduled this week</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500">{{ __('No meetings scheduled this week') }}</p>
                     </div>
                 @endforelse
             </div>
@@ -202,9 +202,9 @@
             {{-- My Action Items --}}
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
-                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">My Action Items</h2>
+                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('My Action Items') }}</h2>
                     <a href="{{ route('action-items.dashboard') }}"
-                       class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">View all →</a>
+                       class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">{{ __('View all →') }}</a>
                 </div>
                 @forelse($upcomingActions as $action)
                     @php
@@ -226,7 +226,7 @@
                                         {{ $isOverdue ? 'Overdue · ' : 'Due · ' }}{{ $action->due_date->format('j M Y') }}
                                     </span>
                                 @else
-                                    <span class="text-gray-400 dark:text-gray-500">No due date</span>
+                                    <span class="text-gray-400 dark:text-gray-500">{{ __('No due date') }}</span>
                                 @endif
                                 <span class="text-gray-300 dark:text-gray-600">·</span>
                                 <span class="text-gray-500 dark:text-gray-400">{{ $action->priority->label() }}</span>
@@ -238,7 +238,7 @@
                         <svg class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
-                        <p class="text-sm text-gray-400 dark:text-gray-500">No pending action items</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500">{{ __('No pending action items') }}</p>
                     </div>
                 @endforelse
             </div>
@@ -249,17 +249,17 @@
         <div class="w-full lg:w-80 shrink-0">
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
-                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recent Activity</h2>
+                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Recent Activity') }}</h2>
                     <a href="{{ route('meetings.index') }}"
-                       class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">View all →</a>
+                       class="text-xs text-violet-600 dark:text-violet-400 hover:underline font-medium">{{ __('View all →') }}</a>
                 </div>
                 @forelse($recentActivity as $log)
                     @php
                         $actionLabel = match($log->action) {
-                            'created'           => 'created',
-                            'finalized'         => 'finalized',
-                            'approved'          => 'approved',
-                            'reverted_to_draft' => 'reverted to draft',
+                            'created'           => __('created'),
+                            'finalized'         => __('finalized'),
+                            'approved'          => __('approved'),
+                            'reverted_to_draft' => __('reverted to draft'),
                             default             => $log->action,
                         };
                         $meetingTitle = $log->auditable?->title ?? 'a meeting';
@@ -293,7 +293,7 @@
                         <svg class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <p class="text-sm text-gray-400 dark:text-gray-500">No recent activity</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500">{{ __('No recent activity') }}</p>
                     </div>
                 @endforelse
             </div>

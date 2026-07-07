@@ -51,7 +51,7 @@ class OrganizationSettingsController extends Controller
         }
 
         return redirect()->route('organizations.settings.edit', $organization)
-            ->with('success', 'Settings updated successfully.');
+            ->with('success', __('Settings updated successfully.'));
     }
 
     public function uploadLogo(Request $request, Organization $organization): RedirectResponse
@@ -70,6 +70,6 @@ class OrganizationSettingsController extends Controller
         $organization->update(['logo_path' => $path]);
 
         return redirect()->route('organizations.settings.edit', $organization)
-            ->with('success', 'Logo updated successfully.');
+            ->with('success', __('Logo updated successfully.'));
     }
 }

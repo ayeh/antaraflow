@@ -38,7 +38,7 @@ class SocialAuthController extends Controller
             $socialUser = Socialite::driver($provider)->user();
         } catch (\Exception) {
             return redirect()->route('login')
-                ->withErrors(['social' => 'Unable to authenticate with '.ucfirst($provider).'. Please try again.']);
+                ->withErrors(['social' => __('Unable to authenticate with :provider. Please try again.', ['provider' => ucfirst($provider)])]);
         }
 
         try {
@@ -67,6 +67,6 @@ class SocialAuthController extends Controller
             return back()->withErrors(['social' => $e->getMessage()]);
         }
 
-        return back()->with('success', ucfirst($provider).' account unlinked successfully.');
+        return back()->with('success', __(':provider account unlinked successfully.', ['provider' => ucfirst($provider)]));
     }
 }

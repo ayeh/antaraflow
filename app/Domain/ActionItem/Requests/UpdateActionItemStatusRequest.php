@@ -28,9 +28,9 @@ class UpdateActionItemStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'status.required' => 'A status is required.',
-            'status.Illuminate\Validation\Rules\Enum' => 'The selected status is not valid.',
-            'comment.max' => 'The note cannot exceed 500 characters.',
+            'status.required' => __('A status is required.'),
+            'status.Illuminate\Validation\Rules\Enum' => __('The selected status is not valid.'),
+            'comment.max' => __('The note cannot exceed 500 characters.'),
         ];
     }
 }

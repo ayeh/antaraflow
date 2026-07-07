@@ -48,7 +48,7 @@
             } catch {
                 this.selectedStatus = prev;
                 this.close();
-                alert('Failed to update status. Please try again.');
+                alert('{{ __('Failed to update status. Please try again.') }}');
             } finally {
                 this.loading = false;
             }
@@ -110,12 +110,12 @@
                 @click="showComment = !showComment"
                 class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 px-2 py-1"
             >
-                <span x-text="showComment ? 'Hide note' : 'Add a note?'"></span>
+                <span x-text="showComment ? '{{ __('Hide note') }}' : '{{ __('Add a note?') }}'"></span>
             </button>
             <div x-show="showComment" x-transition class="px-2 pb-2 space-y-1.5">
                 <textarea
                     x-model="comment"
-                    placeholder="Optional note..."
+                    placeholder="{{ __('Optional note...') }}"
                     rows="2"
                     class="w-full text-xs rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 px-2 py-1.5 resize-none focus:outline-none focus:ring-1 focus:ring-violet-500"
                 ></textarea>
@@ -125,7 +125,7 @@
                     :disabled="!comment.trim() || loading"
                     class="w-full text-xs font-medium px-2 py-1 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                    Save note
+                    {{ __('Save note') }}
                 </button>
             </div>
         </div>

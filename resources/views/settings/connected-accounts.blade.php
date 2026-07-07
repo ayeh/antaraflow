@@ -3,8 +3,8 @@
 @section('content')
 <div class="max-w-3xl mx-auto space-y-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Connected Accounts</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your social login connections</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Connected Accounts') }}</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Manage your social login connections') }}</p>
     </div>
 
     @if($errors->has('social'))
@@ -14,7 +14,7 @@
     @endif
 
     <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Social Login Providers</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Social Login Providers') }}</h2>
 
         <div class="space-y-4">
             @php
@@ -44,9 +44,9 @@
                         <div>
                             <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $provider['name'] }}</p>
                             @if($linkedProviders->has($providerKey))
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $linkedProviders[$providerKey]->provider_email ?? 'Connected' }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $linkedProviders[$providerKey]->provider_email ?? __('Connected') }}</p>
                             @else
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Not connected</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Not connected') }}</p>
                             @endif
                         </div>
                     </div>
@@ -57,12 +57,12 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium">
-                                    Unlink
+                                    {{ __('Unlink') }}
                                 </button>
                             </form>
                         @else
                             <a href="{{ route('social.redirect', $providerKey) }}" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
-                                Connect
+                                {{ __('Connect') }}
                             </a>
                         @endif
                     </div>

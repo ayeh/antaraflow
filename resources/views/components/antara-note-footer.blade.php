@@ -1,15 +1,15 @@
 @php
 $taglines = [
-    ['text' => 'Stop losing decisions in messy notes.', 'cta' => 'Meet antaraNote →'],
-    ['text' => 'AI-powered minutes. Zero hassle.', 'cta' => 'Try antaraNote free →'],
-    ['text' => 'What if every meeting actually led to action?', 'cta' => 'See how antaraNote works →'],
-    ['text' => 'Your team\'s decisions — captured, organised, actionable.', 'cta' => 'Discover antaraNote →'],
-    ['text' => 'Between Words and Action.', 'cta' => 'That\'s antaraNote →'],
-    ['text' => 'Meetings worth remembering, minutes worth reading.', 'cta' => 'Explore antaraNote →'],
-    ['text' => 'The last meeting tool your team will ever need.', 'cta' => 'Start with antaraNote →'],
-    ['text' => 'From voice to structured minutes in seconds.', 'cta' => 'Try antaraNote →'],
-    ['text' => 'Decisions documented. Actions assigned. Nothing lost.', 'cta' => 'Learn about antaraNote →'],
-    ['text' => 'Smart teams run smarter meetings.', 'cta' => 'Join them on antaraNote →'],
+    ['text' => __('Stop losing decisions in messy notes.'), 'cta' => __('Meet antaraNote →')],
+    ['text' => __('AI-powered minutes. Zero hassle.'), 'cta' => __('Try antaraNote free →')],
+    ['text' => __('What if every meeting actually led to action?'), 'cta' => __('See how antaraNote works →')],
+    ['text' => __("Your team's decisions — captured, organised, actionable."), 'cta' => __('Discover antaraNote →')],
+    ['text' => __('Between Words and Action.'), 'cta' => __("That's antaraNote →")],
+    ['text' => __('Meetings worth remembering, minutes worth reading.'), 'cta' => __('Explore antaraNote →')],
+    ['text' => __('The last meeting tool your team will ever need.'), 'cta' => __('Start with antaraNote →')],
+    ['text' => __('From voice to structured minutes in seconds.'), 'cta' => __('Try antaraNote →')],
+    ['text' => __('Decisions documented. Actions assigned. Nothing lost.'), 'cta' => __('Learn about antaraNote →')],
+    ['text' => __('Smart teams run smarter meetings.'), 'cta' => __('Join them on antaraNote →')],
 ];
 $pick = $taglines[array_rand($taglines)];
 @endphp

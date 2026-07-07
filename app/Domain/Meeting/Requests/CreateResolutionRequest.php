@@ -28,10 +28,10 @@ class CreateResolutionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'The resolution title is required.',
-            'title.max' => 'The resolution title cannot exceed 255 characters.',
-            'mover_id.exists' => 'The selected mover is not a valid attendee.',
-            'seconder_id.exists' => 'The selected seconder is not a valid attendee.',
+            'title.required' => __('The resolution title is required.'),
+            'title.max' => __('The resolution title cannot exceed 255 characters.'),
+            'mover_id.exists' => __('The selected mover is not a valid attendee.'),
+            'seconder_id.exists' => __('The selected seconder is not a valid attendee.'),
         ];
     }
 }

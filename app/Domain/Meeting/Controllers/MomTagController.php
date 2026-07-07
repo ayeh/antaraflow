@@ -34,7 +34,7 @@ class MomTagController extends Controller
 
         MomTag::query()->create($data);
 
-        return redirect()->route('tags.index')->with('success', 'Tag created.');
+        return redirect()->route('tags.index')->with('success', __('Tag created.'));
     }
 
     public function update(UpdateMomTagRequest $request, MomTag $momTag): RedirectResponse
@@ -43,7 +43,7 @@ class MomTagController extends Controller
 
         $momTag->update($request->validated());
 
-        return redirect()->route('tags.index')->with('success', 'Tag updated.');
+        return redirect()->route('tags.index')->with('success', __('Tag updated.'));
     }
 
     public function destroy(MomTag $momTag): RedirectResponse
@@ -52,6 +52,6 @@ class MomTagController extends Controller
 
         $momTag->delete();
 
-        return redirect()->route('tags.index')->with('success', 'Tag deleted.');
+        return redirect()->route('tags.index')->with('success', __('Tag deleted.'));
     }
 }

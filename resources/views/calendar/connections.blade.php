@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto">
-    <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Calendar Connections</h1>
+    <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">{{ __('Calendar Connections') }}</h1>
 
     <div class="space-y-4">
         {{-- Google Calendar --}}
@@ -18,7 +18,7 @@
                         <h3 class="font-semibold text-slate-900 dark:text-white">Google Calendar</h3>
                         @php $googleConn = $connections->firstWhere('provider', 'google'); @endphp
                         <p class="text-sm text-slate-500 dark:text-slate-400">
-                            {{ $googleConn ? 'Connected' : 'Not connected' }}
+                            {{ $googleConn ? __('Connected') : __('Not connected') }}
                         </p>
                     </div>
                 </div>
@@ -31,18 +31,18 @@
                                 <span class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out {{ $googleConn->auto_record ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }}">
                                     <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $googleConn->auto_record ? 'translate-x-4' : 'translate-x-0' }}"></span>
                                 </span>
-                                Notify on start
+                                {{ __('Notify on start') }}
                             </button>
                         </form>
                         <form method="POST" action="{{ route('calendar.disconnect', $googleConn) }}">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">Disconnect</button>
+                            <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">{{ __('Disconnect') }}</button>
                         </form>
                     </div>
                 @else
                     <a href="{{ route('calendar.connect', 'google') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
-                        Connect
+                        {{ __('Connect') }}
                     </a>
                 @endif
             </div>
@@ -61,7 +61,7 @@
                         <h3 class="font-semibold text-slate-900 dark:text-white">Outlook Calendar</h3>
                         @php $outlookConn = $connections->firstWhere('provider', 'outlook'); @endphp
                         <p class="text-sm text-slate-500 dark:text-slate-400">
-                            {{ $outlookConn ? 'Connected' : 'Not connected' }}
+                            {{ $outlookConn ? __('Connected') : __('Not connected') }}
                         </p>
                     </div>
                 </div>
@@ -74,18 +74,18 @@
                                 <span class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out {{ $outlookConn->auto_record ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }}">
                                     <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $outlookConn->auto_record ? 'translate-x-4' : 'translate-x-0' }}"></span>
                                 </span>
-                                Notify on start
+                                {{ __('Notify on start') }}
                             </button>
                         </form>
                         <form method="POST" action="{{ route('calendar.disconnect', $outlookConn) }}">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">Disconnect</button>
+                            <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">{{ __('Disconnect') }}</button>
                         </form>
                     </div>
                 @else
                     <a href="{{ route('calendar.connect', 'outlook') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
-                        Connect
+                        {{ __('Connect') }}
                     </a>
                 @endif
             </div>

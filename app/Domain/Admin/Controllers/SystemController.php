@@ -87,10 +87,10 @@ class SystemController extends Controller
             Artisan::call('queue:retry', ['id' => [$id]]);
 
             return redirect()->route('admin.system.index')
-                ->with('success', "Job #{$id} queued for retry.");
+                ->with('success', __('Job #:id queued for retry.', ['id' => $id]));
         } catch (\Exception $e) {
             return redirect()->route('admin.system.index')
-                ->with('error', "Failed to retry job: {$e->getMessage()}");
+                ->with('error', __('Failed to retry job: :message', ['message' => $e->getMessage()]));
         }
     }
 
@@ -101,10 +101,10 @@ class SystemController extends Controller
             Artisan::call('queue:retry', ['id' => ['all']]);
 
             return redirect()->route('admin.system.index')
-                ->with('success', "Retried {$count} failed job(s).");
+                ->with('success', __('Retried :count failed job(s).', ['count' => $count]));
         } catch (\Exception $e) {
             return redirect()->route('admin.system.index')
-                ->with('error', "Failed to retry all jobs: {$e->getMessage()}");
+                ->with('error', __('Failed to retry all jobs: :message', ['message' => $e->getMessage()]));
         }
     }
 
@@ -114,10 +114,10 @@ class SystemController extends Controller
             DB::table('failed_jobs')->where('id', $id)->delete();
 
             return redirect()->route('admin.system.index')
-                ->with('success', "Failed job #{$id} deleted.");
+                ->with('success', __('Failed job #:id deleted.', ['id' => $id]));
         } catch (\Exception $e) {
             return redirect()->route('admin.system.index')
-                ->with('error', "Failed to delete job: {$e->getMessage()}");
+                ->with('error', __('Failed to delete job: :message', ['message' => $e->getMessage()]));
         }
     }
 
@@ -128,10 +128,10 @@ class SystemController extends Controller
             DB::table('failed_jobs')->truncate();
 
             return redirect()->route('admin.system.index')
-                ->with('success', "Deleted {$count} failed job(s).");
+                ->with('success', __('Deleted :count failed job(s).', ['count' => $count]));
         } catch (\Exception $e) {
             return redirect()->route('admin.system.index')
-                ->with('error', "Failed to delete all failed jobs: {$e->getMessage()}");
+                ->with('error', __('Failed to delete all failed jobs: :message', ['message' => $e->getMessage()]));
         }
     }
 
@@ -142,10 +142,10 @@ class SystemController extends Controller
             DB::table('jobs')->truncate();
 
             return redirect()->route('admin.system.index')
-                ->with('success', "Cleared {$count} pending job(s) from the queue.");
+                ->with('success', __('Cleared :count pending job(s) from the queue.', ['count' => $count]));
         } catch (\Exception $e) {
             return redirect()->route('admin.system.index')
-                ->with('error', "Failed to clear pending jobs: {$e->getMessage()}");
+                ->with('error', __('Failed to clear pending jobs: :message', ['message' => $e->getMessage()]));
         }
     }
 

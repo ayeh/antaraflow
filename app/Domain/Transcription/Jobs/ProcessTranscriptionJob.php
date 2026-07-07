@@ -161,7 +161,7 @@ class ProcessTranscriptionJob implements ShouldQueue
         ]);
 
         if ($result->failed() || ! file_exists($compressedPath)) {
-            throw new \RuntimeException('Failed to compress audio: '.$result->errorOutput());
+            throw new \RuntimeException(__('Failed to compress audio: :output', ['output' => $result->errorOutput()]));
         }
 
         return $compressedPath;

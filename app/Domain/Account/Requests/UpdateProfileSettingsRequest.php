@@ -28,7 +28,7 @@ class UpdateProfileSettingsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Your name is required.',
+            'name.required' => __('Your name is required.'),
         ];
     }
 }

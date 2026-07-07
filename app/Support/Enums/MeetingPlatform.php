@@ -17,7 +17,7 @@ enum MeetingPlatform: string
             self::Zoom => 'Zoom',
             self::GoogleMeet => 'Google Meet',
             self::MicrosoftTeams => 'Microsoft Teams',
-            self::Other => 'Other',
+            self::Other => __('Other'),
         };
     }
 

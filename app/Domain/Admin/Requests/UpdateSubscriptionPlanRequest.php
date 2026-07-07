@@ -38,11 +38,11 @@ class UpdateSubscriptionPlanRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'The plan name is required.',
-            'slug.required' => 'The plan slug is required.',
-            'slug.unique' => 'This slug is already taken.',
-            'price_monthly.required' => 'Monthly price is required.',
-            'price_yearly.required' => 'Yearly price is required.',
+            'name.required' => __('The plan name is required.'),
+            'slug.required' => __('The plan slug is required.'),
+            'slug.unique' => __('This slug is already taken.'),
+            'price_monthly.required' => __('Monthly price is required.'),
+            'price_yearly.required' => __('Yearly price is required.'),
         ];
     }
 }

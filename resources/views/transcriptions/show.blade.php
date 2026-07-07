@@ -19,11 +19,11 @@
                         @csrf
                         <button type="submit"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/20 rounded-lg hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
-                                onclick="event.preventDefault(); window.antaraConfirm('Run AI speaker analysis? This will re-label speakers based on conversation context. Manual edits will be preserved.').then(ok => ok && this.closest('form').submit())">
+                                onclick="event.preventDefault(); window.antaraConfirm('{{ __('Run AI speaker analysis? This will re-label speakers based on conversation context. Manual edits will be preserved.') }}').then(ok => ok && this.closest('form').submit())">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
                             </svg>
-                            AI Analyze Speakers
+                            {{ __('AI Analyze Speakers') }}
                         </button>
                     </form>
                 @endif
@@ -61,7 +61,7 @@
         @endphp
 
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6" id="speaker-timeline">
-            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Speaker Timeline</h2>
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('Speaker Timeline') }}</h2>
 
             {{-- Legend --}}
             <div class="flex flex-wrap gap-3 mb-3">
@@ -101,7 +101,7 @@
 
     @if($transcription->full_text)
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Full Transcript</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Full Transcript') }}</h2>
             <div class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{{ $transcription->full_text }}</div>
         </div>
     @endif
@@ -121,7 +121,7 @@
         @endphp
 
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Segments</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Segments') }}</h2>
             <div class="space-y-0">
                 @foreach($transcription->segments as $segment)
                     @php
@@ -186,7 +186,7 @@
                                         <button
                                             @click="editing = true"
                                             class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium {{ $speakerColorMap[$segment->speaker] }} hover:ring-2 hover:ring-offset-1 hover:ring-blue-400 transition-all cursor-pointer"
-                                            title="Click to rename speaker"
+                                            title="{{ __('Click to rename speaker') }}"
                                         >
                                             <span x-text="value"></span>
                                             <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,13 +213,13 @@
                         {{-- Right side: confidence + edited badge --}}
                         <div class="shrink-0 flex flex-col items-end gap-1 pt-0.5">
                             @if($segment->confidence !== null)
-                                <span class="text-xs text-gray-400 dark:text-gray-500 font-mono" title="Confidence">
+                                <span class="text-xs text-gray-400 dark:text-gray-500 font-mono" title="{{ __('Confidence') }}">
                                     {{ number_format($segment->confidence * 100, 1) }}%
                                 </span>
                             @endif
                             @if($segment->is_edited)
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
-                                    Edited
+                                    {{ __('Edited') }}
                                 </span>
                             @endif
                         </div>

@@ -29,9 +29,9 @@ class UpdateMeetingSeriesRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Series name is required.',
-            'recurrence_pattern.required' => 'Recurrence pattern is required.',
-            'recurrence_pattern.in' => 'Recurrence pattern must be weekly, biweekly, or monthly.',
+            'name.required' => __('Series name is required.'),
+            'recurrence_pattern.required' => __('Recurrence pattern is required.'),
+            'recurrence_pattern.in' => __('Recurrence pattern must be weekly, biweekly, or monthly.'),
         ];
     }
 }

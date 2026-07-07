@@ -38,11 +38,11 @@ class SendEmailDistributionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'recipients.required' => 'At least one recipient is required.',
-            'recipients.*.email' => 'Each recipient must be a valid email address.',
-            'subject.required' => 'The email subject is required.',
-            'export_format.required' => 'The export format is required.',
-            'export_format.in' => 'The export format must be either PDF or DOCX.',
+            'recipients.required' => __('At least one recipient is required.'),
+            'recipients.*.email' => __('Each recipient must be a valid email address.'),
+            'subject.required' => __('The email subject is required.'),
+            'export_format.required' => __('The export format is required.'),
+            'export_format.in' => __('The export format must be either PDF or DOCX.'),
         ];
     }
 }

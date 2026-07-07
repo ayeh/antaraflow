@@ -53,7 +53,7 @@ class ExtractionTemplateController extends Controller
         ExtractionTemplate::query()->create($data);
 
         return redirect()->route('extraction-templates.index')
-            ->with('success', 'Extraction template created successfully.');
+            ->with('success', __('Extraction template created successfully.'));
     }
 
     public function edit(ExtractionTemplate $extractionTemplate): View
@@ -76,7 +76,7 @@ class ExtractionTemplateController extends Controller
         $extractionTemplate->update($data);
 
         return redirect()->route('extraction-templates.index')
-            ->with('success', 'Extraction template updated successfully.');
+            ->with('success', __('Extraction template updated successfully.'));
     }
 
     public function destroy(ExtractionTemplate $extractionTemplate): RedirectResponse
@@ -86,6 +86,6 @@ class ExtractionTemplateController extends Controller
         $extractionTemplate->delete();
 
         return redirect()->route('extraction-templates.index')
-            ->with('success', 'Extraction template deleted.');
+            ->with('success', __('Extraction template deleted.'));
     }
 }

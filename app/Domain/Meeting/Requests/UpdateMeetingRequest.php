@@ -41,15 +41,15 @@ class UpdateMeetingRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.max' => 'The meeting title cannot exceed 255 characters.',
-            'meeting_date.date' => 'The meeting date must be a valid date.',
-            'start_time.date_format' => 'The start time must be in HH:MM format.',
-            'end_time.date_format' => 'The end time must be in HH:MM format.',
-            'end_time.after' => 'The end time must be after the start time.',
-            'project_id.exists' => 'The selected project does not exist.',
-            'prepared_by.max' => 'The prepared by field cannot exceed 255 characters.',
-            'language.in' => 'The language must be either Malay (ms) or English (en).',
-            'tags.*.exists' => 'One or more selected tags do not exist.',
+            'title.max' => __('The meeting title cannot exceed 255 characters.'),
+            'meeting_date.date' => __('The meeting date must be a valid date.'),
+            'start_time.date_format' => __('The start time must be in HH:MM format.'),
+            'end_time.date_format' => __('The end time must be in HH:MM format.'),
+            'end_time.after' => __('The end time must be after the start time.'),
+            'project_id.exists' => __('The selected project does not exist.'),
+            'prepared_by.max' => __('The prepared by field cannot exceed 255 characters.'),
+            'language.in' => __('The language must be either Malay (ms) or English (en).'),
+            'tags.*.exists' => __('One or more selected tags do not exist.'),
         ];
     }
 }

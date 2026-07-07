@@ -27,24 +27,24 @@ class TranscriptionFailedNotification extends Notification implements ShouldQueu
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Transcription Failed')
-            ->greeting("Hello {$notifiable->name},")
-            ->line('A transcription has failed for your meeting.')
-            ->line('Please try uploading the audio file again or contact support.')
-            ->action('View Meeting', route('meetings.show', $this->transcription->minutes_of_meeting_id));
+            ->subject(__('Transcription Failed'))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__('A transcription has failed for your meeting.'))
+            ->line(__('Please try uploading the audio file again or contact support.'))
+            ->action(__('View Meeting'), route('meetings.show', $this->transcription->minutes_of_meeting_id));
     }
 
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
-        $meetingTitle = $this->transcription->minutesOfMeeting?->title ?? 'Unknown Meeting';
+        $meetingTitle = $this->transcription->minutesOfMeeting?->title ?? __('Unknown Meeting');
 
         return [
             'type' => 'transcription_failed',
             'transcription_id' => $this->transcription->id,
             'meeting_id' => $this->transcription->minutes_of_meeting_id,
             'meeting_title' => $this->transcription->minutesOfMeeting?->title,
-            'message' => "Transcription failed for \"{$meetingTitle}\"",
+            'message' => __('Transcription failed for ":title"', ['title' => $meetingTitle]),
         ];
     }
 }

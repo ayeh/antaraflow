@@ -31,6 +31,6 @@ class EmailDistributionController
 
         SendMomEmailJob::dispatch($dist);
 
-        return redirect()->route('meetings.show', $meeting)->with('success', 'Email queued for delivery.');
+        return redirect()->route('meetings.show', $meeting)->with('success', __('Email queued for delivery.'));
     }
 }

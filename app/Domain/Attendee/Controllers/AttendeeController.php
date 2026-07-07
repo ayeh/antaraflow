@@ -42,7 +42,7 @@ class AttendeeController extends Controller
         $this->attendeeService->addAttendee($meeting, $request->validated());
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Attendee added successfully.');
+            ->with('success', __('Attendee added successfully.'));
     }
 
     public function update(Request $request, MinutesOfMeeting $meeting, MomAttendee $attendee): RedirectResponse
@@ -52,7 +52,7 @@ class AttendeeController extends Controller
         $attendee->update($request->only(['name', 'email', 'role', 'department']));
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Attendee updated successfully.');
+            ->with('success', __('Attendee updated successfully.'));
     }
 
     public function destroy(MinutesOfMeeting $meeting, MomAttendee $attendee): RedirectResponse
@@ -62,7 +62,7 @@ class AttendeeController extends Controller
         $this->attendeeService->removeAttendee($attendee);
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Attendee removed successfully.');
+            ->with('success', __('Attendee removed successfully.'));
     }
 
     public function bulkInvite(BulkInviteRequest $request, MinutesOfMeeting $meeting): RedirectResponse
@@ -73,7 +73,7 @@ class AttendeeController extends Controller
         $created = $this->attendeeService->bulkInviteFromGroup($meeting, $group);
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', $created->count().' attendee(s) invited from group.');
+            ->with('success', __(':count attendee(s) invited from group.', ['count' => $created->count()]));
     }
 
     public function updateRsvp(Request $request, MinutesOfMeeting $meeting, MomAttendee $attendee): RedirectResponse
@@ -87,7 +87,7 @@ class AttendeeController extends Controller
         $this->attendeeService->updateRsvp($attendee, RsvpStatus::from($request->input('rsvp_status')));
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'RSVP updated successfully.');
+            ->with('success', __('RSVP updated successfully.'));
     }
 
     public function markPresence(Request $request, MinutesOfMeeting $meeting, MomAttendee $attendee): RedirectResponse
@@ -101,6 +101,6 @@ class AttendeeController extends Controller
         $this->attendeeService->markPresent($attendee, (bool) $request->input('is_present'));
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Attendance updated successfully.');
+            ->with('success', __('Attendance updated successfully.'));
     }
 }

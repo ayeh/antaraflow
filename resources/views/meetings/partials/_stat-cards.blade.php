@@ -2,7 +2,7 @@
 @php
 $cards = [
     [
-        'label'  => 'Total',
+        'label'  => __('Total'),
         'count'  => $stats['total'],
         'href'   => route('meetings.index', request()->except(['status', 'page'])),
         'active' => !request('status'),
@@ -10,7 +10,7 @@ $cards = [
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
     ],
     [
-        'label'  => 'Draft',
+        'label'  => __('Draft'),
         'count'  => $stats['draft'],
         'href'   => route('meetings.index', array_merge(request()->except(['status', 'page']), ['status' => 'draft'])),
         'active' => request('status') === 'draft',
@@ -18,7 +18,7 @@ $cards = [
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>',
     ],
     [
-        'label'  => 'Finalized',
+        'label'  => __('Finalized'),
         'count'  => $stats['finalized'],
         'href'   => route('meetings.index', array_merge(request()->except(['status', 'page']), ['status' => 'finalized'])),
         'active' => request('status') === 'finalized',
@@ -26,7 +26,7 @@ $cards = [
         'icon'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
     ],
     [
-        'label'  => 'Approved',
+        'label'  => __('Approved'),
         'count'  => $stats['approved'],
         'href'   => route('meetings.index', array_merge(request()->except(['status', 'page']), ['status' => 'approved'])),
         'active' => request('status') === 'approved',
