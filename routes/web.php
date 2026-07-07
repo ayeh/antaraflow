@@ -51,11 +51,7 @@ use App\Domain\Transcription\Controllers\SpeakerDiarizationController;
 use App\Domain\Transcription\Controllers\TranscriptionController;
 use App\Domain\Transcription\Controllers\VoiceNoteController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
-
-// Locale switch (available to guests and authenticated users)
-Route::get('locale/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
 
 // Root redirect
 Route::get('/', function () {
