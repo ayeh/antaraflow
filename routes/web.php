@@ -7,6 +7,7 @@ use App\Domain\Account\Controllers\Auth\RegisterController;
 use App\Domain\Account\Controllers\IntegrationSettingsController;
 use App\Domain\Account\Controllers\InvitationAcceptController;
 use App\Domain\Account\Controllers\InvitationController;
+use App\Domain\Account\Controllers\LocaleController;
 use App\Domain\Account\Controllers\MemberController;
 use App\Domain\Account\Controllers\NotificationSettingsController;
 use App\Domain\Account\Controllers\OnboardingController;
@@ -67,6 +68,9 @@ Route::get('/', function () {
 Route::view('/about', 'legal.about')->name('about');
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/terms', 'legal.terms')->name('terms');
+
+// Language switcher (public — works for guests and logged-in users)
+Route::get('locale/{locale}', [LocaleController::class, 'update'])->name('locale.switch');
 
 // Guest meeting view (no auth required)
 Route::middleware('throttle:10,1')->group(function () {
