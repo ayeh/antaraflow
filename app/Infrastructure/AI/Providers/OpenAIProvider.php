@@ -15,7 +15,7 @@ class OpenAIProvider implements AIProviderInterface
 {
     public function __construct(
         private readonly string $apiKey,
-        private readonly string $model = 'gpt-4o',
+        private readonly string $model = 'gpt-5.4-mini',
     ) {}
 
     /** {@inheritDoc} */

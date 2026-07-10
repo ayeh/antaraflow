@@ -32,7 +32,7 @@ class AIProviderFactory
         return match ($provider) {
             'openai' => new OpenAIProvider(
                 apiKey: $config['api_key'] ?? '',
-                model: $config['model'] ?? 'gpt-4o',
+                model: $config['model'] ?? 'gpt-5.4-mini',
             ),
             'anthropic' => new AnthropicProvider(
                 apiKey: $config['api_key'] ?? '',

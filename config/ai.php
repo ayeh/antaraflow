@@ -8,7 +8,7 @@ return [
     'providers' => [
         'openai' => [
             'api_key' => env('OPENAI_API_KEY'),
-            'model' => env('OPENAI_MODEL', 'gpt-4o'),
+            'model' => env('OPENAI_MODEL', 'gpt-5.4-mini'),
             'transcription_model' => env('OPENAI_WHISPER_MODEL', 'whisper-1'),
         ],
         'anthropic' => [

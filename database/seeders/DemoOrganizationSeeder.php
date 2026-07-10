@@ -74,7 +74,7 @@ class DemoOrganizationSeeder extends Seeder
             'provider' => 'openai',
             'display_name' => 'OpenAI (Default)',
             'api_key_encrypted' => encrypt('sk-placeholder-key'),
-            'model' => 'gpt-4o',
+            'model' => 'gpt-5.4-mini',
             'is_default' => true,
             'is_active' => true,
         ]);
