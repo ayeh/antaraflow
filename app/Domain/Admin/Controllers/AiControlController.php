@@ -8,6 +8,7 @@ use App\Domain\Admin\Services\AiControlService;
 use App\Domain\AI\Models\AiUsageLog;
 use App\Domain\AI\Notifications\AiBudgetAlertNotification;
 use App\Domain\AI\Services\AiUsageRecorder;
+use App\Domain\AI\Services\AnthropicBillingService;
 use App\Domain\AI\Services\OpenAiBillingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ class AiControlController extends Controller
         private readonly AiControlService $control,
         private readonly AiUsageRecorder $usage,
         private readonly OpenAiBillingService $billing,
+        private readonly AnthropicBillingService $anthropicBilling,
     ) {}
 
     public function index(Request $request): View
@@ -98,6 +100,7 @@ class AiControlController extends Controller
             ['label' => 'OpenAI — inference', 'env' => 'OPENAI_API_KEY', 'masked' => $this->maskKey(config('ai.providers.openai.api_key')), 'active' => $default === 'openai'],
             ['label' => 'OpenAI — Admin / billing', 'env' => 'OPENAI_ADMIN_KEY', 'masked' => $this->maskKey(config('ai.openai_admin_key')), 'active' => false],
             ['label' => 'Anthropic (Claude)', 'env' => 'ANTHROPIC_API_KEY', 'masked' => $this->maskKey(config('ai.providers.anthropic.api_key')), 'active' => $default === 'anthropic'],
+            ['label' => 'Anthropic — Admin / billing', 'env' => 'ANTHROPIC_ADMIN_KEY', 'masked' => $this->maskKey(config('ai.anthropic_admin_key')), 'active' => false],
             ['label' => 'Google (Gemini)', 'env' => 'GOOGLE_AI_API_KEY', 'masked' => $this->maskKey(config('ai.providers.google.api_key')), 'active' => $default === 'google'],
             ['label' => 'Telegram bot', 'env' => 'TELEGRAM_BOT_TOKEN', 'masked' => $this->maskKey(config('services.telegram.bot_token')), 'active' => false],
         ];
@@ -106,6 +109,9 @@ class AiControlController extends Controller
 
         $openAiConfigured = $this->billing->isConfigured();
         $openAiMonthCost = $openAiConfigured ? $this->billing->monthCost() : null;
+
+        $anthropicConfigured = $this->anthropicBilling->isConfigured();
+        $anthropicMonthCost = $anthropicConfigured ? $this->anthropicBilling->monthCost() : null;
 
         $estimatedBalance = null;
         if ($openAiConfigured && $creditTopup > 0 && $creditTopupDate) {
@@ -143,6 +149,8 @@ class AiControlController extends Controller
             'openAiConfigured' => $openAiConfigured,
             'openAiMonthCost' => $openAiMonthCost,
             'estimatedBalance' => $estimatedBalance,
+            'anthropicConfigured' => $anthropicConfigured,
+            'anthropicMonthCost' => $anthropicMonthCost,
             'apiKeys' => $apiKeys,
             'activeProvider' => $activeProvider,
             'activeModel' => $activeModel,

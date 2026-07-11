@@ -12,6 +12,12 @@ return [
      */
     'openai_admin_key' => env('OPENAI_ADMIN_KEY'),
 
+    /*
+     * Anthropic organization Admin key (sk-ant-admin-...) used to read actual
+     * spend from the Cost Report API. Distinct from ANTHROPIC_API_KEY.
+     */
+    'anthropic_admin_key' => env('ANTHROPIC_ADMIN_KEY'),
+
     'providers' => [
         'openai' => [
             'api_key' => env('OPENAI_API_KEY'),

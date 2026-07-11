@@ -170,6 +170,30 @@
             @endif
         </div>
 
+        {{-- Other providers — actual spend --}}
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">{{ __('Other Providers — Actual Spend') }}</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-sm text-slate-400 mb-1">{{ __('Anthropic (Claude), this month') }}</p>
+                    @if(! $anthropicConfigured)
+                        <p class="text-lg text-slate-500">{{ __('Set ANTHROPIC_ADMIN_KEY (sk-ant-admin-…)') }}</p>
+                    @else
+                        <p class="text-3xl font-bold text-white">{{ $anthropicMonthCost === null ? '—' : '$'.number_format($anthropicMonthCost, 2) }}</p>
+                        <p class="text-xs text-slate-500 mt-1">{{ __('From the Cost Report API') }}</p>
+                    @endif
+                </div>
+                <div>
+                    <p class="text-sm text-slate-400 mb-1">{{ __('Google (Gemini), this month') }}</p>
+                    <p class="text-lg text-slate-500">{{ __('Estimate only') }}</p>
+                    <p class="text-xs text-slate-500 mt-1">
+                        {{ __('Google has no simple costs API; actuals live in GCP billing (BigQuery export).') }}
+                        <a href="https://console.cloud.google.com/billing" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300">{{ __('Open GCP billing ↗') }}</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
         {{-- API keys in use --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
             <div class="flex items-center justify-between mb-1">
