@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\AI\Providers;
 
+use App\Domain\AI\Services\AiUsageRecorder;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
 use App\Infrastructure\AI\DTOs\ExtractedActionItem;
 use App\Infrastructure\AI\DTOs\ExtractedDecision;
@@ -60,6 +61,14 @@ class GoogleProvider implements AIProviderInterface
             ]);
 
         $response->throw();
+
+        app(AiUsageRecorder::class)->recordChat(
+            provider: 'google',
+            model: $this->model,
+            promptTokens: (int) $response->json('usageMetadata.promptTokenCount', 0),
+            completionTokens: (int) $response->json('usageMetadata.candidatesTokenCount', 0),
+            operation: is_string($context['operation'] ?? null) ? $context['operation'] : 'chat',
+        );
 
         return $response->json('candidates.0.content.parts.0.text', '');
     }

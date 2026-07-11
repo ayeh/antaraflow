@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\AI\Providers;
 
+use App\Domain\AI\Services\AiUsageRecorder;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
 use App\Infrastructure\AI\DTOs\ExtractedActionItem;
 use App\Infrastructure\AI\DTOs\ExtractedDecision;
@@ -51,6 +52,14 @@ class AnthropicProvider implements AIProviderInterface
             ->post('https://api.anthropic.com/v1/messages', $payload);
 
         $response->throw();
+
+        app(AiUsageRecorder::class)->recordChat(
+            provider: 'anthropic',
+            model: $this->model,
+            promptTokens: (int) $response->json('usage.input_tokens', 0),
+            completionTokens: (int) $response->json('usage.output_tokens', 0),
+            operation: is_string($context['operation'] ?? null) ? $context['operation'] : 'chat',
+        );
 
         return $response->json('content.0.text', '');
     }
