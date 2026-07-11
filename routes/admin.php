@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Admin\Controllers\AdminSwitchController;
 use App\Domain\Admin\Controllers\AiControlController;
+use App\Domain\Admin\Controllers\AiModelPriceController;
 use App\Domain\Admin\Controllers\Auth\LoginController;
 use App\Domain\Admin\Controllers\BrandingController;
 use App\Domain\Admin\Controllers\DashboardController;
@@ -75,6 +76,12 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('ai/toggle', [AiControlController::class, 'toggle'])->name('ai.toggle');
         Route::put('ai/settings', [AiControlController::class, 'updateSettings'])->name('ai.update-settings');
         Route::post('ai/test-alert', [AiControlController::class, 'sendTest'])->name('ai.test-alert');
+
+        // AI model pricing registry
+        Route::get('ai/prices', [AiModelPriceController::class, 'index'])->name('ai.prices.index');
+        Route::post('ai/prices', [AiModelPriceController::class, 'store'])->name('ai.prices.store');
+        Route::put('ai/prices/{price}', [AiModelPriceController::class, 'update'])->name('ai.prices.update');
+        Route::delete('ai/prices/{price}', [AiModelPriceController::class, 'destroy'])->name('ai.prices.destroy');
 
         // System
         Route::get('system', [SystemController::class, 'index'])->name('system.index');

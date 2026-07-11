@@ -239,7 +239,10 @@
 
         {{-- Usage by model (this month) --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">{{ __('Usage by Model (this month)') }}</h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-white">{{ __('Usage by Model (this month)') }}</h3>
+                <a href="{{ route('admin.ai.prices.index') }}" class="text-xs text-blue-400 hover:text-blue-300">{{ __('Manage model pricing →') }}</a>
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>

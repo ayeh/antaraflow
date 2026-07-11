@@ -38,7 +38,7 @@ class AiUsageRecorder
             'total_tokens' => $promptTokens + $completionTokens,
             'duration_ms' => $durationMs,
             'status' => $status,
-            'cost' => $this->pricing->chatCost($model, $promptTokens, $completionTokens),
+            'cost' => $this->pricing->chatCost($model, $promptTokens, $completionTokens, $cachedTokens),
         ]);
     }
 
