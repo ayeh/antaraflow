@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Admin\Controllers\AdminSwitchController;
+use App\Domain\Admin\Controllers\AiControlController;
 use App\Domain\Admin\Controllers\Auth\LoginController;
 use App\Domain\Admin\Controllers\BrandingController;
 use App\Domain\Admin\Controllers\DashboardController;
@@ -68,6 +69,11 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('email-templates/{emailTemplate}', [EmailTemplateController::class, 'edit'])->name('email-templates.edit');
         Route::put('email-templates/{emailTemplate}', [EmailTemplateController::class, 'update'])->name('email-templates.update');
         Route::post('email-templates/{emailTemplate}/preview', [EmailTemplateController::class, 'preview'])->name('email-templates.preview');
+
+        // AI Control
+        Route::get('ai', [AiControlController::class, 'index'])->name('ai.index');
+        Route::post('ai/toggle', [AiControlController::class, 'toggle'])->name('ai.toggle');
+        Route::put('ai/settings', [AiControlController::class, 'updateSettings'])->name('ai.update-settings');
 
         // System
         Route::get('system', [SystemController::class, 'index'])->name('system.index');

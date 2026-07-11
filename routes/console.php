@@ -23,6 +23,8 @@ Schedule::command('calendar:notify-upcoming')->everyFiveMinutes();
 
 Schedule::command('reports:generate-scheduled')->hourly();
 
+Schedule::command('ai:check-budget')->hourly();
+
 Schedule::job(new CheckStaleDecisionsJob)->weeklyOn(1, '09:00');
 
 Schedule::job(new GenerateProactiveInsightsJob)->dailyAt('07:00');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\AI\Providers;
 
+use App\Domain\AI\Services\AiUsageRecorder;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
 use App\Infrastructure\AI\DTOs\ExtractedActionItem;
 use App\Infrastructure\AI\DTOs\ExtractedDecision;
@@ -44,6 +45,14 @@ class OpenAIProvider implements AIProviderInterface
             ]);
 
         $response->throw();
+
+        app(AiUsageRecorder::class)->recordChat(
+            provider: 'openai',
+            model: $this->model,
+            promptTokens: (int) $response->json('usage.prompt_tokens', 0),
+            completionTokens: (int) $response->json('usage.completion_tokens', 0),
+            operation: is_string($context['operation'] ?? null) ? $context['operation'] : 'chat',
+        );
 
         return $response->json('choices.0.message.content', '');
     }

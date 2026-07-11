@@ -65,4 +65,8 @@ return [
         'pkce' => env('MYDIGITALID_PKCE', true),
     ],
 
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+    ],
+
 ];

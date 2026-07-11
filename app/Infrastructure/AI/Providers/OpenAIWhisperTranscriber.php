@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\AI\Providers;
 
+use App\Domain\AI\Services\AiUsageRecorder;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use App\Infrastructure\AI\DTOs\TranscriptionResult;
 use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
@@ -35,6 +36,12 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
         }
 
         $data = $response->json();
+
+        app(AiUsageRecorder::class)->recordTranscription(
+            provider: 'openai',
+            model: $this->config['transcription_model'] ?? 'whisper-1',
+            audioSeconds: (float) ($data['duration'] ?? 0),
+        );
 
         // Known Whisper hallucinations for silence/low-quality audio
         $hallucinations = [

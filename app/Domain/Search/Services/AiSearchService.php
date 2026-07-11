@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Search\Services;
 
 use App\Domain\Account\Models\AiProviderConfig;
+use App\Domain\Admin\Services\AiControlService;
 use App\Domain\AI\Services\ChatService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Infrastructure\AI\AIProviderFactory;
@@ -127,6 +128,10 @@ class AiSearchService
 
     private function queryAi(string $query, string $context, int $organizationId): string
     {
+        if (! app(AiControlService::class)->isEnabled()) {
+            return __('AI features are temporarily disabled. Please try again later.');
+        }
+
         $providerConfig = AiProviderConfig::query()
             ->where('organization_id', $organizationId)
             ->where('is_default', true)

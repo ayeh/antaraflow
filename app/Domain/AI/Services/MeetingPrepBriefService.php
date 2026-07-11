@@ -7,12 +7,14 @@ namespace App\Domain\AI\Services;
 use App\Domain\Account\Models\AiProviderConfig;
 use App\Domain\Account\Models\Organization;
 use App\Domain\ActionItem\Models\ActionItem;
+use App\Domain\Admin\Services\AiControlService;
 use App\Domain\AI\Models\MeetingPrepBrief;
 use App\Domain\AI\Models\MomExtraction;
 use App\Domain\Attendee\Models\MomAttendee;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Infrastructure\AI\AIProviderFactory;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
+use App\Infrastructure\AI\Exceptions\AiDisabledException;
 use App\Models\User;
 use App\Support\Enums\ActionItemStatus;
 use Illuminate\Support\Collection;
@@ -474,6 +476,10 @@ class MeetingPrepBriefService
 
     private function resolveProvider(Organization $org): AIProviderInterface
     {
+        if (! app(AiControlService::class)->isEnabled()) {
+            throw AiDisabledException::make();
+        }
+
         $config = AiProviderConfig::query()
             ->where('organization_id', $org->id)
             ->where('is_active', true)

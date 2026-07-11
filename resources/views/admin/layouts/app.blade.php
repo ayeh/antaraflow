@@ -64,6 +64,12 @@
                             'icon' => 'document-text',
                         ],
                         [
+                            'label' => __('AI Control'),
+                            'route' => 'admin.ai.index',
+                            'active' => 'admin.ai.*',
+                            'icon' => 'cpu-chip',
+                        ],
+                        [
                             'label' => __('System'),
                             'route' => 'admin.system.index',
                             'active' => 'admin.system.*',

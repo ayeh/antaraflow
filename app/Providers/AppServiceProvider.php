@@ -49,6 +49,7 @@ use App\Domain\Webhook\Listeners\WebhookEventSubscriber;
 use App\Domain\Webhook\Models\WebhookEndpoint;
 use App\Domain\Webhook\Policies\WebhookEndpointPolicy;
 use App\Infrastructure\Notifications\Channels\TeamsChannel;
+use App\Infrastructure\Notifications\Channels\TelegramChannel;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -144,6 +145,10 @@ class AppServiceProvider extends ServiceProvider
 
         Notification::extend('teams', function ($app) {
             return $app->make(TeamsChannel::class);
+        });
+
+        Notification::extend('telegram', function ($app) {
+            return $app->make(TelegramChannel::class);
         });
 
         // Production safety checks
