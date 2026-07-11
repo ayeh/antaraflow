@@ -125,7 +125,7 @@
 
         {{-- Settings --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">{{ __('Settings') }}</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">{{ __('nav.settings') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="sort_order" class="block text-sm font-medium text-slate-300 mb-1">{{ __('Sort Order') }}</label>

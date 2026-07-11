@@ -78,7 +78,7 @@
             meetings:    '{{ __('Meetings') }}',
             newMeeting:  '{{ __('New Meeting') }}',
             actionItems: '{{ __('Action Items') }}',
-            settings:    '{{ __('Settings') }}',
+            settings:    '{{ __('nav.settings') }}',
         } })"
         x-init="recentMeetings = {!! \Illuminate\Support\Js::from($recentMeetings ?? []) !!}"
         class="min-h-full"

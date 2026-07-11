@@ -311,7 +311,7 @@
                                 </template>
                             </div>
                             <div class="flex-1 p-2 space-y-1">
-                                <template x-for="item in ['{{ __("Dashboard") }}','{{ __("Users") }}','{{ __("Settings") }}']" :key="item">
+                                <template x-for="item in ['{{ __("Dashboard") }}','{{ __("Users") }}','{{ __("nav.settings") }}']" :key="item">
                                     <div class="px-2 py-1.5 rounded text-xs text-white/60" x-text="item"></div>
                                 </template>
                                 <div class="px-2 py-1.5 rounded text-xs text-white font-medium"

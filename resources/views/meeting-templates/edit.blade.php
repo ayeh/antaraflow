@@ -196,7 +196,7 @@
 
         {{-- Settings --}}
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-4">
-            <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ __('Settings') }}</h2>
+            <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ __('nav.settings') }}</h2>
 
             <label class="flex items-start gap-3 cursor-pointer group">
                 <input type="hidden" name="is_shared" value="0">

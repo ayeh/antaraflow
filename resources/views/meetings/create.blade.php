@@ -185,7 +185,7 @@
 
         {{-- Settings --}}
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-5">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Settings') }}</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('nav.settings') }}</h2>
 
             {{-- Language --}}
             <div>
