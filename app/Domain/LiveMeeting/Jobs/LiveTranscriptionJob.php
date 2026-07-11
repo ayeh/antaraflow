@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\LiveMeeting\Jobs;
 
+use App\Domain\AI\Services\AiUsageContext;
 use App\Domain\LiveMeeting\Enums\ChunkStatus;
 use App\Domain\LiveMeeting\Events\TranscriptionChunkProcessed;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
@@ -34,6 +35,11 @@ class LiveTranscriptionJob implements ShouldQueue
         $this->chunk->update([
             'status' => ChunkStatus::Processing,
         ]);
+
+        app(AiUsageContext::class)->set(
+            organizationId: $this->chunk->session?->meeting?->organization_id,
+            feature: 'live_transcription',
+        );
 
         try {
             $filePath = Storage::disk('local')->path($this->chunk->audio_file_path);

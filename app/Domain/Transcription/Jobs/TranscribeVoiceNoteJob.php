@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Transcription\Jobs;
 
+use App\Domain\AI\Services\AiUsageContext;
 use App\Domain\Transcription\Models\VoiceNote;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use Illuminate\Bus\Queueable;
@@ -27,6 +28,12 @@ class TranscribeVoiceNoteJob implements ShouldQueue
 
     public function handle(TranscriberInterface $transcriber): void
     {
+        app(AiUsageContext::class)->set(
+            organizationId: $this->voiceNote->organization_id,
+            userId: $this->voiceNote->user_id,
+            feature: 'voice_note',
+        );
+
         $this->voiceNote->update(['status' => 'transcribing']);
 
         try {

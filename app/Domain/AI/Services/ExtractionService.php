@@ -7,12 +7,14 @@ namespace App\Domain\AI\Services;
 use App\Domain\Account\Models\AiProviderConfig;
 use App\Domain\Account\Models\Organization;
 use App\Domain\ActionItem\Models\ActionItem;
+use App\Domain\Admin\Services\AiControlService;
 use App\Domain\AI\Models\ExtractionTemplate;
 use App\Domain\AI\Models\MomExtraction;
 use App\Domain\AI\Models\MomTopic;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Infrastructure\AI\AIProviderFactory;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
+use App\Infrastructure\AI\Exceptions\AiDisabledException;
 use App\Models\User;
 use App\Support\Enums\ActionItemPriority;
 
@@ -20,6 +22,16 @@ class ExtractionService
 {
     public function extractAll(MinutesOfMeeting $mom): void
     {
+        if (! app(AiControlService::class)->isEnabled()) {
+            throw AiDisabledException::make();
+        }
+
+        app(AiUsageContext::class)->set(
+            organizationId: $mom->organization_id,
+            userId: $mom->created_by,
+            feature: 'mom_generation',
+        );
+
         $provider = $this->resolveProvider($mom->organization);
         $providerConfig = $this->getProviderConfig($mom->organization);
         $rawText = $this->getFullText($mom);
