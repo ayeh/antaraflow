@@ -10,6 +10,7 @@ use App\Domain\Admin\Controllers\BrandingController;
 use App\Domain\Admin\Controllers\DashboardController;
 use App\Domain\Admin\Controllers\EmailTemplateController;
 use App\Domain\Admin\Controllers\OrganizationController;
+use App\Domain\Admin\Controllers\OrgBudgetController;
 use App\Domain\Admin\Controllers\SmtpController;
 use App\Domain\Admin\Controllers\SubscriptionPlanController;
 use App\Domain\Admin\Controllers\SystemController;
@@ -82,6 +83,10 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('ai/prices', [AiModelPriceController::class, 'store'])->name('ai.prices.store');
         Route::put('ai/prices/{price}', [AiModelPriceController::class, 'update'])->name('ai.prices.update');
         Route::delete('ai/prices/{price}', [AiModelPriceController::class, 'destroy'])->name('ai.prices.destroy');
+
+        // Per-organization AI budgets
+        Route::get('ai/org-budgets', [OrgBudgetController::class, 'index'])->name('ai.org-budgets.index');
+        Route::put('ai/org-budgets/{organization}', [OrgBudgetController::class, 'update'])->name('ai.org-budgets.update');
 
         // System
         Route::get('system', [SystemController::class, 'index'])->name('system.index');

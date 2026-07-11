@@ -27,6 +27,8 @@ class ExtractionService
             throw AiDisabledException::make();
         }
 
+        app(OrgBudgetService::class)->guard($mom->organization_id);
+
         app(AiUsageContext::class)->set(
             organizationId: $mom->organization_id,
             userId: $mom->created_by,

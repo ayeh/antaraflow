@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Transcription\Jobs;
 
 use App\Domain\AI\Services\AiUsageContext;
+use App\Domain\AI\Services\OrgBudgetService;
 use App\Domain\Transcription\Events\TranscriptionCompleted;
 use App\Domain\Transcription\Events\TranscriptionFailed;
 use App\Domain\Transcription\Models\AudioTranscription;
@@ -36,8 +37,11 @@ class ProcessTranscriptionJob implements ShouldQueue
 
     public function handle(TranscriberInterface $transcriber): void
     {
+        $organizationId = $this->transcription->minutesOfMeeting?->organization_id;
+        app(OrgBudgetService::class)->guard($organizationId);
+
         app(AiUsageContext::class)->set(
-            organizationId: $this->transcription->minutesOfMeeting?->organization_id,
+            organizationId: $organizationId,
             userId: $this->transcription->uploaded_by,
             feature: 'transcription',
         );

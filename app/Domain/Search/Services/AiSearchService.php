@@ -8,6 +8,7 @@ use App\Domain\Account\Models\AiProviderConfig;
 use App\Domain\Admin\Services\AiControlService;
 use App\Domain\AI\Services\AiUsageContext;
 use App\Domain\AI\Services\ChatService;
+use App\Domain\AI\Services\OrgBudgetService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Infrastructure\AI\AIProviderFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -131,6 +132,10 @@ class AiSearchService
     {
         if (! app(AiControlService::class)->isEnabled()) {
             return __('AI features are temporarily disabled. Please try again later.');
+        }
+
+        if (app(OrgBudgetService::class)->isOverLimit($organizationId)) {
+            return __('Your organization has reached its AI usage budget. Please contact your administrator.');
         }
 
         app(AiUsageContext::class)->set(organizationId: $organizationId, feature: 'search');
