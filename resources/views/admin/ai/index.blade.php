@@ -144,10 +144,16 @@
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
-                        <p class="text-sm text-slate-400 mb-1">{{ __('Actual spend this month (OpenAI)') }}</p>
+                        <p class="text-sm text-slate-400 mb-1">
+                            {{ __('Actual spend this month (OpenAI)') }}
+                            <span class="text-xs {{ $openAiProjectScoped ? 'text-green-400' : 'text-amber-400' }}">· {{ $openAiProjectScoped ? __('this project') : __('whole org') }}</span>
+                        </p>
                         <p class="text-3xl font-bold text-white">
                             {{ $openAiMonthCost === null ? '—' : '$'.number_format($openAiMonthCost, 2) }}
                         </p>
+                        @unless($openAiProjectScoped)
+                            <p class="text-xs text-amber-400/80 mt-1">{{ __('Set OPENAI_PROJECT_ID to scope this to antaraNote only.') }}</p>
+                        @endunless
                     </div>
                     <div>
                         <p class="text-sm text-slate-400 mb-1">{{ __('Estimated balance remaining') }}</p>

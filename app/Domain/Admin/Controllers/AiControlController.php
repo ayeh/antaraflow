@@ -109,6 +109,7 @@ class AiControlController extends Controller
 
         $openAiConfigured = $this->billing->isConfigured();
         $openAiMonthCost = $openAiConfigured ? $this->billing->monthCost() : null;
+        $openAiProjectScoped = $this->billing->projectId() !== null;
 
         $anthropicConfigured = $this->anthropicBilling->isConfigured();
         $anthropicMonthCost = $anthropicConfigured ? $this->anthropicBilling->monthCost() : null;
@@ -148,6 +149,7 @@ class AiControlController extends Controller
             'anomalyMultiplier' => $this->control->anomalyMultiplier(),
             'openAiConfigured' => $openAiConfigured,
             'openAiMonthCost' => $openAiMonthCost,
+            'openAiProjectScoped' => $openAiProjectScoped,
             'estimatedBalance' => $estimatedBalance,
             'anthropicConfigured' => $anthropicConfigured,
             'anthropicMonthCost' => $anthropicMonthCost,

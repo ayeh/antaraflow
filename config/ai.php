@@ -13,6 +13,13 @@ return [
     'openai_admin_key' => env('OPENAI_ADMIN_KEY'),
 
     /*
+     * When set, the OpenAI actual-spend figure is scoped to this project
+     * (proj_...) instead of the whole organization — so the dashboard reflects
+     * this app's spend only. Pair it with a project-scoped OPENAI_API_KEY.
+     */
+    'openai_project_id' => env('OPENAI_PROJECT_ID'),
+
+    /*
      * Anthropic organization Admin key (sk-ant-admin-...) used to read actual
      * spend from the Cost Report API. Distinct from ANTHROPIC_API_KEY.
      */

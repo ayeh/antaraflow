@@ -40,7 +40,8 @@ class OpenAiBillingService
             return null;
         }
 
-        $cacheKey = 'openai_cost_since_'.$start->toDateString();
+        $projectId = $this->projectId();
+        $cacheKey = 'openai_cost_since_'.$start->toDateString().'_'.($projectId ?? 'org');
         $cached = Cache::get($cacheKey);
 
         if ($cached !== null) {
@@ -52,14 +53,22 @@ class OpenAiBillingService
         $guard = 0;
 
         do {
+            $query = http_build_query(array_filter([
+                'start_time' => $start->getTimestamp(),
+                'bucket_width' => '1d',
+                'limit' => 180,
+                'page' => $page,
+            ], fn ($value) => $value !== null));
+
+            // Scope to a single project when configured so the figure reflects
+            // this app only, not the whole organization.
+            if ($projectId) {
+                $query .= '&project_ids[]='.urlencode($projectId);
+            }
+
             $response = Http::withToken($key)
                 ->timeout(20)
-                ->get(self::COSTS_ENDPOINT, array_filter([
-                    'start_time' => $start->getTimestamp(),
-                    'bucket_width' => '1d',
-                    'limit' => 180,
-                    'page' => $page,
-                ], fn ($value) => $value !== null));
+                ->get(self::COSTS_ENDPOINT.'?'.$query);
 
             if ($response->failed()) {
                 Log::warning('OpenAI Costs API request failed', [
@@ -90,5 +99,12 @@ class OpenAiBillingService
         $key = config('ai.openai_admin_key');
 
         return is_string($key) && $key !== '' ? $key : null;
+    }
+
+    public function projectId(): ?string
+    {
+        $id = config('ai.openai_project_id');
+
+        return is_string($id) && $id !== '' ? $id : null;
     }
 }

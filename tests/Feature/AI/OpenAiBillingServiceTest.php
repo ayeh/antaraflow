@@ -40,3 +40,22 @@ test('cost since returns null when the api fails', function () {
 
     expect(app(OpenAiBillingService::class)->costSince(now()->startOfMonth()))->toBeNull();
 });
+
+test('cost is scoped to the project when OPENAI_PROJECT_ID is set', function () {
+    config()->set('ai.openai_admin_key', 'sk-admin-test');
+    config()->set('ai.openai_project_id', 'proj_antaranote');
+
+    Http::fake([
+        'api.openai.com/*' => Http::response([
+            'data' => [['results' => [['amount' => ['value' => 1.0, 'currency' => 'usd']]]]],
+            'has_more' => false,
+            'next_page' => null,
+        ]),
+    ]);
+
+    expect(app(OpenAiBillingService::class)->projectId())->toBe('proj_antaranote');
+    app(OpenAiBillingService::class)->costSince(now()->startOfMonth());
+
+    Http::assertSent(fn ($request) => str_contains($request->url(), 'proj_antaranote')
+        && str_contains(rawurldecode($request->url()), 'project_ids[]'));
+});
