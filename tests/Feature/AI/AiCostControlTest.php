@@ -81,6 +81,18 @@ test('admin can view the ai control page', function () {
         ->assertSee('AI Features');
 });
 
+test('api keys card shows masked keys and never the full secret', function () {
+    $admin = Admin::factory()->create();
+    config()->set('ai.providers.openai.api_key', 'sk-proj-ABCDEFGHIJKLMNOP1234WXYZ');
+
+    $this->actingAs($admin, 'admin')
+        ->get(route('admin.ai.index'))
+        ->assertStatus(200)
+        ->assertSee('OPENAI_API_KEY')
+        ->assertSee('WXYZ')
+        ->assertDontSee('sk-proj-ABCDEFGHIJKLMNOP1234WXYZ');
+});
+
 test('admin can toggle ai off and on', function () {
     $admin = Admin::factory()->create();
 

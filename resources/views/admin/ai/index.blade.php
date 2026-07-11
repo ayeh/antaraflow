@@ -94,6 +94,52 @@
             @endif
         </div>
 
+        {{-- API keys in use --}}
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-1">
+                <h3 class="text-lg font-semibold text-white">{{ __('API Keys in Use') }}</h3>
+                <span class="text-xs text-slate-400">
+                    {{ __('Active') }}: <span class="text-slate-200 font-medium">{{ $activeProvider }}</span>
+                    @if($activeModel)<span class="font-mono text-xs">· {{ $activeModel }}</span>@endif
+                </span>
+            </div>
+            <p class="text-xs text-slate-500 mb-4">{{ __('Masked for safety — prefix + last 4 only. Full keys live in the server .env.') }}</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-slate-400 border-b border-slate-700">
+                            <th class="py-2 pr-4 font-medium">{{ __('Purpose') }}</th>
+                            <th class="py-2 pr-4 font-medium">{{ __('Env var') }}</th>
+                            <th class="py-2 pr-4 font-medium">{{ __('Key') }}</th>
+                            <th class="py-2 font-medium">{{ __('Status') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($apiKeys as $key)
+                            <tr class="border-b border-slate-700/50 text-slate-200">
+                                <td class="py-2 pr-4">
+                                    {{ $key['label'] }}
+                                    @if($key['active'])
+                                        <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-500/15 text-green-400">{{ __('ACTIVE') }}</span>
+                                    @endif
+                                </td>
+                                <td class="py-2 pr-4 font-mono text-xs text-slate-400">{{ $key['env'] }}</td>
+                                <td class="py-2 pr-4 font-mono text-xs">{{ $key['masked'] ?? '—' }}</td>
+                                <td class="py-2">
+                                    @if($key['masked'])
+                                        <span class="inline-flex items-center gap-1.5 text-green-400 text-xs"><span class="size-1.5 rounded-full bg-green-400"></span>{{ __('Set') }}</span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 text-slate-500 text-xs"><span class="size-1.5 rounded-full bg-slate-600"></span>{{ __('Not set') }}</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-slate-500 mt-4">{{ __('Per-organization keys are managed separately under each org\'s AI Provider settings.') }}</p>
+        </div>
+
         {{-- Budget & alerts --}}
         <form method="POST" action="{{ route('admin.ai.update-settings') }}">
             @csrf

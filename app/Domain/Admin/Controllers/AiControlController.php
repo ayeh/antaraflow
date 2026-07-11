@@ -43,6 +43,17 @@ class AiControlController extends Controller
         $creditTopup = $this->control->creditTopup();
         $creditTopupDate = $this->control->creditTopupDate();
 
+        $default = config('ai.default', 'openai');
+        $apiKeys = [
+            ['label' => 'OpenAI — inference', 'env' => 'OPENAI_API_KEY', 'masked' => $this->maskKey(config('ai.providers.openai.api_key')), 'active' => $default === 'openai'],
+            ['label' => 'OpenAI — Admin / billing', 'env' => 'OPENAI_ADMIN_KEY', 'masked' => $this->maskKey(config('ai.openai_admin_key')), 'active' => false],
+            ['label' => 'Anthropic (Claude)', 'env' => 'ANTHROPIC_API_KEY', 'masked' => $this->maskKey(config('ai.providers.anthropic.api_key')), 'active' => $default === 'anthropic'],
+            ['label' => 'Google (Gemini)', 'env' => 'GOOGLE_AI_API_KEY', 'masked' => $this->maskKey(config('ai.providers.google.api_key')), 'active' => $default === 'google'],
+            ['label' => 'Telegram bot', 'env' => 'TELEGRAM_BOT_TOKEN', 'masked' => $this->maskKey(config('services.telegram.bot_token')), 'active' => false],
+        ];
+        $activeProvider = $default;
+        $activeModel = config("ai.providers.{$default}.model");
+
         $openAiConfigured = $this->billing->isConfigured();
         $openAiMonthCost = $openAiConfigured ? $this->billing->monthCost() : null;
 
@@ -69,7 +80,29 @@ class AiControlController extends Controller
             'openAiConfigured' => $openAiConfigured,
             'openAiMonthCost' => $openAiMonthCost,
             'estimatedBalance' => $estimatedBalance,
+            'apiKeys' => $apiKeys,
+            'activeProvider' => $activeProvider,
+            'activeModel' => $activeModel,
         ]);
+    }
+
+    /**
+     * Mask a secret for display: keep a short prefix + last 4 chars only.
+     * Never returns the full key.
+     */
+    private function maskKey(mixed $key): ?string
+    {
+        if (! is_string($key) || $key === '') {
+            return null;
+        }
+
+        $length = strlen($key);
+
+        if ($length <= 14) {
+            return substr($key, 0, 4).str_repeat('•', max(1, $length - 4));
+        }
+
+        return substr($key, 0, 10).'…'.substr($key, -4);
     }
 
     public function toggle(Request $request): RedirectResponse
