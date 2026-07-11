@@ -19,11 +19,14 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
 
     public function transcribe(string $filePath, array $options = []): TranscriptionResult
     {
+        $model = $this->config['transcription_model'] ?? 'whisper-1';
+        $start = microtime(true);
+
         $response = Http::withToken($this->config['api_key'])
             ->timeout(300)
             ->attach('file', fopen($filePath, 'r'), basename($filePath))
             ->post('https://api.openai.com/v1/audio/transcriptions', [
-                'model' => $this->config['transcription_model'] ?? 'whisper-1',
+                'model' => $model,
                 'language' => $options['language'] ?? null,
                 'response_format' => 'verbose_json',
                 'timestamp_granularities' => ['segment'],
@@ -31,6 +34,7 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
             ]);
 
         if ($response->failed()) {
+            app(AiUsageRecorder::class)->recordTranscription('openai', $model, 0, (int) round((microtime(true) - $start) * 1000), 'error');
             $error = $response->json('error.message', __('Whisper API request failed with status :status', ['status' => $response->status()]));
             throw new \RuntimeException($error);
         }
@@ -39,8 +43,9 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
 
         app(AiUsageRecorder::class)->recordTranscription(
             provider: 'openai',
-            model: $this->config['transcription_model'] ?? 'whisper-1',
+            model: $model,
             audioSeconds: (float) ($data['duration'] ?? 0),
+            durationMs: (int) round((microtime(true) - $start) * 1000),
         );
 
         // Known Whisper hallucinations for silence/low-quality audio

@@ -480,6 +480,8 @@ class MeetingPrepBriefService
             throw AiDisabledException::make();
         }
 
+        app(AiUsageContext::class)->set(organizationId: $org->id, feature: 'prep_brief');
+
         $config = AiProviderConfig::query()
             ->where('organization_id', $org->id)
             ->where('is_active', true)

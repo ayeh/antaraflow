@@ -28,12 +28,30 @@ class AiControlController extends Controller
         $todaySpend = $this->usage->todaySpend();
         $monthSpend = $this->usage->monthSpend();
 
+        $monthStart = now()->startOfMonth();
+
         $byModel = AiUsageLog::query()
-            ->where('created_at', '>=', now()->startOfMonth())
+            ->where('created_at', '>=', $monthStart)
             ->selectRaw('provider, model, SUM(cost) as total_cost, COUNT(*) as calls, SUM(total_tokens) as tokens')
             ->groupBy('provider', 'model')
             ->orderByDesc('total_cost')
             ->get();
+
+        $byFeature = AiUsageLog::query()
+            ->where('created_at', '>=', $monthStart)
+            ->selectRaw('feature, SUM(cost) as total_cost, COUNT(*) as calls')
+            ->groupBy('feature')
+            ->orderByDesc('total_cost')
+            ->get();
+
+        $totalCalls = AiUsageLog::query()->where('created_at', '>=', $monthStart)->count();
+        $errorCalls = AiUsageLog::query()->where('created_at', '>=', $monthStart)->where('status', 'error')->count();
+        $avgLatency = (float) AiUsageLog::query()->where('created_at', '>=', $monthStart)->where('status', 'success')->whereNotNull('duration_ms')->avg('duration_ms');
+        $promptTokenSum = (int) AiUsageLog::query()->where('created_at', '>=', $monthStart)->sum('prompt_tokens');
+        $cachedTokenSum = (int) AiUsageLog::query()->where('created_at', '>=', $monthStart)->sum('cached_tokens');
+
+        $errorRate = $totalCalls > 0 ? $errorCalls / $totalCalls : 0.0;
+        $cacheHitRate = $promptTokenSum > 0 ? $cachedTokenSum / $promptTokenSum : 0.0;
 
         $recentLogs = AiUsageLog::query()
             ->latest()
@@ -74,7 +92,11 @@ class AiControlController extends Controller
             'todaySpend' => $todaySpend,
             'monthSpend' => $monthSpend,
             'byModel' => $byModel,
+            'byFeature' => $byFeature,
             'recentLogs' => $recentLogs,
+            'avgLatency' => $avgLatency,
+            'errorRate' => $errorRate,
+            'cacheHitRate' => $cacheHitRate,
             'creditTopup' => $creditTopup,
             'creditTopupDate' => $creditTopupDate,
             'openAiConfigured' => $openAiConfigured,

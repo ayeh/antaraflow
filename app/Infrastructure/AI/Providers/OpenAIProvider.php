@@ -36,22 +36,32 @@ class OpenAIProvider implements AIProviderInterface
 
         $messages[] = ['role' => 'user', 'content' => $prompt];
 
-        $response = Http::withToken($this->apiKey)
-            ->timeout(120)
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => $this->model,
-                'messages' => $messages,
-                'temperature' => 0.3,
-            ]);
+        $operation = is_string($context['operation'] ?? null) ? $context['operation'] : 'chat';
+        $start = microtime(true);
 
-        $response->throw();
+        try {
+            $response = Http::withToken($this->apiKey)
+                ->timeout(120)
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => $this->model,
+                    'messages' => $messages,
+                    'temperature' => 0.3,
+                ]);
+
+            $response->throw();
+        } catch (\Throwable $e) {
+            app(AiUsageRecorder::class)->recordChatError('openai', $this->model, $operation, (int) round((microtime(true) - $start) * 1000));
+            throw $e;
+        }
 
         app(AiUsageRecorder::class)->recordChat(
             provider: 'openai',
             model: $this->model,
             promptTokens: (int) $response->json('usage.prompt_tokens', 0),
             completionTokens: (int) $response->json('usage.completion_tokens', 0),
-            operation: is_string($context['operation'] ?? null) ? $context['operation'] : 'chat',
+            operation: $operation,
+            cachedTokens: (int) $response->json('usage.prompt_tokens_details.cached_tokens', 0),
+            durationMs: (int) round((microtime(true) - $start) * 1000),
         );
 
         return $response->json('choices.0.message.content', '');

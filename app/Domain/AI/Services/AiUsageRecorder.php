@@ -12,6 +12,7 @@ class AiUsageRecorder
 {
     public function __construct(
         private readonly AiPricingService $pricing,
+        private readonly AiUsageContext $context,
     ) {}
 
     /**
@@ -23,22 +24,37 @@ class AiUsageRecorder
         int $promptTokens,
         int $completionTokens,
         string $operation = 'chat',
-        ?int $organizationId = null,
+        int $cachedTokens = 0,
+        ?int $durationMs = null,
+        string $status = 'success',
     ): void {
-        try {
-            AiUsageLog::query()->create([
-                'organization_id' => $organizationId,
-                'provider' => $provider,
-                'model' => $model,
-                'operation' => $operation,
-                'prompt_tokens' => $promptTokens,
-                'completion_tokens' => $completionTokens,
-                'total_tokens' => $promptTokens + $completionTokens,
-                'cost' => $this->pricing->chatCost($model, $promptTokens, $completionTokens),
-            ]);
-        } catch (Throwable $e) {
-            Log::warning('Failed to record AI chat usage', ['error' => $e->getMessage()]);
-        }
+        $this->write([
+            'provider' => $provider,
+            'model' => $model,
+            'operation' => $operation,
+            'prompt_tokens' => $promptTokens,
+            'completion_tokens' => $completionTokens,
+            'cached_tokens' => $cachedTokens,
+            'total_tokens' => $promptTokens + $completionTokens,
+            'duration_ms' => $durationMs,
+            'status' => $status,
+            'cost' => $this->pricing->chatCost($model, $promptTokens, $completionTokens),
+        ]);
+    }
+
+    /**
+     * Record a failed chat/completion call so the error rate reflects reality.
+     */
+    public function recordChatError(string $provider, string $model, string $operation = 'chat', ?int $durationMs = null): void
+    {
+        $this->write([
+            'provider' => $provider,
+            'model' => $model,
+            'operation' => $operation,
+            'duration_ms' => $durationMs,
+            'status' => 'error',
+            'cost' => 0,
+        ]);
     }
 
     /**
@@ -48,19 +64,34 @@ class AiUsageRecorder
         string $provider,
         string $model,
         float $audioSeconds,
-        ?int $organizationId = null,
+        ?int $durationMs = null,
+        string $status = 'success',
     ): void {
+        $this->write([
+            'provider' => $provider,
+            'model' => $model,
+            'operation' => 'transcription',
+            'audio_seconds' => $audioSeconds,
+            'duration_ms' => $durationMs,
+            'status' => $status,
+            'cost' => $this->pricing->transcriptionCost($model, $audioSeconds),
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function write(array $attributes): void
+    {
         try {
             AiUsageLog::query()->create([
-                'organization_id' => $organizationId,
-                'provider' => $provider,
-                'model' => $model,
-                'operation' => 'transcription',
-                'audio_seconds' => $audioSeconds,
-                'cost' => $this->pricing->transcriptionCost($model, $audioSeconds),
+                'organization_id' => $this->context->organizationId(),
+                'user_id' => $this->context->userId(),
+                'feature' => $this->context->feature(),
+                ...$attributes,
             ]);
         } catch (Throwable $e) {
-            Log::warning('Failed to record AI transcription usage', ['error' => $e->getMessage()]);
+            Log::warning('Failed to record AI usage', ['error' => $e->getMessage()]);
         }
     }
 

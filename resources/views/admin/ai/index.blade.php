@@ -54,6 +54,25 @@
             </div>
         </div>
 
+        {{-- Health metrics (this month) --}}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+                <p class="text-sm text-slate-400 mb-1">{{ __('Avg latency') }}</p>
+                <p class="text-3xl font-bold text-white">{{ $avgLatency > 0 ? number_format($avgLatency).' ms' : '—' }}</p>
+                <p class="text-xs text-slate-500 mt-1">{{ __('Successful calls, this month') }}</p>
+            </div>
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+                <p class="text-sm text-slate-400 mb-1">{{ __('Error rate') }}</p>
+                <p class="text-3xl font-bold {{ $errorRate > 0.05 ? 'text-red-400' : 'text-white' }}">{{ number_format($errorRate * 100, 1) }}%</p>
+                <p class="text-xs text-slate-500 mt-1">{{ __('Failed AI calls, this month') }}</p>
+            </div>
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+                <p class="text-sm text-slate-400 mb-1">{{ __('Cache-hit rate') }}</p>
+                <p class="text-3xl font-bold text-white">{{ number_format($cacheHitRate * 100, 1) }}%</p>
+                <p class="text-xs text-slate-500 mt-1">{{ __('Cached prompt tokens') }}</p>
+            </div>
+        </div>
+
         {{-- OpenAI actual (Admin API) --}}
         <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
             <div class="flex items-center justify-between mb-4">
@@ -243,6 +262,33 @@
                             </tr>
                         @empty
                             <tr><td colspan="5" class="py-4 text-center text-slate-500">{{ __('No usage recorded yet.') }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Usage by feature --}}
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">{{ __('Usage by Feature (this month)') }}</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-slate-400 border-b border-slate-700">
+                            <th class="py-2 pr-4 font-medium">{{ __('Feature') }}</th>
+                            <th class="py-2 pr-4 font-medium text-right">{{ __('Calls') }}</th>
+                            <th class="py-2 font-medium text-right">{{ __('Cost') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($byFeature as $row)
+                            <tr class="border-b border-slate-700/50 text-slate-200">
+                                <td class="py-2 pr-4">{{ $row->feature ?? __('(unattributed)') }}</td>
+                                <td class="py-2 pr-4 text-right">{{ number_format((int) $row->calls) }}</td>
+                                <td class="py-2 text-right">${{ number_format((float) $row->total_cost, 4) }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="3" class="py-4 text-center text-slate-500">{{ __('No usage recorded yet.') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>

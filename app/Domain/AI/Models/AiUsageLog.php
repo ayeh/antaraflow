@@ -12,13 +12,18 @@ class AiUsageLog extends Model
 {
     protected $fillable = [
         'organization_id',
+        'user_id',
         'provider',
         'model',
         'operation',
+        'feature',
         'prompt_tokens',
         'completion_tokens',
+        'cached_tokens',
         'total_tokens',
         'audio_seconds',
+        'duration_ms',
+        'status',
         'cost',
     ];
 
@@ -28,8 +33,10 @@ class AiUsageLog extends Model
         return [
             'prompt_tokens' => 'integer',
             'completion_tokens' => 'integer',
+            'cached_tokens' => 'integer',
             'total_tokens' => 'integer',
             'audio_seconds' => 'float',
+            'duration_ms' => 'integer',
             'cost' => 'float',
         ];
     }

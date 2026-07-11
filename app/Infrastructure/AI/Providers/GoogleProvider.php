@@ -52,22 +52,32 @@ class GoogleProvider implements AIProviderInterface
 
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}";
 
-        $response = Http::timeout(120)
-            ->post($url, [
-                'contents' => $contents,
-                'generationConfig' => [
-                    'temperature' => 0.3,
-                ],
-            ]);
+        $operation = is_string($context['operation'] ?? null) ? $context['operation'] : 'chat';
+        $start = microtime(true);
 
-        $response->throw();
+        try {
+            $response = Http::timeout(120)
+                ->post($url, [
+                    'contents' => $contents,
+                    'generationConfig' => [
+                        'temperature' => 0.3,
+                    ],
+                ]);
+
+            $response->throw();
+        } catch (\Throwable $e) {
+            app(AiUsageRecorder::class)->recordChatError('google', $this->model, $operation, (int) round((microtime(true) - $start) * 1000));
+            throw $e;
+        }
 
         app(AiUsageRecorder::class)->recordChat(
             provider: 'google',
             model: $this->model,
             promptTokens: (int) $response->json('usageMetadata.promptTokenCount', 0),
             completionTokens: (int) $response->json('usageMetadata.candidatesTokenCount', 0),
-            operation: is_string($context['operation'] ?? null) ? $context['operation'] : 'chat',
+            operation: $operation,
+            cachedTokens: (int) $response->json('usageMetadata.cachedContentTokenCount', 0),
+            durationMs: (int) round((microtime(true) - $start) * 1000),
         );
 
         return $response->json('candidates.0.content.parts.0.text', '');

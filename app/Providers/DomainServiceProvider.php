@@ -47,5 +47,6 @@ class DomainServiceProvider extends ServiceProvider
 
         $this->app->singleton(AuditService::class);
         $this->app->singleton(AuthorizationService::class);
+        $this->app->singleton(\App\Domain\AI\Services\AiUsageContext::class);
     }
 }

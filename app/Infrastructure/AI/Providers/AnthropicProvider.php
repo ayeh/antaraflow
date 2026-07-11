@@ -44,21 +44,31 @@ class AnthropicProvider implements AIProviderInterface
             $payload['system'] = $systemPrompt;
         }
 
-        $response = Http::withHeaders([
-            'x-api-key' => $this->apiKey,
-            'anthropic-version' => '2023-06-01',
-        ])
-            ->timeout(120)
-            ->post('https://api.anthropic.com/v1/messages', $payload);
+        $operation = is_string($context['operation'] ?? null) ? $context['operation'] : 'chat';
+        $start = microtime(true);
 
-        $response->throw();
+        try {
+            $response = Http::withHeaders([
+                'x-api-key' => $this->apiKey,
+                'anthropic-version' => '2023-06-01',
+            ])
+                ->timeout(120)
+                ->post('https://api.anthropic.com/v1/messages', $payload);
+
+            $response->throw();
+        } catch (\Throwable $e) {
+            app(AiUsageRecorder::class)->recordChatError('anthropic', $this->model, $operation, (int) round((microtime(true) - $start) * 1000));
+            throw $e;
+        }
 
         app(AiUsageRecorder::class)->recordChat(
             provider: 'anthropic',
             model: $this->model,
             promptTokens: (int) $response->json('usage.input_tokens', 0),
             completionTokens: (int) $response->json('usage.output_tokens', 0),
-            operation: is_string($context['operation'] ?? null) ? $context['operation'] : 'chat',
+            operation: $operation,
+            cachedTokens: (int) $response->json('usage.cache_read_input_tokens', 0),
+            durationMs: (int) round((microtime(true) - $start) * 1000),
         );
 
         return $response->json('content.0.text', '');
