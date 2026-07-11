@@ -17,6 +17,7 @@ class AiUsageLog extends Model
         'model',
         'operation',
         'feature',
+        'session_id',
         'prompt_tokens',
         'completion_tokens',
         'cached_tokens',

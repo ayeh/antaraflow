@@ -127,11 +127,16 @@ class AiPricingService
      */
     private function registry(): \Illuminate\Support\Collection
     {
-        return Cache::remember(self::CACHE_KEY, now()->addMinutes(5), function () {
-            return AiModelPrice::query()
-                ->orderBy('is_regex')
-                ->orderByDesc('priority')
-                ->get();
-        });
+        try {
+            return Cache::remember(self::CACHE_KEY, now()->addMinutes(5), function () {
+                return AiModelPrice::query()
+                    ->orderBy('is_regex')
+                    ->orderByDesc('priority')
+                    ->get();
+            });
+        } catch (\Throwable $e) {
+            // Pricing must never break an AI call — fall back to the config map.
+            return collect();
+        }
     }
 }

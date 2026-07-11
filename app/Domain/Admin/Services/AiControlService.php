@@ -22,6 +22,10 @@ class AiControlService
 
     private const KEY_CREDIT_TOPUP_DATE = 'ai_credit_topup_date';
 
+    private const KEY_ANOMALY_ENABLED = 'ai_anomaly_enabled';
+
+    private const KEY_ANOMALY_MULTIPLIER = 'ai_anomaly_multiplier';
+
     public function isEnabled(): bool
     {
         return (bool) PlatformSetting::getValue(self::KEY_ENABLED, true);
@@ -112,5 +116,31 @@ class AiControlService
     {
         PlatformSetting::setValue(self::KEY_CREDIT_TOPUP, $amount);
         PlatformSetting::setValue(self::KEY_CREDIT_TOPUP_DATE, $date ?? '');
+    }
+
+    /**
+     * When enabled, today's spend is compared against a rolling 7-day daily
+     * average and alerts when it exceeds that baseline by the multiplier.
+     */
+    public function anomalyEnabled(): bool
+    {
+        return (bool) PlatformSetting::getValue(self::KEY_ANOMALY_ENABLED, false);
+    }
+
+    public function setAnomalyEnabled(bool $enabled): void
+    {
+        PlatformSetting::setValue(self::KEY_ANOMALY_ENABLED, $enabled);
+    }
+
+    public function anomalyMultiplier(): float
+    {
+        $value = (float) PlatformSetting::getValue(self::KEY_ANOMALY_MULTIPLIER, 2.0);
+
+        return $value > 0 ? $value : 2.0;
+    }
+
+    public function setAnomalyMultiplier(float $multiplier): void
+    {
+        PlatformSetting::setValue(self::KEY_ANOMALY_MULTIPLIER, $multiplier);
     }
 }

@@ -17,6 +17,7 @@ use App\Infrastructure\AI\Contracts\AIProviderInterface;
 use App\Infrastructure\AI\Exceptions\AiDisabledException;
 use App\Models\User;
 use App\Support\Enums\ActionItemPriority;
+use Illuminate\Support\Str;
 
 class ExtractionService
 {
@@ -30,6 +31,7 @@ class ExtractionService
             organizationId: $mom->organization_id,
             userId: $mom->created_by,
             feature: 'mom_generation',
+            sessionId: (string) Str::uuid(),
         );
 
         $provider = $this->resolveProvider($mom->organization);

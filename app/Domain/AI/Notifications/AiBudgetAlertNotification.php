@@ -13,7 +13,7 @@ class AiBudgetAlertNotification extends Notification
     use Queueable;
 
     /**
-     * @param  'warning'|'critical'  $level
+     * @param  'warning'|'critical'|'anomaly'  $level
      */
     public function __construct(
         public string $level,
@@ -40,11 +40,21 @@ class AiBudgetAlertNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
+        $greeting = match ($this->level) {
+            'critical' => __('AI spend limit reached'),
+            'anomaly' => __('AI spend anomaly detected'),
+            default => __('AI spend warning'),
+        };
+
+        $thresholdLabel = $this->level === 'anomaly'
+            ? __('Rolling baseline threshold: :threshold.', ['threshold' => $this->formatUsd($this->threshold)])
+            : __('Configured threshold: :threshold.', ['threshold' => $this->formatUsd($this->threshold)]);
+
         $mail = (new MailMessage)
             ->subject($this->subjectLine())
-            ->greeting($this->level === 'critical' ? __('AI spend limit reached') : __('AI spend warning'))
+            ->greeting($greeting)
             ->line(__('Today\'s estimated AI API spend is :spend.', ['spend' => $this->formatUsd($this->spend)]))
-            ->line(__('Configured threshold: :threshold.', ['threshold' => $this->formatUsd($this->threshold)]));
+            ->line($thresholdLabel);
 
         if ($this->autoDisabled) {
             $mail->line(__('AI features have been automatically DISABLED to stop further spend.'));
@@ -73,9 +83,11 @@ class AiBudgetAlertNotification extends Notification
 
     private function subjectLine(): string
     {
-        return $this->level === 'critical'
-            ? __('[antaraNote] AI hard cap exceeded')
-            : __('[antaraNote] AI daily budget warning');
+        return match ($this->level) {
+            'critical' => __('[antaraNote] AI hard cap exceeded'),
+            'anomaly' => __('[antaraNote] AI spend anomaly detected'),
+            default => __('[antaraNote] AI daily budget warning'),
+        };
     }
 
     private function formatUsd(float $amount): string

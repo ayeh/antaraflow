@@ -93,6 +93,17 @@ test('api keys card shows masked keys and never the full secret', function () {
         ->assertDontSee('sk-proj-ABCDEFGHIJKLMNOP1234WXYZ');
 });
 
+test('ai control page renders with provider and feature filters', function () {
+    $admin = Admin::factory()->create();
+    AiUsageLog::query()->create(['provider' => 'openai', 'model' => 'gpt-5.4-mini', 'operation' => 'chat', 'feature' => 'search', 'cost' => 1.0]);
+    AiUsageLog::query()->create(['provider' => 'anthropic', 'model' => 'claude-sonnet-4-20250514', 'operation' => 'chat', 'feature' => 'mom_generation', 'cost' => 2.0]);
+
+    $this->actingAs($admin, 'admin')
+        ->get(route('admin.ai.index', ['provider' => 'openai', 'feature' => 'search']))
+        ->assertStatus(200)
+        ->assertSee('Daily Spend');
+});
+
 test('admin can toggle ai off and on', function () {
     $admin = Admin::factory()->create();
 
@@ -120,6 +131,8 @@ test('admin can save budget and alert settings', function () {
             'alert_telegram_chat_id' => '-100123',
             'credit_topup' => 100,
             'credit_topup_date' => '2026-07-01',
+            'anomaly_enabled' => '1',
+            'anomaly_multiplier' => 2.5,
         ])
         ->assertRedirect(route('admin.ai.index'));
 
@@ -130,6 +143,8 @@ test('admin can save budget and alert settings', function () {
     expect($control->alertTelegramChatId())->toBe('-100123');
     expect($control->creditTopup())->toBe(100.0);
     expect($control->creditTopupDate())->toBe('2026-07-01');
+    expect($control->anomalyEnabled())->toBeTrue();
+    expect($control->anomalyMultiplier())->toBe(2.5);
 });
 
 test('test alert sends to configured email', function () {

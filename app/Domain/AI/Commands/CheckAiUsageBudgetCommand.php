@@ -38,11 +38,20 @@ class CheckAiUsageBudgetCommand extends Command
         if ($dailyBudget > 0 && $spend >= $dailyBudget) {
             $this->warn(sprintf('Daily budget $%.2f reached.', $dailyBudget));
             $this->dispatchAlert($control, 'warning', $spend, $dailyBudget, false);
-
-            return self::SUCCESS;
         }
 
-        $this->info('Within budget.');
+        if ($control->anomalyEnabled()) {
+            $baseline = $usage->dailyBaseline(7);
+            $multiplier = $control->anomalyMultiplier();
+            $threshold = $baseline * $multiplier;
+
+            if ($baseline > 0 && $spend >= $threshold) {
+                $this->warn(sprintf('Anomaly: $%.2f is ≥ %.1f× the 7-day baseline ($%.2f).', $spend, $multiplier, $baseline));
+                $this->dispatchAlert($control, 'anomaly', $spend, $threshold, false);
+            }
+        }
+
+        $this->info('Budget check complete.');
 
         return self::SUCCESS;
     }

@@ -70,6 +70,23 @@ test('a failed provider call is recorded as an error', function () {
     expect($log->total_tokens)->toBe(0);
 });
 
+test('session id groups the calls of one flow', function () {
+    app(AiUsageContext::class)->set(feature: 'mom_generation', sessionId: 'sess-123');
+
+    Http::fake([
+        'api.openai.com/*' => Http::response([
+            'choices' => [['message' => ['content' => 'x']]],
+            'usage' => ['prompt_tokens' => 10, 'completion_tokens' => 5],
+        ]),
+    ]);
+
+    $provider = new OpenAIProvider('key', 'gpt-5.4-mini');
+    $provider->chat('one');
+    $provider->chat('two');
+
+    expect(AiUsageLog::query()->where('session_id', 'sess-123')->count())->toBe(2);
+});
+
 test('usage context falls back to null when nothing is set and no auth', function () {
     Http::fake([
         'api.openai.com/*' => Http::response([

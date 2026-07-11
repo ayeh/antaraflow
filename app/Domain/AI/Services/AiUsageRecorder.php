@@ -88,6 +88,7 @@ class AiUsageRecorder
                 'organization_id' => $this->context->organizationId(),
                 'user_id' => $this->context->userId(),
                 'feature' => $this->context->feature(),
+                'session_id' => $this->context->sessionId(),
                 ...$attributes,
             ]);
         } catch (Throwable $e) {
@@ -113,5 +114,47 @@ class AiUsageRecorder
         return (float) AiUsageLog::query()
             ->where('created_at', '>=', now()->startOfMonth())
             ->sum('cost');
+    }
+
+    /**
+     * Average daily USD spend over the previous $days complete days (excludes
+     * today), used as a rolling baseline for anomaly detection.
+     */
+    public function dailyBaseline(int $days = 7): float
+    {
+        $start = now()->subDays($days)->startOfDay();
+        $end = now()->startOfDay();
+
+        $total = (float) AiUsageLog::query()
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<', $end)
+            ->sum('cost');
+
+        return $days > 0 ? round($total / $days, 6) : 0.0;
+    }
+
+    /**
+     * USD spend per calendar day for the last $days days (oldest first),
+     * keyed by Y-m-d, with zero-filled gaps — for dashboard charting.
+     *
+     * @return array<string, float>
+     */
+    public function dailySeries(int $days = 30): array
+    {
+        $start = now()->subDays($days - 1)->startOfDay();
+
+        $rows = AiUsageLog::query()
+            ->where('created_at', '>=', $start)
+            ->selectRaw('DATE(created_at) as day, SUM(cost) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+
+        $series = [];
+        for ($i = 0; $i < $days; $i++) {
+            $day = now()->subDays($days - 1 - $i)->toDateString();
+            $series[$day] = round((float) ($rows[$day] ?? 0), 6);
+        }
+
+        return $series;
     }
 }

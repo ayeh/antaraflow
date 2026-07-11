@@ -21,7 +21,9 @@ class AiUsageContext
 
     private ?string $feature = null;
 
-    public function set(?int $organizationId = null, ?int $userId = null, ?string $feature = null): void
+    private ?string $sessionId = null;
+
+    public function set(?int $organizationId = null, ?int $userId = null, ?string $feature = null, ?string $sessionId = null): void
     {
         if ($organizationId !== null) {
             $this->organizationId = $organizationId;
@@ -33,6 +35,10 @@ class AiUsageContext
 
         if ($feature !== null) {
             $this->feature = $feature;
+        }
+
+        if ($sessionId !== null) {
+            $this->sessionId = $sessionId;
         }
     }
 
@@ -46,6 +52,7 @@ class AiUsageContext
         $this->organizationId = null;
         $this->userId = null;
         $this->feature = null;
+        $this->sessionId = null;
     }
 
     public function organizationId(): ?int
@@ -61,5 +68,10 @@ class AiUsageContext
     public function feature(): ?string
     {
         return $this->feature;
+    }
+
+    public function sessionId(): ?string
+    {
+        return $this->sessionId;
     }
 }

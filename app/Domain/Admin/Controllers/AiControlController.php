@@ -23,35 +23,67 @@ class AiControlController extends Controller
         private readonly OpenAiBillingService $billing,
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $todaySpend = $this->usage->todaySpend();
         $monthSpend = $this->usage->monthSpend();
 
         $monthStart = now()->startOfMonth();
 
-        $byModel = AiUsageLog::query()
+        // Optional drill-down filters applied to the monthly breakdowns.
+        $provider = $request->query('provider') ?: null;
+        $feature = $request->query('feature') ?: null;
+        $scoped = fn () => AiUsageLog::query()
             ->where('created_at', '>=', $monthStart)
+            ->when($provider, fn ($q) => $q->where('provider', $provider))
+            ->when($feature, fn ($q) => $q->where('feature', $feature));
+
+        $providerOptions = AiUsageLog::query()->distinct()->orderBy('provider')->pluck('provider')->filter()->values();
+        $featureOptions = AiUsageLog::query()->distinct()->orderBy('feature')->pluck('feature')->filter()->values();
+
+        $byModel = $scoped()
             ->selectRaw('provider, model, SUM(cost) as total_cost, COUNT(*) as calls, SUM(total_tokens) as tokens')
             ->groupBy('provider', 'model')
             ->orderByDesc('total_cost')
             ->get();
 
-        $byFeature = AiUsageLog::query()
-            ->where('created_at', '>=', $monthStart)
+        $byFeature = $scoped()
             ->selectRaw('feature, SUM(cost) as total_cost, COUNT(*) as calls')
             ->groupBy('feature')
             ->orderByDesc('total_cost')
             ->get();
 
-        $totalCalls = AiUsageLog::query()->where('created_at', '>=', $monthStart)->count();
-        $errorCalls = AiUsageLog::query()->where('created_at', '>=', $monthStart)->where('status', 'error')->count();
-        $avgLatency = (float) AiUsageLog::query()->where('created_at', '>=', $monthStart)->where('status', 'success')->whereNotNull('duration_ms')->avg('duration_ms');
-        $promptTokenSum = (int) AiUsageLog::query()->where('created_at', '>=', $monthStart)->sum('prompt_tokens');
-        $cachedTokenSum = (int) AiUsageLog::query()->where('created_at', '>=', $monthStart)->sum('cached_tokens');
+        $topSessions = $scoped()
+            ->whereNotNull('session_id')
+            ->selectRaw('session_id, MAX(feature) as feature, COUNT(*) as calls, SUM(total_tokens) as tokens, SUM(cost) as total_cost')
+            ->groupBy('session_id')
+            ->orderByDesc('total_cost')
+            ->limit(10)
+            ->get();
+
+        // Health metrics are an overall monthly summary (not filtered).
+        $monthly = fn () => AiUsageLog::query()->where('created_at', '>=', $monthStart);
+        $totalCalls = $monthly()->count();
+        $errorCalls = $monthly()->where('status', 'error')->count();
+        $promptTokenSum = (int) $monthly()->sum('prompt_tokens');
+        $cachedTokenSum = (int) $monthly()->sum('cached_tokens');
 
         $errorRate = $totalCalls > 0 ? $errorCalls / $totalCalls : 0.0;
         $cacheHitRate = $promptTokenSum > 0 ? $cachedTokenSum / $promptTokenSum : 0.0;
+
+        // Latency percentiles (p50/p95/p99) computed in PHP for cross-DB portability.
+        $durations = $monthly()->where('status', 'success')->whereNotNull('duration_ms')->orderBy('duration_ms')->pluck('duration_ms')->all();
+        $percentile = function (int $p) use ($durations): int {
+            if ($durations === []) {
+                return 0;
+            }
+
+            return (int) $durations[(int) floor(($p / 100) * (count($durations) - 1))];
+        };
+        $latency = ['p50' => $percentile(50), 'p95' => $percentile(95), 'p99' => $percentile(99)];
+
+        $dailySeries = $this->usage->dailySeries(30);
+        $dailyBaseline = $this->usage->dailyBaseline(7);
 
         $recentLogs = AiUsageLog::query()
             ->latest()
@@ -93,12 +125,21 @@ class AiControlController extends Controller
             'monthSpend' => $monthSpend,
             'byModel' => $byModel,
             'byFeature' => $byFeature,
+            'topSessions' => $topSessions,
             'recentLogs' => $recentLogs,
-            'avgLatency' => $avgLatency,
+            'latency' => $latency,
             'errorRate' => $errorRate,
             'cacheHitRate' => $cacheHitRate,
+            'dailySeries' => $dailySeries,
+            'dailyBaseline' => $dailyBaseline,
+            'providerOptions' => $providerOptions,
+            'featureOptions' => $featureOptions,
+            'selectedProvider' => $provider,
+            'selectedFeature' => $feature,
             'creditTopup' => $creditTopup,
             'creditTopupDate' => $creditTopupDate,
+            'anomalyEnabled' => $this->control->anomalyEnabled(),
+            'anomalyMultiplier' => $this->control->anomalyMultiplier(),
             'openAiConfigured' => $openAiConfigured,
             'openAiMonthCost' => $openAiMonthCost,
             'estimatedBalance' => $estimatedBalance,
@@ -148,6 +189,7 @@ class AiControlController extends Controller
             'alert_telegram_chat_id' => ['nullable', 'string', 'max:64'],
             'credit_topup' => ['required', 'numeric', 'min:0'],
             'credit_topup_date' => ['nullable', 'date'],
+            'anomaly_multiplier' => ['required', 'numeric', 'min:1', 'max:100'],
         ]);
 
         $this->control->setDailyBudget((float) $validated['daily_budget']);
@@ -155,6 +197,8 @@ class AiControlController extends Controller
         $this->control->setAlertEmail($validated['alert_email'] ?? null);
         $this->control->setAlertTelegramChatId($validated['alert_telegram_chat_id'] ?? null);
         $this->control->setCreditTopup((float) $validated['credit_topup'], $validated['credit_topup_date'] ?? null);
+        $this->control->setAnomalyEnabled($request->boolean('anomaly_enabled'));
+        $this->control->setAnomalyMultiplier((float) $validated['anomaly_multiplier']);
 
         return redirect()->route('admin.ai.index')->with('success', __('AI budget & alert settings saved.'));
     }

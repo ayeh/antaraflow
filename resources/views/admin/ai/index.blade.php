@@ -50,16 +50,73 @@
             <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
                 <p class="text-sm text-slate-400 mb-1">{{ __('Spend This Month') }}</p>
                 <p class="text-3xl font-bold text-white">${{ number_format($monthSpend, 2) }}</p>
-                <p class="text-xs text-slate-500 mt-1">{{ __('Estimated from tracked calls') }}</p>
+                @php
+                    $spark = array_slice(array_values($dailySeries), -7);
+                    $sMax = max(0.0001, max($spark));
+                    $sN = max(1, count($spark) - 1);
+                    $pts = [];
+                    foreach ($spark as $i => $v) { $pts[] = round($i * (100 / $sN), 1).','.round(24 - ($v / $sMax) * 22, 1); }
+                @endphp
+                <svg viewBox="0 0 100 26" preserveAspectRatio="none" class="w-full h-6 mt-2" aria-hidden="true">
+                    <polyline fill="none" stroke="#3b82f6" stroke-width="2" points="{{ implode(' ', $pts) }}"/>
+                </svg>
+                <p class="text-xs text-slate-500 mt-1">{{ __('Last 7 days') }}</p>
             </div>
+        </div>
+
+        {{-- Daily spend chart (30 days) with anomaly highlighting --}}
+        @php
+            $vals = array_values($dailySeries);
+            $days = array_keys($dailySeries);
+            $n = max(1, count($vals));
+            $threshold = $dailyBaseline * $anomalyMultiplier;
+            $maxV = max(0.0001, max($vals), $threshold);
+            $chartW = 680; $chartH = 150; $slot = $chartW / $n; $barW = max(2, $slot * 0.68);
+            $yBaseline = $chartH - ($dailyBaseline / $maxV) * $chartH;
+            $yThreshold = $chartH - ($threshold / $maxV) * $chartH;
+        @endphp
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
+                <h3 class="text-lg font-semibold text-white">{{ __('Daily Spend — last 30 days') }}</h3>
+                <div class="flex items-center gap-4 text-xs text-slate-400">
+                    <span class="inline-flex items-center gap-1.5"><span class="inline-block w-3 h-2 rounded-sm" style="background:#3b82f6"></span>{{ __('Daily') }}</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="inline-block w-3 h-2 rounded-sm" style="background:#ef4444"></span>{{ __('Anomaly') }}</span>
+                    @if($dailyBaseline > 0)<span class="inline-flex items-center gap-1.5"><span class="inline-block w-3 border-t border-dashed" style="border-color:#f59e0b"></span>{{ __('Threshold') }}</span>@endif
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <svg viewBox="0 0 {{ $chartW }} {{ $chartH + 22 }}" class="w-full" style="min-width:560px" role="img" aria-label="{{ __('Daily AI spend over the last 30 days') }}">
+                    @if($dailyBaseline > 0)
+                        <line x1="0" y1="{{ $yBaseline }}" x2="{{ $chartW }}" y2="{{ $yBaseline }}" stroke="#64748b" stroke-width="1" stroke-opacity="0.6"/>
+                        <line x1="0" y1="{{ $yThreshold }}" x2="{{ $chartW }}" y2="{{ $yThreshold }}" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4 3"/>
+                    @endif
+                    @foreach($vals as $i => $v)
+                        @php
+                            $h = ($v / $maxV) * $chartH;
+                            $x = $i * $slot + ($slot - $barW) / 2;
+                            $y = $chartH - $h;
+                            $isAnomaly = $dailyBaseline > 0 && $v > 0 && $v >= $threshold;
+                        @endphp
+                        <rect x="{{ round($x, 1) }}" y="{{ round($y, 1) }}" width="{{ round($barW, 1) }}" height="{{ round(max(0, $h), 1) }}" rx="1"
+                              fill="{{ $isAnomaly ? '#ef4444' : '#3b82f6' }}" fill-opacity="{{ $v > 0 ? '0.9' : '0.25' }}">
+                            <title>{{ $days[$i] }}: ${{ number_format($v, 4) }}</title>
+                        </rect>
+                    @endforeach
+                    <text x="0" y="{{ $chartH + 16 }}" fill="#64748b" font-size="11" font-family="monospace">{{ \Illuminate\Support\Str::of($days[0])->substr(5) }}</text>
+                    <text x="{{ $chartW }}" y="{{ $chartH + 16 }}" fill="#64748b" font-size="11" font-family="monospace" text-anchor="end">{{ __('today') }}</text>
+                </svg>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">{{ __('Bars turn red when a day meets the anomaly threshold (baseline × multiplier). Hover a bar for the exact amount.') }}</p>
         </div>
 
         {{-- Health metrics (this month) --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-                <p class="text-sm text-slate-400 mb-1">{{ __('Avg latency') }}</p>
-                <p class="text-3xl font-bold text-white">{{ $avgLatency > 0 ? number_format($avgLatency).' ms' : '—' }}</p>
-                <p class="text-xs text-slate-500 mt-1">{{ __('Successful calls, this month') }}</p>
+                <p class="text-sm text-slate-400 mb-1">{{ __('Latency (ms)') }}</p>
+                <p class="text-2xl font-bold text-white" style="font-variant-numeric:tabular-nums">
+                    {{ number_format($latency['p50']) }}<span class="text-slate-500 text-base font-normal"> · {{ number_format($latency['p95']) }} · {{ number_format($latency['p99']) }}</span>
+                </p>
+                <p class="text-xs text-slate-500 mt-1">{{ __('p50 · p95 · p99, this month') }}</p>
             </div>
             <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
                 <p class="text-sm text-slate-400 mb-1">{{ __('Error rate') }}</p>
@@ -219,6 +276,23 @@
                         @error('credit_topup_date') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
                     </div>
                 </div>
+                <div class="border-t border-slate-700 pt-5">
+                    <label class="flex items-center gap-3 cursor-pointer mb-3">
+                        <input type="hidden" name="anomaly_enabled" value="0">
+                        <input type="checkbox" name="anomaly_enabled" value="1" @checked($anomalyEnabled)
+                               class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500">
+                        <span class="text-sm text-slate-300">{{ __('Enable spend anomaly detection (rolling 7-day baseline)') }}</span>
+                    </label>
+                    <div class="max-w-xs">
+                        <label for="anomaly_multiplier" class="block text-sm font-medium text-slate-300 mb-1">{{ __('Anomaly multiplier (× baseline)') }}</label>
+                        <input type="number" step="0.1" min="1" max="100" name="anomaly_multiplier" id="anomaly_multiplier"
+                               value="{{ old('anomaly_multiplier', $anomalyMultiplier) }}"
+                               class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        @error('anomaly_multiplier') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
+                        <p class="mt-1 text-xs text-slate-500">{{ __('Alert when today\'s spend ≥ this many times the 7-day daily average.') }}</p>
+                    </div>
+                </div>
+
                 <div class="flex items-center gap-3">
                     <button type="submit"
                             class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
@@ -235,6 +309,29 @@
 
         <form id="ai-test-alert-form" method="POST" action="{{ route('admin.ai.test-alert') }}" class="hidden">
             @csrf
+        </form>
+
+        {{-- Filter bar (scopes the breakdowns below) --}}
+        <form method="GET" action="{{ route('admin.ai.index') }}" class="bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-wrap items-end gap-3">
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">{{ __('Provider') }}</label>
+                <select name="provider" class="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-1.5 text-sm">
+                    <option value="">{{ __('All providers') }}</option>
+                    @foreach($providerOptions as $p)<option value="{{ $p }}" @selected($selectedProvider === $p)>{{ $p }}</option>@endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">{{ __('Feature') }}</label>
+                <select name="feature" class="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-1.5 text-sm">
+                    <option value="">{{ __('All features') }}</option>
+                    @foreach($featureOptions as $f)<option value="{{ $f }}" @selected($selectedFeature === $f)>{{ $f }}</option>@endforeach
+                </select>
+            </div>
+            <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg">{{ __('Filter') }}</button>
+            @if($selectedProvider || $selectedFeature)
+                <a href="{{ route('admin.ai.index') }}" class="px-4 py-1.5 text-slate-400 hover:text-white text-sm">{{ __('Clear') }}</a>
+            @endif
+            <span class="text-xs text-slate-500 ml-auto self-center">{{ __('Scopes the tables & metrics below') }}</span>
         </form>
 
         {{-- Usage by model (this month) --}}
@@ -292,6 +389,38 @@
                             </tr>
                         @empty
                             <tr><td colspan="3" class="py-4 text-center text-slate-500">{{ __('No usage recorded yet.') }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Top sessions --}}
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-1">{{ __('Top Sessions by Cost (this month)') }}</h3>
+            <p class="text-xs text-slate-500 mb-4">{{ __('A session groups the multiple calls of one flow (e.g. a MOM generation makes ~5 calls).') }}</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-slate-400 border-b border-slate-700">
+                            <th class="py-2 pr-4 font-medium">{{ __('Session') }}</th>
+                            <th class="py-2 pr-4 font-medium">{{ __('Feature') }}</th>
+                            <th class="py-2 pr-4 font-medium text-right">{{ __('Calls') }}</th>
+                            <th class="py-2 pr-4 font-medium text-right">{{ __('Tokens') }}</th>
+                            <th class="py-2 font-medium text-right">{{ __('Cost') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($topSessions as $s)
+                            <tr class="border-b border-slate-700/50 text-slate-200">
+                                <td class="py-2 pr-4 font-mono text-xs">{{ \Illuminate\Support\Str::limit($s->session_id, 13, '…') }}</td>
+                                <td class="py-2 pr-4">{{ $s->feature ?? '—' }}</td>
+                                <td class="py-2 pr-4 text-right">{{ number_format((int) $s->calls) }}</td>
+                                <td class="py-2 pr-4 text-right">{{ number_format((int) $s->tokens) }}</td>
+                                <td class="py-2 text-right">${{ number_format((float) $s->total_cost, 4) }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="py-4 text-center text-slate-500">{{ __('No multi-call sessions recorded yet.') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
