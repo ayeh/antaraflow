@@ -6,10 +6,12 @@ namespace App\Domain\Admin\Controllers;
 
 use App\Domain\Admin\Services\AiControlService;
 use App\Domain\AI\Models\AiUsageLog;
+use App\Domain\AI\Notifications\AiBudgetAlertNotification;
 use App\Domain\AI\Services\AiUsageRecorder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
 class AiControlController extends Controller
@@ -76,5 +78,28 @@ class AiControlController extends Controller
         $this->control->setAlertTelegramChatId($validated['alert_telegram_chat_id'] ?? null);
 
         return redirect()->route('admin.ai.index')->with('success', __('AI budget & alert settings saved.'));
+    }
+
+    public function sendTest(): RedirectResponse
+    {
+        $email = $this->control->alertEmail();
+        $telegram = $this->control->alertTelegramChatId();
+
+        if (! $email && ! $telegram) {
+            return redirect()->route('admin.ai.index')
+                ->with('error', __('Set an alert email or Telegram chat ID first, then save.'));
+        }
+
+        if ($telegram && ! config('services.telegram.bot_token')) {
+            return redirect()->route('admin.ai.index')
+                ->with('error', __('TELEGRAM_BOT_TOKEN is not configured on the server; Telegram cannot be tested yet.'));
+        }
+
+        Notification::route('mail', $email)
+            ->route('telegram', $telegram)
+            ->notify(new AiBudgetAlertNotification('warning', $this->usage->todaySpend(), $this->control->dailyBudget()));
+
+        return redirect()->route('admin.ai.index')
+            ->with('success', __('Test alert sent to the configured channels.'));
     }
 }

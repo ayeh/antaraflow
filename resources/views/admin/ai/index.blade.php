@@ -97,11 +97,22 @@
                         <p class="mt-1 text-xs text-slate-500">{{ __('Requires TELEGRAM_BOT_TOKEN in the environment.') }}</p>
                     </div>
                 </div>
-                <button type="submit"
-                        class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                    {{ __('Save Settings') }}
-                </button>
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                        {{ __('Save Settings') }}
+                    </button>
+                    <button type="submit" form="ai-test-alert-form"
+                            class="px-6 py-2.5 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors">
+                        {{ __('Send Test Alert') }}
+                    </button>
+                </div>
+                <p class="text-xs text-slate-500">{{ __('Test uses the saved email & Telegram chat ID. Save first if you just changed them.') }}</p>
             </div>
+        </form>
+
+        <form id="ai-test-alert-form" method="POST" action="{{ route('admin.ai.test-alert') }}" class="hidden">
+            @csrf
         </form>
 
         {{-- Usage by model (this month) --}}

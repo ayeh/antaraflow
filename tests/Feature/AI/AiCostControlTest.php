@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Admin\Models\Admin;
 use App\Domain\Admin\Services\AiControlService;
 use App\Domain\AI\Models\AiUsageLog;
+use App\Domain\AI\Notifications\AiBudgetAlertNotification;
 use App\Domain\AI\Services\AiPricingService;
 use App\Domain\AI\Services\AiUsageRecorder;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
@@ -13,6 +14,8 @@ use App\Infrastructure\AI\Exceptions\AiDisabledException;
 use App\Infrastructure\AI\Providers\DisabledAIProvider;
 use App\Infrastructure\AI\Providers\DisabledTranscriber;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Support\Facades\Notification;
 
 uses(RefreshDatabase::class);
 
@@ -111,4 +114,46 @@ test('admin can save budget and alert settings', function () {
     expect($control->hardCap())->toBe(100.0);
     expect($control->alertEmail())->toBe('ops@example.com');
     expect($control->alertTelegramChatId())->toBe('-100123');
+});
+
+test('test alert sends to configured email', function () {
+    Notification::fake();
+
+    $admin = Admin::factory()->create();
+    app(AiControlService::class)->setAlertEmail('ops@example.com');
+
+    $this->actingAs($admin, 'admin')
+        ->post(route('admin.ai.test-alert'))
+        ->assertRedirect(route('admin.ai.index'))
+        ->assertSessionHas('success');
+
+    Notification::assertSentTo(new AnonymousNotifiable, AiBudgetAlertNotification::class);
+});
+
+test('test alert errors when no recipients configured', function () {
+    Notification::fake();
+
+    $admin = Admin::factory()->create();
+
+    $this->actingAs($admin, 'admin')
+        ->post(route('admin.ai.test-alert'))
+        ->assertRedirect(route('admin.ai.index'))
+        ->assertSessionHas('error');
+
+    Notification::assertNothingSent();
+});
+
+test('test alert errors when telegram set but bot token missing', function () {
+    Notification::fake();
+    config()->set('services.telegram.bot_token', null);
+
+    $admin = Admin::factory()->create();
+    app(AiControlService::class)->setAlertTelegramChatId('-100123');
+
+    $this->actingAs($admin, 'admin')
+        ->post(route('admin.ai.test-alert'))
+        ->assertRedirect(route('admin.ai.index'))
+        ->assertSessionHas('error');
+
+    Notification::assertNothingSent();
 });
