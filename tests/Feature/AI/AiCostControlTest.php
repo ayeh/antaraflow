@@ -78,7 +78,8 @@ test('admin can view the ai control page', function () {
     $this->actingAs($admin, 'admin')
         ->get(route('admin.ai.index'))
         ->assertStatus(200)
-        ->assertSee('AI Features');
+        ->assertSee('AI Control')
+        ->assertSee('Provider, Model & API Keys');
 });
 
 test('api keys card shows masked keys and never the full secret', function () {

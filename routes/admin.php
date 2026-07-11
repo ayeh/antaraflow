@@ -76,6 +76,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('ai', [AiControlController::class, 'index'])->name('ai.index');
         Route::post('ai/toggle', [AiControlController::class, 'toggle'])->name('ai.toggle');
         Route::put('ai/settings', [AiControlController::class, 'updateSettings'])->name('ai.update-settings');
+        Route::put('ai/provider', [AiControlController::class, 'updateProvider'])->name('ai.update-provider');
         Route::post('ai/test-alert', [AiControlController::class, 'sendTest'])->name('ai.test-alert');
 
         // AI model pricing registry

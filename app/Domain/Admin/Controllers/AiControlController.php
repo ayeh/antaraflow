@@ -107,6 +107,18 @@ class AiControlController extends Controller
         $activeProvider = $default;
         $activeModel = config("ai.providers.{$default}.model");
 
+        // Editable provider/model/key state for the UI. Keys are never sent to
+        // the browser — only whether one is stored and where it came from.
+        $managedProviders = [];
+        foreach (AiControlService::MANAGED_PROVIDERS as $name) {
+            $managedProviders[] = [
+                'name' => $name,
+                'model' => config("ai.providers.{$name}.model"),
+                'keyMasked' => $this->maskKey(config("ai.providers.{$name}.api_key")),
+                'keyFromDb' => $this->control->hasKeyOverride($name),
+            ];
+        }
+
         $openAiConfigured = $this->billing->isConfigured();
         $openAiMonthCost = $openAiConfigured ? $this->billing->monthCost() : null;
         $openAiProjectScoped = $this->billing->projectId() !== null;
@@ -156,6 +168,8 @@ class AiControlController extends Controller
             'apiKeys' => $apiKeys,
             'activeProvider' => $activeProvider,
             'activeModel' => $activeModel,
+            'managedProviders' => $managedProviders,
+            'providerOverride' => $this->control->activeProviderOverride(),
         ]);
     }
 
@@ -171,11 +185,16 @@ class AiControlController extends Controller
 
         $length = strlen($key);
 
-        if ($length <= 14) {
-            return substr($key, 0, 4).str_repeat('•', max(1, $length - 4));
+        if ($length <= 20) {
+            // Short/opaque token — reveal only a small prefix.
+            $prefix = min(6, max(1, $length - 4));
+
+            return substr($key, 0, $prefix).str_repeat('•', max(1, $length - $prefix));
         }
 
-        return substr($key, 0, 10).'…'.substr($key, -4);
+        // Longer provider keys: show enough of the leading chars to identify
+        // which key it is (e.g. sk-proj-8iOPLt…), plus the last 4. Middle redacted.
+        return substr($key, 0, 14).'…'.substr($key, -4);
     }
 
     public function toggle(Request $request): RedirectResponse
@@ -211,6 +230,41 @@ class AiControlController extends Controller
         $this->control->setAnomalyMultiplier((float) $validated['anomaly_multiplier']);
 
         return redirect()->route('admin.ai.index')->with('success', __('AI budget & alert settings saved.'));
+    }
+
+    /**
+     * Update the active provider, per-provider model overrides and API keys.
+     * Keys are stored encrypted; a blank key field leaves the existing key
+     * untouched, and the per-provider "clear" checkbox removes a DB override.
+     */
+    public function updateProvider(Request $request): RedirectResponse
+    {
+        $providers = AiControlService::MANAGED_PROVIDERS;
+
+        $validated = $request->validate([
+            'active_provider' => ['required', 'string', 'in:'.implode(',', $providers)],
+            'models' => ['array'],
+            'models.*' => ['nullable', 'string', 'max:100'],
+            'keys' => ['array'],
+            'keys.*' => ['nullable', 'string', 'max:255'],
+            'clear_keys' => ['array'],
+        ]);
+
+        $this->control->setActiveProvider($validated['active_provider']);
+
+        $clearKeys = array_keys($request->input('clear_keys', []));
+
+        foreach ($providers as $name) {
+            $this->control->setModel($name, $validated['models'][$name] ?? null);
+
+            if (in_array($name, $clearKeys, true)) {
+                $this->control->clearKey($name);
+            } else {
+                $this->control->setApiKey($name, $validated['keys'][$name] ?? null);
+            }
+        }
+
+        return redirect()->route('admin.ai.index')->with('success', __('AI provider & model settings saved.'));
     }
 
     public function sendTest(): RedirectResponse

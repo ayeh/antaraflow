@@ -49,4 +49,9 @@ class DomainServiceProvider extends ServiceProvider
         $this->app->singleton(AuthorizationService::class);
         $this->app->singleton(\App\Domain\AI\Services\AiUsageContext::class);
     }
+
+    public function boot(): void
+    {
+        $this->app->make(AiControlService::class)->applyRuntimeOverrides();
+    }
 }
