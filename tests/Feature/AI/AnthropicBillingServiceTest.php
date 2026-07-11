@@ -15,11 +15,12 @@ test('anthropic billing is not configured without an admin key', function () {
 test('anthropic cost since sums amounts from the cost report api', function () {
     config()->set('ai.anthropic_admin_key', 'sk-ant-admin-test');
 
+    // The Cost Report API returns `amount` in cents, so 150 + 225 = $3.75.
     Http::fake([
         'api.anthropic.com/v1/organizations/cost_report*' => Http::response([
             'data' => [
-                ['results' => [['amount' => '1.50', 'currency' => 'USD']]],
-                ['results' => [['amount' => '2.25', 'currency' => 'USD']]],
+                ['results' => [['amount' => '150', 'currency' => 'USD']]],
+                ['results' => [['amount' => '225', 'currency' => 'USD']]],
             ],
             'has_more' => false,
             'next_page' => null,

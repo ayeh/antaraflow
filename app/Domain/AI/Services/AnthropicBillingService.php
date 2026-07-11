@@ -74,7 +74,9 @@ class AnthropicBillingService
 
             foreach ($response->json('data', []) as $bucket) {
                 foreach ($bucket['results'] ?? [] as $result) {
-                    $total += (float) ($result['amount'] ?? 0);
+                    // The Cost Report API returns `amount` in cents (despite
+                    // currency:"USD"), so convert to dollars.
+                    $total += (float) ($result['amount'] ?? 0) / 100;
                 }
             }
 
