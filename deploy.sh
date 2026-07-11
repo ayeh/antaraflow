@@ -43,8 +43,11 @@ else
     exit 1
 fi
 
-# Enter maintenance mode
-"$PHP_BIN" artisan down --retry=60 --refresh=15
+# ---------------------------------------------------------------------------
+# Fetch & build FIRST, while the site is still serving traffic. These are the
+# slow, failure-prone steps (network, npm). If any of them fail, `set -e` aborts
+# here and the live site is untouched — no downtime, still on the old build.
+# ---------------------------------------------------------------------------
 
 # Pull latest code
 git pull origin main
@@ -52,9 +55,23 @@ git pull origin main
 # Install PHP dependencies (production only)
 $COMPOSER install --no-dev --optimize-autoloader --no-interaction
 
-# Install JS dependencies and build assets
-npm ci
+# Install JS dependencies and build assets. node_modules on this box has
+# corrupted itself before (ENOTEMPTY / missing esbuild) and taken deploys down;
+# self-heal by rebuilding from scratch on the first failure.
+if ! npm ci; then
+    echo "⚠️  npm ci failed — rebuilding node_modules from scratch..."
+    rm -rf node_modules
+    npm ci
+fi
 npm run build
+
+# ---------------------------------------------------------------------------
+# Apply behind a brief maintenance window. The trap guarantees the app is
+# brought back UP even if migrate or a cache step fails — the deploy must never
+# leave the site stuck in maintenance.
+# ---------------------------------------------------------------------------
+"$PHP_BIN" artisan down --retry=60 --refresh=15
+trap '"$PHP_BIN" artisan up >/dev/null 2>&1 || true' EXIT
 
 # Run database migrations
 "$PHP_BIN" artisan migrate --force
@@ -87,5 +104,6 @@ fi
 
 # Exit maintenance mode
 "$PHP_BIN" artisan up
+trap - EXIT
 
 echo "✅ Deployment complete!"
