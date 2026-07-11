@@ -5,6 +5,13 @@ return [
 
     'transcriber' => env('AI_TRANSCRIBER', 'openai'),
 
+    /*
+     * OpenAI organization Admin key (sk-admin-...) used to read actual spend
+     * from the Costs API. Distinct from the standard OPENAI_API_KEY used for
+     * inference. Leave empty to disable live-spend/balance display.
+     */
+    'openai_admin_key' => env('OPENAI_ADMIN_KEY'),
+
     'providers' => [
         'openai' => [
             'api_key' => env('OPENAI_API_KEY'),

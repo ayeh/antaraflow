@@ -18,6 +18,10 @@ class AiControlService
 
     private const KEY_ALERT_TELEGRAM = 'ai_alert_telegram_chat_id';
 
+    private const KEY_CREDIT_TOPUP = 'ai_credit_topup';
+
+    private const KEY_CREDIT_TOPUP_DATE = 'ai_credit_topup_date';
+
     public function isEnabled(): bool
     {
         return (bool) PlatformSetting::getValue(self::KEY_ENABLED, true);
@@ -86,5 +90,27 @@ class AiControlService
     public function setAlertTelegramChatId(?string $chatId): void
     {
         PlatformSetting::setValue(self::KEY_ALERT_TELEGRAM, $chatId ?? '');
+    }
+
+    /**
+     * Amount (USD) the org last topped up on OpenAI. Used to estimate the
+     * remaining balance, since OpenAI exposes no balance endpoint.
+     */
+    public function creditTopup(): float
+    {
+        return (float) PlatformSetting::getValue(self::KEY_CREDIT_TOPUP, 0);
+    }
+
+    public function creditTopupDate(): ?string
+    {
+        $value = PlatformSetting::getValue(self::KEY_CREDIT_TOPUP_DATE);
+
+        return $value !== null && $value !== '' ? (string) $value : null;
+    }
+
+    public function setCreditTopup(float $amount, ?string $date): void
+    {
+        PlatformSetting::setValue(self::KEY_CREDIT_TOPUP, $amount);
+        PlatformSetting::setValue(self::KEY_CREDIT_TOPUP_DATE, $date ?? '');
     }
 }

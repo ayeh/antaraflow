@@ -8,6 +8,7 @@ use App\Domain\Admin\Services\AiControlService;
 use App\Domain\AI\Models\AiUsageLog;
 use App\Domain\AI\Notifications\AiBudgetAlertNotification;
 use App\Domain\AI\Services\AiUsageRecorder;
+use App\Domain\AI\Services\OpenAiBillingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -19,6 +20,7 @@ class AiControlController extends Controller
     public function __construct(
         private readonly AiControlService $control,
         private readonly AiUsageRecorder $usage,
+        private readonly OpenAiBillingService $billing,
     ) {}
 
     public function index(): View
@@ -38,6 +40,20 @@ class AiControlController extends Controller
             ->limit(20)
             ->get();
 
+        $creditTopup = $this->control->creditTopup();
+        $creditTopupDate = $this->control->creditTopupDate();
+
+        $openAiConfigured = $this->billing->isConfigured();
+        $openAiMonthCost = $openAiConfigured ? $this->billing->monthCost() : null;
+
+        $estimatedBalance = null;
+        if ($openAiConfigured && $creditTopup > 0 && $creditTopupDate) {
+            $spentSinceTopup = $this->billing->costSince(\Illuminate\Support\Carbon::parse($creditTopupDate)->startOfDay());
+            if ($spentSinceTopup !== null) {
+                $estimatedBalance = round($creditTopup - $spentSinceTopup, 2);
+            }
+        }
+
         return view('admin.ai.index', [
             'enabled' => $this->control->isEnabled(),
             'dailyBudget' => $this->control->dailyBudget(),
@@ -48,6 +64,11 @@ class AiControlController extends Controller
             'monthSpend' => $monthSpend,
             'byModel' => $byModel,
             'recentLogs' => $recentLogs,
+            'creditTopup' => $creditTopup,
+            'creditTopupDate' => $creditTopupDate,
+            'openAiConfigured' => $openAiConfigured,
+            'openAiMonthCost' => $openAiMonthCost,
+            'estimatedBalance' => $estimatedBalance,
         ]);
     }
 
@@ -70,12 +91,15 @@ class AiControlController extends Controller
             'hard_cap' => ['required', 'numeric', 'min:0'],
             'alert_email' => ['nullable', 'email', 'max:255'],
             'alert_telegram_chat_id' => ['nullable', 'string', 'max:64'],
+            'credit_topup' => ['required', 'numeric', 'min:0'],
+            'credit_topup_date' => ['nullable', 'date'],
         ]);
 
         $this->control->setDailyBudget((float) $validated['daily_budget']);
         $this->control->setHardCap((float) $validated['hard_cap']);
         $this->control->setAlertEmail($validated['alert_email'] ?? null);
         $this->control->setAlertTelegramChatId($validated['alert_telegram_chat_id'] ?? null);
+        $this->control->setCreditTopup((float) $validated['credit_topup'], $validated['credit_topup_date'] ?? null);
 
         return redirect()->route('admin.ai.index')->with('success', __('AI budget & alert settings saved.'));
     }

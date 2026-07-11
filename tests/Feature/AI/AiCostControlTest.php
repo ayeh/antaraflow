@@ -106,6 +106,8 @@ test('admin can save budget and alert settings', function () {
             'hard_cap' => 100,
             'alert_email' => 'ops@example.com',
             'alert_telegram_chat_id' => '-100123',
+            'credit_topup' => 100,
+            'credit_topup_date' => '2026-07-01',
         ])
         ->assertRedirect(route('admin.ai.index'));
 
@@ -114,6 +116,8 @@ test('admin can save budget and alert settings', function () {
     expect($control->hardCap())->toBe(100.0);
     expect($control->alertEmail())->toBe('ops@example.com');
     expect($control->alertTelegramChatId())->toBe('-100123');
+    expect($control->creditTopup())->toBe(100.0);
+    expect($control->creditTopupDate())->toBe('2026-07-01');
 });
 
 test('test alert sends to configured email', function () {

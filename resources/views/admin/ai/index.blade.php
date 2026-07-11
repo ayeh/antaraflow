@@ -50,7 +50,48 @@
             <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
                 <p class="text-sm text-slate-400 mb-1">{{ __('Spend This Month') }}</p>
                 <p class="text-3xl font-bold text-white">${{ number_format($monthSpend, 2) }}</p>
+                <p class="text-xs text-slate-500 mt-1">{{ __('Estimated from tracked calls') }}</p>
             </div>
+        </div>
+
+        {{-- OpenAI actual (Admin API) --}}
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-white">{{ __('OpenAI Account (live)') }}</h3>
+                <a href="https://platform.openai.com/usage" target="_blank" rel="noopener"
+                   class="text-xs text-blue-400 hover:text-blue-300">{{ __('Open OpenAI usage ↗') }}</a>
+            </div>
+            @if(! $openAiConfigured)
+                <p class="text-sm text-slate-400">
+                    {{ __('Set OPENAI_ADMIN_KEY (an sk-admin-… key) on the server to pull real spend from OpenAI\'s Costs API.') }}
+                </p>
+            @else
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm text-slate-400 mb-1">{{ __('Actual spend this month (OpenAI)') }}</p>
+                        <p class="text-3xl font-bold text-white">
+                            {{ $openAiMonthCost === null ? '—' : '$'.number_format($openAiMonthCost, 2) }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-slate-400 mb-1">{{ __('Estimated balance remaining') }}</p>
+                        @if($estimatedBalance === null)
+                            <p class="text-3xl font-bold text-slate-500">—</p>
+                            <p class="text-xs text-slate-500 mt-1">{{ __('Enter your last top-up amount & date below.') }}</p>
+                        @else
+                            <p class="text-3xl font-bold {{ $estimatedBalance <= 0 ? 'text-red-400' : 'text-green-400' }}">
+                                ${{ number_format($estimatedBalance, 2) }}
+                            </p>
+                            <p class="text-xs text-slate-500 mt-1">
+                                {{ __('Top-up $:topup on :date − actual spend since', ['topup' => number_format($creditTopup, 2), 'date' => $creditTopupDate]) }}
+                            </p>
+                        @endif
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-4">
+                    {{ __('OpenAI exposes no true balance endpoint; balance is estimated. The exact figure is on OpenAI\'s dashboard.') }}
+                </p>
+            @endif
         </div>
 
         {{-- Budget & alerts --}}
@@ -95,6 +136,22 @@
                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                         @error('alert_telegram_chat_id') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
                         <p class="mt-1 text-xs text-slate-500">{{ __('Requires TELEGRAM_BOT_TOKEN in the environment.') }}</p>
+                    </div>
+                    <div>
+                        <label for="credit_topup" class="block text-sm font-medium text-slate-300 mb-1">{{ __('Last top-up amount (USD)') }}</label>
+                        <input type="number" step="0.01" min="0" name="credit_topup" id="credit_topup"
+                               value="{{ old('credit_topup', $creditTopup) }}"
+                               placeholder="100.00"
+                               class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        @error('credit_topup') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
+                        <p class="mt-1 text-xs text-slate-500">{{ __('Used to estimate remaining balance vs OpenAI actual spend.') }}</p>
+                    </div>
+                    <div>
+                        <label for="credit_topup_date" class="block text-sm font-medium text-slate-300 mb-1">{{ __('Top-up date') }}</label>
+                        <input type="date" name="credit_topup_date" id="credit_topup_date"
+                               value="{{ old('credit_topup_date', $creditTopupDate) }}"
+                               class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        @error('credit_topup_date') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
