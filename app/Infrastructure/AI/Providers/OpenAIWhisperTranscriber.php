@@ -13,9 +13,6 @@ use Illuminate\Support\Facades\Http;
 
 class OpenAIWhisperTranscriber implements TranscriberInterface
 {
-    /** Roughly the 224-token prompt ceiling, kept well short of it. */
-    private const PROMPT_CHAR_BUDGET = 600;
-
     /**
      * Only discard a segment when Whisper is all but certain it heard nothing.
      *
@@ -62,14 +59,19 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
             'temperature' => 0,
         ];
 
-        // Whisper takes vocabulary hints as free text rather than a keyword
-        // list. Feeding it the attendee names is what turns "Epam Gambilan"
-        // into "ePengambilan" — measured against the live API.
-        $prompt = $this->vocabularyPrompt($options);
-
-        if ($prompt !== null) {
-            $payload['prompt'] = $prompt;
-        }
+        /*
+         * No prompt is sent, deliberately.
+         *
+         * Whisper takes vocabulary hints as free text, and on a clean sample
+         * that fixed proper nouns outright. On real meeting audio it does the
+         * opposite: measured over twelve minutes of a recorded meeting, a
+         * twelve-name hint made Whisper emit "nama-nama dan nama-nama dan …"
+         * for the first ninety seconds in place of the speech, and a four-name
+         * hint collapsed the whole transcript into repeated ellipses. The same
+         * audio with no prompt transcribed cleanly.
+         *
+         * Hints reach the models that accept them properly — see OpenAiTranscriber.
+         */
 
         // `language` is deliberately omitted: it accepts only one code, and
         // these meetings switch between Malay and English mid-sentence, so
@@ -140,70 +142,10 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
         return false;
     }
 
-    /**
-     * Whisper's prompt is capped at 224 tokens, so the hint list is trimmed to
-     * a conservative character budget rather than sent whole. People's names go
-     * in first — those are the errors a reader actually notices.
-     *
-     * @param  array<string, mixed>  $options
-     */
-    private function vocabularyPrompt(array $options): ?string
-    {
-        $parts = [];
-
-        $keywords = $this->keywordsWithinBudget($options['keywords'] ?? []);
-
-        if ($keywords !== []) {
-            $parts[] = __('Meeting transcript. Names and terms: :keywords.', [
-                'keywords' => implode(', ', $keywords),
-            ]);
-        }
-
-        // Whisper has one hint channel, so preceding context shares it with the
-        // vocabulary rather than replacing it.
-        if (! empty($options['prompt'])) {
-            $parts[] = trim((string) $options['prompt']);
-        }
-
-        if ($parts === []) {
-            return null;
-        }
-
-        return mb_substr(implode(' ', $parts), 0, self::PROMPT_CHAR_BUDGET);
-    }
-
     /** Whether the whole segment is a phrase Whisper invents from silence. */
     private function isHallucination(string $text): bool
     {
         return in_array(mb_strtolower($text), self::HALLUCINATIONS, true);
-    }
-
-    /**
-     * @param  array<int, string>  $keywords
-     * @return array<int, string>
-     */
-    private function keywordsWithinBudget(array $keywords): array
-    {
-        $kept = [];
-        $length = 0;
-
-        foreach ($keywords as $keyword) {
-            $keyword = trim(preg_replace('/\s+/', ' ', (string) $keyword) ?? '');
-
-            if ($keyword === '' || in_array($keyword, $kept, true)) {
-                continue;
-            }
-
-            $length += mb_strlen($keyword) + 2;
-
-            if ($length > self::PROMPT_CHAR_BUDGET) {
-                break;
-            }
-
-            $kept[] = $keyword;
-        }
-
-        return $kept;
     }
 
     /**

@@ -183,52 +183,6 @@ function whisperTranscriber(): App\Infrastructure\AI\Providers\OpenAIWhisperTran
     ]);
 }
 
-it('folds keywords into a whisper vocabulary prompt', function (): void {
-    Http::fake(['*/audio/transcriptions' => Http::response(['text' => 'ok', 'duration' => 5, 'segments' => []])]);
-
-    whisperTranscriber()->transcribe(audioFixture(), [
-        'language' => 'en',
-        'keywords' => ['Ahmad Faiz', 'ePengambilan', 'Antara Digital', 'Ahmad Faiz'],
-    ]);
-
-    Http::assertSent(function (Request $request) {
-        $parts = collect($request->data())->pluck('contents', 'name');
-
-        return str_contains($parts['prompt'], 'Ahmad Faiz')
-            && str_contains($parts['prompt'], 'ePengambilan')
-            && str_contains($parts['prompt'], 'Antara Digital')
-            // Deduplicated rather than repeated.
-            && substr_count($parts['prompt'], 'Ahmad Faiz') === 1
-            // Language is left out so Whisper auto-detects code-switching.
-            && ! $parts->has('language');
-    });
-});
-
-it('keeps the whisper prompt inside its token budget', function (): void {
-    Http::fake(['*/audio/transcriptions' => Http::response(['text' => 'ok', 'duration' => 5, 'segments' => []])]);
-
-    $manyNames = collect(range(1, 200))->map(fn (int $i) => "Attendee Number {$i}")->all();
-
-    whisperTranscriber()->transcribe(audioFixture(), ['keywords' => $manyNames]);
-
-    Http::assertSent(function (Request $request) {
-        $prompt = collect($request->data())->pluck('contents', 'name')['prompt'];
-
-        return mb_strlen($prompt) < 700
-            // Earliest keywords survive the trim, later ones are dropped.
-            && str_contains($prompt, 'Attendee Number 1,')
-            && ! str_contains($prompt, 'Attendee Number 200');
-    });
-});
-
-it('sends no prompt when there is nothing to hint', function (): void {
-    Http::fake(['*/audio/transcriptions' => Http::response(['text' => 'ok', 'duration' => 5, 'segments' => []])]);
-
-    whisperTranscriber()->transcribe(audioFixture());
-
-    Http::assertSent(fn (Request $request) => ! collect($request->data())->pluck('name')->contains('prompt'));
-});
-
 it('reports no confidence when the provider does not supply one', function (): void {
     Http::fake([
         '*/audio/transcriptions' => Http::response([
@@ -292,18 +246,22 @@ it('still drops phrases whisper invents from silence', function (): void {
         ->and($result->fullText)->toBe('Okay kita mula sekarang.');
 });
 
-it('combines vocabulary and preceding context in the whisper prompt', function (): void {
+it('never sends whisper a prompt, whatever hints it is given', function (): void {
     Http::fake(['*/audio/transcriptions' => Http::response(['text' => 'ok', 'duration' => 5, 'segments' => []])]);
 
     whisperTranscriber()->transcribe(audioFixture(), [
-        'keywords' => ['Ahmad Faiz'],
-        'prompt' => '...dan kita sambung perbincangan tadi',
+        'keywords' => ['Ahmad Faiz', 'ePengambilan'],
+        'prompt' => '...sambungan perbincangan tadi',
+        'language' => 'ms',
     ]);
 
+    // Measured on twelve minutes of real meeting audio: any prompt sent
+    // Whisper into a repetition loop that replaced the speech itself.
     Http::assertSent(function (Request $request) {
-        $prompt = collect($request->data())->pluck('contents', 'name')['prompt'];
+        $names = collect($request->data())->pluck('name')->all();
 
-        return str_contains($prompt, 'Ahmad Faiz')
-            && str_contains($prompt, 'sambung perbincangan tadi');
+        return ! in_array('prompt', $names, true)
+            && ! in_array('keywords[]', $names, true)
+            && ! in_array('language', $names, true);
     });
 });
