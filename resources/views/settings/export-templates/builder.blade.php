@@ -399,37 +399,39 @@
         </div>
     </div>
 
-    {{-- ── Preview modal ─────────────────────────────────────────────── --}}
-    <div x-show="showPreview" x-cloak
-        class="fixed inset-0 flex items-center justify-center bg-black/60" style="z-index:9999"
-        @click.self="showPreview = false">
-        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl flex flex-col overflow-hidden" style="width:calc(100vw - 32px);height:calc(100vh - 32px)">
-            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-slate-700 shrink-0">
-                <h3 class="font-semibold text-gray-900 dark:text-white text-sm">Pratonton Dokumen</h3>
-                <div class="flex items-center gap-2">
-                    <select x-model="previewLanguage" @change="loadPreview()"
-                        class="text-xs rounded border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white px-2 py-1">
-                        <option value="ms">Bahasa Melayu</option>
-                        <option value="en">English</option>
-                    </select>
-                    <button @click="showPreview = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
+    {{-- ── Preview modal — teleported to <body> so it sits above the fixed sidebar --}}
+    <template x-teleport="body">
+        <div x-show="showPreview" x-cloak
+            class="fixed inset-0 flex items-center justify-center bg-black/60" style="z-index:9999"
+            @click.self="showPreview = false">
+            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl flex flex-col overflow-hidden" style="width:calc(100vw - 32px);height:calc(100vh - 32px)">
+                <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-slate-700 shrink-0">
+                    <h3 class="font-semibold text-gray-900 dark:text-white text-sm">Pratonton Dokumen</h3>
+                    <div class="flex items-center gap-2">
+                        <select x-model="previewLanguage" @change="loadPreview()"
+                            class="text-xs rounded border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white px-2 py-1">
+                            <option value="ms">Bahasa Melayu</option>
+                            <option value="en">English</option>
+                        </select>
+                        <button @click="showPreview = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-hidden relative">
+                    {{-- Hidden form: POSTs blocks JSON into the iframe so we bypass URL-length limits --}}
+                    <form x-ref="previewForm" method="POST" target="previewFrame"
+                        :action="previewUrl" class="hidden">
+                        @csrf
+                        <input type="hidden" name="language" x-model="previewLanguage">
+                        <input type="hidden" name="blocks_json" x-ref="blocksJsonInput">
+                        <input type="hidden" name="mom_id" :value="sampleMomId ?? ''">
+                    </form>
+                    <iframe name="previewFrame" x-ref="previewFrame" class="w-full h-full border-0 bg-white"></iframe>
                 </div>
             </div>
-            <div class="flex-1 overflow-hidden relative">
-                {{-- Hidden form: POSTs blocks JSON into the iframe so we bypass URL-length limits --}}
-                <form x-ref="previewForm" method="POST" target="previewFrame"
-                    :action="previewUrl" class="hidden">
-                    @csrf
-                    <input type="hidden" name="language" x-model="previewLanguage">
-                    <input type="hidden" name="blocks_json" x-ref="blocksJsonInput">
-                    <input type="hidden" name="mom_id" :value="sampleMomId ?? ''">
-                </form>
-                <iframe name="previewFrame" x-ref="previewFrame" class="w-full h-full border-0 bg-white"></iframe>
-            </div>
         </div>
-    </div>
+    </template>
 </div>
 
 <script>
