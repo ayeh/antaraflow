@@ -261,6 +261,18 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
         ->except(['show'])
         ->parameters(['export-templates' => 'exportTemplate']);
 
+    // Block builder for export templates
+    Route::get('settings/export-templates/{exportTemplate}/builder', [\App\Domain\Export\Controllers\TemplateBuilderController::class, 'show'])
+        ->name('settings.export-templates.builder');
+    Route::post('settings/export-templates/{exportTemplate}/blocks', [\App\Domain\Export\Controllers\TemplateBuilderController::class, 'saveBlocks'])
+        ->name('settings.export-templates.blocks.save');
+    Route::match(['get', 'post'], 'settings/export-templates/{exportTemplate}/preview', [\App\Domain\Export\Controllers\TemplateBuilderController::class, 'preview'])
+        ->name('settings.export-templates.preview');
+    Route::post('settings/export-templates/{exportTemplate}/logo', [\App\Domain\Export\Controllers\TemplateBuilderController::class, 'uploadLogo'])
+        ->name('settings.export-templates.logo');
+    Route::post('settings/export-templates/{exportTemplate}/duplicate', [\App\Domain\Export\Controllers\TemplateBuilderController::class, 'duplicate'])
+        ->name('settings.export-templates.duplicate');
+
     // Extraction Templates
     Route::resource('extraction-templates', ExtractionTemplateController::class)->except(['show']);
 

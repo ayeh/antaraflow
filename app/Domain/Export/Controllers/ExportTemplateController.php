@@ -37,7 +37,12 @@ class ExportTemplateController
 
         ExportTemplate::create(array_merge(
             $request->validated(),
-            ['organization_id' => $orgId, 'is_default' => $request->boolean('is_default')]
+            [
+                'organization_id' => $orgId,
+                'is_default' => $request->boolean('is_default'),
+                'is_system' => false,
+                'created_by' => $request->user()->id,
+            ]
         ));
 
         return redirect()->route('settings.export-templates.index')->with('success', __('Template created.'));
@@ -83,6 +88,8 @@ class ExportTemplateController
             $exportTemplate->organization_id === $request->user()->current_organization_id,
             403
         );
+
+        abort_if($exportTemplate->is_system, 403, __('System templates cannot be deleted.'));
 
         $exportTemplate->delete();
 

@@ -24,10 +24,16 @@ class MomAttendee extends Model
         'phone',
         'company',
         'role',
+        'position',
+        'organization_unit',
         'rsvp_status',
         'is_present',
         'is_external',
         'department',
+        'attendance_group',
+        'annotation',
+        'absence_reason',
+        'sort_order',
     ];
 
     /** @return array<string, string> */

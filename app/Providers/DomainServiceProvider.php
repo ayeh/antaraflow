@@ -7,6 +7,21 @@ namespace App\Providers;
 use App\Domain\Account\Services\AuditService;
 use App\Domain\Account\Services\AuthorizationService;
 use App\Domain\Admin\Services\AiControlService;
+use App\Domain\Export\Blocks\BlockRegistry;
+use App\Domain\Export\Blocks\Renderers\ActionItemsRenderer;
+use App\Domain\Export\Blocks\Renderers\ActionTagRenderer;
+use App\Domain\Export\Blocks\Renderers\AgendaRenderer;
+use App\Domain\Export\Blocks\Renderers\AttendeesRenderer;
+use App\Domain\Export\Blocks\Renderers\DividerRenderer;
+use App\Domain\Export\Blocks\Renderers\FooterRenderer;
+use App\Domain\Export\Blocks\Renderers\ImageRenderer;
+use App\Domain\Export\Blocks\Renderers\LetterheadRenderer;
+use App\Domain\Export\Blocks\Renderers\MetaRenderer;
+use App\Domain\Export\Blocks\Renderers\PageBreakRenderer;
+use App\Domain\Export\Blocks\Renderers\RichTextRenderer;
+use App\Domain\Export\Blocks\Renderers\SignatureRenderer;
+use App\Domain\Export\Blocks\Renderers\TableRenderer;
+use App\Domain\Export\Blocks\Renderers\TitleRenderer;
 use App\Infrastructure\AI\AIProviderFactory;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
@@ -41,6 +56,26 @@ class DomainServiceProvider extends ServiceProvider
         $this->app->singleton(AuditService::class);
         $this->app->singleton(AuthorizationService::class);
         $this->app->singleton(\App\Domain\AI\Services\AiUsageContext::class);
+
+        $this->app->singleton(BlockRegistry::class, function () {
+            $registry = new BlockRegistry;
+            $registry->register(new LetterheadRenderer);
+            $registry->register(new TitleRenderer);
+            $registry->register(new MetaRenderer);
+            $registry->register(new AttendeesRenderer);
+            $registry->register(new AgendaRenderer);
+            $registry->register(new ActionItemsRenderer);
+            $registry->register(new RichTextRenderer);
+            $registry->register(new ActionTagRenderer);
+            $registry->register(new TableRenderer);
+            $registry->register(new ImageRenderer);
+            $registry->register(new SignatureRenderer);
+            $registry->register(new DividerRenderer);
+            $registry->register(new PageBreakRenderer);
+            $registry->register(new FooterRenderer);
+
+            return $registry;
+        });
     }
 
     public function boot(): void

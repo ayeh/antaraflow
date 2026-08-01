@@ -61,6 +61,8 @@ class MinutesOfMeeting extends Model
         'calendar_event_id',
         'calendar_provider',
         'calendar_synced_at',
+        'export_template_id',
+        'output_language',
     ];
 
     /** @return array<string, string> */

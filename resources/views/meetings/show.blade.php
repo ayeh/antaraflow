@@ -65,16 +65,11 @@
 
                     {{-- Export section --}}
                     <div class="px-3 pt-2 pb-1 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">{{ __('Export') }}</div>
-                    <a href="{{ route('meetings.export.pdf', $meeting) }}" @click="moreOpen = false"
-                       class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                    <button @click="moreOpen = false; $dispatch('open-export-modal')"
+                       class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 text-left">
                         <svg class="w-4 h-4 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                        {{ __('PDF') }}
-                    </a>
-                    <a href="{{ route('meetings.export.word', $meeting) }}" @click="moreOpen = false"
-                       class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
-                        <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                        {{ __('Word (.docx)') }}
-                    </a>
+                        {{ __('PDF / Word') }}
+                    </button>
                     <a href="{{ route('meetings.export.csv', $meeting) }}" @click="moreOpen = false"
                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                         <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -267,6 +262,101 @@
         <div x-show="activeStep === 5" class="h-9"></div>
     </div>
 </div>
+</div>
+
+{{-- Export Options Modal --}}
+<div x-data="{
+        open: false,
+        templateId: '{{ $meeting->export_template_id ?? '' }}',
+        language: '{{ $meeting->output_language ?? $meeting->language ?? 'ms' }}',
+        pdfUrl: '{{ route('meetings.export.pdf', $meeting) }}',
+        wordUrl: '{{ route('meetings.export.word', $meeting) }}',
+        get pdfHref() {
+            const p = new URLSearchParams({ language: this.language });
+            if (this.templateId) p.set('template_id', this.templateId);
+            return this.pdfUrl + '?' + p.toString();
+        },
+        get wordHref() {
+            const p = new URLSearchParams({ language: this.language });
+            if (this.templateId) p.set('template_id', this.templateId);
+            return this.wordUrl + '?' + p.toString();
+        },
+     }"
+     @open-export-modal.window="open = true"
+     @keydown.escape.window="open = false"
+     x-show="open" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="display:none;">
+
+    {{-- Backdrop --}}
+    <div class="absolute inset-0 bg-black/50" @click="open = false"></div>
+
+    {{-- Panel --}}
+    <div class="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6"
+         @click.stop>
+
+        {{-- Header --}}
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Export Meeting Minutes') }}</h2>
+            <button @click="open = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        {{-- Template selector --}}
+        <div class="mb-4">
+            <label class="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">{{ __('Template') }}</label>
+            <select x-model="templateId"
+                    class="w-full rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-gray-800 dark:text-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500">
+                <option value="">{{ __('— Auto (use meeting default) —') }}</option>
+                @foreach($exportTemplates as $tpl)
+                    <option value="{{ $tpl->id }}">
+                        {{ $tpl->name }}
+                        @if($tpl->is_system) ({{ __('System') }}) @endif
+                        @if($tpl->is_default && ! $tpl->is_system) ★ @endif
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- Language selector --}}
+        <div class="mb-6">
+            <label class="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">{{ __('Output Language') }}</label>
+            <div class="flex gap-2">
+                <button @click="language = 'ms'"
+                        :class="language === 'ms' ? 'bg-violet-600 text-white border-violet-600' : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-600'"
+                        class="flex-1 py-2 rounded-xl border text-sm font-medium transition-colors">
+                    Bahasa Melayu
+                </button>
+                <button @click="language = 'en'"
+                        :class="language === 'en' ? 'bg-violet-600 text-white border-violet-600' : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-600'"
+                        class="flex-1 py-2 rounded-xl border text-sm font-medium transition-colors">
+                    English
+                </button>
+            </div>
+            <p x-show="language !== '{{ $meeting->language ?? 'ms' }}'"
+               x-cloak
+               class="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
+                {{ __('Meeting content is in :lang — AI will translate to the selected language.', ['lang' => ($meeting->language ?? 'ms') === 'ms' ? 'Bahasa Melayu' : 'English']) }}
+            </p>
+        </div>
+
+        {{-- Format buttons --}}
+        <div class="flex gap-3">
+            <a :href="pdfHref"
+               @click="open = false"
+               class="flex-1 flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 rounded-xl py-2.5 text-sm font-medium transition-colors">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                PDF
+            </a>
+            <a :href="wordHref"
+               @click="open = false"
+               class="flex-1 flex items-center justify-center gap-2 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-xl py-2.5 text-sm font-medium transition-colors">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                Word (.docx)
+            </a>
+        </div>
+    </div>
 </div>
 
 <script>

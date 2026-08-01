@@ -25,10 +25,16 @@ class MomAttendeeFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'role' => AttendeeRole::Participant,
+            'position' => null,
+            'organization_unit' => null,
             'rsvp_status' => RsvpStatus::Pending,
             'is_present' => false,
             'is_external' => false,
             'department' => fake()->word(),
+            'attendance_group' => 'present',
+            'annotation' => null,
+            'absence_reason' => null,
+            'sort_order' => 0,
         ];
     }
 
@@ -44,7 +50,26 @@ class MomAttendeeFactory extends Factory
     {
         return $this->state([
             'is_present' => true,
+            'attendance_group' => 'present',
             'rsvp_status' => RsvpStatus::Accepted,
+        ]);
+    }
+
+    public function alsoPresent(): static
+    {
+        return $this->state([
+            'is_present' => true,
+            'attendance_group' => 'also_present',
+            'rsvp_status' => RsvpStatus::Accepted,
+        ]);
+    }
+
+    public function absent(): static
+    {
+        return $this->state([
+            'is_present' => false,
+            'attendance_group' => 'absent',
+            'rsvp_status' => RsvpStatus::Declined,
         ]);
     }
 
@@ -52,6 +77,15 @@ class MomAttendeeFactory extends Factory
     {
         return $this->state([
             'role' => AttendeeRole::Organizer,
+            'annotation' => '-Pengerusi-',
+        ]);
+    }
+
+    public function noteTaker(): static
+    {
+        return $this->state([
+            'role' => AttendeeRole::NoteTaker,
+            'annotation' => '-Pencatit minit-',
         ]);
     }
 }

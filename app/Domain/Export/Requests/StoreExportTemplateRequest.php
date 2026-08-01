@@ -25,6 +25,11 @@ class StoreExportTemplateRequest extends FormRequest
             'primary_color' => ['nullable', 'string', 'max:20'],
             'font_family' => ['nullable', 'string', 'max:100'],
             'is_default' => ['nullable', 'boolean'],
+            'blocks' => ['nullable', 'array'],
+            'labels' => ['nullable', 'array'],
+            'page_setup' => ['nullable', 'array'],
+            'glossary' => ['nullable', 'array'],
+            'meeting_type' => ['nullable', 'string', 'max:50'],
         ];
     }
 

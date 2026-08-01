@@ -10,11 +10,23 @@ use Illuminate\Http\Response;
 
 class PdfExportService
 {
+    public function __construct(
+        private readonly TemplateRenderService $renderer,
+        private readonly MomTranslationService $translator,
+    ) {}
+
     public function export(MinutesOfMeeting $meeting): Response
     {
-        $meeting->load(['createdBy', 'attendees.user', 'actionItems.assignedTo', 'extractions', 'manualNotes', 'topics']);
+        $template = $this->renderer->resolveTemplate($meeting);
+        $language = $meeting->output_language ?? $meeting->language ?? 'ms';
 
-        $pdf = Pdf::loadView('exports.meeting-pdf', compact('meeting'));
+        if ($this->translator->needsTranslation($meeting, $language)) {
+            $this->translator->applyTranslations($meeting, $language);
+        }
+
+        $html = $this->renderer->renderHtml($meeting, $template, $language);
+
+        $pdf = Pdf::loadHTML($html)->setPaper('A4', 'portrait');
 
         return $pdf->download("meeting-{$meeting->id}.pdf");
     }

@@ -12,6 +12,7 @@ use App\Domain\Analytics\Services\AnalyticsEventService;
 use App\Domain\Calendar\Services\CalendarSyncService;
 use App\Domain\Collaboration\Services\CommentService;
 use App\Domain\Collaboration\Services\ShareService;
+use App\Domain\Export\Models\ExportTemplate;
 use App\Domain\Meeting\Models\MeetingSeries;
 use App\Domain\Meeting\Models\MeetingTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
@@ -192,11 +193,18 @@ class MeetingController extends Controller
         $decisionTracker = app(DecisionTrackerService::class)->getDecisionStatus($meeting);
         $relatedMeetings = app(KnowledgeLinkService::class)->getRelatedMeetings($meeting);
 
+        $exportTemplates = ExportTemplate::withoutGlobalScopes()
+            ->where(fn ($q) => $q
+                ->where('organization_id', $user->current_organization_id)
+                ->orWhere('is_system', true)
+            )
+            ->get(['id', 'name', 'is_system', 'is_default', 'organization_id']);
+
         return view('meetings.show', compact(
             'meeting', 'isEditable', 'orgMembers',
             'attendeeStats', 'actionItemStats',
             'comments', 'shares', 'decisionTracker',
-            'relatedMeetings',
+            'relatedMeetings', 'exportTemplates',
         ));
     }
 

@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             SubscriptionPlanSeeder::class,
             AdminSeeder::class,
             EmailTemplateSeeder::class,
+            ExportTemplateSeeder::class,
             DemoOrganizationSeeder::class,
             DemoMeetingSeeder::class,
         ]);
