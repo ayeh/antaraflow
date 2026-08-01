@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Transcription\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 
 class AudioStorageService
@@ -65,19 +67,87 @@ class AudioStorageService
             mkdir($dir, 0755, true);
         }
 
+        /** @var array<int, string> $chunkFullPaths */
+        $chunkFullPaths = $files->map(fn (string $file) => $disk->path($file))->all();
+
+        if (! $this->concatWithFfmpeg($chunkFullPaths, $mergedFullPath)) {
+            $this->concatRaw($chunkFullPaths, $mergedFullPath);
+        }
+
+        $this->deleteChunks($organizationId, $sessionId);
+
+        return $mergedPath;
+    }
+
+    /**
+     * Rebuild a single valid container from the per-chunk recordings.
+     *
+     * Each chunk is a complete media file with its own header, so concatenating
+     * the bytes produces a container whose metadata describes only the first
+     * chunk. Downstream duration probing then under-reports the recording
+     * length, which throws off the transcription bitrate calculation. The
+     * ffmpeg concat demuxer stitches the streams into one correct container.
+     *
+     * @param  array<int, string>  $chunkFullPaths
+     */
+    private function concatWithFfmpeg(array $chunkFullPaths, string $mergedFullPath): bool
+    {
+        $listPath = tempnam(sys_get_temp_dir(), 'concat_').'.txt';
+
+        $list = implode("\n", array_map(
+            fn (string $path) => "file '".str_replace("'", "'\\''", $path)."'",
+            $chunkFullPaths,
+        ));
+
+        file_put_contents($listPath, $list."\n");
+
+        try {
+            $result = Process::timeout(300)->run([
+                'ffmpeg', '-hide_banner', '-loglevel', 'error',
+                '-f', 'concat',
+                '-safe', '0',
+                '-i', $listPath,
+                '-c', 'copy',
+                '-y',
+                $mergedFullPath,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('ffmpeg concat unavailable, falling back to raw merge.', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        } finally {
+            @unlink($listPath);
+        }
+
+        if ($result->failed() || ! file_exists($mergedFullPath) || filesize($mergedFullPath) === 0) {
+            Log::warning('ffmpeg concat failed, falling back to raw merge.', [
+                'error' => $result->errorOutput(),
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Byte-level fallback used when ffmpeg is unavailable or rejects the input.
+     *
+     * @param  array<int, string>  $chunkFullPaths
+     */
+    private function concatRaw(array $chunkFullPaths, string $mergedFullPath): void
+    {
         $outputStream = fopen($mergedFullPath, 'wb');
 
-        foreach ($files as $file) {
-            $chunkStream = fopen($disk->path($file), 'rb');
+        foreach ($chunkFullPaths as $path) {
+            $chunkStream = fopen($path, 'rb');
             stream_copy_to_stream($chunkStream, $outputStream);
             fclose($chunkStream);
         }
 
         fclose($outputStream);
-
-        $this->deleteChunks($organizationId, $sessionId);
-
-        return $mergedPath;
     }
 
     public function deleteChunks(int $organizationId, string $sessionId): void

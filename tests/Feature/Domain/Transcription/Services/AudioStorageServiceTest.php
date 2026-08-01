@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Transcription\Services\AudioStorageService;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 
 it('stores an audio chunk with zero-padded index', function () {
@@ -75,7 +76,7 @@ it('deletes all chunks for a session', function () {
     expect(Storage::disk('local')->files($chunkDir))->toBeEmpty();
 });
 
-it('merges chunk content correctly without corruption', function () {
+it('falls back to a byte-level merge when the chunks are not decodable media', function () {
     Storage::fake('local');
 
     $service = app(AudioStorageService::class);
@@ -93,6 +94,43 @@ it('merges chunk content correctly without corruption', function () {
     $mergedContent = Storage::disk('local')->get($mergedPath);
     expect($mergedContent)->toBe($chunk1Content.$chunk2Content);
 });
+
+it('preserves the full duration when merging real webm chunks', function () {
+    Storage::fake('local');
+
+    $service = app(AudioStorageService::class);
+    $sessionId = 'duration-test';
+    $orgId = 1;
+    $disk = Storage::disk('local');
+
+    $chunkDir = "organizations/{$orgId}/audio/chunks/{$sessionId}";
+    $disk->makeDirectory($chunkDir);
+
+    foreach ([440, 880, 1320] as $index => $frequency) {
+        $chunkPath = $disk->path(sprintf('%s/chunk_%05d.webm', $chunkDir, $index));
+
+        Process::run([
+            'ffmpeg', '-hide_banner', '-loglevel', 'error',
+            '-f', 'lavfi', '-i', "sine=frequency={$frequency}:duration=5",
+            '-c:a', 'libopus', '-f', 'webm', '-y', $chunkPath,
+        ])->throw();
+    }
+
+    $mergedPath = $service->mergeChunks($orgId, $sessionId, 'audio/webm');
+
+    $duration = (float) trim(Process::run([
+        'ffprobe', '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'csv=p=0',
+        $disk->path($mergedPath),
+    ])->output());
+
+    expect($duration)->toBeGreaterThan(14.0);
+})->skip(
+    fn () => ! Process::run(['which', 'ffmpeg'])->successful()
+        || ! Process::run(['which', 'ffprobe'])->successful(),
+    'ffmpeg and ffprobe are required for this test.',
+);
 
 it('throws an exception when merging with no chunks', function () {
     Storage::fake('local');
