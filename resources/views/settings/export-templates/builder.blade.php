@@ -401,7 +401,7 @@
 
     {{-- ── Preview modal ─────────────────────────────────────────────── --}}
     <div x-show="showPreview" x-cloak
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60"
         @click.self="showPreview = false">
         <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl flex flex-col overflow-hidden" style="width:calc(100vw - 32px);height:calc(100vh - 32px)">
             <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-slate-700 shrink-0">
