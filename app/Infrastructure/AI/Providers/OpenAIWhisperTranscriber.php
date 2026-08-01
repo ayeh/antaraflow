@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Http;
 
 class OpenAIWhisperTranscriber implements TranscriberInterface
 {
+    /** Roughly the 224-token prompt ceiling, kept well short of it. */
+    private const PROMPT_CHAR_BUDGET = 600;
+
     /** @param array<string, mixed> $config */
     public function __construct(
         private array $config,
@@ -23,16 +26,29 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
         $model = $this->config['transcription_model'] ?? 'whisper-1';
         $start = microtime(true);
 
+        $payload = [
+            'model' => $model,
+            'response_format' => 'verbose_json',
+            'timestamp_granularities' => ['segment'],
+            'temperature' => 0,
+        ];
+
+        // Whisper takes vocabulary hints as free text rather than a keyword
+        // list. Feeding it the attendee names is what turns "Epam Gambilan"
+        // into "ePengambilan" — measured against the live API.
+        $prompt = $this->vocabularyPrompt($options);
+
+        if ($prompt !== null) {
+            $payload['prompt'] = $prompt;
+        }
+
+        // `language` is deliberately omitted: it accepts only one code, and
+        // these meetings switch between Malay and English mid-sentence, so
+        // auto-detection beats committing to whichever code was stored.
         $response = Http::withToken($this->config['api_key'])
             ->timeout(300)
             ->attach('file', fopen($filePath, 'r'), basename($filePath))
-            ->post('https://api.openai.com/v1/audio/transcriptions', [
-                'model' => $model,
-                'language' => $options['language'] ?? null,
-                'response_format' => 'verbose_json',
-                'timestamp_granularities' => ['segment'],
-                'temperature' => 0,
-            ]);
+            ->post('https://api.openai.com/v1/audio/transcriptions', $payload);
 
         if ($response->failed()) {
             app(AiUsageRecorder::class)->recordTranscription('openai', $model, 0, (int) round((microtime(true) - $start) * 1000), 'error');
@@ -109,6 +125,58 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
     public function supportsDiarization(): bool
     {
         return false;
+    }
+
+    /**
+     * Whisper's prompt is capped at 224 tokens, so the hint list is trimmed to
+     * a conservative character budget rather than sent whole. People's names go
+     * in first — those are the errors a reader actually notices.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    private function vocabularyPrompt(array $options): ?string
+    {
+        if (! empty($options['prompt'])) {
+            return mb_substr((string) $options['prompt'], 0, self::PROMPT_CHAR_BUDGET);
+        }
+
+        $keywords = $this->keywordsWithinBudget($options['keywords'] ?? []);
+
+        if ($keywords === []) {
+            return null;
+        }
+
+        return __('Meeting transcript. Names and terms: :keywords.', [
+            'keywords' => implode(', ', $keywords),
+        ]);
+    }
+
+    /**
+     * @param  array<int, string>  $keywords
+     * @return array<int, string>
+     */
+    private function keywordsWithinBudget(array $keywords): array
+    {
+        $kept = [];
+        $length = 0;
+
+        foreach ($keywords as $keyword) {
+            $keyword = trim(preg_replace('/\s+/', ' ', (string) $keyword) ?? '');
+
+            if ($keyword === '' || in_array($keyword, $kept, true)) {
+                continue;
+            }
+
+            $length += mb_strlen($keyword) + 2;
+
+            if ($length > self::PROMPT_CHAR_BUDGET) {
+                break;
+            }
+
+            $kept[] = $keyword;
+        }
+
+        return $kept;
     }
 
     /**

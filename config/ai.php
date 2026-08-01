@@ -32,11 +32,14 @@ return [
             'transcription_model' => env('OPENAI_WHISPER_MODEL', 'whisper-1'),
 
             /*
-             * Uploaded recordings are transcribed with the diarizing model: it
-             * is the only one that returns per-segment speaker labels alongside
-             * start/end times, which the transcript view depends on.
+             * Uploaded recordings stay on Whisper. It is the only model that
+             * returns segment timestamps *and* accepts a vocabulary hint, and
+             * measurement against the live API put the diarizing alternative at
+             * 3.5x the cost while transcribing proper nouns worse — it refuses
+             * keyword hints. Switch to 'gpt-4o-transcribe-diarize' when real
+             * speaker labels are worth that trade.
              */
-            'upload_transcription_model' => env('OPENAI_UPLOAD_TRANSCRIPTION_MODEL', 'gpt-4o-transcribe-diarize'),
+            'upload_transcription_model' => env('OPENAI_UPLOAD_TRANSCRIPTION_MODEL', 'whisper-1'),
 
             /*
              * Live chunks are short and already carry their own start/end from

@@ -116,18 +116,22 @@ class OpenAiTranscriber implements TranscriberInterface
             'response_format' => $this->diarize ? 'diarized_json' : 'json',
         ];
 
-        $languages = $this->languageHints($options);
+        // The diarizing model rejects every context hint outright — `languages`,
+        // `keywords` and `prompt` all return 400. Verified against the live API.
+        if (! $this->diarize) {
+            $languages = $this->languageHints($options);
 
-        if ($languages !== []) {
-            $payload['languages'] = $languages;
-        }
+            if ($languages !== []) {
+                $payload['languages'] = $languages;
+            }
 
-        if (! empty($options['keywords'])) {
-            $payload['keywords'] = $this->sanitiseKeywords($options['keywords']);
-        }
+            if (! empty($options['keywords'])) {
+                $payload['keywords'] = $this->sanitiseKeywords($options['keywords']);
+            }
 
-        if (! empty($options['prompt'])) {
-            $payload['prompt'] = $options['prompt'];
+            if (! empty($options['prompt'])) {
+                $payload['prompt'] = $options['prompt'];
+            }
         }
 
         // Server-side voice-activity chunking keeps long recordings from being
@@ -269,9 +273,22 @@ class OpenAiTranscriber implements TranscriberInterface
      */
     private function detectedLanguage(array $data, array $options): ?string
     {
-        $detected = $data['language'] ?? ($data['languages'][0] ?? null);
+        if (! empty($data['language']) && is_string($data['language'])) {
+            return $data['language'];
+        }
 
-        return $detected ?? ($options['language'] ?? null);
+        // gpt-transcribe reports detection as [{"code": "en"}, …].
+        $first = $data['languages'][0] ?? null;
+
+        if (is_array($first) && isset($first['code'])) {
+            return (string) $first['code'];
+        }
+
+        if (is_string($first)) {
+            return $first;
+        }
+
+        return $options['language'] ?? null;
     }
 
     /**

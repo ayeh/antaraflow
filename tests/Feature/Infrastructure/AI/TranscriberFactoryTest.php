@@ -13,23 +13,24 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('gives uploads a diarizing transcriber and live chunks a plain one', function (): void {
+it('keeps uploads on whisper and sends live chunks to the cheaper model', function (): void {
     $factory = app(TranscriberFactory::class);
 
-    $upload = $factory->for(TranscriptionMode::Upload);
-    $live = $factory->for(TranscriptionMode::Live);
-
-    expect($upload)->toBeInstanceOf(OpenAiTranscriber::class)
-        ->and($upload->supportsDiarization())->toBeTrue()
-        ->and($live)->toBeInstanceOf(OpenAiTranscriber::class)
-        ->and($live->supportsDiarization())->toBeFalse();
+    expect($factory->for(TranscriptionMode::Upload))
+        ->toBeInstanceOf(OpenAIWhisperTranscriber::class)
+        ->and($factory->for(TranscriptionMode::Live))
+        ->toBeInstanceOf(OpenAiTranscriber::class)
+        ->and($factory->for(TranscriptionMode::Live)->supportsDiarization())
+        ->toBeFalse();
 });
 
-it('keeps the legacy provider when a model is pinned back to whisper', function (): void {
-    config(['ai.providers.openai.upload_transcription_model' => 'whisper-1']);
+it('switches uploads to the diarizing model when it is configured', function (): void {
+    config(['ai.providers.openai.upload_transcription_model' => 'gpt-4o-transcribe-diarize']);
 
-    expect(app(TranscriberFactory::class)->for(TranscriptionMode::Upload))
-        ->toBeInstanceOf(OpenAIWhisperTranscriber::class);
+    $upload = app(TranscriberFactory::class)->for(TranscriptionMode::Upload);
+
+    expect($upload)->toBeInstanceOf(OpenAiTranscriber::class)
+        ->and($upload->supportsDiarization())->toBeTrue();
 });
 
 it('honours the local whisper transcriber setting', function (): void {
