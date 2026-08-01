@@ -250,3 +250,60 @@ it('reports no confidence when whisper returns no usable segments', function ():
 
     expect(whisperTranscriber()->transcribe(audioFixture())->confidence)->toBeNull();
 });
+
+it('keeps speech that whisper is merely unsure about', function (): void {
+    Http::fake([
+        '*/audio/transcriptions' => Http::response([
+            'text' => '',
+            'duration' => 30,
+            'segments' => [
+                // Far-field meeting audio routinely lands in this band on real
+                // speech; the old 0.7 cut discarded a third of every recording.
+                ['start' => 0, 'end' => 10, 'text' => 'Tapi kalau anak-anak dia tak buat.', 'no_speech_prob' => 0.82, 'avg_logprob' => -0.4],
+                ['start' => 10, 'end' => 20, 'text' => 'Memang pernah dia buat.', 'no_speech_prob' => 0.91, 'avg_logprob' => -0.5],
+                ['start' => 20, 'end' => 30, 'text' => 'Silence here.', 'no_speech_prob' => 0.98, 'avg_logprob' => -0.9],
+            ],
+        ]),
+    ]);
+
+    $result = whisperTranscriber()->transcribe(audioFixture());
+
+    expect($result->segments)->toHaveCount(2)
+        ->and($result->fullText)->toContain('Tapi kalau anak-anak')
+        ->and($result->fullText)->toContain('Memang pernah dia buat')
+        ->and($result->fullText)->not->toContain('Silence here');
+});
+
+it('still drops phrases whisper invents from silence', function (): void {
+    Http::fake([
+        '*/audio/transcriptions' => Http::response([
+            'text' => '',
+            'duration' => 30,
+            'segments' => [
+                ['start' => 0, 'end' => 15, 'text' => 'Berita terkini terima kasih atas dukungan anda', 'no_speech_prob' => 0.6],
+                ['start' => 15, 'end' => 30, 'text' => 'Okay kita mula sekarang.', 'no_speech_prob' => 0.6],
+            ],
+        ]),
+    ]);
+
+    $result = whisperTranscriber()->transcribe(audioFixture());
+
+    expect($result->segments)->toHaveCount(1)
+        ->and($result->fullText)->toBe('Okay kita mula sekarang.');
+});
+
+it('combines vocabulary and preceding context in the whisper prompt', function (): void {
+    Http::fake(['*/audio/transcriptions' => Http::response(['text' => 'ok', 'duration' => 5, 'segments' => []])]);
+
+    whisperTranscriber()->transcribe(audioFixture(), [
+        'keywords' => ['Ahmad Faiz'],
+        'prompt' => '...dan kita sambung perbincangan tadi',
+    ]);
+
+    Http::assertSent(function (Request $request) {
+        $prompt = collect($request->data())->pluck('contents', 'name')['prompt'];
+
+        return str_contains($prompt, 'Ahmad Faiz')
+            && str_contains($prompt, 'sambung perbincangan tadi');
+    });
+});

@@ -294,3 +294,80 @@ test('blocks the chunk when the organization is over its AI budget', function ()
     expect($chunk->status)->toBe(ChunkStatus::Failed)
         ->and($chunk->error_message)->toContain('budget');
 });
+
+test('sends attendee names, both languages and the previous chunk as context', function () {
+    Event::fake();
+    Storage::fake('local');
+
+    app(AiCircuitBreaker::class)->reset(LiveTranscriptionJob::CIRCUIT);
+
+    $session = LiveMeetingSession::factory()->create();
+    $session->meeting->update(['language' => 'ms', 'title' => 'CR ePengambilan']);
+    $session->meeting->attendees()->create(['name' => 'Kak Nisa', 'company' => 'Jabatan Perikanan Malaysia']);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 1,
+        'text' => 'Okay so kita pergi ke portal dulu',
+    ]);
+
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 2,
+        'audio_file_path' => 'live-chunks/test-audio.webm',
+        'status' => ChunkStatus::Pending,
+        'text' => null,
+    ]);
+
+    Storage::disk('local')->put('live-chunks/test-audio.webm', 'fake-audio-data');
+
+    $captured = [];
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('transcribe')
+        ->once()
+        ->andReturnUsing(function (string $path, array $options) use (&$captured) {
+            $captured = $options;
+
+            return new TranscriptionResult(fullText: 'ok', confidence: null, segments: []);
+        });
+
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    expect($captured['keywords'])->toContain('Kak Nisa', 'Jabatan Perikanan Malaysia', 'CR ePengambilan')
+        ->and($captured['languages'])->toContain('ms', 'en')
+        ->and($captured['prompt'])->toContain('kita pergi ke portal dulu');
+});
+
+test('sends no context for the first chunk of a session', function () {
+    Event::fake();
+    Storage::fake('local');
+
+    app(AiCircuitBreaker::class)->reset(LiveTranscriptionJob::CIRCUIT);
+
+    $session = LiveMeetingSession::factory()->create();
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 1,
+        'audio_file_path' => 'live-chunks/test-audio.webm',
+        'status' => ChunkStatus::Pending,
+        'text' => null,
+    ]);
+
+    Storage::disk('local')->put('live-chunks/test-audio.webm', 'fake-audio-data');
+
+    $captured = ['prompt' => 'unset'];
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('transcribe')
+        ->once()
+        ->andReturnUsing(function (string $path, array $options) use (&$captured) {
+            $captured = $options;
+
+            return new TranscriptionResult(fullText: 'ok', confidence: null, segments: []);
+        });
+
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    expect($captured['prompt'])->toBeNull();
+});

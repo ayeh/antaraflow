@@ -9,6 +9,7 @@ use App\Domain\AI\Services\OrgBudgetService;
 use App\Domain\Transcription\Events\TranscriptionCompleted;
 use App\Domain\Transcription\Events\TranscriptionFailed;
 use App\Domain\Transcription\Models\AudioTranscription;
+use App\Domain\Transcription\Services\TranscriptionHintBuilder;
 use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
 use App\Infrastructure\AI\TranscriberFactory;
 use App\Support\Enums\TranscriptionMode;
@@ -76,10 +77,14 @@ class ProcessTranscriptionJob implements ShouldQueue
                 $compressedPath = $filePath;
             }
 
+            $meeting = $this->transcription->minutesOfMeeting;
+            $hints = app(TranscriptionHintBuilder::class);
+
             $result = $transcriber->transcribe($filePath, [
                 'language' => $this->transcription->language,
+                'languages' => $hints->languagesFor($meeting),
+                'keywords' => $hints->keywordsFor($meeting),
                 'duration_seconds' => $this->transcription->duration_seconds,
-                'keywords' => $this->keywords(),
             ]);
 
             $this->transcription->update([
@@ -120,34 +125,6 @@ class ProcessTranscriptionJob implements ShouldQueue
                 @unlink($compressedPath);
             }
         }
-    }
-
-    /**
-     * Proper nouns the recording is likely to contain, sent as recognition
-     * hints. Attendee and organisation names are exactly what a general model
-     * mishears, and they are the words a reader most notices getting wrong.
-     *
-     * @return array<int, string>
-     */
-    private function keywords(): array
-    {
-        $meeting = $this->transcription->minutesOfMeeting;
-
-        if (! $meeting) {
-            return [];
-        }
-
-        $keywords = $meeting->attendees()
-            ->pluck('name')
-            ->merge($meeting->attendees()->pluck('company'))
-            ->push($meeting->title)
-            ->filter()
-            ->map(fn (string $value) => trim($value))
-            ->reject(fn (string $value) => $value === '')
-            ->unique()
-            ->values();
-
-        return $keywords->all();
     }
 
     /**

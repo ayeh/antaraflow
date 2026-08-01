@@ -6,6 +6,15 @@ return [
     'transcriber' => env('AI_TRANSCRIBER', 'openai'),
 
     /*
+     * Languages a transcription should expect in addition to whichever one the
+     * meeting is filed under. Malay meetings here borrow English freely
+     * mid-sentence ("so kita pergi ke portal dulu"), and naming a single
+     * language pushes the model to force everything it hears into that one.
+     * These are hints, not constraints — models still detect what was spoken.
+     */
+    'transcription_language_hints' => ['ms', 'en'],
+
+    /*
      * OpenAI organization Admin key (sk-admin-...) used to read actual spend
      * from the Costs API. Distinct from the standard OPENAI_API_KEY used for
      * inference. Leave empty to disable live-spend/balance display.

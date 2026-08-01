@@ -10,6 +10,7 @@ use App\Domain\AI\Services\OrgBudgetService;
 use App\Domain\LiveMeeting\Enums\ChunkStatus;
 use App\Domain\LiveMeeting\Events\TranscriptionChunkProcessed;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
+use App\Domain\Transcription\Services\TranscriptionHintBuilder;
 use App\Infrastructure\AI\Exceptions\AiQuotaExceededException;
 use App\Infrastructure\AI\Exceptions\OrgBudgetExceededException;
 use App\Infrastructure\AI\TranscriberFactory;
@@ -37,6 +38,9 @@ class LiveTranscriptionJob implements ShouldQueue
 
     /** Circuit breaker feature key shared by every live transcription chunk. */
     public const CIRCUIT = 'live_transcription';
+
+    /** How much of the previous chunk to replay as context for this one. */
+    private const CONTEXT_CHAR_BUDGET = 400;
 
     public function handle(TranscriberFactory $transcribers): void
     {
@@ -72,10 +76,14 @@ class LiveTranscriptionJob implements ShouldQueue
         try {
             $filePath = Storage::disk('local')->path($this->chunk->audio_file_path);
 
-            $language = $this->chunk->session?->meeting?->language ?? 'en';
+            $meeting = $this->chunk->session?->meeting;
+            $hints = app(TranscriptionHintBuilder::class);
 
             $result = $transcriber->transcribe($filePath, [
-                'language' => $language,
+                'language' => $meeting?->language ?? 'en',
+                'languages' => $hints->languagesFor($meeting),
+                'keywords' => $hints->keywordsFor($meeting),
+                'prompt' => $this->precedingContext(),
                 'duration_seconds' => $this->chunk->end_time - $this->chunk->start_time,
             ]);
 
@@ -100,6 +108,30 @@ class LiveTranscriptionJob implements ShouldQueue
 
             throw $e;
         }
+    }
+
+    /**
+     * The tail of the previous chunk's transcript.
+     *
+     * Recording is cut into fixed 30-second chunks, so sentences routinely
+     * straddle a boundary and each chunk is otherwise transcribed blind.
+     * Handing the model what was just said lets it carry the sentence — and
+     * the vocabulary already established — across the cut.
+     */
+    private function precedingContext(): ?string
+    {
+        $previous = $this->chunk->session?->chunks()
+            ->where('chunk_number', '<', $this->chunk->chunk_number)
+            ->where('status', ChunkStatus::Completed)
+            ->whereNotNull('text')
+            ->orderByDesc('chunk_number')
+            ->value('text');
+
+        if (! $previous) {
+            return null;
+        }
+
+        return mb_substr(trim($previous), -self::CONTEXT_CHAR_BUDGET) ?: null;
     }
 
     /**

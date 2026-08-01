@@ -16,6 +16,35 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
     /** Roughly the 224-token prompt ceiling, kept well short of it. */
     private const PROMPT_CHAR_BUDGET = 600;
 
+    /**
+     * Only discard a segment when Whisper is all but certain it heard nothing.
+     *
+     * This sat at 0.7, which far-field meeting audio trips constantly on real
+     * speech: measured across two live sessions it silently dropped a third of
+     * every recording, and re-running the same audio through another model
+     * recovered whole sentences from chunks stored as empty.
+     */
+    private const SILENCE_CERTAINTY = 0.95;
+
+    /**
+     * Phrases Whisper emits from silence rather than from speech. Matched
+     * against a whole segment, so a meeting genuinely ending in "thank you for
+     * watching" would lose only that segment.
+     *
+     * @var array<int, string>
+     */
+    private const HALLUCINATIONS = [
+        'terima kasih kerana menonton',
+        'terima kasih kerana menonton!',
+        'terima kasih atas dukungan anda',
+        'berita terkini terima kasih atas dukungan anda',
+        'subscribe',
+        'like and subscribe',
+        'thank you for watching',
+        'thanks for watching',
+        'you',
+    ];
+
     /** @param array<string, mixed> $config */
     public function __construct(
         private array $config,
@@ -70,33 +99,17 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
             durationMs: (int) round((microtime(true) - $start) * 1000),
         );
 
-        // Known Whisper hallucinations for silence/low-quality audio
-        $hallucinations = [
-            'terima kasih kerana menonton',
-            'terima kasih kerana menonton!',
-            'subscribe',
-            'like and subscribe',
-            'thank you for watching',
-            'thanks for watching',
-            'you',
-        ];
-
         $segments = [];
         foreach ($data['segments'] ?? [] as $segment) {
-            // Skip segments where Whisper detects mostly silence
             $noSpeechProb = (float) ($segment['no_speech_prob'] ?? 0);
-            if ($noSpeechProb > 0.7) {
+
+            if ($noSpeechProb > self::SILENCE_CERTAINTY) {
                 continue;
             }
 
             $text = trim($segment['text'] ?? '');
 
-            // Skip known hallucination phrases
-            if (in_array(mb_strtolower($text), $hallucinations, true)) {
-                continue;
-            }
-
-            if ($text === '') {
+            if ($text === '' || $this->isHallucination($text)) {
                 continue;
             }
 
@@ -136,19 +149,33 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
      */
     private function vocabularyPrompt(array $options): ?string
     {
-        if (! empty($options['prompt'])) {
-            return mb_substr((string) $options['prompt'], 0, self::PROMPT_CHAR_BUDGET);
-        }
+        $parts = [];
 
         $keywords = $this->keywordsWithinBudget($options['keywords'] ?? []);
 
-        if ($keywords === []) {
+        if ($keywords !== []) {
+            $parts[] = __('Meeting transcript. Names and terms: :keywords.', [
+                'keywords' => implode(', ', $keywords),
+            ]);
+        }
+
+        // Whisper has one hint channel, so preceding context shares it with the
+        // vocabulary rather than replacing it.
+        if (! empty($options['prompt'])) {
+            $parts[] = trim((string) $options['prompt']);
+        }
+
+        if ($parts === []) {
             return null;
         }
 
-        return __('Meeting transcript. Names and terms: :keywords.', [
-            'keywords' => implode(', ', $keywords),
-        ]);
+        return mb_substr(implode(' ', $parts), 0, self::PROMPT_CHAR_BUDGET);
+    }
+
+    /** Whether the whole segment is a phrase Whisper invents from silence. */
+    private function isHallucination(string $text): bool
+    {
+        return in_array(mb_strtolower($text), self::HALLUCINATIONS, true);
     }
 
     /**
