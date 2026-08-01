@@ -68,10 +68,10 @@ class WhisperLocalTranscriber implements TranscriberInterface
     }
 
     /** @param array<TranscriptionSegmentData> $segments */
-    private function calculateAverageConfidence(array $segments): float
+    private function calculateAverageConfidence(array $segments): ?float
     {
         if (empty($segments)) {
-            return 0.0;
+            return null;
         }
 
         $total = array_sum(array_map(fn (TranscriptionSegmentData $s) => $s->confidence, $segments));

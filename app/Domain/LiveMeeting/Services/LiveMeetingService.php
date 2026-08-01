@@ -7,6 +7,7 @@ namespace App\Domain\LiveMeeting\Services;
 use App\Domain\AI\Jobs\ExtractMeetingDataJob;
 use App\Domain\LiveMeeting\Enums\ChunkStatus;
 use App\Domain\LiveMeeting\Enums\LiveSessionStatus;
+use App\Domain\LiveMeeting\Events\LiveTranscriptIncomplete;
 use App\Domain\LiveMeeting\Jobs\LiveTranscriptionJob;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
@@ -176,6 +177,15 @@ class LiveMeetingService
             ],
             'completed_at' => now(),
         ]);
+
+        if ($droppedChunks > 0) {
+            event(new LiveTranscriptIncomplete(
+                session: $session,
+                transcription: $transcription,
+                mergedChunks: $completedChunks->count(),
+                droppedChunks: $droppedChunks,
+            ));
+        }
 
         foreach ($completedChunks as $index => $chunk) {
             TranscriptionSegment::query()->create([

@@ -82,7 +82,8 @@ class OpenAiTranscriber implements TranscriberInterface
 
         return new TranscriptionResult(
             fullText: $this->fullTextFrom($data, $segments),
-            confidence: 0.0,
+            // Neither model reports a confidence score.
+            confidence: null,
             segments: $segments,
             language: $this->detectedLanguage($data, $options),
             durationSeconds: $audioSeconds > 0 ? (int) round($audioSeconds) : null,

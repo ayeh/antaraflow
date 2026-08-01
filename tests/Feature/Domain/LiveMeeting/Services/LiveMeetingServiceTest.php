@@ -9,6 +9,7 @@ use App\Domain\LiveMeeting\Enums\LiveSessionStatus;
 use App\Domain\LiveMeeting\Jobs\LiveTranscriptionJob;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
+use App\Domain\LiveMeeting\Notifications\LiveTranscriptIncompleteNotification;
 use App\Domain\LiveMeeting\Services\LiveMeetingService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Transcription\Models\AudioTranscription;
@@ -18,6 +19,7 @@ use App\Support\Enums\TranscriptionStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
@@ -295,4 +297,77 @@ test('records dropped chunks on the transcription when the merge is incomplete',
     Log::shouldHaveReceived('warning')
         ->withArgs(fn (string $message, array $context) => str_contains($message, 'incomplete')
             && $context['dropped_chunks'] === 1);
+});
+
+test('notifies the organiser once when the live transcript is incomplete', function () {
+    Queue::fake();
+    Notification::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'started_at' => now()->subMinutes(30),
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 1,
+        'text' => 'Hello everyone.',
+        'start_time' => 0.0,
+        'end_time' => 30.0,
+    ]);
+
+    // Three failed chunks spanning 90 seconds of the meeting.
+    foreach ([2, 3, 4] as $i) {
+        LiveTranscriptChunk::factory()->create([
+            'live_meeting_session_id' => $session->id,
+            'chunk_number' => $i,
+            'status' => ChunkStatus::Failed,
+            'text' => null,
+            'start_time' => ($i - 1) * 30.0,
+            'end_time' => $i * 30.0,
+        ]);
+    }
+
+    $this->service->endSession($session);
+
+    Notification::assertSentTo(
+        $this->user,
+        LiveTranscriptIncompleteNotification::class,
+        function (LiveTranscriptIncompleteNotification $notification) {
+            $payload = $notification->toArray($this->user);
+
+            return $payload['dropped_chunks'] === 3
+                && $payload['merged_chunks'] === 1
+                && $payload['missing_minutes'] === 2;
+        },
+    );
+
+    // One notice for the whole session, not one per failed chunk.
+    Notification::assertSentToTimes($this->user, LiveTranscriptIncompleteNotification::class, 1);
+});
+
+test('sends no incomplete notice when every chunk transcribed', function () {
+    Queue::fake();
+    Notification::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'started_at' => now()->subMinutes(30),
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 1,
+        'text' => 'All good.',
+        'start_time' => 0.0,
+        'end_time' => 30.0,
+    ]);
+
+    $this->service->endSession($session);
+
+    Notification::assertNothingSent();
 });

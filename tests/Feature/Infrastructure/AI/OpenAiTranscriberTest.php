@@ -228,3 +228,25 @@ it('sends no prompt when there is nothing to hint', function (): void {
 
     Http::assertSent(fn (Request $request) => ! collect($request->data())->pluck('name')->contains('prompt'));
 });
+
+it('reports no confidence when the provider does not supply one', function (): void {
+    Http::fake([
+        '*/audio/transcriptions' => Http::response([
+            'text' => 'ok',
+            'duration' => 5,
+            'segments' => [['start' => 0, 'end' => 5, 'text' => 'ok', 'speaker' => 'A']],
+        ]),
+    ]);
+
+    $result = diarizeTranscriber()->transcribe(audioFixture());
+
+    // Null, not 0.0 — "unknown" and "zero percent confident" are different claims.
+    expect($result->confidence)->toBeNull()
+        ->and($result->segments[0]->confidence)->toBeNull();
+});
+
+it('reports no confidence when whisper returns no usable segments', function (): void {
+    Http::fake(['*/audio/transcriptions' => Http::response(['text' => '', 'duration' => 5, 'segments' => []])]);
+
+    expect(whisperTranscriber()->transcribe(audioFixture())->confidence)->toBeNull();
+});
