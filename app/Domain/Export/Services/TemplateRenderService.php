@@ -9,7 +9,6 @@ use App\Domain\Export\Blocks\ExportContext;
 use App\Domain\Export\Models\ExportTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\SimpleType\Jc;
 
 final class TemplateRenderService
 {
@@ -112,6 +111,8 @@ final class TemplateRenderService
         $word->setDefaultFontSize($ctx->pageSetup['size'] ?? 11);
 
         $section = $word->addSection([
+            'pageSizeW' => 11906,
+            'pageSizeH' => 16838,
             'marginTop' => $ctx->pageSetup['margin_top'] ?? 1440,
             'marginBottom' => $ctx->pageSetup['margin_bottom'] ?? 1440,
             'marginLeft' => $ctx->pageSetup['margin_left'] ?? 1800,
@@ -125,14 +126,6 @@ final class TemplateRenderService
             }
             $this->registry->get($type)->toWord($block['settings'] ?? [], $ctx, $section);
         }
-
-        // Generated-by footer
-        $section->addTextBreak(2);
-        $section->addText(
-            $ctx->label('generated_by').' '.now()->translatedFormat('d F Y g:i A'),
-            ['size' => 9, 'color' => '9ca3af'],
-            ['alignment' => Jc::CENTER]
-        );
 
         return $word;
     }
