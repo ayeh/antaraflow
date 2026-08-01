@@ -432,10 +432,9 @@
     </div>
 </div>
 
-@push('scripts')
 <script>
-function templateBuilder(config) {
-    return {
+document.addEventListener('alpine:init', () => {
+    Alpine.data('templateBuilder', (config) => ({
         templateId:      config.templateId,
         blocks:          config.blocks.length ? config.blocks : [],
         primaryColor:    config.primaryColor,
@@ -644,8 +643,7 @@ function templateBuilder(config) {
                 this.logoUploading = false;
             }
         },
-    };
-}
+    }));
+});
 </script>
-@endpush
 @endsection
