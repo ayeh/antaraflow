@@ -9,6 +9,7 @@ use App\Domain\Export\Blocks\ExportContext;
 use App\Domain\Export\Models\ExportTemplate;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Settings;
 
 final class TemplateRenderService
 {
@@ -105,6 +106,8 @@ final class TemplateRenderService
         $ctx = $this->makeContext($mom, $template, $outputLanguage);
         $blocks = $this->blocks($template);
         $font = $ctx->pageSetup['font'] ?? 'Arial';
+
+        Settings::setOutputEscapingEnabled(true);
 
         $word = new PhpWord;
         $word->setDefaultFontName($font);
