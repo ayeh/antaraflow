@@ -8,6 +8,7 @@ use App\Domain\AI\Services\AiUsageRecorder;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use App\Infrastructure\AI\DTOs\TranscriptionResult;
 use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
+use App\Infrastructure\AI\Exceptions\AiQuotaExceededException;
 use Illuminate\Support\Facades\Http;
 
 class OpenAIWhisperTranscriber implements TranscriberInterface
@@ -36,6 +37,11 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
         if ($response->failed()) {
             app(AiUsageRecorder::class)->recordTranscription('openai', $model, 0, (int) round((microtime(true) - $start) * 1000), 'error');
             $error = $response->json('error.message', __('Whisper API request failed with status :status', ['status' => $response->status()]));
+
+            if ($this->isQuotaFailure($response->status(), $response->json('error.code'), $response->json('error.type'))) {
+                throw AiQuotaExceededException::make($error);
+            }
+
             throw new \RuntimeException($error);
         }
 
@@ -103,6 +109,17 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
     public function supportsDiarization(): bool
     {
         return false;
+    }
+
+    /**
+     * Whether the provider rejected the call for quota or rate-limit reasons,
+     * which retrying on our own schedule cannot resolve.
+     */
+    private function isQuotaFailure(int $status, ?string $code, ?string $type): bool
+    {
+        return $status === 429
+            || $code === 'insufficient_quota'
+            || $type === 'insufficient_quota';
     }
 
     /** @return array<string> */

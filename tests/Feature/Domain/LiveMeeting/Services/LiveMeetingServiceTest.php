@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Support\Enums\TranscriptionStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
@@ -250,4 +251,48 @@ test('end session without completed chunks does not create transcription', funct
 
     $session->refresh();
     expect($session->status)->toBe(LiveSessionStatus::Ended);
+});
+
+test('records dropped chunks on the transcription when the merge is incomplete', function () {
+    Queue::fake();
+    Log::spy();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'started_at' => now()->subMinutes(30),
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 1,
+        'text' => 'Hello everyone.',
+        'start_time' => 0.0,
+        'end_time' => 15.0,
+    ]);
+
+    LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 2,
+        'status' => ChunkStatus::Failed,
+        'text' => null,
+        'start_time' => 15.0,
+        'end_time' => 30.0,
+    ]);
+
+    $this->service->endSession($session);
+
+    $transcription = AudioTranscription::query()
+        ->where('minutes_of_meeting_id', $this->meeting->id)
+        ->first();
+
+    expect($transcription->provider_metadata)->toBe([
+        'merged_chunks' => 1,
+        'dropped_chunks' => 1,
+    ]);
+
+    Log::shouldHaveReceived('warning')
+        ->withArgs(fn (string $message, array $context) => str_contains($message, 'incomplete')
+            && $context['dropped_chunks'] === 1);
 });

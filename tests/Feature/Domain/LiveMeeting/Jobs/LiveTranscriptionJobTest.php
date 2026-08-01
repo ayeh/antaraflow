@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Domain\AI\Models\AiUsageLog;
+use App\Domain\AI\Models\OrganizationAiBudget;
+use App\Domain\AI\Services\AiCircuitBreaker;
 use App\Domain\LiveMeeting\Enums\ChunkStatus;
 use App\Domain\LiveMeeting\Events\TranscriptionChunkProcessed;
 use App\Domain\LiveMeeting\Jobs\LiveTranscriptionJob;
@@ -10,6 +13,7 @@ use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use App\Infrastructure\AI\DTOs\TranscriptionResult;
 use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
+use App\Infrastructure\AI\Exceptions\AiQuotaExceededException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
@@ -191,4 +195,102 @@ test('passes correct language option from meeting', function () {
 
     $chunk->refresh();
     expect($chunk->text)->toBe('Bonjour');
+});
+
+test('trips the circuit breaker and abandons the chunk on a provider quota failure', function () {
+    Event::fake();
+    Storage::fake('local');
+
+    app(AiCircuitBreaker::class)->reset(LiveTranscriptionJob::CIRCUIT);
+
+    $session = LiveMeetingSession::factory()->create();
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'audio_file_path' => 'live-chunks/test-audio.webm',
+        'status' => ChunkStatus::Pending,
+        'text' => null,
+    ]);
+
+    Storage::disk('local')->put('live-chunks/test-audio.webm', 'fake-audio-data');
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('transcribe')
+        ->once()
+        ->andThrow(AiQuotaExceededException::make('You exceeded your current quota'));
+
+    (new LiveTranscriptionJob($chunk))->handle($mockTranscriber);
+
+    $chunk->refresh();
+
+    expect($chunk->status)->toBe(ChunkStatus::Failed)
+        ->and($chunk->error_message)->toContain('exceeded your current quota')
+        ->and(app(AiCircuitBreaker::class)->isOpen(LiveTranscriptionJob::CIRCUIT))->toBeTrue();
+});
+
+test('skips the provider entirely while the circuit breaker is open', function () {
+    Event::fake();
+    Storage::fake('local');
+
+    app(AiCircuitBreaker::class)->trip(LiveTranscriptionJob::CIRCUIT);
+
+    $session = LiveMeetingSession::factory()->create();
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'audio_file_path' => 'live-chunks/test-audio.webm',
+        'status' => ChunkStatus::Pending,
+        'text' => null,
+    ]);
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldNotReceive('transcribe');
+
+    (new LiveTranscriptionJob($chunk))->handle($mockTranscriber);
+
+    $chunk->refresh();
+
+    expect($chunk->status)->toBe(ChunkStatus::Failed)
+        ->and($chunk->error_message)->toContain('paused');
+
+    app(AiCircuitBreaker::class)->reset(LiveTranscriptionJob::CIRCUIT);
+});
+
+test('blocks the chunk when the organization is over its AI budget', function () {
+    Event::fake();
+    Storage::fake('local');
+
+    app(AiCircuitBreaker::class)->reset(LiveTranscriptionJob::CIRCUIT);
+
+    $session = LiveMeetingSession::factory()->create();
+
+    OrganizationAiBudget::query()->create([
+        'organization_id' => $session->meeting->organization_id,
+        'daily_limit' => 0.01,
+        'monthly_limit' => null,
+    ]);
+
+    AiUsageLog::query()->create([
+        'organization_id' => $session->meeting->organization_id,
+        'provider' => 'openai',
+        'model' => 'whisper-1',
+        'feature' => 'live_transcription',
+        'cost' => 5.00,
+        'status' => 'success',
+    ]);
+
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'audio_file_path' => 'live-chunks/test-audio.webm',
+        'status' => ChunkStatus::Pending,
+        'text' => null,
+    ]);
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldNotReceive('transcribe');
+
+    (new LiveTranscriptionJob($chunk))->handle($mockTranscriber);
+
+    $chunk->refresh();
+
+    expect($chunk->status)->toBe(ChunkStatus::Failed)
+        ->and($chunk->error_message)->toContain('budget');
 });

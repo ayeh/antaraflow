@@ -18,6 +18,7 @@ use App\Support\Enums\InputType;
 use App\Support\Enums\TranscriptionStatus;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class LiveMeetingService
 {
@@ -145,6 +146,19 @@ class LiveMeetingService
 
         $fullText = $completedChunks->pluck('text')->join("\n");
 
+        $droppedChunks = $session->chunks()
+            ->where('status', '!=', ChunkStatus::Completed)
+            ->count();
+
+        if ($droppedChunks > 0) {
+            Log::warning('Live session transcript is incomplete; chunks were dropped from the merge.', [
+                'session_id' => $session->id,
+                'meeting_id' => $session->minutes_of_meeting_id,
+                'merged_chunks' => $completedChunks->count(),
+                'dropped_chunks' => $droppedChunks,
+            ]);
+        }
+
         $transcription = AudioTranscription::query()->create([
             'minutes_of_meeting_id' => $session->minutes_of_meeting_id,
             'uploaded_by' => $session->started_by,
@@ -156,6 +170,10 @@ class LiveMeetingService
             'language' => 'en',
             'status' => TranscriptionStatus::Completed,
             'full_text' => $fullText,
+            'provider_metadata' => [
+                'merged_chunks' => $completedChunks->count(),
+                'dropped_chunks' => $droppedChunks,
+            ],
             'completed_at' => now(),
         ]);
 
