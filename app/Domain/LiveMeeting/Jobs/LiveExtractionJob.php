@@ -36,17 +36,12 @@ class LiveExtractionJob implements ShouldQueue
         }
 
         $meeting = $this->session->meeting;
-        $originalContent = $meeting->content;
 
-        try {
-            $meeting->content = $transcriptText;
-            $meeting->saveQuietly();
-
-            app(ExtractionService::class)->extractAll($meeting);
-        } finally {
-            $meeting->content = $originalContent;
-            $meeting->saveQuietly();
-        }
+        // The transcript is handed straight to the extractor. It used to be
+        // written onto the meeting and restored afterwards, which showed the
+        // wrong content to anyone viewing the meeting meanwhile and lost the
+        // real content outright if the worker died in between.
+        app(ExtractionService::class)->extractAll($meeting, $transcriptText);
 
         $extractions = $meeting->extractions()->latest()->get()->toArray();
 

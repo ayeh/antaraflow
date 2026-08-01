@@ -29,6 +29,7 @@ class LiveMeetingController extends Controller
         $config = $request->validate([
             'chunk_interval' => ['sometimes', 'integer', 'min:10', 'max:120'],
             'extraction_interval' => ['sometimes', 'integer', 'min:60', 'max:600'],
+            'live_extraction' => ['sometimes', 'boolean'],
         ]);
 
         try {

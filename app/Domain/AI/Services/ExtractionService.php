@@ -21,7 +21,17 @@ use Illuminate\Support\Str;
 
 class ExtractionService
 {
-    public function extractAll(MinutesOfMeeting $mom): void
+    /**
+     * @param  string|null  $overrideText  Transcript to extract from instead of
+     *                                     the meeting's own content. A live
+     *                                     session has nothing stored yet, and
+     *                                     writing its partial transcript onto
+     *                                     the meeting to be read back would put
+     *                                     the wrong content in front of anyone
+     *                                     viewing it — permanently, if the
+     *                                     worker died before restoring it.
+     */
+    public function extractAll(MinutesOfMeeting $mom, ?string $overrideText = null): void
     {
         if (! app(AiControlService::class)->isEnabled()) {
             throw AiDisabledException::make();
@@ -38,7 +48,7 @@ class ExtractionService
 
         $provider = $this->resolveProvider($mom->organization);
         $providerConfig = $this->getProviderConfig($mom->organization);
-        $rawText = $this->getFullText($mom);
+        $rawText = $overrideText ?? $this->getFullText($mom);
 
         if (empty($rawText)) {
             return;

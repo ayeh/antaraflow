@@ -39,7 +39,13 @@ class LiveMeetingService
                 throw new \RuntimeException(__('Meeting already has an active live session.'));
             }
 
-            $defaultConfig = ['chunk_interval' => 30, 'extraction_interval' => 300];
+            // Live extraction is opt-in: it costs about what a full set of
+            // minutes costs, once per interval, on top of transcription.
+            $defaultConfig = [
+                'chunk_interval' => 30,
+                'extraction_interval' => 300,
+                'live_extraction' => false,
+            ];
 
             return LiveMeetingSession::query()->create([
                 'minutes_of_meeting_id' => $meeting->id,

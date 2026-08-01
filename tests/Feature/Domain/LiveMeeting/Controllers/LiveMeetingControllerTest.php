@@ -50,7 +50,7 @@ test('it can start a live session with custom config', function () {
     $response->assertCreated();
 
     $session = LiveMeetingSession::query()->latest('id')->first();
-    expect($session->config)->toBe(['chunk_interval' => 60, 'extraction_interval' => 120]);
+    expect($session->config)->toBe(['chunk_interval' => 60, 'extraction_interval' => 120, 'live_extraction' => false]);
 });
 
 test('it validates config values when starting a session', function () {

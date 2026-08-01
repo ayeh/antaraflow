@@ -36,9 +36,9 @@ test('extracts from accumulated transcript text', function () {
     $mockExtractionService = Mockery::mock(ExtractionService::class);
     $mockExtractionService->shouldReceive('extractAll')
         ->once()
-        ->withArgs(function ($mom) {
-            return str_contains($mom->content, 'First chunk of text.')
-                && str_contains($mom->content, 'Second chunk of text.');
+        ->withArgs(function ($mom, $text) {
+            return str_contains($text, 'First chunk of text.')
+                && str_contains($text, 'Second chunk of text.');
         });
 
     $this->app->instance(ExtractionService::class, $mockExtractionService);
@@ -96,7 +96,7 @@ test('skips extraction when no completed chunks', function () {
     Event::assertNotDispatched(LiveExtractionUpdated::class);
 });
 
-test('restores original meeting content after extraction', function () {
+test('never writes the live transcript onto the meeting', function () {
     Event::fake();
 
     $session = LiveMeetingSession::factory()->create();
@@ -110,11 +110,13 @@ test('restores original meeting content after extraction', function () {
     ]);
 
     $contentDuringExtraction = null;
+    $textPassed = null;
     $mockExtractionService = Mockery::mock(ExtractionService::class);
     $mockExtractionService->shouldReceive('extractAll')
         ->once()
-        ->andReturnUsing(function ($mom) use (&$contentDuringExtraction) {
+        ->andReturnUsing(function ($mom, $text) use (&$contentDuringExtraction, &$textPassed) {
             $contentDuringExtraction = $mom->content;
+            $textPassed = $text;
         });
 
     $this->app->instance(ExtractionService::class, $mockExtractionService);
@@ -124,6 +126,7 @@ test('restores original meeting content after extraction', function () {
 
     $meeting->refresh();
 
-    expect($contentDuringExtraction)->toContain('Live transcript text.')
+    expect($textPassed)->toContain('Live transcript text.')
+        ->and($contentDuringExtraction)->toBe('Original meeting notes here.')
         ->and($meeting->content)->toBe('Original meeting notes here.');
 });

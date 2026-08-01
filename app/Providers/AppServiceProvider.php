@@ -24,7 +24,9 @@ use App\Domain\Collaboration\Models\MeetingShare;
 use App\Domain\Collaboration\Policies\CommentPolicy;
 use App\Domain\Collaboration\Policies\MeetingSharePolicy;
 use App\Domain\LiveMeeting\Events\LiveTranscriptIncomplete;
+use App\Domain\LiveMeeting\Events\TranscriptionChunkProcessed;
 use App\Domain\LiveMeeting\Listeners\NotifyLiveTranscriptIncomplete;
+use App\Domain\LiveMeeting\Listeners\ScheduleLiveExtraction;
 use App\Domain\Meeting\Events\MeetingApproved;
 use App\Domain\Meeting\Events\MeetingFinalized;
 use App\Domain\Meeting\Listeners\NotifyMeetingApproved;
@@ -127,6 +129,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(TranscriptionCompleted::class, NotifyTranscriptionComplete::class);
         Event::listen(TranscriptionFailed::class, NotifyTranscriptionFailed::class);
         Event::listen(LiveTranscriptIncomplete::class, NotifyLiveTranscriptIncomplete::class);
+        Event::listen(TranscriptionChunkProcessed::class, ScheduleLiveExtraction::class);
         Event::listen(ExtractionCompleted::class, NotifyExtractionComplete::class);
         Event::listen(ExtractionFailed::class, NotifyExtractionFailed::class);
         Event::listen(MeetingFinalized::class, NotifyMeetingFinalized::class);

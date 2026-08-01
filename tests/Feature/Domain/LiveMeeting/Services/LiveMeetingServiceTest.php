@@ -43,7 +43,7 @@ test('starts a session successfully', function () {
         ->and($session->minutes_of_meeting_id)->toBe($this->meeting->id)
         ->and($session->started_by)->toBe($this->user->id)
         ->and($session->started_at)->not->toBeNull()
-        ->and($session->config)->toBe(['chunk_interval' => 30, 'extraction_interval' => 300]);
+        ->and($session->config)->toBe(['chunk_interval' => 30, 'extraction_interval' => 300, 'live_extraction' => false]);
 });
 
 test('starts a session with custom config', function () {
@@ -51,7 +51,7 @@ test('starts a session with custom config', function () {
 
     $session = $this->service->startSession($this->meeting, $this->user, $config);
 
-    expect($session->config)->toBe($config);
+    expect($session->config)->toBe([...$config, 'live_extraction' => false]);
 });
 
 test('throws exception when session already active', function () {
