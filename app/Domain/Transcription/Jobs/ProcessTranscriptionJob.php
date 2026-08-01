@@ -31,6 +31,18 @@ class ProcessTranscriptionJob implements ShouldQueue
     /** Maximum file size in bytes for the Whisper API (25 MB). */
     private const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
+    /** Lowest Opus bitrate worth attempting before giving up on a recording. */
+    private const MIN_BITRATE = 6_000;
+
+    /** Ceiling for the calculated bitrate; higher gains nothing for speech. */
+    private const MAX_BITRATE = 48_000;
+
+    /** Bitrate used when the source duration cannot be probed. */
+    private const FALLBACK_BITRATE = 16_000;
+
+    /** How many times to re-encode at a lower bitrate before failing. */
+    private const MAX_COMPRESSION_ATTEMPTS = 3;
+
     public function __construct(
         public AudioTranscription $transcription,
     ) {}
@@ -136,37 +148,75 @@ class ProcessTranscriptionJob implements ShouldQueue
     }
 
     /**
-     * Compress audio to mono 16kHz MP3 to fit within the Whisper API size limit.
-     * Bitrate is calculated dynamically based on duration to guarantee output < 25 MB.
+     * Compress audio to mono 16kHz Opus so it fits within the transcription size limit.
+     *
+     * The bitrate is derived from the source duration, but a duration probe can
+     * be wrong or unavailable, so the encoded result is measured and re-encoded
+     * at a proportionally lower bitrate until it actually fits. Public so the
+     * size guard can be exercised with a small $maxBytes in tests.
      */
-    private function compressAudio(string $filePath): string
+    public function compressAudio(string $filePath, ?int $maxBytes = null): string
     {
-        // Use Opus/OGG: Whisper supports .ogg and Opus has no bitrate quantization unlike MP3
-        $compressedPath = sys_get_temp_dir().'/whisper_'.uniqid().'.ogg';
+        $maxBytes ??= self::MAX_FILE_SIZE;
 
-        // Get duration so we can calculate the exact bitrate needed
-        $probeResult = Process::timeout(30)->run([
+        // Aim below the hard limit so container overhead cannot push us over.
+        $targetBytes = (int) ($maxBytes * 0.8);
+
+        $duration = $this->probeDuration($filePath);
+
+        $bitrate = $duration > 0
+            ? max(self::MIN_BITRATE, min(self::MAX_BITRATE, (int) ($targetBytes * 8 / $duration)))
+            : self::FALLBACK_BITRATE;
+
+        for ($attempt = 1; $attempt <= self::MAX_COMPRESSION_ATTEMPTS; $attempt++) {
+            $compressedPath = $this->encodeToOpus($filePath, $bitrate);
+            $size = filesize($compressedPath);
+
+            if ($size !== false && $size <= $maxBytes) {
+                return $compressedPath;
+            }
+
+            @unlink($compressedPath);
+
+            if ($bitrate <= self::MIN_BITRATE || $size === false || $size <= 0) {
+                break;
+            }
+
+            $bitrate = max(self::MIN_BITRATE, (int) ($bitrate * $targetBytes / $size));
+        }
+
+        throw new \RuntimeException(__('Audio could not be compressed under :size MB for transcription; the recording is too long.', [
+            'size' => (int) round($maxBytes / 1024 / 1024),
+        ]));
+    }
+
+    /** Source duration in seconds, or 0.0 when it cannot be determined. */
+    private function probeDuration(string $filePath): float
+    {
+        $result = Process::timeout(30)->run([
             'ffprobe', '-v', 'quiet',
             '-show_entries', 'format=duration',
             '-of', 'csv=p=0',
             $filePath,
         ]);
 
-        $duration = $probeResult->successful() ? (float) trim($probeResult->output()) : 0.0;
+        return $result->successful() ? (float) trim($result->output()) : 0.0;
+    }
 
-        // Target 20 MB to leave a comfortable margin below the 25 MB API limit.
-        // Opus supports arbitrary bitrates so the calculated value is used exactly.
-        $targetBytes = 20 * 1024 * 1024;
-        $bitrate = $duration > 0
-            ? max(6_000, min(48_000, (int) ($targetBytes * 8 / $duration)))
-            : 16_000;
+    /**
+     * Encode to Opus/OGG, which Whisper accepts and which — unlike MP3 — honours
+     * an arbitrary bitrate exactly rather than snapping to a quantized ladder.
+     */
+    private function encodeToOpus(string $filePath, int $bitrate): string
+    {
+        $compressedPath = sys_get_temp_dir().'/whisper_'.uniqid().'.ogg';
 
         $result = Process::timeout(300)->run([
             'ffmpeg', '-i', $filePath,
-            '-c:a', 'libopus',                  // Opus codec — arbitrary bitrate, no quantization
+            '-c:a', 'libopus',
             '-ac', '1',                         // Mono
             '-ar', '16000',                     // 16kHz (Whisper's native sample rate)
-            '-b:a', $bitrate,                   // Dynamic bitrate (exact, not rounded)
+            '-b:a', (string) $bitrate,
             '-y',                               // Overwrite
             $compressedPath,
         ]);

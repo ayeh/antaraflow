@@ -48,3 +48,14 @@ function something()
 {
     // ..
 }
+
+/**
+ * Whether ffmpeg and ffprobe are on PATH, for tests that exercise real audio handling.
+ */
+function ffmpegAvailable(): bool
+{
+    static $available = null;
+
+    return $available ??= Illuminate\Support\Facades\Process::run(['which', 'ffmpeg'])->successful()
+        && Illuminate\Support\Facades\Process::run(['which', 'ffprobe'])->successful();
+}

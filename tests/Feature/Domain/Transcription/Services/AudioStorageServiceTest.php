@@ -126,11 +126,7 @@ it('preserves the full duration when merging real webm chunks', function () {
     ])->output());
 
     expect($duration)->toBeGreaterThan(14.0);
-})->skip(
-    fn () => ! Process::run(['which', 'ffmpeg'])->successful()
-        || ! Process::run(['which', 'ffprobe'])->successful(),
-    'ffmpeg and ffprobe are required for this test.',
-);
+})->skip(fn () => ! ffmpegAvailable(), 'ffmpeg and ffprobe are required for this test.');
 
 it('throws an exception when merging with no chunks', function () {
     Storage::fake('local');

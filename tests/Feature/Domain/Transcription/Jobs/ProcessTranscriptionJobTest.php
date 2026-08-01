@@ -12,6 +12,7 @@ use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
 use App\Support\Enums\TranscriptionStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Process;
 
 uses(RefreshDatabase::class);
 
@@ -135,3 +136,42 @@ test('job sets processing status before transcribing', function () {
     expect($transcription->started_at)->not->toBeNull()
         ->and($transcription->status)->toBe(TranscriptionStatus::Completed);
 });
+
+it('compresses audio to fit under the size limit', function (): void {
+    $source = sys_get_temp_dir().'/compress_source_'.uniqid().'.wav';
+
+    Process::run([
+        'ffmpeg', '-hide_banner', '-loglevel', 'error',
+        '-f', 'lavfi', '-i', 'sine=frequency=440:duration=60',
+        '-y', $source,
+    ])->throw();
+
+    $job = new ProcessTranscriptionJob(AudioTranscription::factory()->create());
+
+    $maxBytes = 200 * 1024;
+    $compressed = $job->compressAudio($source, $maxBytes);
+
+    expect(filesize($compressed))->toBeLessThanOrEqual($maxBytes);
+
+    @unlink($source);
+    @unlink($compressed);
+})->skip(fn () => ! ffmpegAvailable(), 'ffmpeg and ffprobe are required for this test.');
+
+it('fails loudly when audio cannot be compressed under the size limit', function (): void {
+    $source = sys_get_temp_dir().'/compress_source_'.uniqid().'.wav';
+
+    Process::run([
+        'ffmpeg', '-hide_banner', '-loglevel', 'error',
+        '-f', 'lavfi', '-i', 'sine=frequency=440:duration=60',
+        '-y', $source,
+    ])->throw();
+
+    $job = new ProcessTranscriptionJob(AudioTranscription::factory()->create());
+
+    try {
+        expect(fn () => $job->compressAudio($source, 1_000))
+            ->toThrow(RuntimeException::class, 'could not be compressed');
+    } finally {
+        @unlink($source);
+    }
+})->skip(fn () => ! ffmpegAvailable(), 'ffmpeg and ffprobe are required for this test.');
