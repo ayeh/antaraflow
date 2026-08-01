@@ -24,9 +24,13 @@ final class LetterheadRenderer implements BlockRenderer
         $html = "<div style=\"text-align:{$align};margin-bottom:12px;\">";
 
         if (! empty($settings['logo_path'])) {
-            $url = asset('storage/'.$settings['logo_path']);
-            $height = $settings['logo_height'] ?? 60;
-            $html .= "<img src=\"{$url}\" style=\"max-height:{$height}px;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;\" alt=\"logo\">";
+            $path = storage_path('app/public/'.$settings['logo_path']);
+            if (file_exists($path)) {
+                $mime = mime_content_type($path) ?: 'image/png';
+                $data = base64_encode((string) file_get_contents($path));
+                $height = $settings['logo_height'] ?? 60;
+                $html .= "<img src=\"data:{$mime};base64,{$data}\" style=\"max-height:{$height}px;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;\" alt=\"logo\">";
+            }
         }
 
         $lines = $settings['lines'] ?? [];
