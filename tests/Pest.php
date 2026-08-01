@@ -50,6 +50,19 @@ function something()
 }
 
 /**
+ * A TranscriberFactory that hands back the given transcriber for every mode,
+ * so job tests can drive the job with a stubbed provider.
+ */
+function fakeTranscriberFactory(
+    App\Infrastructure\AI\Contracts\TranscriberInterface $transcriber
+): App\Infrastructure\AI\TranscriberFactory {
+    $factory = Mockery::mock(App\Infrastructure\AI\TranscriberFactory::class);
+    $factory->shouldReceive('for')->andReturn($transcriber);
+
+    return $factory;
+}
+
+/**
  * Whether ffmpeg and ffprobe are on PATH, for tests that exercise real audio handling.
  */
 function ffmpegAvailable(): bool

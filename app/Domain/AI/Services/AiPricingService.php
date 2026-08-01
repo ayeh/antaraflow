@@ -41,17 +41,31 @@ class AiPricingService
     }
 
     /**
-     * Estimate the USD cost of a transcription call from audio duration.
+     * Estimate the USD cost of a transcription call.
+     *
+     * Duration-billed models are costed from $audioSeconds. Models billed on
+     * audio/text tokens instead are costed from the token counts, which the
+     * provider returns per call — pass them when available.
      */
-    public function transcriptionCost(string $model, float $audioSeconds): float
+    public function transcriptionCost(string $model, float $audioSeconds, int $inputTokens = 0, int $outputTokens = 0): float
     {
         $perMinute = $this->resolveTranscriptionRate($model);
 
-        if ($perMinute === null) {
+        if ($perMinute !== null) {
+            return round(($audioSeconds / 60) * $perMinute, 6);
+        }
+
+        $rates = $this->resolveTranscriptionTokenRates($model);
+
+        if ($rates === null) {
             return 0.0;
         }
 
-        return round(($audioSeconds / 60) * $perMinute, 6);
+        return round(
+            ($inputTokens / 1_000_000) * $rates['input']
+            + ($outputTokens / 1_000_000) * $rates['output'],
+            6,
+        );
     }
 
     public static function flushCache(): void
@@ -108,6 +122,39 @@ class AiPricingService
         $rates = config('ai.pricing.transcription', [])[$model] ?? null;
 
         return is_array($rates) && isset($rates['per_minute']) ? (float) $rates['per_minute'] : null;
+    }
+
+    /**
+     * Per-million token rates for transcription models billed on tokens rather
+     * than duration. The DB registry's chat columns are reused for these.
+     *
+     * @return array{input: float, output: float}|null
+     */
+    private function resolveTranscriptionTokenRates(string $model): ?array
+    {
+        foreach ($this->registry() as $price) {
+            if ($price->input_per_mtok === null) {
+                continue;
+            }
+
+            if ($this->matches($price, $model)) {
+                return [
+                    'input' => (float) $price->input_per_mtok,
+                    'output' => (float) $price->output_per_mtok,
+                ];
+            }
+        }
+
+        $rates = config('ai.pricing.transcription', [])[$model] ?? null;
+
+        if (is_array($rates) && isset($rates['input'], $rates['output'])) {
+            return [
+                'input' => (float) $rates['input'],
+                'output' => (float) $rates['output'],
+            ];
+        }
+
+        return null;
     }
 
     private function matches(AiModelPrice $price, string $model): bool

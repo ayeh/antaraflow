@@ -9,8 +9,9 @@ use App\Domain\AI\Services\OrgBudgetService;
 use App\Domain\Transcription\Events\TranscriptionCompleted;
 use App\Domain\Transcription\Events\TranscriptionFailed;
 use App\Domain\Transcription\Models\AudioTranscription;
-use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
+use App\Infrastructure\AI\TranscriberFactory;
+use App\Support\Enums\TranscriptionMode;
 use App\Support\Enums\TranscriptionStatus;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -47,8 +48,9 @@ class ProcessTranscriptionJob implements ShouldQueue
         public AudioTranscription $transcription,
     ) {}
 
-    public function handle(TranscriberInterface $transcriber): void
+    public function handle(TranscriberFactory $transcribers): void
     {
+        $transcriber = $transcribers->for(TranscriptionMode::Upload);
         $organizationId = $this->transcription->minutesOfMeeting?->organization_id;
         app(OrgBudgetService::class)->guard($organizationId);
 
@@ -68,16 +70,17 @@ class ProcessTranscriptionJob implements ShouldQueue
         try {
             $filePath = Storage::disk('local')->path($this->transcription->file_path);
 
-            // Compress large files to fit within the Whisper API 25 MB limit
+            // Compress large files to fit within the transcription size limit
             if (file_exists($filePath) && filesize($filePath) > self::MAX_FILE_SIZE) {
                 $filePath = $this->compressAudio($filePath);
                 $compressedPath = $filePath;
             }
 
-            $result = $transcriber->transcribe(
-                $filePath,
-                ['language' => $this->transcription->language]
-            );
+            $result = $transcriber->transcribe($filePath, [
+                'language' => $this->transcription->language,
+                'duration_seconds' => $this->transcription->duration_seconds,
+                'keywords' => $this->keywords(),
+            ]);
 
             $this->transcription->update([
                 'status' => TranscriptionStatus::Completed,
@@ -86,7 +89,11 @@ class ProcessTranscriptionJob implements ShouldQueue
                 'completed_at' => now(),
             ]);
 
-            $assignedSegments = $this->assignSpeakers($result->segments);
+            // A diarizing model already knows who spoke; the gap heuristic is
+            // only a stand-in for providers that cannot tell us.
+            $assignedSegments = $transcriber->supportsDiarization()
+                ? $result->segments
+                : $this->assignSpeakers($result->segments);
 
             foreach ($assignedSegments as $i => $segment) {
                 $this->transcription->segments()->create([
@@ -113,6 +120,34 @@ class ProcessTranscriptionJob implements ShouldQueue
                 @unlink($compressedPath);
             }
         }
+    }
+
+    /**
+     * Proper nouns the recording is likely to contain, sent as recognition
+     * hints. Attendee and organisation names are exactly what a general model
+     * mishears, and they are the words a reader most notices getting wrong.
+     *
+     * @return array<int, string>
+     */
+    private function keywords(): array
+    {
+        $meeting = $this->transcription->minutesOfMeeting;
+
+        if (! $meeting) {
+            return [];
+        }
+
+        $keywords = $meeting->attendees()
+            ->pluck('name')
+            ->merge($meeting->attendees()->pluck('company'))
+            ->push($meeting->title)
+            ->filter()
+            ->map(fn (string $value) => trim($value))
+            ->reject(fn (string $value) => $value === '')
+            ->unique()
+            ->values();
+
+        return $keywords->all();
     }
 
     /**

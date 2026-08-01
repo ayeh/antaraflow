@@ -30,6 +30,20 @@ return [
             'api_key' => env('OPENAI_API_KEY'),
             'model' => env('OPENAI_MODEL', 'gpt-5.4-mini'),
             'transcription_model' => env('OPENAI_WHISPER_MODEL', 'whisper-1'),
+
+            /*
+             * Uploaded recordings are transcribed with the diarizing model: it
+             * is the only one that returns per-segment speaker labels alongside
+             * start/end times, which the transcript view depends on.
+             */
+            'upload_transcription_model' => env('OPENAI_UPLOAD_TRANSCRIPTION_MODEL', 'gpt-4o-transcribe-diarize'),
+
+            /*
+             * Live chunks are short and already carry their own start/end from
+             * the session, so they use the cheaper, faster model that returns
+             * plain text without timestamps.
+             */
+            'live_transcription_model' => env('OPENAI_LIVE_TRANSCRIPTION_MODEL', 'gpt-transcribe'),
         ],
         'anthropic' => [
             'api_key' => env('ANTHROPIC_API_KEY'),
@@ -52,7 +66,9 @@ return [
     /*
      * Per-model pricing in USD used to estimate spend from recorded usage.
      * Chat/completion models: cost per 1 million tokens (input / output).
-     * Transcription models: cost per audio minute.
+     * Transcription models: cost per audio minute, OR — for models billed on
+     * audio/text tokens rather than duration — the same input/output per-million
+     * shape as chat. A model with input/output keys is costed from tokens.
      * Unlisted models are treated as $0 (logged), so keep this current.
      */
     'pricing' => [
@@ -70,6 +86,14 @@ return [
         ],
         'transcription' => [
             'whisper-1' => ['per_minute' => 0.006],
+            'gpt-transcribe' => ['per_minute' => 0.0045],
+            'gpt-live-transcribe' => ['per_minute' => 0.017],
+            'gpt-4o-transcribe' => ['per_minute' => 0.006],
+            'gpt-4o-mini-transcribe' => ['per_minute' => 0.003],
+
+            // Billed on tokens, not duration — roughly $0.006/min in practice,
+            // but it scales with how much speech the recording actually contains.
+            'gpt-4o-transcribe-diarize' => ['input' => 2.50, 'output' => 10.00],
         ],
     ],
 ];

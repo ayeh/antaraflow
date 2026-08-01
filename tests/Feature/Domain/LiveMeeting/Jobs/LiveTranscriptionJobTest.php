@@ -54,7 +54,7 @@ test('transcribes chunk and updates status to completed', function () {
         ));
 
     $job = new LiveTranscriptionJob($chunk);
-    $job->handle($mockTranscriber);
+    $job->handle(fakeTranscriberFactory($mockTranscriber));
 
     $chunk->refresh();
 
@@ -96,7 +96,7 @@ test('broadcasts TranscriptionChunkProcessed event on success', function () {
         ));
 
     $job = new LiveTranscriptionJob($chunk);
-    $job->handle($mockTranscriber);
+    $job->handle(fakeTranscriberFactory($mockTranscriber));
 
     Event::assertDispatched(TranscriptionChunkProcessed::class, function ($event) use ($chunk) {
         return $event->chunk->id === $chunk->id;
@@ -149,7 +149,7 @@ test('sets processing status before transcribing', function () {
         });
 
     $job = new LiveTranscriptionJob($chunk);
-    $job->handle($mockTranscriber);
+    $job->handle(fakeTranscriberFactory($mockTranscriber));
 
     expect($statusDuringTranscription)->toBe(ChunkStatus::Processing);
 });
@@ -191,7 +191,7 @@ test('passes correct language option from meeting', function () {
         ));
 
     $job = new LiveTranscriptionJob($chunk);
-    $job->handle($mockTranscriber);
+    $job->handle(fakeTranscriberFactory($mockTranscriber));
 
     $chunk->refresh();
     expect($chunk->text)->toBe('Bonjour');
@@ -218,7 +218,7 @@ test('trips the circuit breaker and abandons the chunk on a provider quota failu
         ->once()
         ->andThrow(AiQuotaExceededException::make('You exceeded your current quota'));
 
-    (new LiveTranscriptionJob($chunk))->handle($mockTranscriber);
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
 
     $chunk->refresh();
 
@@ -244,7 +244,7 @@ test('skips the provider entirely while the circuit breaker is open', function (
     $mockTranscriber = Mockery::mock(TranscriberInterface::class);
     $mockTranscriber->shouldNotReceive('transcribe');
 
-    (new LiveTranscriptionJob($chunk))->handle($mockTranscriber);
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
 
     $chunk->refresh();
 
@@ -287,7 +287,7 @@ test('blocks the chunk when the organization is over its AI budget', function ()
     $mockTranscriber = Mockery::mock(TranscriberInterface::class);
     $mockTranscriber->shouldNotReceive('transcribe');
 
-    (new LiveTranscriptionJob($chunk))->handle($mockTranscriber);
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
 
     $chunk->refresh();
 

@@ -11,9 +11,8 @@ use App\Infrastructure\AI\AIProviderFactory;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use App\Infrastructure\AI\Providers\DisabledAIProvider;
-use App\Infrastructure\AI\Providers\DisabledTranscriber;
-use App\Infrastructure\AI\Providers\OpenAIWhisperTranscriber;
-use App\Infrastructure\AI\Providers\WhisperLocalTranscriber;
+use App\Infrastructure\AI\TranscriberFactory;
+use App\Support\Enums\TranscriptionMode;
 use Illuminate\Support\ServiceProvider;
 
 class DomainServiceProvider extends ServiceProvider
@@ -31,19 +30,13 @@ class DomainServiceProvider extends ServiceProvider
             return AIProviderFactory::make($defaultProvider, $config);
         });
 
-        $this->app->bind(TranscriberInterface::class, function ($app) {
-            if (! $app->make(AiControlService::class)->isEnabled()) {
-                return new DisabledTranscriber;
-            }
-
-            $transcriber = config('ai.transcriber', 'openai');
-
-            if ($transcriber === 'whisper_local') {
-                return new WhisperLocalTranscriber(config('ai.providers.whisper_local', []));
-            }
-
-            return new OpenAIWhisperTranscriber(config('ai.providers.openai', []));
-        });
+        // Callers that do not care which model answers — voice notes, ad-hoc
+        // checks — get the cheaper text-only transcriber. Jobs that need
+        // speaker labels ask the factory for the upload model instead.
+        $this->app->bind(
+            TranscriberInterface::class,
+            fn ($app) => $app->make(TranscriberFactory::class)->for(TranscriptionMode::Live),
+        );
 
         $this->app->singleton(AuditService::class);
         $this->app->singleton(AuthorizationService::class);

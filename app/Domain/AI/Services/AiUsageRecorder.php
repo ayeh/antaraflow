@@ -66,15 +66,20 @@ class AiUsageRecorder
         float $audioSeconds,
         ?int $durationMs = null,
         string $status = 'success',
+        int $inputTokens = 0,
+        int $outputTokens = 0,
     ): void {
         $this->write([
             'provider' => $provider,
             'model' => $model,
             'operation' => 'transcription',
             'audio_seconds' => $audioSeconds,
+            'prompt_tokens' => $inputTokens,
+            'completion_tokens' => $outputTokens,
+            'total_tokens' => $inputTokens + $outputTokens,
             'duration_ms' => $durationMs,
             'status' => $status,
-            'cost' => $this->pricing->transcriptionCost($model, $audioSeconds),
+            'cost' => $this->pricing->transcriptionCost($model, $audioSeconds, $inputTokens, $outputTokens),
         ]);
     }
 

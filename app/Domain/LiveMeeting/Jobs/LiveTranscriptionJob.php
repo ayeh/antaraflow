@@ -10,9 +10,10 @@ use App\Domain\AI\Services\OrgBudgetService;
 use App\Domain\LiveMeeting\Enums\ChunkStatus;
 use App\Domain\LiveMeeting\Events\TranscriptionChunkProcessed;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
-use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use App\Infrastructure\AI\Exceptions\AiQuotaExceededException;
 use App\Infrastructure\AI\Exceptions\OrgBudgetExceededException;
+use App\Infrastructure\AI\TranscriberFactory;
+use App\Support\Enums\TranscriptionMode;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -37,8 +38,9 @@ class LiveTranscriptionJob implements ShouldQueue
     /** Circuit breaker feature key shared by every live transcription chunk. */
     public const CIRCUIT = 'live_transcription';
 
-    public function handle(TranscriberInterface $transcriber): void
+    public function handle(TranscriberFactory $transcribers): void
     {
+        $transcriber = $transcribers->for(TranscriptionMode::Live);
         $breaker = app(AiCircuitBreaker::class);
         $organizationId = $this->chunk->session?->meeting?->organization_id;
 
@@ -72,7 +74,10 @@ class LiveTranscriptionJob implements ShouldQueue
 
             $language = $this->chunk->session?->meeting?->language ?? 'en';
 
-            $result = $transcriber->transcribe($filePath, ['language' => $language]);
+            $result = $transcriber->transcribe($filePath, [
+                'language' => $language,
+                'duration_seconds' => $this->chunk->end_time - $this->chunk->start_time,
+            ]);
 
             $speaker = $result->segments[0]->speaker ?? null;
 

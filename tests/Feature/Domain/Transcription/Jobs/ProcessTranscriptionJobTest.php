@@ -20,6 +20,7 @@ test('job processes transcription and creates segments', function () {
     Event::fake();
 
     $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('supportsDiarization')->andReturnFalse();
     $mockTranscriber->shouldReceive('transcribe')
         ->once()
         ->andReturn(new TranscriptionResult(
@@ -36,7 +37,7 @@ test('job processes transcription and creates segments', function () {
     $transcription = AudioTranscription::factory()->create();
 
     $job = new ProcessTranscriptionJob($transcription);
-    $job->handle($mockTranscriber);
+    $job->handle(fakeTranscriberFactory($mockTranscriber));
 
     $transcription->refresh();
 
@@ -116,6 +117,7 @@ test('job sets processing status before transcribing', function () {
     $statuses = [];
 
     $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('supportsDiarization')->andReturnFalse();
     $mockTranscriber->shouldReceive('transcribe')
         ->once()
         ->andReturnUsing(function () {
@@ -129,7 +131,7 @@ test('job sets processing status before transcribing', function () {
     $transcription = AudioTranscription::factory()->create();
 
     $job = new ProcessTranscriptionJob($transcription);
-    $job->handle($mockTranscriber);
+    $job->handle(fakeTranscriberFactory($mockTranscriber));
 
     $transcription->refresh();
 
@@ -175,3 +177,54 @@ it('fails loudly when audio cannot be compressed under the size limit', function
         @unlink($source);
     }
 })->skip(fn () => ! ffmpegAvailable(), 'ffmpeg and ffprobe are required for this test.');
+
+it('keeps provider speaker labels when the model diarizes', function (): void {
+    Event::fake();
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('supportsDiarization')->andReturnTrue();
+    $mockTranscriber->shouldReceive('transcribe')
+        ->once()
+        ->andReturn(new TranscriptionResult(
+            fullText: 'Selamat pagi. Terima kasih.',
+            confidence: 0.0,
+            segments: [
+                // A 5s gap would make the heuristic invent a new speaker here.
+                new TranscriptionSegmentData(text: 'Selamat pagi.', startTime: 0.0, endTime: 3.0, speaker: 'Siti'),
+                new TranscriptionSegmentData(text: 'Terima kasih.', startTime: 8.0, endTime: 10.0, speaker: 'Siti'),
+            ],
+        ));
+
+    $transcription = AudioTranscription::factory()->create();
+
+    (new ProcessTranscriptionJob($transcription))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    $speakers = $transcription->refresh()->segments()->orderBy('sequence_order')->pluck('speaker')->all();
+
+    expect($speakers)->toBe(['Siti', 'Siti']);
+});
+
+it('sends attendee and meeting names as recognition keywords', function (): void {
+    Event::fake();
+
+    $transcription = AudioTranscription::factory()->create();
+    $meeting = $transcription->minutesOfMeeting;
+    $meeting->update(['title' => 'CR ePengambilan']);
+    $meeting->attendees()->create(['name' => 'Ahmad Faiz', 'company' => 'Antara Digital']);
+
+    $captured = [];
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('supportsDiarization')->andReturnFalse();
+    $mockTranscriber->shouldReceive('transcribe')
+        ->once()
+        ->andReturnUsing(function (string $path, array $options) use (&$captured) {
+            $captured = $options['keywords'] ?? [];
+
+            return new TranscriptionResult(fullText: 'ok', confidence: 0.0, segments: []);
+        });
+
+    (new ProcessTranscriptionJob($transcription))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    expect($captured)->toContain('Ahmad Faiz', 'Antara Digital', 'CR ePengambilan');
+});

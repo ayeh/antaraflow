@@ -238,7 +238,7 @@ test('TranscriptionChunkProcessed event is fired when chunk completes', function
     $this->app->instance(\App\Infrastructure\AI\Contracts\TranscriberInterface::class, $mockTranscriber);
 
     // Run the job directly.
-    (new LiveTranscriptionJob($chunk))->handle($mockTranscriber);
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
 
     // Verify chunk was updated.
     $chunk->refresh();
