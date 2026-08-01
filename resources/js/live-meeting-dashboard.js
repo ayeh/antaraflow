@@ -17,6 +17,11 @@ export default function liveMeetingDashboard(config) {
         lastExtractionUpdate: null,
         isExtracting: false,
 
+        // Live extraction is a paid extra, so it is off unless switched on.
+        liveExtraction: config.liveExtraction || false,
+        extractionUrl: config.extractionUrl,
+        togglingExtraction: false,
+
         // Session state
         sessionStatus: config.sessionStatus || 'active',
         startedAt: config.startedAt,
@@ -288,6 +293,40 @@ export default function liveMeetingDashboard(config) {
                 alert(this.i18n?.networkError || 'Network error. Please check your connection and try again.');
             } finally {
                 this.isEndingSession = false;
+            }
+        },
+
+        async toggleLiveExtraction() {
+            if (this.togglingExtraction || this.sessionStatus !== 'active') {
+                return;
+            }
+
+            const next = !this.liveExtraction;
+            this.togglingExtraction = true;
+
+            try {
+                const response = await fetch(this.extractionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken(),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ enabled: next }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.liveExtraction = data.live_extraction;
+                    // The first result arrives with the next chunk, not instantly.
+                    this.isExtracting = this.liveExtraction;
+                } else {
+                    alert(this.i18n?.extractionToggleFailed || 'Could not change the AI extraction setting. Please try again.');
+                }
+            } catch {
+                alert(this.i18n?.networkError || 'Network error. Please check your connection and try again.');
+            } finally {
+                this.togglingExtraction = false;
             }
         },
 

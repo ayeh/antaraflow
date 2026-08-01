@@ -98,6 +98,31 @@ class LiveMeetingController extends Controller
         return response()->json(['message' => __('Session ended successfully.')]);
     }
 
+    /**
+     * Turn live AI extraction on or off part-way through a session.
+     *
+     * It is a paid extra rather than a property of the meeting, so the person
+     * running it decides while they can see what it is producing — and can
+     * stop it again without ending the session.
+     */
+    public function extraction(Request $request, MinutesOfMeeting $meeting, LiveMeetingSession $session): JsonResponse
+    {
+        $this->authorize('startLive', $meeting);
+        abort_if($session->minutes_of_meeting_id !== $meeting->id, 404);
+        abort_if(! $session->isActive(), 409, 'Session is not active.');
+
+        $enabled = $request->validate(['enabled' => ['required', 'boolean']])['enabled'];
+
+        $session->update(['config' => [...$session->config ?? [], 'live_extraction' => $enabled]]);
+
+        return response()->json([
+            'live_extraction' => $enabled,
+            'message' => $enabled
+                ? __('Live AI extraction is on. It will update every few minutes.')
+                : __('Live AI extraction is off.'),
+        ]);
+    }
+
     public function state(Request $request, MinutesOfMeeting $meeting, LiveMeetingSession $session): JsonResponse
     {
         $this->authorize('view', $meeting);

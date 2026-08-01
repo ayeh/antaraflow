@@ -10,6 +10,8 @@
         stateUrl: '{{ route('meetings.live.state', [$meeting, $session]) }}',
         chunkUrl: '{{ route('meetings.live.chunk', [$meeting, $session]) }}',
         endUrl: '{{ route('meetings.live.end', [$meeting, $session]) }}',
+        extractionUrl: '{{ route('meetings.live.extraction', [$meeting, $session]) }}',
+        liveExtraction: {!! \Illuminate\Support\Js::from((bool) ($session->config['live_extraction'] ?? false)) !!},
         meetingUrl: '{{ route('meetings.show', $meeting) }}',
         initialChunks: {!! \Illuminate\Support\Js::from($state['chunks']) !!},
         initialExtractions: {!! \Illuminate\Support\Js::from($state['extractions']) !!},
@@ -19,6 +21,7 @@
             failedEndSession: '{{ __('Failed to end session. Please try again.') }}',
             networkError: '{{ __('Network error. Please check your connection and try again.') }}',
             notYetUpdated: '{{ __('Not yet updated') }}',
+            extractionToggleFailed: '{{ __('Could not change the AI extraction setting. Please try again.') }}',
         },
         startedAt: {!! \Illuminate\Support\Js::from($session->started_at?->toIso8601String()) !!},
         attendees: {!! \Illuminate\Support\Js::from($meeting->attendees()->with('user')->get()) !!},
@@ -147,6 +150,25 @@
                         <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('AI Extractions') }}</h2>
                     </div>
                     <div class="flex items-center gap-2">
+                        {{-- On/off for live extraction. Off by default: each run
+                             costs about what a full set of minutes costs. --}}
+                        @can('startLive', $meeting)
+                            <button type="button"
+                                    @click="toggleLiveExtraction()"
+                                    :disabled="togglingExtraction || sessionStatus !== 'active'"
+                                    :class="liveExtraction
+                                        ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
+                                        : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700'"
+                                    class="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    :title="liveExtraction
+                                        ? '{{ __('AI is summarising as the meeting runs. Click to stop.') }}'
+                                        : '{{ __('Have AI summarise as the meeting runs (costs extra).') }}'">
+                                <span class="w-1.5 h-1.5 rounded-full"
+                                      :class="liveExtraction ? 'bg-white animate-pulse' : 'bg-gray-400'"></span>
+                                <span x-text="liveExtraction ? '{{ __('Live AI on') }}' : '{{ __('Live AI off') }}'"></span>
+                            </button>
+                        @endcan
+
                         {{-- Loading Spinner --}}
                         <svg x-show="isExtracting" x-cloak class="animate-spin w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -165,7 +187,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                         </svg>
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No AI extractions yet') }}</p>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('Decisions, action items, and topics will appear as the AI processes the transcript.') }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1"
+                           x-text="liveExtraction
+                                ? '{{ __('Decisions, action items, and topics will appear as the AI processes the transcript.') }}'
+                                : '{{ __('Turn on Live AI above to have decisions and action items appear as the meeting runs.') }}'"></p>
                     </div>
 
                     {{-- Summary Section --}}

@@ -363,6 +363,7 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
         Route::post('live/{session}/chunk', [\App\Domain\LiveMeeting\Controllers\LiveMeetingController::class, 'chunk'])->name('live.chunk');
         Route::post('live/{session}/end', [\App\Domain\LiveMeeting\Controllers\LiveMeetingController::class, 'end'])->name('live.end');
         Route::get('live/{session}/state', [\App\Domain\LiveMeeting\Controllers\LiveMeetingController::class, 'state'])->name('live.state');
+        Route::post('live/{session}/extraction', [\App\Domain\LiveMeeting\Controllers\LiveMeetingController::class, 'extraction'])->name('live.extraction');
 
         // Offline Data
         Route::get('offline-data', [OfflineDataController::class, 'show'])->name('offline-data');
