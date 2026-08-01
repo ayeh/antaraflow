@@ -403,7 +403,7 @@
     <div x-show="showPreview" x-cloak
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
         @click.self="showPreview = false">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-[90vw] max-w-4xl h-[88vh] flex flex-col overflow-hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl flex flex-col overflow-hidden" style="width:calc(100vw - 32px);height:calc(100vh - 32px)">
             <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-slate-700 shrink-0">
                 <h3 class="font-semibold text-gray-900 dark:text-white text-sm">Pratonton Dokumen</h3>
                 <div class="flex items-center gap-2">
