@@ -6,6 +6,59 @@
     100% { transform: translateX(200%); width: 50%; }
 }
 .progress-bar-indeterminate { animation: progress-slide 1.5s ease-in-out infinite; }
+
+/*
+    Recorder micro-interactions.
+
+    Every animation here has to say something true about state. The meter was
+    rebuilt precisely because decorative motion had taught people that movement
+    on this panel means nothing, so anything added back has to earn its place:
+    the countdown digit pops and walks teal → amber → crimson because time is
+    running out, the record icon morphs circle → rounded square because that is
+    the recorder idiom for "committed", the tape wakes and collapses because the
+    capture starts and ends.
+
+    Easing and timing follow the house style already set by the confirm modal
+    (see components/confirm-modal.blade.php), whose _cm-icon, _cm-strip and
+    _cm-shake keyframes are reused below rather than duplicated.
+*/
+@keyframes _rec-pop {
+    0%   { opacity: 0; transform: scale(.55); }
+    60%  { opacity: 1; transform: scale(1.16); }
+    80%  { transform: scale(.95); }
+    100% { transform: scale(1); }
+}
+@keyframes _rec-breathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.03); }
+}
+
+._rec-spring  { animation: _rec-pop .35s cubic-bezier(.34,1.56,.64,1) both; }
+
+/* The idle record button breathes: a call to action, not a status light. It is
+   held to 3% at 2.5s, and it lives on the button alone — the tape stays flat
+   and dead until something is actually being captured. */
+._rec-breathe { animation: _rec-breathe 2.5s ease-in-out infinite; }
+
+._rec-morph        { border-radius: 50%; transition: border-radius .35s cubic-bezier(.34,1.56,.64,1), transform .35s cubic-bezier(.34,1.56,.64,1); }
+._rec-morph-square { border-radius: 28%; transform: scale(.88); }
+
+@media (prefers-reduced-motion: reduce) {
+    /* The tape's wake, its collapse and the processing shimmer are painted on a
+       canvas, where this query cannot reach them; audio-recorder.js reads the
+       same preference through matchMedia and skips them. The level meter itself
+       keeps updating either way — it is data, not decoration — and loses only
+       its attack/release easing and its peak decay. */
+    ._rec-spring,
+    ._rec-breathe,
+    ._rec-morph,
+    ._cm-icon,
+    ._cm-strip,
+    ._cm-shake {
+        animation: none !important;
+        transition: none !important;
+    }
+}
 </style>
 <div
     x-data="{
@@ -793,6 +846,10 @@
                             <div x-show="showQuietWarning"
                                  x-cloak
                                  x-transition
+                                 {{-- Shakes on arrival, borrowing the confirm dialog's own
+                                      keyframes. A banner that slides in politely is a banner
+                                      that gets read after the meeting. --}}
+                                 :class="showQuietWarning && '_cm-shake'"
                                  class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 px-4 py-2 flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
                                     <svg class="h-4 w-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -860,24 +917,39 @@
                                             height="64"
                                             class="w-full h-full"></canvas>
 
-                                    {{-- Countdown Overlay --}}
+                                    {{-- Countdown Overlay.
+
+                                         Keyed on the digit so each tick is a new element and the
+                                         pop replays, and coloured teal → amber → crimson on the
+                                         way down: the motion and the colour both say the same
+                                         thing the number says, which is that time is nearly up. --}}
                                     <div x-show="state === 'countdown'"
                                          x-transition
-                                         class="absolute inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm">
-                                        <span x-text="countdownValue"
-                                              class="text-3xl font-bold text-white"></span>
+                                         class="absolute inset-0 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
+                                        <template x-for="digit in [countdownValue]" :key="digit">
+                                            <span id="recorder-countdown-digit"
+                                                  x-text="digit"
+                                                  class="_rec-spring text-4xl font-bold tabular-nums drop-shadow"
+                                                  :style="{ color: digit >= 3 ? '#0D7377' : (digit === 2 ? '#D97706' : '#DC2626') }"></span>
+                                        </template>
                                     </div>
                                 </div>
 
                                 {{-- Controls --}}
                                 <div class="flex items-center gap-2">
-                                    {{-- Test mic / Start Recording (idle / ready) --}}
-                                    <template x-if="['idle', 'ready'].includes(state)">
+                                    {{-- Test mic / Start Recording (idle / ready / counting down).
+
+                                         The button stays mounted through the countdown so its icon
+                                         can morph circle → rounded square — the recorder idiom for
+                                         "committed" — instead of the control vanishing and a
+                                         different one appearing in its place. --}}
+                                    <template x-if="['idle', 'ready', 'countdown'].includes(state)">
                                         <div class="flex w-full items-center gap-2">
                                             {{-- A quiet room is only fixable before the meeting starts,
                                                  so the verdict has to be available before it does. --}}
                                             <button id="recorder-mic-check"
                                                     type="button"
+                                                    x-show="state !== 'countdown'"
                                                     @click="runMicCheck()"
                                                     class="inline-flex flex-shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -885,12 +957,16 @@
                                                 </svg>
                                                 <span x-text="micCheckResult ? @js(__('Test again')) : @js(__('Test mic'))"></span>
                                             </button>
-                                            <button @click="startRecording()"
-                                                    class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
-                                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                                                    <circle cx="12" cy="12" r="6" />
-                                                </svg>
-                                                <span x-text="state === 'ready' ? 'Record' : 'Start Recording'"></span>
+                                            <button id="recorder-record"
+                                                    @click="startRecording()"
+                                                    :disabled="state === 'countdown'"
+                                                    class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
+                                                    :class="state === 'countdown' ? 'cursor-default' : '_rec-breathe'">
+                                                <span class="_rec-morph block h-4 w-4 bg-current"
+                                                      :class="state === 'countdown' && '_rec-morph-square'"></span>
+                                                <span x-text="state === 'countdown'
+                                                    ? @js(__('Starting...'))
+                                                    : (state === 'ready' ? 'Record' : 'Start Recording')"></span>
                                             </button>
                                         </div>
                                     </template>
@@ -993,14 +1069,18 @@
                                     {{-- Complete --}}
                                     <template x-if="state === 'complete'">
                                         <div class="w-full space-y-2">
+                                            {{-- Completion borrows the confirm dialog's icon pop and
+                                                 its strip: the same gesture the rest of the app
+                                                 already uses to say "that worked". --}}
+                                            <div class="_cm-strip h-[3px] w-full rounded-full bg-green-500"></div>
                                             <div class="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="_cm-icon h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                                 </svg>
                                                 <span x-text="successMessage"></span>
                                             </div>
                                             <button @click="resetRecorder()"
-                                                    class="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
+                                                    class="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors">
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                                     <circle cx="12" cy="12" r="6" />
                                                 </svg>
@@ -1128,6 +1208,7 @@
                                 <div x-show="['idle', 'ready', 'checking', 'countdown'].includes(state)" x-cloak class="mt-3">
                                     <select
                                         x-model="language"
+                                        aria-label="{{ __('Language') }}"
                                         :disabled="state !== 'ready'"
                                         class="w-full rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >

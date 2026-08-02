@@ -49,6 +49,16 @@ const MIC_CHECK_GOOD_DBFS = -40;
 const IDLE_LINE_COLOUR = '#9CA3AF';
 
 /**
+ * How long the tape takes to wake at the start of a recording and to collapse
+ * at the end of one. Long enough to read as a transition, short enough that it
+ * is over before anybody could mistake it for the meter's own movement.
+ */
+const SWEEP_MS = 400;
+
+/** One pass of the processing shimmer, left edge to right edge. */
+const SHIMMER_PERIOD_MS = 1400;
+
+/**
  * Which colour band a level falls into. Module scope, not a closure inside the
  * draw loop: this is called a few hundred times per frame.
  */
@@ -132,6 +142,12 @@ export default function audioRecorder(config) {
         _peakSetAtMs: 0,
         _lastFrameMs: 0,
         _quietWarning: null,
+
+        // The tape's wake and collapse. Both are transitions of the meter, not
+        // decoration on top of it, so they live in the draw loop.
+        _sweepStartedAt: 0,
+        _sweepPhase: null,
+        _reducedMotionQuery: null,
 
         // Chunk upload tracking
         chunkIndex: 0,
@@ -804,9 +820,30 @@ export default function audioRecorder(config) {
             // genuinely open and genuinely being listened to, which is exactly
             // what a moving tape claims. It is also the only feedback the user
             // has that the check is doing anything at all.
+            const nowMs = performance.now();
+            const sweep = this.currentSweep(nowMs);
+
             if (['recording', 'checking'].includes(this.state) && this.analyserNode) {
-                this.sampleLevel(performance.now());
+                this.sampleLevel(nowMs);
+
+                if (sweep?.phase === 'in') {
+                    this.paintWakeLine(ctx, width, height, sweep.progress);
+                }
+
                 this.paintTape(ctx, width, height);
+            } else if (sweep?.phase === 'out') {
+                // Stop pressed. The minute of level on the tape was genuinely
+                // measured, so it is allowed to collapse away rather than being
+                // cut; nothing new is sampled while it does.
+                this.audioLevel = 0;
+                this.paintTape(ctx, width, height, sweep.progress);
+            } else if (['processing', 'uploading'].includes(this.state)) {
+                // Not 'stopping': the encoder flush is over in a frame or two,
+                // and starting a shimmer there would put motion on the tape in
+                // the one state whose whole job is to look finished. It is also
+                // where the collapse above is still running.
+                this.audioLevel = 0;
+                this.paintShimmer(ctx, width, height, nowMs);
             } else {
                 this.audioLevel = 0;
                 this.paintFlatLine(ctx, width, height);
@@ -824,6 +861,105 @@ export default function audioRecorder(config) {
                 ctx.fillStyle = 'rgba(55, 65, 81, 0.3)';
             }
             ctx.fillRect(0, 0, width, height);
+        },
+
+        // -- Meter transitions --
+        /**
+         * Whether the user has asked the system for less movement.
+         *
+         * The CSS in the recorder's style block covers everything that is an
+         * element; the tape lives on a canvas, where no media query can reach
+         * it, so the same preference is read here. What it switches off is the
+         * wake, the collapse, the shimmer, and the meter's easing — never the
+         * meter itself, which is data.
+         */
+        prefersReducedMotion() {
+            this._reducedMotionQuery ??= window.matchMedia?.('(prefers-reduced-motion: reduce)') ?? null;
+
+            return this._reducedMotionQuery?.matches === true;
+        },
+
+        /**
+         * Begin the tape's wake ('in') or its collapse ('out').
+         */
+        startSweep(phase) {
+            if (this.prefersReducedMotion()) {
+                this._sweepStartedAt = 0;
+                this._sweepPhase = null;
+
+                return;
+            }
+
+            this._sweepPhase = phase;
+            this._sweepStartedAt = performance.now();
+        },
+
+        /**
+         * The sweep in progress, or null once it has run its course.
+         */
+        currentSweep(nowMs) {
+            if (! this._sweepStartedAt) {
+                return null;
+            }
+
+            const progress = (nowMs - this._sweepStartedAt) / SWEEP_MS;
+
+            if (progress >= 1 || progress < 0) {
+                this._sweepStartedAt = 0;
+                this._sweepPhase = null;
+
+                return null;
+            }
+
+            return { phase: this._sweepPhase, progress };
+        },
+
+        /**
+         * The tape waking: a live line sweeping in from the left over the grey
+         * idle one, as the first real bars start arriving at the right edge.
+         *
+         * The wake animates the baseline and never the bars. A tape that has
+         * just been cleared holds no levels, and inventing some to sweep up
+         * from flat would put a shape on screen that no microphone produced.
+         */
+        paintWakeLine(ctx, width, height, progress) {
+            const front = Math.min(1, progress * 1.15) * width;
+            const centerY = height / 2;
+
+            ctx.fillStyle = IDLE_LINE_COLOUR;
+            ctx.fillRect(front, centerY - 1, width - front, 2);
+
+            ctx.fillStyle = BAND_COLOURS[0];
+            ctx.fillRect(0, centerY - 1.5, front, 3);
+        },
+
+        /**
+         * Work in progress, with no level to report: a band travelling left to
+         * right along the centre line. Indeterminate on purpose — the encoder
+         * and the upload cannot say how far along they are, and a progress bar
+         * that invented a percentage would be worse than one that admits it.
+         */
+        paintShimmer(ctx, width, height, nowMs) {
+            const centerY = height / 2;
+
+            ctx.fillStyle = IDLE_LINE_COLOUR;
+            ctx.fillRect(0, centerY - 1, width, 2);
+
+            if (this.prefersReducedMotion()) {
+                return;
+            }
+
+            const bandWidth = width * 0.25;
+            const travelled = ((nowMs % SHIMMER_PERIOD_MS) / SHIMMER_PERIOD_MS) * (width + bandWidth);
+            const x = travelled - bandWidth;
+
+            const gradient = ctx.createLinearGradient(x, 0, x + bandWidth, 0);
+            gradient.addColorStop(0, 'rgba(13, 115, 119, 0)');
+            gradient.addColorStop(0.5, 'rgba(13, 115, 119, 1)');
+            gradient.addColorStop(1, 'rgba(13, 115, 119, 0)');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x, centerY - 2, bandWidth, 4);
         },
 
         /**
@@ -850,7 +986,13 @@ export default function audioRecorder(config) {
             const firstFrame = this._lastFrameMs === 0;
             this._lastFrameMs = nowMs;
 
-            if (firstFrame) {
+            // Reduced motion takes the easing off the meter, not the meter off
+            // the screen. Every frame is still measured, pushed and drawn; the
+            // bars simply land on the reading instead of gliding onto it, and
+            // the peak drops to it instead of falling.
+            const reducedMotion = this.prefersReducedMotion();
+
+            if (firstFrame || reducedMotion) {
                 // Start the filter at what is actually there. Easing up from the
                 // silence floor instead paints a bar or two of level that was
                 // never captured, at the very moment the user is watching to see
@@ -868,10 +1010,11 @@ export default function audioRecorder(config) {
                 this._peakDbfs = this._smoothedDbfs;
                 this._peakSetAtMs = nowMs;
             } else if (nowMs - this._peakSetAtMs > PEAK_HOLD_MS) {
-                this._peakDbfs = Math.max(
-                    this._smoothedDbfs,
-                    this._peakDbfs - (PEAK_FALL_DB_PER_SECOND * elapsedMs) / 1000,
-                );
+                const fallDb = reducedMotion
+                    ? Infinity
+                    : (PEAK_FALL_DB_PER_SECOND * elapsedMs) / 1000;
+
+                this._peakDbfs = Math.max(this._smoothedDbfs, this._peakDbfs - fallDb);
             }
 
             // The raw measurement, not the smoothed one: the warning is about what
@@ -917,7 +1060,7 @@ export default function audioRecorder(config) {
          * 600px canvas was tried and rejected: it advances two bars a second and
          * reads as a still image, which is the problem this meter exists to fix.
          */
-        paintTape(ctx, width, height) {
+        paintTape(ctx, width, height, collapseProgress = 0) {
             const barCount = Math.max(1, Math.floor(width / BAR_SLOT_PX));
 
             if (!this._barValues || this._barValues.length !== barCount) {
@@ -944,14 +1087,42 @@ export default function audioRecorder(config) {
                         continue;
                     }
 
-                    const half = Math.max(1, this.normaliseLevel(dbfs) * maxHalf);
+                    const collapse = this.collapseFactor(bar / barCount, collapseProgress);
+
+                    if (collapse <= 0) {
+                        continue;
+                    }
+
+                    const half = Math.max(1, this.normaliseLevel(dbfs) * maxHalf) * collapse;
                     ctx.roundRect(bar * slot, centerY - half, barWidth, half * 2, Math.min(barWidth / 2, half));
                 }
 
                 ctx.fill();
             }
 
-            this.paintPeakMarker(ctx, width, centerY, maxHalf);
+            if (collapseProgress <= 0) {
+                this.paintPeakMarker(ctx, width, centerY, maxHalf);
+            }
+        },
+
+        /**
+         * How much of a bar's height survives the collapse, for a bar at
+         * horizontal position 0..1 and a sweep that is `progress` of the way
+         * through. The newest end goes first, so the tape reads as being wound
+         * back rather than fading out all at once.
+         *
+         * Returns 1 for every bar when no collapse is running, which is the
+         * ordinary case and costs one comparison.
+         */
+        collapseFactor(position, progress) {
+            if (progress <= 0) {
+                return 1;
+            }
+
+            const edge = 0.15;
+            const front = (1 + edge) * (1 - progress);
+
+            return Math.min(1, Math.max(0, (front - position) / edge));
         },
 
         /**
@@ -976,6 +1147,8 @@ export default function audioRecorder(config) {
          * silence instead of inheriting the last one's tail.
          */
         resetMeter() {
+            this._sweepStartedAt = 0;
+            this._sweepPhase = null;
             this._tape.clear();
             this._smoothedDbfs = SILENCE_DBFS;
             this._peakDbfs = SILENCE_DBFS;
@@ -1219,6 +1392,10 @@ export default function audioRecorder(config) {
             this.startTimerTick();
             this.acquireWakeLock();
 
+            // The tape wakes: the flat idle line becomes a live one, left to
+            // right, as the first measured bars arrive at the newest edge.
+            this.startSweep('in');
+
             // In live mode, switch to chunked mode immediately with 30-second intervals
             if (this.liveMode) {
                 this.$nextTick(() => {
@@ -1364,6 +1541,11 @@ export default function audioRecorder(config) {
             if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') return;
 
             this.state = 'stopping';
+
+            // The mirror of the wake: what was measured collapses back to the
+            // centre line, newest end first.
+            this.startSweep('out');
+
             this.playBeep(500, 150);
             clearInterval(this.timerInterval);
             clearTimeout(this.chunkInterval);
