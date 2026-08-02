@@ -403,3 +403,8 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
         Route::post('sub-organizations', [ResellerController::class, 'storeSubOrg'])->name('sub-organizations.store');
     });
 });
+
+// Test-only harness for pure client-side audio helpers (no DB, no auth).
+if (app()->environment('local', 'testing')) {
+    Route::view('__audio-harness', 'testing.audio-harness')->name('testing.audio-harness');
+}
