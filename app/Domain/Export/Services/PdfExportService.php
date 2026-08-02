@@ -17,6 +17,18 @@ class PdfExportService
 
     public function export(MinutesOfMeeting $meeting): Response
     {
+        $pdf = Pdf::loadHTML($this->buildHtml($meeting))->setPaper('A4', 'portrait');
+
+        return $pdf->download("meeting-{$meeting->id}.pdf");
+    }
+
+    public function generate(MinutesOfMeeting $meeting): string
+    {
+        return Pdf::loadHTML($this->buildHtml($meeting))->setPaper('A4', 'portrait')->output();
+    }
+
+    private function buildHtml(MinutesOfMeeting $meeting): string
+    {
         $template = $this->renderer->resolveTemplate($meeting);
         $language = $meeting->output_language ?? $meeting->language ?? 'ms';
 
@@ -24,10 +36,6 @@ class PdfExportService
             $this->translator->applyTranslations($meeting, $language);
         }
 
-        $html = $this->renderer->renderHtml($meeting, $template, $language);
-
-        $pdf = Pdf::loadHTML($html)->setPaper('A4', 'portrait');
-
-        return $pdf->download("meeting-{$meeting->id}.pdf");
+        return $this->renderer->renderHtml($meeting, $template, $language);
     }
 }
