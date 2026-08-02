@@ -24,6 +24,7 @@ use App\Domain\Project\Models\Project;
 use App\Models\User;
 use App\Support\Enums\ActionItemStatus;
 use App\Support\Enums\MeetingStatus;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -127,7 +128,38 @@ class MeetingController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'recurrence_pattern']);
 
-        return view('meetings.create', compact('projects', 'templates', 'selectedTemplate', 'meetingSeries'));
+        $defaults = $this->createFormDefaults($request->user());
+
+        return view('meetings.create', compact('projects', 'templates', 'selectedTemplate', 'meetingSeries', 'defaults'));
+    }
+
+    /**
+     * Date and time seeds for the create form, resolved in the organisation's own
+     * timezone rather than the app default, so an evening in UTC+8 does not offer
+     * yesterday's date. The start time is rounded up to the next half hour and is
+     * offered as a suggestion the user can override or ignore.
+     *
+     * @return array{today: string, tomorrow: string, next_monday: string, start_time: string, end_time: string, now_time: string, timezone: string}
+     */
+    private function createFormDefaults(User $user): array
+    {
+        $timezone = $user->currentOrganization?->timezone
+            ?: ($user->timezone ?: config('app.timezone'));
+
+        $localNow = now()->setTimezone($timezone);
+        $suggestedStart = $localNow->copy()
+            ->addMinutes((30 - ($localNow->minute % 30)) % 30)
+            ->startOfMinute();
+
+        return [
+            'today' => $localNow->toDateString(),
+            'tomorrow' => $localNow->copy()->addDay()->toDateString(),
+            'next_monday' => $localNow->copy()->next(CarbonInterface::MONDAY)->toDateString(),
+            'start_time' => $suggestedStart->format('H:i'),
+            'end_time' => $suggestedStart->copy()->addHour()->format('H:i'),
+            'now_time' => $localNow->format('H:i'),
+            'timezone' => $timezone,
+        ];
     }
 
     public function store(CreateMeetingRequest $request): RedirectResponse
