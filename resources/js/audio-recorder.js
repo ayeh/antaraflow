@@ -20,6 +20,8 @@ export default function audioRecorder(config) {
         // Recording data
         mediaRecorder: null,
         mediaStream: null,
+        captureStream: null,
+        selectedDeviceId: null,
         chunks: [],
         sessionId: null,
         mimeType: null,
@@ -188,27 +190,108 @@ export default function audioRecorder(config) {
         },
 
         // -- Stream Setup --
+        /**
+         * Open the microphone with the browser's call-tuned processing disabled.
+         *
+         * echoCancellation, noiseSuppression and autoGainControl are designed for one
+         * person close to a mic on a video call. In a meeting room they actively
+         * destroy the signal we need: noise suppression gates distant speech out as
+         * noise, echo cancellation suppresses the room reflections that carry a far
+         * speaker's energy, and auto gain pumps between loud and quiet talkers.
+         * Disabling echo cancellation also stops Chrome forcing its narrow processing
+         * path, so we receive full-band device audio.
+         */
         async setupStream() {
             this.mediaStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true,
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: false,
+                    voiceIsolation: false,
+                    channelCount: 1,
+                    ...(this.selectedDeviceId ? { deviceId: { exact: this.selectedDeviceId } } : {}),
                 },
             });
 
-            // Setup Web Audio API analyser for real microphone level
-            try {
-                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const source = this.audioContext.createMediaStreamSource(this.mediaStream);
-                this.analyserNode = this.audioContext.createAnalyser();
-                this.analyserNode.fftSize = 256;
-                source.connect(this.analyserNode);
-            } catch (e) {
-                // Fallback: waveform will use static animation
-            }
+            this.captureStream = this.buildGainChain(this.mediaStream) ?? this.mediaStream;
 
             this.drawWaveform();
+        },
+
+        /**
+         * Raise the signal before it reaches the Opus encoder.
+         *
+         * MediaRecorder encodes at a low bitrate. A distant speaker sitting at -50
+         * dBFS receives almost no bits, and no amount of server-side normalisation
+         * recovers that — it only amplifies encoder noise. Gain has to be applied
+         * before encoding, which means here.
+         *
+         * Returns null when Web Audio is unavailable, in which case the caller falls
+         * back to the raw stream. A recording must never be silent because of this.
+         */
+        buildGainChain(stream) {
+            try {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                const source = this.audioContext.createMediaStreamSource(stream);
+
+                const highpass = this.audioContext.createBiquadFilter();
+                highpass.type = 'highpass';
+                highpass.frequency.value = 80;
+
+                const compressor = this.audioContext.createDynamicsCompressor();
+                compressor.threshold.value = -35;
+                compressor.ratio.value = 4;
+                compressor.attack.value = 0.02;
+                compressor.release.value = 0.25;
+
+                const gain = this.audioContext.createGain();
+                gain.gain.value = 1.5;
+
+                this.analyserNode = this.audioContext.createAnalyser();
+                this.analyserNode.fftSize = 2048;
+
+                const destination = this.audioContext.createMediaStreamDestination();
+
+                // A destination node defaults to two channels and up-mixes our mono
+                // capture into both, so the encoder would spend half its bitrate on a
+                // duplicate. Keeping it mono leaves those bits for the quiet speaker.
+                try {
+                    destination.channelCount = 1;
+                } catch {
+                    // Stereo output is wasteful but harmless; keep the chain.
+                }
+
+                source.connect(highpass);
+                highpass.connect(compressor);
+                compressor.connect(gain);
+                gain.connect(this.analyserNode);
+                this.analyserNode.connect(destination);
+
+                this.resumeAudioContext();
+
+                return destination.stream;
+            } catch {
+                if (this.audioContext) {
+                    this.audioContext.close?.().catch(() => {});
+                }
+                this.audioContext = null;
+                this.analyserNode = null;
+
+                return null;
+            }
+        },
+
+        /**
+         * An AudioContext constructed without user activation starts suspended, and a
+         * suspended context renders silence into the destination stream. Because the
+         * capture stream now flows through the graph, that would produce an entirely
+         * silent recording rather than merely a frozen level meter.
+         */
+        resumeAudioContext() {
+            if (this.audioContext?.state === 'suspended') {
+                this.audioContext.resume().catch(() => {});
+            }
         },
 
         // -- Waveform Visualization (time-based animation) --
@@ -316,6 +399,8 @@ export default function audioRecorder(config) {
                 if (this.state !== 'ready') return;
             }
 
+            this.resumeAudioContext();
+
             if (this.showCountdown) {
                 this.startCountdown();
             } else {
@@ -345,7 +430,7 @@ export default function audioRecorder(config) {
             this.sessionId = crypto.randomUUID();
             this.errorMessage = '';
 
-            this.mediaRecorder = new MediaRecorder(this.mediaStream, {
+            this.mediaRecorder = new MediaRecorder(this.captureStream, {
                 mimeType: this.mimeType,
             });
 
@@ -427,9 +512,9 @@ export default function audioRecorder(config) {
 
         startChunkCycle() {
             const startNewChunk = () => {
-                if (this.state !== 'recording' || !this.mediaStream) return;
+                if (this.state !== 'recording' || !this.captureStream) return;
 
-                const recorder = new MediaRecorder(this.mediaStream, {
+                const recorder = new MediaRecorder(this.captureStream, {
                     mimeType: this.mimeType,
                 });
                 this.mediaRecorder = recorder;
@@ -911,15 +996,28 @@ export default function audioRecorder(config) {
 
             if (this.animationFrame) {
                 cancelAnimationFrame(this.animationFrame);
+                this.animationFrame = null;
             }
 
-            if (this.mediaStream) {
-                this.mediaStream.getTracks().forEach((track) => track.stop());
-            }
+            // The microphone is only released by stopping the tracks of the raw
+            // getUserMedia stream. The capture stream's tracks belong to the Web Audio
+            // destination node and hold no hardware, but they keep the graph alive and
+            // stay "live" for anything still holding the stream, so stop them too. When
+            // the gain chain could not be built the two are the same object.
+            [this.captureStream, this.mediaStream].forEach((stream) => {
+                stream?.getTracks().forEach((track) => track.stop());
+            });
 
             if (this.audioContext && this.audioContext.state !== 'closed') {
                 this.audioContext.close().catch(() => {});
             }
+
+            // Null the streams so resetRecorder() falls back to 'idle' and re-opens the
+            // microphone instead of reporting 'ready' on top of dead tracks.
+            this.mediaStream = null;
+            this.captureStream = null;
+            this.audioContext = null;
+            this.analyserNode = null;
         },
     };
 }
