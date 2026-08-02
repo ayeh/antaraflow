@@ -1,4 +1,4 @@
-<div class="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
+<div class="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 flex flex-col items-end gap-3">
     {{-- Mini buttons (shown when fabExpanded) --}}
     <div x-show="fabExpanded" class="flex flex-col items-end gap-2">
 
