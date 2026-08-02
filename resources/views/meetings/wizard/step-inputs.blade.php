@@ -707,6 +707,7 @@
                                 cancelUrl: '{{ route('meetings.audio-chunks.destroy', $meeting) }}',
                                 meetingId: {{ $meeting->id }},
                                 i18n: {
+                                    recording: '{{ __('RECORDING') }}',
                                     recordingInProgress: '{{ __('Recording is in progress. Are you sure you want to leave?') }}',
                                     micDenied: '{{ __('Microphone access denied. Please allow microphone access in your browser settings.') }}',
                                     micNotFound: '{{ __('No microphone found. Please connect a microphone and try again.') }}',

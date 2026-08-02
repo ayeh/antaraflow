@@ -119,6 +119,12 @@ export default function audioRecorder(config) {
         hasPendingRecovery: false,
         recoveryTimestamp: null,
 
+        // Tab indicator. The originals are captured once and put back on the
+        // way out, so a recorder that has finished leaves no trace in the tab.
+        _originalTitle: '',
+        _originalFaviconHref: null,
+        _recordingFaviconHref: null,
+
         // Wall-clock tracking for accurate timer resync after background tab
         _recordingStartTime: null,
         _pausedDuration: 0,
@@ -153,6 +159,12 @@ export default function audioRecorder(config) {
             this.checkPendingRecovery();
             this.checkExistingPermission();
             this.selectedDeviceId = this.readStoredDeviceId();
+
+            this._originalTitle = document.title;
+
+            // Every state transition, without having to remember to call this
+            // from each of the dozen places that assign to `state`.
+            this.$watch('state', () => this.syncTabIndicator());
 
             this.$nextTick(() => {
                 const canvas = this.$refs.waveformCanvas;
@@ -751,6 +763,102 @@ export default function audioRecorder(config) {
             this.audioLevel = 0;
         },
 
+        // -- Tab Indicator --
+        /**
+         * Mirror recording state into the tab title and favicon, so the signal
+         * survives the user switching to another tab entirely.
+         */
+        syncTabIndicator() {
+            if (this.state === 'recording') {
+                document.title = `● ${this.formattedTimer} — ${this.config.i18n?.recording || 'RECORDING'}`;
+                this.setFavicon(true);
+
+                return;
+            }
+
+            document.title = this._originalTitle;
+            this.setFavicon(false);
+        },
+
+        /**
+         * Swap the tab icon for a red disc while recording, and put the real
+         * one back afterwards.
+         *
+         * The disc is drawn on a canvas rather than composited onto the app's
+         * own favicon: that favicon is tenant-brandable and may be an
+         * arbitrary — possibly cross-origin — URL, which would taint the canvas
+         * and make toDataURL() throw, and an .ico is not reliably decodable
+         * into one either. Drawing it also avoids shipping an asset and the
+         * network request to fetch it. At 16px a badged logo is illegible
+         * anyway, where a solid red disc is not, and it speaks the same
+         * language as the pill's ● and the browser's own indicator.
+         */
+        setFavicon(recording) {
+            const link = document.querySelector('link[rel="icon"]');
+
+            if (!link) {
+                return;
+            }
+
+            if (this._originalFaviconHref === null) {
+                this._originalFaviconHref = link.getAttribute('href') ?? '';
+            }
+
+            if (!recording) {
+                link.setAttribute('href', this._originalFaviconHref);
+
+                return;
+            }
+
+            const dot = this.recordingFaviconHref();
+
+            if (dot) {
+                link.setAttribute('href', dot);
+            }
+        },
+
+        /**
+         * The red disc as a data URI, drawn once and reused. Returns null when
+         * canvas is unavailable, in which case the tab title carries the signal
+         * on its own.
+         */
+        recordingFaviconHref() {
+            if (this._recordingFaviconHref !== null) {
+                return this._recordingFaviconHref;
+            }
+
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 32;
+                canvas.height = 32;
+
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#DC2626';
+                ctx.beginPath();
+                ctx.arc(16, 16, 14, 0, Math.PI * 2);
+                ctx.fill();
+
+                this._recordingFaviconHref = canvas.toDataURL('image/png');
+            } catch {
+                // Remember the failure as an empty string rather than null, so
+                // this is not retried on every tick.
+                this._recordingFaviconHref = '';
+            }
+
+            return this._recordingFaviconHref;
+        },
+
+        /**
+         * Hand the tab back exactly as it was found.
+         */
+        restoreTabIndicator() {
+            if (this._originalTitle) {
+                document.title = this._originalTitle;
+            }
+
+            this.setFavicon(false);
+        },
+
         // -- Recording Controls --
         async startRecording() {
             // Keyed off the stream rather than the state name: the microphone is now
@@ -943,6 +1051,7 @@ export default function audioRecorder(config) {
             this.timerInterval = setInterval(() => {
                 this.timer++;
                 this.pulseOn = !this.pulseOn;
+                this.syncTabIndicator();
 
                 if (this.timer === 300 && !this.isLongRecording && !this.liveMode) {
                     this.switchToChunkedMode();
@@ -1393,6 +1502,7 @@ export default function audioRecorder(config) {
                 this.animationFrame = null;
             }
 
+            this.restoreTabIndicator();
             this.releaseStream();
         },
     };
