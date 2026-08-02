@@ -952,6 +952,23 @@
                                     </template>
                                 </div>
 
+                                {{-- Microphone picker: only worth showing when there is a choice to make --}}
+                                <div x-show="inputDevices.length > 1" x-cloak class="mt-3">
+                                    <label for="recorder-mic-device" class="mb-1 block text-xs text-gray-500 dark:text-gray-400">{{ __('Microphone') }}</label>
+                                    <select
+                                        id="recorder-mic-device"
+                                        x-model="selectedDeviceId"
+                                        @change="selectInputDevice($event.target.value)"
+                                        :disabled="isMicrophoneBusy()"
+                                        :title="isMicrophoneBusy() ? @js(__('Stop the recording before switching microphone.')) : null"
+                                        class="w-full rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <template x-for="device in inputDevices" :key="device.deviceId">
+                                            <option :value="device.deviceId" x-text="device.label || @js(__('Microphone'))"></option>
+                                        </template>
+                                    </select>
+                                </div>
+
                                 {{-- Language selector --}}
                                 <div x-show="['idle', 'ready', 'countdown'].includes(state)" x-cloak class="mt-3">
                                     <select

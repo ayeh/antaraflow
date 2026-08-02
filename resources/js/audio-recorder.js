@@ -24,6 +24,7 @@ export default function audioRecorder(config) {
         micOpen: false,
         permissionGranted: false,
         selectedDeviceId: null,
+        inputDevices: [],
         chunks: [],
         sessionId: null,
         mimeType: null,
@@ -91,6 +92,7 @@ export default function audioRecorder(config) {
             this.detectMimeType();
             this.checkPendingRecovery();
             this.checkExistingPermission();
+            this.selectedDeviceId = this.readStoredDeviceId();
 
             this.$nextTick(() => {
                 const canvas = this.$refs.waveformCanvas;
@@ -117,9 +119,7 @@ export default function audioRecorder(config) {
                         this.timer = Math.floor((Date.now() - this._recordingStartTime - this._pausedDuration) / 1000);
                     }
                     // Restart waveform animation if it stopped
-                    if (!this.animationFrame) {
-                        this.drawWaveform();
-                    }
+                    this.startWaveform();
                 }
             };
             document.addEventListener('visibilitychange', this._visibilityHandler);
@@ -210,21 +210,143 @@ export default function audioRecorder(config) {
          * path, so we receive full-band device audio.
          */
         async setupStream() {
-            this.mediaStream = await navigator.mediaDevices.getUserMedia({
-                audio: {
-                    echoCancellation: false,
-                    noiseSuppression: false,
-                    autoGainControl: false,
-                    voiceIsolation: false,
-                    channelCount: 1,
-                    ...(this.selectedDeviceId ? { deviceId: { exact: this.selectedDeviceId } } : {}),
-                },
-            });
+            this.mediaStream = await this.openMicrophone(this.selectedDeviceId);
 
             this.captureStream = this.buildGainChain(this.mediaStream) ?? this.mediaStream;
             this.micOpen = true;
 
-            this.drawWaveform();
+            await this.loadInputDevices();
+
+            this.startWaveform();
+        },
+
+        /**
+         * The capture constraints, built fresh so no caller can mutate a shared
+         * object. See setupStream() for why the browser's own processing is off.
+         *
+         * @return {{echoCancellation: boolean, noiseSuppression: boolean, autoGainControl: boolean, voiceIsolation: boolean, channelCount: number}}
+         */
+        captureConstraints() {
+            return {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false,
+                voiceIsolation: false,
+                channelCount: 1,
+            };
+        },
+
+        /**
+         * Open the microphone, preferring the device the user last chose.
+         *
+         * The remembered device id outlives the device: unplug the USB conference
+         * mic between meetings and `deviceId: {exact: ...}` rejects with
+         * OverconstrainedError (some browsers report NotFoundError instead). Left
+         * alone that leaves the user unable to record at all, behind an error
+         * naming a microphone they are not trying to use. Forget the stale choice
+         * and fall back to the system default — recording matters more than the
+         * preference. Every other failure, permission denial above all, belongs to
+         * the caller to report.
+         */
+        async openMicrophone(deviceId) {
+            const audio = this.captureConstraints();
+
+            if (!deviceId) {
+                return navigator.mediaDevices.getUserMedia({ audio });
+            }
+
+            try {
+                return await navigator.mediaDevices.getUserMedia({
+                    audio: { ...audio, deviceId: { exact: deviceId } },
+                });
+            } catch (err) {
+                if (err.name !== 'OverconstrainedError' && err.name !== 'NotFoundError') {
+                    throw err;
+                }
+
+                this.forgetSelectedDevice();
+
+                return navigator.mediaDevices.getUserMedia({ audio });
+            }
+        },
+
+        // -- Input Device Selection --
+        /**
+         * List available inputs. Device labels are only populated after permission
+         * has been granted, so this runs after setupStream(), never before.
+         */
+        async loadInputDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                this.inputDevices = devices.filter((d) => d.kind === 'audioinput');
+            } catch {
+                this.inputDevices = [];
+            }
+        },
+
+        /**
+         * Switching device means closing the microphone and opening another one.
+         *
+         * Mid-recording that hands MediaRecorder a dead track and ends the capture
+         * silently, so a meeting could be lost to a stray click on a dropdown. The
+         * picker is disabled in the UI while a recording is in flight; this guard
+         * is the one that actually holds, because the markup can be bypassed and
+         * the state can change between the click and the handler.
+         */
+        async selectInputDevice(deviceId) {
+            if (this.isMicrophoneBusy()) {
+                return;
+            }
+
+            this.selectedDeviceId = deviceId;
+            this.storeDeviceId(deviceId);
+
+            if (!this.micOpen) {
+                return;
+            }
+
+            this.releaseStream();
+
+            try {
+                await this.setupStream();
+                this.state = 'ready';
+            } catch (err) {
+                this.handlePermissionError(err);
+            }
+        },
+
+        /**
+         * Whether the microphone is committed to a recording that a device swap
+         * would destroy. 'stopping' counts: the encoder is still flushing.
+         */
+        isMicrophoneBusy() {
+            return ['countdown', 'recording', 'paused', 'stopping'].includes(this.state);
+        },
+
+        readStoredDeviceId() {
+            try {
+                return localStorage.getItem('antaranote-mic-device');
+            } catch {
+                return null;
+            }
+        },
+
+        storeDeviceId(deviceId) {
+            try {
+                localStorage.setItem('antaranote-mic-device', deviceId);
+            } catch {
+                // A remembered device is a convenience, not a requirement.
+            }
+        },
+
+        forgetSelectedDevice() {
+            this.selectedDeviceId = null;
+
+            try {
+                localStorage.removeItem('antaranote-mic-device');
+            } catch {
+                // Nothing to forget when storage is unavailable.
+            }
         },
 
         /**
@@ -332,7 +454,28 @@ export default function audioRecorder(config) {
         },
 
         // -- Waveform Visualization (time-based animation) --
+        /**
+         * Enter the animation loop, or do nothing if it is already running.
+         *
+         * Several paths want the meter alive — opening the stream, starting,
+         * resuming, returning to a backgrounded tab — and calling drawWaveform()
+         * directly from each of them started an independent requestAnimationFrame
+         * loop every time, so a resumed recording painted the same canvas two or
+         * three times per frame.
+         */
+        startWaveform() {
+            if (this.animationFrame) {
+                return;
+            }
+
+            this.drawWaveform();
+        },
+
         drawWaveform() {
+            // The pending frame has now run; a null handle is what lets
+            // startWaveform() tell a stopped loop from a running one.
+            this.animationFrame = null;
+
             // Re-acquire canvas context if not yet available (canvas may have been hidden during init)
             if (!this.canvasContext) {
                 const canvas = this.$refs.waveformCanvas;
@@ -524,7 +667,7 @@ export default function audioRecorder(config) {
                 });
             }
 
-            this.drawWaveform();
+            this.startWaveform();
         },
 
         switchToChunkedMode() {
@@ -633,7 +776,7 @@ export default function audioRecorder(config) {
                     }
                 }, 1000);
 
-                this.drawWaveform();
+                this.startWaveform();
             }
         },
 
