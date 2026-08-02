@@ -124,7 +124,7 @@ export default function liveMeetingDashboard(config) {
                 // Merge extractions
                 if (state.extractions && state.extractions.length > 0) {
                     this.extractions = state.extractions;
-                    this.lastExtractionUpdate = new Date().toLocaleTimeString();
+                    this.lastExtractionUpdate = new Date().toISOString();
                 }
             } catch (e) {
                 // Silently fail — next poll will retry
@@ -266,7 +266,11 @@ export default function liveMeetingDashboard(config) {
                 return;
             }
 
-            if (!confirm(this.i18n?.confirmEndSession || 'Are you sure you want to end this live session? This action cannot be undone.')) {
+            const ok = await window.antaraConfirm(
+                this.i18n?.confirmEndSession || 'Are you sure you want to end this live session? This action cannot be undone.',
+                { title: this.i18n?.endSession || 'End Live Session', confirmLabel: this.i18n?.endSessionConfirm || 'End Session', type: 'danger' },
+            );
+            if (!ok) {
                 return;
             }
 
