@@ -724,6 +724,42 @@
                             })"
                             class="mt-4 rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden"
                         >
+                            {{-- Sticky status pill.
+
+                                 Worded, not merely coloured: a red dot alone is
+                                 invisible to a colour-blind user and reads as
+                                 decoration to everyone else. The word is what makes
+                                 it unmistakable, and the elapsed time is what proves
+                                 the recording is still advancing.
+
+                                 Teleported to <body> so it survives the wizard hiding
+                                 this step, and so no ancestor transform or overflow
+                                 can re-anchor or clip a fixed element.
+
+                                 Offsets: the mobile bottom nav is 64px tall at z-50,
+                                 so the pill sits at 80px (the same clearance the FAB
+                                 uses) with a lower z-index — it can never cover the
+                                 nav. Horizontally centred, which keeps it off the
+                                 bottom-right FAB and off the desktop sidebar. --}}
+                            <template x-teleport="body">
+                                <div id="recorder-status-pill"
+                                     x-show="['recording', 'paused'].includes(state)"
+                                     x-cloak
+                                     role="status"
+                                     aria-live="polite"
+                                     class="fixed left-1/2 -translate-x-1/2 bottom-20 md:bottom-6 z-40
+                                            pointer-events-none select-none
+                                            flex items-center gap-2 rounded-full px-4 py-2 shadow-lg
+                                            text-sm font-semibold tracking-wide text-white"
+                                     :class="state === 'recording' ? 'bg-red-600' : 'bg-amber-600'"
+                                     style="margin-bottom: env(safe-area-inset-bottom)">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-white transition-opacity duration-300"
+                                          :class="(state === 'recording' && ! pulseOn) ? 'opacity-30' : 'opacity-100'"></span>
+                                    <span x-text="state === 'recording' ? @js(__('RECORDING')) : @js(__('PAUSED'))"></span>
+                                    <span class="font-mono font-normal tabular-nums" x-text="formattedTimer"></span>
+                                </div>
+                            </template>
+
                             {{-- Recovery Banner --}}
                             <template x-if="hasPendingRecovery">
                                 <div class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 p-3 flex items-center justify-between">

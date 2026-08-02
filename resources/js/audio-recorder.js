@@ -88,6 +88,12 @@ export default function audioRecorder(config) {
         audioLevel: 0,
         showQuietWarning: false,
 
+        // Beat of the status pill's dot. Flipped by the timer tick rather than
+        // by a CSS animation so the dot and the digits change on the same
+        // event; a pulse that drifts out of phase with the clock is exactly
+        // what teaches people that motion on this screen means nothing.
+        pulseOn: false,
+
         // Level meter internals. Every buffer here is allocated once and reused;
         // see drawWaveform() for why.
         _tape: createTape(TAPE_CAPACITY),
@@ -831,13 +837,8 @@ export default function audioRecorder(config) {
             this._pausedDuration = 0;
             this._pauseStartTime = null;
 
-            this.timerInterval = setInterval(() => {
-                this.timer++;
-
-                if (this.timer === 300 && !this.isLongRecording && !this.liveMode) {
-                    this.switchToChunkedMode();
-                }
-            }, 1000);
+            this.pulseOn = true;
+            this.startTimerTick();
 
             // In live mode, switch to chunked mode immediately with 30-second intervals
             if (this.liveMode) {
@@ -929,12 +930,36 @@ export default function audioRecorder(config) {
             startNewChunk();
         },
 
+        /**
+         * The one-second heartbeat behind the timer and the status pill.
+         *
+         * Starting and resuming a recording share it so the two can never fall
+         * out of step, and so there is a single place that owns what happens
+         * once a second.
+         */
+        startTimerTick() {
+            clearInterval(this.timerInterval);
+
+            this.timerInterval = setInterval(() => {
+                this.timer++;
+                this.pulseOn = !this.pulseOn;
+
+                if (this.timer === 300 && !this.isLongRecording && !this.liveMode) {
+                    this.switchToChunkedMode();
+                }
+            }, 1000);
+        },
+
         pauseRecording() {
             if (this.mediaRecorder?.state === 'recording') {
                 this.mediaRecorder.pause();
                 this.state = 'paused';
                 this._pauseStartTime = Date.now();
                 clearInterval(this.timerInterval);
+
+                // Nothing is being captured and the clock has stopped, so the
+                // dot stops beating too and sits steady.
+                this.pulseOn = false;
             }
         },
 
@@ -948,12 +973,8 @@ export default function audioRecorder(config) {
                     this._pauseStartTime = null;
                 }
 
-                this.timerInterval = setInterval(() => {
-                    this.timer++;
-                    if (this.timer === 300 && !this.isLongRecording) {
-                        this.switchToChunkedMode();
-                    }
-                }, 1000);
+                this.pulseOn = true;
+                this.startTimerTick();
 
                 this.startWaveform();
             }
@@ -1353,6 +1374,7 @@ export default function audioRecorder(config) {
             this.uploadedChunks = 0;
             this.pendingChunkUploads = 0;
             this.isLongRecording = false;
+            this.pulseOn = false;
 
             this._quietWarning?.reset();
             this.showQuietWarning = false;
