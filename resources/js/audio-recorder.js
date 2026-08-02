@@ -25,6 +25,26 @@ const PEAK_FALL_DB_PER_SECOND = 40;
 /** Teal while healthy, amber when hot, crimson when clipping. */
 const BAND_COLOURS = ['#0D7377', '#D97706', '#DC2626'];
 
+/** How long the pre-flight check listens before it commits to a verdict. */
+const MIC_CHECK_MS = 5000;
+
+/** How often the check refreshes the seconds it is counting down. */
+const MIC_CHECK_TICK_MS = 50;
+
+/**
+ * Frames quieter than this are room tone rather than someone speaking, and
+ * counting them would drag every verdict down to "quiet" no matter how well
+ * the microphone hears the person talking.
+ */
+const MIC_CHECK_SPEECH_FLOOR_DBFS = -60;
+
+/**
+ * Median speech level a recording needs to survive the Opus encoder. Below it,
+ * a distant speaker receives so few bits that no amount of later processing
+ * brings the words back.
+ */
+const MIC_CHECK_GOOD_DBFS = -40;
+
 /** Colour of the flat line drawn whenever nothing is being captured. */
 const IDLE_LINE_COLOUR = '#9CA3AF';
 
@@ -57,7 +77,7 @@ export default function audioRecorder(config) {
         liveChunkNumber: config.initialChunkCount || 0,
 
         // State machine
-        state: 'idle', // idle, requesting_permission, ready, countdown, recording, paused, stopping, processing, uploading, complete, error
+        state: 'idle', // idle, requesting_permission, checking, ready, countdown, recording, paused, stopping, processing, uploading, complete, error
 
         // Recording data
         mediaRecorder: null,
@@ -87,6 +107,14 @@ export default function audioRecorder(config) {
         analyserNode: null,
         audioLevel: 0,
         showQuietWarning: false,
+
+        // Pre-flight microphone check. `micCheckResult` is null until a check
+        // has finished, then 'good', 'quiet', or 'unmeasurable' when the
+        // browser gave us no analyser to measure with.
+        micCheckResult: null,
+        micCheckRemaining: 0,
+        _micCheckSamples: null,
+        _micCheckCancelled: false,
 
         // Beat of the status pill's dot. Flipped by the timer tick rather than
         // by a CSS animation so the dot and the digits change on the same
@@ -157,8 +185,18 @@ export default function audioRecorder(config) {
             return this.state === 'paused';
         },
 
+        /**
+         * Deliberately excludes 'checking'. Everything keyed off this getter —
+         * the blue "working on your recording" affordances — is about audio
+         * that has already been captured, and a pre-flight check has captured
+         * nothing.
+         */
         get isProcessing() {
             return ['stopping', 'processing', 'uploading'].includes(this.state);
+        },
+
+        get isChecking() {
+            return this.state === 'checking';
         },
 
         // -- Lifecycle --
@@ -181,7 +219,12 @@ export default function audioRecorder(config) {
                 }
             });
 
-            // Warn user before closing/refreshing tab while recording
+            // Warn user before closing/refreshing tab while recording.
+            //
+            // 'checking' is deliberately absent: a pre-flight check holds no
+            // audio anyone would mind losing, and a browser that nags on the way
+            // out of a five-second test teaches people to click through the
+            // dialog that is meant to save a two-hour meeting.
             this._beforeUnloadHandler = (e) => {
                 if (['recording', 'paused'].includes(this.state)) {
                     e.preventDefault();
@@ -354,6 +397,149 @@ export default function audioRecorder(config) {
             }
         },
 
+        // -- Pre-flight Microphone Check --
+        /**
+         * Listen for a few seconds and tell the user, before the meeting starts,
+         * whether the microphone is hearing the room well enough.
+         *
+         * The verdict used to arrive only after the meeting was over, in the
+         * form of a transcript full of holes. Here it arrives while it can still
+         * be acted on by moving the laptop or picking another microphone.
+         *
+         * This is also where the microphone is first opened and where the device
+         * list first gets its labels, which the browser withholds until
+         * permission has been granted.
+         *
+         * @param {number} durationMs How long to listen. Injectable so tests do
+         *                            not have to spend five real seconds.
+         */
+        async runMicCheck(durationMs = MIC_CHECK_MS) {
+            if (this.state === 'checking') {
+                return;
+            }
+
+            this.micCheckResult = null;
+            this.errorMessage = '';
+            this._micCheckCancelled = false;
+            this._micCheckSamples = [];
+            this.micCheckRemaining = Math.ceil(durationMs / 1000);
+            this.state = 'checking';
+            this.resetMeter();
+
+            try {
+                await this.setupStream();
+            } catch (err) {
+                this._micCheckSamples = null;
+                this.micCheckRemaining = 0;
+
+                if (this._micCheckCancelled) {
+                    return;
+                }
+
+                // Without this the component sat on 'checking' for ever behind a
+                // spinner, with the actual reason — denied, unplugged, in use by
+                // another app — never reaching the person who could fix it.
+                this.handlePermissionError(err);
+
+                return;
+            }
+
+            // Cancelled while the microphone was still opening. It has only just
+            // been handed over and nobody is waiting on it, so give it straight
+            // back rather than leaving the browser's recording indicator lit
+            // over a check the user walked away from.
+            if (this._micCheckCancelled) {
+                this._micCheckSamples = null;
+                this.releaseStream();
+
+                return;
+            }
+
+            await this.listenForMicCheck(durationMs);
+
+            const samples = this._micCheckSamples ?? [];
+            this._micCheckSamples = null;
+            this.micCheckRemaining = 0;
+
+            // Anything that took the component out of 'checking' while we were
+            // listening — a cancel, a device swap, a stream that died — owns the
+            // state now, and a stale verdict would describe a microphone that is
+            // no longer the selected one.
+            if (this.state !== 'checking') {
+                return;
+            }
+
+            this.micCheckResult = this.micCheckVerdict(samples);
+            this.state = 'ready';
+        },
+
+        /**
+         * Hold the check open for its duration, refreshing the countdown so the
+         * wait is visibly finite, and giving cancellation somewhere to land.
+         */
+        async listenForMicCheck(durationMs) {
+            const started = performance.now();
+
+            while (! this._micCheckCancelled && this.state === 'checking') {
+                const elapsedMs = performance.now() - started;
+
+                if (elapsedMs >= durationMs) {
+                    return;
+                }
+
+                this.micCheckRemaining = Math.max(1, Math.ceil((durationMs - elapsedMs) / 1000));
+
+                await new Promise((resolve) => setTimeout(resolve, MIC_CHECK_TICK_MS));
+            }
+        },
+
+        /**
+         * Turn the frames the meter measured into a verdict.
+         *
+         * The median of the frames that carried speech, not the mean: a cough, a
+         * chair, or one loud "testing" would otherwise pass a microphone that
+         * cannot hear the room. Frames below the speech floor are room tone and
+         * are dropped, or every verdict would be dragged down by the silence
+         * between words.
+         */
+        micCheckVerdict(samples) {
+            const speech = samples
+                .filter((dbfs) => dbfs > MIC_CHECK_SPEECH_FLOOR_DBFS)
+                .sort((a, b) => a - b);
+
+            if (samples.length === 0) {
+                // No frames at all means there was no analyser to read, which
+                // happens when Web Audio could not be built. Recording still
+                // works on the raw stream; we simply cannot judge it, and
+                // guessing either way would be a lie.
+                return 'unmeasurable';
+            }
+
+            if (speech.length === 0) {
+                return 'quiet';
+            }
+
+            const median = speech[Math.floor(speech.length / 2)];
+
+            return median > MIC_CHECK_GOOD_DBFS ? 'good' : 'quiet';
+        },
+
+        /**
+         * Abandon a check in flight. The microphone stays open — the user
+         * stopped the test, not the recording they are about to make.
+         */
+        cancelMicCheck() {
+            if (this.state !== 'checking') {
+                return;
+            }
+
+            this._micCheckCancelled = true;
+            this._micCheckSamples = null;
+            this.micCheckRemaining = 0;
+            this.micCheckResult = null;
+            this.state = this.captureStream ? 'ready' : 'idle';
+        },
+
         // -- Input Device Selection --
         /**
          * List available inputs. Device labels are only populated after permission
@@ -382,6 +568,14 @@ export default function audioRecorder(config) {
                 return;
             }
 
+            // A verdict belongs to the microphone it was measured on, so choosing
+            // a different one throws it away rather than leaving a green tick
+            // sitting above a device that was never tested. Cancelling first
+            // also stops a check in flight from finishing against the new
+            // device and reporting a verdict the user never asked for.
+            this.cancelMicCheck();
+            this.micCheckResult = null;
+
             this.selectedDeviceId = deviceId;
             this.storeDeviceId(deviceId);
 
@@ -402,6 +596,10 @@ export default function audioRecorder(config) {
         /**
          * Whether the microphone is committed to a recording that a device swap
          * would destroy. 'stopping' counts: the encoder is still flushing.
+         *
+         * 'checking' deliberately does not: swapping microphone is the most
+         * likely thing a bad verdict should make someone do, so the picker stays
+         * live throughout, and selectInputDevice() abandons the check instead.
          */
         isMicrophoneBusy() {
             return ['countdown', 'recording', 'paused', 'stopping'].includes(this.state);
@@ -600,7 +798,13 @@ export default function audioRecorder(config) {
             // when Web Audio could not be built, in which case the recording is
             // still running on the raw stream and a flat line is the honest
             // answer — an invented one would be worse.
-            if (this.state === 'recording' && this.analyserNode) {
+            //
+            // 'checking' moves the tape as well, and that does not weaken what
+            // motion here means: during a pre-flight check the microphone is
+            // genuinely open and genuinely being listened to, which is exactly
+            // what a moving tape claims. It is also the only feedback the user
+            // has that the check is doing anything at all.
+            if (['recording', 'checking'].includes(this.state) && this.analyserNode) {
                 this.sampleLevel(performance.now());
                 this.paintTape(ctx, width, height);
             } else {
@@ -675,6 +879,11 @@ export default function audioRecorder(config) {
             if (this._quietWarning?.observe(levelDbfs, nowMs)) {
                 this.showQuietWarning = true;
             }
+
+            // A running pre-flight check reads the same measurement rather than
+            // opening a second analyser of its own, so the verdict it gives is
+            // about precisely the levels the user watched go past on the meter.
+            this._micCheckSamples?.push(levelDbfs);
         },
 
         /**
@@ -916,6 +1125,12 @@ export default function audioRecorder(config) {
 
         // -- Recording Controls --
         async startRecording() {
+            // Pressing record during a pre-flight check answers the question the
+            // check was asking, so the check gets out of the way. It leaves the
+            // microphone open, which is the whole reason the countdown below is
+            // long enough to hide the cost of opening one.
+            this.cancelMicCheck();
+
             // Keyed off the stream rather than the state name: the microphone is now
             // opened on demand, so 'idle' no longer implies "never had permission"
             // and 'ready' no longer implies "stream is open". The stream itself is
@@ -1528,6 +1743,8 @@ export default function audioRecorder(config) {
 
         // -- Reset & Cleanup --
         resetRecorder() {
+            this.cancelMicCheck();
+            this.micCheckResult = null;
             this.releaseStream();
             this.state = 'idle';
             this.timer = 0;
@@ -1550,6 +1767,7 @@ export default function audioRecorder(config) {
         },
 
         cleanup() {
+            this.cancelMicCheck();
             clearInterval(this.timerInterval);
             clearInterval(this.countdownInterval);
             clearTimeout(this.chunkInterval);

@@ -817,6 +817,7 @@
                                              :class="{
                                                  'bg-gray-100 dark:bg-slate-700': state === 'idle',
                                                  'bg-green-100 dark:bg-green-900/30': state === 'ready',
+                                                 'bg-teal-100 dark:bg-teal-900/30': isChecking,
                                                  'bg-red-100 dark:bg-red-900/30': ['recording', 'countdown'].includes(state),
                                                  'bg-amber-100 dark:bg-amber-900/30': state === 'paused',
                                                  'bg-blue-100 dark:bg-blue-900/30': isProcessing,
@@ -828,6 +829,7 @@
                                                  :class="{
                                                      'bg-gray-400': state === 'idle',
                                                      'bg-green-500': state === 'ready' || state === 'complete',
+                                                     'bg-teal-500': isChecking,
                                                      'bg-red-500': state === 'countdown',
                                                      'bg-amber-500': state === 'paused',
                                                      'bg-blue-500': isProcessing,
@@ -869,15 +871,47 @@
 
                                 {{-- Controls --}}
                                 <div class="flex items-center gap-2">
-                                    {{-- Start Recording (idle / ready) --}}
+                                    {{-- Test mic / Start Recording (idle / ready) --}}
                                     <template x-if="['idle', 'ready'].includes(state)">
-                                        <button @click="startRecording()"
-                                                class="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
-                                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                                                <circle cx="12" cy="12" r="6" />
-                                            </svg>
-                                            <span x-text="state === 'ready' ? 'Record' : 'Start Recording'"></span>
-                                        </button>
+                                        <div class="flex w-full items-center gap-2">
+                                            {{-- A quiet room is only fixable before the meeting starts,
+                                                 so the verdict has to be available before it does. --}}
+                                            <button id="recorder-mic-check"
+                                                    type="button"
+                                                    @click="runMicCheck()"
+                                                    class="inline-flex flex-shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                                </svg>
+                                                <span x-text="micCheckResult ? @js(__('Test again')) : @js(__('Test mic'))"></span>
+                                            </button>
+                                            <button @click="startRecording()"
+                                                    class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
+                                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="6" />
+                                                </svg>
+                                                <span x-text="state === 'ready' ? 'Record' : 'Start Recording'"></span>
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    {{-- Mic check in flight. Five seconds of nothing is a long time to
+                                         stare at, so the wait is counted down and can be abandoned. --}}
+                                    <template x-if="isChecking">
+                                        <div class="flex w-full items-center justify-between gap-3">
+                                            <div class="flex items-center gap-2 text-sm text-teal-700 dark:text-teal-300" role="status" aria-live="polite">
+                                                <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                                </svg>
+                                                <span>{{ __('Testing microphone — keep talking') }}</span>
+                                                <span class="font-mono tabular-nums" x-text="micCheckRemaining + 's'"></span>
+                                            </div>
+                                            <button type="button"
+                                                    @click="cancelMicCheck()"
+                                                    class="flex-shrink-0 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
+                                                {{ __('Cancel') }}
+                                            </button>
+                                        </div>
                                     </template>
 
                                     {{-- Pause / Stop (recording) --}}
@@ -1009,6 +1043,70 @@
                                     </template>
                                 </div>
 
+                                {{-- Mic check verdict.
+
+                                     A verdict that only says "too quiet" leaves the user
+                                     exactly where they were, so the amber one names the
+                                     three things that actually fix it — and every one of
+                                     them can be done from this panel, before recording. --}}
+                                <div id="recorder-mic-verdict"
+                                     x-show="micCheckResult && ['idle', 'ready'].includes(state)"
+                                     x-cloak
+                                     x-transition
+                                     role="status"
+                                     aria-live="polite"
+                                     class="mt-3 rounded-lg border px-3 py-2"
+                                     :class="{
+                                         'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800': micCheckResult === 'good',
+                                         'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800': micCheckResult === 'quiet',
+                                         'bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600': micCheckResult === 'unmeasurable',
+                                     }">
+                                    <template x-if="micCheckResult === 'good'">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="h-4 w-4 flex-shrink-0 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <p class="text-xs text-green-700 dark:text-green-300">
+                                                {{ __('Microphone sounds good — voices are coming through clearly.') }}
+                                            </p>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="micCheckResult === 'quiet'">
+                                        <div class="flex items-start gap-2">
+                                            <svg class="h-4 w-4 mt-0.5 flex-shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                            </svg>
+                                            <div>
+                                                <p class="text-xs font-medium text-amber-700 dark:text-amber-300">
+                                                    {{ __('Too quiet to transcribe reliably.') }}
+                                                </p>
+                                                <ul class="mt-1 space-y-0.5 text-xs text-amber-600 dark:text-amber-400 list-disc list-inside">
+                                                    <li>{{ __('Move the laptop closer to whoever will be speaking.') }}</li>
+                                                    <li>{{ __('Check the microphone is not muted or covered.') }}</li>
+                                                    <li x-show="inputDevices.length > 1">{{ __('Try another microphone below.') }}</li>
+                                                </ul>
+                                                <button type="button"
+                                                        @click="runMicCheck()"
+                                                        class="mt-1.5 text-xs font-medium text-amber-700 dark:text-amber-300 hover:underline">
+                                                    {{ __('Test again') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="micCheckResult === 'unmeasurable'">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="h-4 w-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                                                {{ __('This browser would not let us measure the level. Recording still works.') }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                </div>
+
                                 {{-- Microphone picker: only worth showing when there is a choice to make --}}
                                 <div x-show="inputDevices.length > 1" x-cloak class="mt-3">
                                     <label for="recorder-mic-device" class="mb-1 block text-xs text-gray-500 dark:text-gray-400">{{ __('Microphone') }}</label>
@@ -1027,7 +1125,7 @@
                                 </div>
 
                                 {{-- Language selector --}}
-                                <div x-show="['idle', 'ready', 'countdown'].includes(state)" x-cloak class="mt-3">
+                                <div x-show="['idle', 'ready', 'checking', 'countdown'].includes(state)" x-cloak class="mt-3">
                                     <select
                                         x-model="language"
                                         :disabled="state !== 'ready'"
