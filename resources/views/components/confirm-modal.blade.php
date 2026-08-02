@@ -269,7 +269,7 @@
  * Promise-based confirm dialog.
  *
  * @param {string} message
- * @param {{ title?: string, confirmLabel?: string, type?: string, isDanger?: boolean }} options
+ * @param {object} options  title, confirmLabel, type (danger|warning|info|success), isDanger
  * @returns {Promise<boolean>}
  */
 window.antaraConfirm = function (message, options = {}) {
