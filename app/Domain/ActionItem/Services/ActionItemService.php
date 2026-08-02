@@ -27,7 +27,12 @@ class ActionItemService
         $data['created_by'] = $user->id;
         $data['status'] = ActionItemStatus::Open;
 
-        $item = ActionItem::query()->create($data);
+        $item = new ActionItem($data);
+        // Not mass-assignable — take it from the parent meeting rather than letting the
+        // BelongsToOrganization hook guess from the current user.
+        $item->organization_id = $mom->organization_id;
+        $item->save();
+
         $this->auditService->log('created', $item);
 
         $item = $item->fresh();
@@ -120,8 +125,7 @@ class ActionItemService
 
     public function carryForward(ActionItem $item, MinutesOfMeeting $newMom, User $user): ActionItem
     {
-        $newItem = ActionItem::query()->create([
-            'organization_id' => $newMom->organization_id,
+        $newItem = new ActionItem([
             'minutes_of_meeting_id' => $newMom->id,
             'assigned_to' => $item->assigned_to,
             'created_by' => $user->id,
@@ -132,6 +136,9 @@ class ActionItemService
             'status' => ActionItemStatus::Open,
             'due_date' => $item->due_date,
         ]);
+
+        $newItem->organization_id = $newMom->organization_id;
+        $newItem->save();
 
         $this->changeStatus($item, ActionItemStatus::CarriedForward, $user, "Carried forward to meeting #{$newMom->id}");
 

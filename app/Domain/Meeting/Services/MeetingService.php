@@ -55,7 +55,13 @@ class MeetingService
         }
 
         return DB::transaction(function () use ($data, $tags, $hasJoinSettings, $allowExternalJoin, $requireRsvp, $autoNotify) {
-            $mom = MinutesOfMeeting::query()->create($data);
+            $mom = new MinutesOfMeeting($data);
+            // organization_id is not mass-assignable, so create($data) dropped it and
+            // left the BelongsToOrganization hook to infer it from the logged-in user.
+            // Setting it here honours the $user this service was actually called with,
+            // which is the only correct source outside an HTTP request.
+            $mom->organization_id = $data['organization_id'];
+            $mom->save();
 
             if ($tags !== null) {
                 $mom->tags()->sync($tags);
