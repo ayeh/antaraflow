@@ -27,7 +27,6 @@ class CreateMeetingRequest extends FormRequest
             'location' => ['nullable', 'string', 'max:255'],
             'language' => ['nullable', 'string', 'in:ms,en'],
             'prepared_by' => ['required', 'string', 'max:255'],
-            'share_with_client' => ['nullable', 'boolean'],
             'meeting_link' => ['nullable', 'url', 'max:2048'],
         ];
     }

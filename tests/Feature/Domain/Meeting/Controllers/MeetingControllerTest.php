@@ -111,7 +111,6 @@ test('creates meeting with new wizard fields', function () {
         'location' => 'Conference Room A',
         'language' => 'en',
         'prepared_by' => 'Jane Smith',
-        'share_with_client' => true,
     ]);
 
     $response->assertRedirect();
@@ -128,7 +127,6 @@ test('creates meeting with new wizard fields', function () {
         ->and($meeting->location)->toBe('Conference Room A')
         ->and($meeting->language)->toBe('en')
         ->and($meeting->prepared_by)->toBe('Jane Smith')
-        ->and($meeting->share_with_client)->toBeTrue()
         ->and($meeting->mom_number)->not->toBeNull()
         ->and($meeting->status)->toBe(MeetingStatus::Draft);
 });

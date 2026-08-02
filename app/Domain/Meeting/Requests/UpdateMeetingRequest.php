@@ -25,7 +25,6 @@ class UpdateMeetingRequest extends FormRequest
             'location' => ['nullable', 'string', 'max:255'],
             'language' => ['nullable', 'string', 'in:ms,en'],
             'prepared_by' => ['nullable', 'string', 'max:255'],
-            'share_with_client' => ['nullable', 'boolean'],
             'summary' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
             'tags' => ['nullable', 'array'],

@@ -30,12 +30,7 @@ it('can create a guest access link', function (): void {
 });
 
 it('guest can view meeting via token', function (): void {
-    MomGuestAccess::withoutGlobalScopes()->create([
-        'minutes_of_meeting_id' => $this->meeting->id,
-        'organization_id' => $this->org->id,
-        'token' => 'test-token-abc',
-        'is_active' => true,
-    ]);
+    MomGuestAccess::factory()->forMeeting($this->meeting)->create(['token' => 'test-token-abc']);
 
     $this->get(route('guest.mom', 'test-token-abc'))
         ->assertOk()
@@ -43,24 +38,13 @@ it('guest can view meeting via token', function (): void {
 });
 
 it('expired token returns 404', function (): void {
-    MomGuestAccess::withoutGlobalScopes()->create([
-        'minutes_of_meeting_id' => $this->meeting->id,
-        'organization_id' => $this->org->id,
-        'token' => 'expired-token',
-        'is_active' => true,
-        'expires_at' => now()->subDay(),
-    ]);
+    MomGuestAccess::factory()->forMeeting($this->meeting)->expired()->create(['token' => 'expired-token']);
 
     $this->get(route('guest.mom', 'expired-token'))->assertNotFound();
 });
 
 it('can revoke a guest access link', function (): void {
-    $access = MomGuestAccess::withoutGlobalScopes()->create([
-        'minutes_of_meeting_id' => $this->meeting->id,
-        'organization_id' => $this->org->id,
-        'token' => 'test-token-xyz',
-        'is_active' => true,
-    ]);
+    $access = MomGuestAccess::factory()->forMeeting($this->meeting)->create(['token' => 'test-token-xyz']);
 
     $this->actingAs($this->user)
         ->delete(route('meetings.guest-access.destroy', $access))

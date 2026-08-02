@@ -6,12 +6,17 @@ namespace App\Domain\Meeting\Services;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 class MeetingSearchService
 {
     public function search(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = MinutesOfMeeting::query()->with(['createdBy', 'series', 'tags', 'project', 'actionItems', 'attendees']);
+        $query = MinutesOfMeeting::query()
+            ->with(['createdBy', 'series', 'tags', 'project', 'actionItems', 'attendees'])
+            // Drives the "Shared" badge. withExists keeps it to one subquery for the
+            // whole page rather than a query per row.
+            ->withExists(['guestAccesses as is_shared_with_guests' => fn (Builder $q) => $q->active()]);
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];

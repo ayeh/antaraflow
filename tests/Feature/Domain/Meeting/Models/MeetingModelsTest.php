@@ -150,13 +150,12 @@ it('has wizard columns', function () {
         'end_time' => '10:00',
         'language' => 'ms',
         'prepared_by' => 'Test User',
-        'share_with_client' => true,
     ]);
 
     expect($meeting->mom_number)->toBe('MOM-2026-000001')
         ->and($meeting->language)->toBe('ms')
         ->and($meeting->prepared_by)->toBe('Test User')
-        ->and($meeting->share_with_client)->toBeTrue();
+        ->and($meeting->start_time->format('H:i'))->toBe('09:00');
 });
 
 it('belongs to a project', function () {

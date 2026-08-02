@@ -28,15 +28,20 @@ class GuestAccessController
             'expires_at' => ['nullable', 'date', 'after:now'],
         ]);
 
-        MomGuestAccess::create([
+        $access = new MomGuestAccess([
             'minutes_of_meeting_id' => $meeting->id,
-            'organization_id' => $meeting->organization_id,
             'token' => Str::random(48),
             'label' => $validated['label'] ?? 'Guest Link',
             'email' => $validated['email'] ?? null,
             'is_active' => true,
             'expires_at' => $validated['expires_at'] ?? null,
         ]);
+
+        // organization_id is not mass-assignable, so it has to be set on the instance.
+        // Taking it from the meeting rather than leaving it to the BelongsToOrganization
+        // hook keeps this correct even without an authenticated user in context.
+        $access->organization_id = $meeting->organization_id;
+        $access->save();
 
         return redirect()->route('meetings.show', $meeting)
             ->with('success', __('Guest access link created.'));
@@ -62,8 +67,7 @@ class GuestAccessController
     {
         $access = MomGuestAccess::withoutGlobalScopes()
             ->where('token', $token)
-            ->where('is_active', true)
-            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->active()
             ->firstOrFail();
 
         $access->increment('access_count');

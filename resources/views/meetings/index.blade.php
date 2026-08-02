@@ -170,8 +170,12 @@
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-1.5 flex-wrap">
                                             @include('meetings.partials._status-badge', ['status' => $meeting->status])
-                                            @if($meeting->share_with_client)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">{{ __('Shared') }}</span>
+                                            @if($meeting->is_shared_with_guests)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
+                                                    title="{{ __('An active guest link exists for this meeting') }}">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5m4.5-4.5l1.5-1.5a4 4 0 015.656 5.656l-3 3a4 4 0 01-5.656 0"/></svg>
+                                                    {{ __('Shared') }}
+                                                </span>
                                             @endif
                                         </div>
                                     </td>

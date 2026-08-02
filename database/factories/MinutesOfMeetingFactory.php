@@ -34,7 +34,6 @@ class MinutesOfMeetingFactory extends Factory
             'end_time' => fake()->time('H:i'),
             'language' => 'ms',
             'prepared_by' => fake()->name(),
-            'share_with_client' => false,
             'project_id' => null,
         ];
     }
