@@ -69,7 +69,9 @@
                 <button @click="showForm = !showForm" type="button"
                     class="inline-flex items-center gap-1.5 text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    <span x-text="showForm ? '{{ __(\'Cancel\') }}' : '{{ __(\'Add Resolution\') }}'"></span>
+                    {{-- @js() emits a properly escaped, single-quoted JS string, so the
+                         Alpine expression needs no hand-escaped quotes of its own. --}}
+                    <span x-text="showForm ? @js(__('Cancel')) : @js(__('Add Resolution'))"></span>
                 </button>
 
                 <form x-show="showForm" x-cloak method="POST" action="{{ route('meetings.resolutions.store', $meeting) }}" class="mt-3 space-y-3">

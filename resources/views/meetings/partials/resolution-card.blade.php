@@ -76,7 +76,7 @@
             <div x-data="{ showVoteForm: false, selectedAttendee: '' }" class="mt-3">
                 <button @click="showVoteForm = !showVoteForm" type="button"
                     class="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium">
-                    <span x-text="showVoteForm ? '{{ __(\'Hide Voting\') }}' : '{{ __(\'Cast Vote\') }}'"></span>
+                    <span x-text="showVoteForm ? @js(__('Hide Voting')) : @js(__('Cast Vote'))"></span>
                 </button>
 
                 <div x-show="showVoteForm" x-cloak class="mt-2 space-y-2">
