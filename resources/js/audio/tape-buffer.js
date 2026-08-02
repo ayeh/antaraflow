@@ -28,6 +28,33 @@ export function createTape(capacity) {
             return out;
         },
 
+        /**
+         * Copy the history into `target`, oldest first and newest last, without
+         * allocating. The renderer calls this on every animation frame, where
+         * toArray()'s fresh array of boxed numbers would mean tens of thousands
+         * of allocations a second for the length of a meeting.
+         *
+         * Slots with no sample behind them yet are filled with `fill`, so a fresh
+         * recording scrolls in from the right instead of starting full. When
+         * `target` is shorter than the history it receives the newest samples.
+         */
+        readInto(target, fill = 0) {
+            const size = target.length;
+            const taken = Math.min(count, size);
+            const start = (count < capacity ? 0 : head) + (count - taken);
+            const offset = size - taken;
+
+            for (let i = 0; i < offset; i++) {
+                target[i] = fill;
+            }
+
+            for (let i = 0; i < taken; i++) {
+                target[offset + i] = values[(start + i) % capacity];
+            }
+
+            return target;
+        },
+
         clear() {
             count = 0;
             head = 0;

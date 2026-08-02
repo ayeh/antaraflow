@@ -1,3 +1,45 @@
+import { CLIPPING_DBFS, SILENCE_DBFS, rmsFromTimeDomain, toDbfs } from './audio/level.js';
+import { createQuietWarning } from './audio/quiet-warning.js';
+import { createTape } from './audio/tape-buffer.js';
+
+/** Frames of level history the tape keeps: about sixty seconds at 60fps. */
+const TAPE_CAPACITY = 3600;
+
+/** Horizontal space one bar of the tape occupies, in canvas pixels. */
+const BAR_SLOT_PX = 4;
+
+/** Quietest level the meter draws. Below this a bar has no height. */
+const METER_FLOOR_DBFS = -60;
+
+/** Above this the signal is loud enough to be worth flagging as hot. */
+const HOT_DBFS = -12;
+
+/** Fast up, slow down — the asymmetry is what makes a meter readable. */
+const ATTACK_MS = 30;
+const RELEASE_MS = 200;
+
+/** How long a peak stays pinned before it is allowed to fall, and how fast. */
+const PEAK_HOLD_MS = 800;
+const PEAK_FALL_DB_PER_SECOND = 40;
+
+/** Teal while healthy, amber when hot, crimson when clipping. */
+const BAND_COLOURS = ['#0D7377', '#D97706', '#DC2626'];
+
+/** Colour of the flat line drawn whenever nothing is being captured. */
+const IDLE_LINE_COLOUR = '#9CA3AF';
+
+/**
+ * Which colour band a level falls into. Module scope, not a closure inside the
+ * draw loop: this is called a few hundred times per frame.
+ */
+function levelBand(dbfs) {
+    if (dbfs > CLIPPING_DBFS) {
+        return 2;
+    }
+
+    return dbfs > HOT_DBFS ? 1 : 0;
+}
+
 export default function audioRecorder(config) {
     return {
         // Config (passed from blade)
@@ -44,6 +86,18 @@ export default function audioRecorder(config) {
         audioContext: null,
         analyserNode: null,
         audioLevel: 0,
+        showQuietWarning: false,
+
+        // Level meter internals. Every buffer here is allocated once and reused;
+        // see drawWaveform() for why.
+        _tape: createTape(TAPE_CAPACITY),
+        _timeDomain: null,
+        _barValues: null,
+        _smoothedDbfs: SILENCE_DBFS,
+        _peakDbfs: SILENCE_DBFS,
+        _peakSetAtMs: 0,
+        _lastFrameMs: 0,
+        _quietWarning: null,
 
         // Chunk upload tracking
         chunkIndex: 0,
@@ -471,6 +525,20 @@ export default function audioRecorder(config) {
             this.drawWaveform();
         },
 
+        /**
+         * Paint one frame of the level meter.
+         *
+         * The meter used to animate layered sine waves in `ready`, `paused` and
+         * `recording` alike, so the most eye-catching thing on the screen moved
+         * whether or not a single sample was being captured. Motion here now
+         * means exactly one thing: audio is going into the recording. Every other
+         * state gets a flat line.
+         *
+         * This runs sixty times a second for as long as a meeting lasts, so it
+         * allocates nothing: the analyser buffer and the bar values are allocated
+         * once and written over in place, and the tape itself is a fixed-capacity
+         * ring.
+         */
         drawWaveform() {
             // The pending frame has now run; a null handle is what lets
             // startWaveform() tell a stopped loop from a running one.
@@ -495,81 +563,186 @@ export default function audioRecorder(config) {
             const ctx = this.canvasContext;
             const width = canvas.width;
             const height = canvas.height;
-            const centerY = height / 2;
-            const time = performance.now() / 1000;
 
-            // Clear canvas
+            this.paintMeterBackground(ctx, width, height);
+
+            // Without an analyser there is no level to show. That happens only
+            // when Web Audio could not be built, in which case the recording is
+            // still running on the raw stream and a flat line is the honest
+            // answer — an invented one would be worse.
+            if (this.state === 'recording' && this.analyserNode) {
+                this.sampleLevel(performance.now());
+                this.paintTape(ctx, width, height);
+            } else {
+                this.audioLevel = 0;
+                this.paintFlatLine(ctx, width, height);
+            }
+
+            if (!['idle', 'complete', 'error'].includes(this.state)) {
+                this.animationFrame = requestAnimationFrame(() => this.drawWaveform());
+            }
+        },
+
+        paintMeterBackground(ctx, width, height) {
             ctx.fillStyle = getComputedStyle(document.documentElement)
                 .getPropertyValue('--color-gray-50')?.trim() || '#f9fafb';
             if (document.documentElement.classList.contains('dark')) {
                 ctx.fillStyle = 'rgba(55, 65, 81, 0.3)';
             }
             ctx.fillRect(0, 0, width, height);
+        },
 
-            // Bar color by state
-            if (this.state === 'recording') {
-                ctx.fillStyle = '#ef4444';
-            } else if (this.state === 'ready' || this.state === 'countdown') {
-                ctx.fillStyle = '#22c55e';
-            } else if (this.state === 'paused') {
-                ctx.fillStyle = '#f59e0b';
+        /**
+         * A single flat line, drawn whenever nothing is being captured.
+         */
+        paintFlatLine(ctx, width, height) {
+            ctx.fillStyle = IDLE_LINE_COLOUR;
+            ctx.fillRect(0, (height / 2) - 1, width, 2);
+        },
+
+        /**
+         * Measure the current level, smooth it, and add it to the tape.
+         *
+         * Smoothing is a time constant rather than a fixed fraction, so the meter
+         * behaves the same on a 120Hz display, a throttled background tab, or a
+         * phone that has dropped to 30fps.
+         */
+        sampleLevel(nowMs) {
+            const levelDbfs = this.readLevelDbfs();
+
+            // A tab that was backgrounded can return with an enormous gap; clamp
+            // it so the meter eases in rather than snapping.
+            const elapsedMs = this._lastFrameMs ? Math.min(nowMs - this._lastFrameMs, 250) : 0;
+            const firstFrame = this._lastFrameMs === 0;
+            this._lastFrameMs = nowMs;
+
+            if (firstFrame) {
+                // Start the filter at what is actually there. Easing up from the
+                // silence floor instead paints a bar or two of level that was
+                // never captured, at the very moment the user is watching to see
+                // whether recording has started.
+                this._smoothedDbfs = levelDbfs;
             } else {
-                ctx.fillStyle = '#9ca3af';
+                const timeConstant = levelDbfs > this._smoothedDbfs ? ATTACK_MS : RELEASE_MS;
+                this._smoothedDbfs += (levelDbfs - this._smoothedDbfs) * (1 - Math.exp(-elapsedMs / timeConstant));
             }
 
-            // Read real microphone level via Web Audio API analyser
-            if (this.analyserNode && (this.state === 'recording' || this.state === 'ready')) {
-                const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
-                this.analyserNode.getByteFrequencyData(dataArray);
-                let sum = 0;
-                for (let i = 0; i < dataArray.length; i++) {
-                    sum += dataArray[i];
-                }
-                // Normalize to 0-1 range with a floor so bars are always visible when recording
-                this.audioLevel = Math.min(1, (sum / dataArray.length / 128));
+            this._tape.push(this._smoothedDbfs);
+            this.audioLevel = this.normaliseLevel(this._smoothedDbfs);
+
+            if (this._smoothedDbfs >= this._peakDbfs) {
+                this._peakDbfs = this._smoothedDbfs;
+                this._peakSetAtMs = nowMs;
+            } else if (nowMs - this._peakSetAtMs > PEAK_HOLD_MS) {
+                this._peakDbfs = Math.max(
+                    this._smoothedDbfs,
+                    this._peakDbfs - (PEAK_FALL_DB_PER_SECOND * elapsedMs) / 1000,
+                );
             }
 
-            // Volume level: use real audio level when recording, gentle pulse otherwise
-            let vol;
-            if (this.state === 'recording') {
-                vol = Math.max(0.15, this.audioLevel);
-            } else if (this.state === 'paused') {
-                vol = 0.15 + Math.sin(time * 1.5) * 0.05;
-            } else if (this.state === 'ready' || this.state === 'countdown') {
-                vol = 0.1 + Math.sin(time * 2) * 0.05;
-            } else {
-                vol = 0;
+            // The raw measurement, not the smoothed one: the warning is about what
+            // is reaching the encoder, not about what looks good on screen.
+            if (this._quietWarning?.observe(levelDbfs, nowMs)) {
+                this.showQuietWarning = true;
+            }
+        },
+
+        /**
+         * Current level in dBFS, read into a buffer that is allocated once.
+         */
+        readLevelDbfs() {
+            const size = this.analyserNode.fftSize;
+
+            if (!this._timeDomain || this._timeDomain.length !== size) {
+                this._timeDomain = new Uint8Array(size);
             }
 
-            // Draw animated bars
-            const barCount = 40;
-            const barWidth = Math.max(2, (width / barCount) * 0.6);
-            const gap = width / barCount;
+            this.analyserNode.getByteTimeDomainData(this._timeDomain);
 
-            for (let i = 0; i < barCount; i++) {
-                const x = i * gap + (gap - barWidth) / 2;
+            return toDbfs(rmsFromTimeDomain(this._timeDomain));
+        },
 
-                // Layered sine waves for natural-looking waveform movement
-                const wave1 = Math.sin(time * 3.0 + i * 0.4) * 0.3;
-                const wave2 = Math.sin(time * 5.7 + i * 0.7) * 0.2;
-                const wave3 = Math.sin(time * 2.3 + i * 0.15) * 0.5;
-                const envelope = Math.sin((i / barCount) * Math.PI); // Taper at edges
+        /**
+         * Map a dBFS reading onto 0..1 of the meter's height.
+         */
+        normaliseLevel(dbfs) {
+            return Math.min(1, Math.max(0, (dbfs - METER_FLOOR_DBFS) / -METER_FLOOR_DBFS));
+        },
 
-                const baseHeight = 2;
-                const maxHeight = (height / 2) - 4;
-                const barHeight = baseHeight + (wave1 + wave2 + wave3) * envelope * vol * maxHeight;
-                const h = Math.max(baseHeight, Math.abs(barHeight));
+        /**
+         * Draw the tape, oldest sample at the left edge and newest at the right,
+         * so a bar enters on the right every frame and history slides away left.
+         *
+         * The tape keeps about a minute; the meter shows as much of its newest
+         * end as the canvas has bars for. Collapsing the whole minute onto a
+         * 600px canvas was tried and rejected: it advances two bars a second and
+         * reads as a still image, which is the problem this meter exists to fix.
+         */
+        paintTape(ctx, width, height) {
+            const barCount = Math.max(1, Math.floor(width / BAR_SLOT_PX));
 
-                // Symmetric bar from center
-                const radius = Math.min(barWidth / 2, h / 2);
+            if (!this._barValues || this._barValues.length !== barCount) {
+                this._barValues = new Float32Array(barCount);
+            }
+
+            this._tape.readInto(this._barValues, SILENCE_DBFS);
+
+            const centerY = height / 2;
+            const maxHalf = (height / 2) - 4;
+            const barWidth = Math.max(2, BAR_SLOT_PX - 1);
+            const slot = width / barCount;
+
+            // One path per colour band rather than one per bar: setting fillStyle
+            // is the expensive part of this loop.
+            for (let band = 0; band < BAND_COLOURS.length; band++) {
+                ctx.fillStyle = BAND_COLOURS[band];
                 ctx.beginPath();
-                ctx.roundRect(x, centerY - h, barWidth, h * 2, radius);
+
+                for (let bar = 0; bar < barCount; bar++) {
+                    const dbfs = this._barValues[bar];
+
+                    if (dbfs <= METER_FLOOR_DBFS || levelBand(dbfs) !== band) {
+                        continue;
+                    }
+
+                    const half = Math.max(1, this.normaliseLevel(dbfs) * maxHalf);
+                    ctx.roundRect(bar * slot, centerY - half, barWidth, half * 2, Math.min(barWidth / 2, half));
+                }
+
                 ctx.fill();
             }
 
-            if (!['idle', 'complete', 'error'].includes(this.state)) {
-                this.animationFrame = requestAnimationFrame(() => this.drawWaveform());
+            this.paintPeakMarker(ctx, width, centerY, maxHalf);
+        },
+
+        /**
+         * The peak marker sits at the newest edge and holds its height briefly,
+         * so a transient that is gone in two frames is still readable.
+         */
+        paintPeakMarker(ctx, width, centerY, maxHalf) {
+            if (this._peakDbfs <= METER_FLOOR_DBFS) {
+                return;
             }
+
+            const half = Math.max(1, this.normaliseLevel(this._peakDbfs) * maxHalf);
+            const markerWidth = BAR_SLOT_PX * 3;
+
+            ctx.fillStyle = BAND_COLOURS[levelBand(this._peakDbfs)];
+            ctx.fillRect(width - markerWidth, centerY - half - 1, markerWidth, 2);
+            ctx.fillRect(width - markerWidth, centerY + half - 1, markerWidth, 2);
+        },
+
+        /**
+         * Forget everything the meter is holding, so a new recording starts from
+         * silence instead of inheriting the last one's tail.
+         */
+        resetMeter() {
+            this._tape.clear();
+            this._smoothedDbfs = SILENCE_DBFS;
+            this._peakDbfs = SILENCE_DBFS;
+            this._peakSetAtMs = 0;
+            this._lastFrameMs = 0;
+            this.audioLevel = 0;
         },
 
         // -- Recording Controls --
@@ -613,6 +786,12 @@ export default function audioRecorder(config) {
             this.isLongRecording = false;
             this.sessionId = crypto.randomUUID();
             this.errorMessage = '';
+
+            // A fresh warning per recording: it fires once, and the next meeting
+            // deserves to be told too.
+            this._quietWarning = createQuietWarning();
+            this.showQuietWarning = false;
+            this.resetMeter();
 
             this.mediaRecorder = new MediaRecorder(this.captureStream, {
                 mimeType: this.mimeType,
@@ -1174,6 +1353,10 @@ export default function audioRecorder(config) {
             this.uploadedChunks = 0;
             this.pendingChunkUploads = 0;
             this.isLongRecording = false;
+
+            this._quietWarning?.reset();
+            this.showQuietWarning = false;
+            this.resetMeter();
 
             // The waveform canvas is hidden while idle, so there is nothing to paint.
         },

@@ -752,6 +752,26 @@
                                 </div>
                             </template>
 
+                            {{-- Quiet-voice warning: raised once per recording, never repeated --}}
+                            <div x-show="showQuietWarning"
+                                 x-cloak
+                                 x-transition
+                                 class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 px-4 py-2 flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-2">
+                                    <svg class="h-4 w-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    </svg>
+                                    <p class="text-xs text-amber-700 dark:text-amber-300">
+                                        {{ __('Voices are too quiet — move the laptop closer to whoever is speaking.') }}
+                                    </p>
+                                </div>
+                                <button type="button"
+                                        @click="showQuietWarning = false"
+                                        class="text-xs text-amber-700 dark:text-amber-300 hover:underline flex-shrink-0">
+                                    {{ __('Dismiss') }}
+                                </button>
+                            </div>
+
                             <div class="p-4">
                                 {{-- Header --}}
                                 <div class="flex items-center justify-between mb-3">

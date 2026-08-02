@@ -2,6 +2,51 @@
 
 declare(strict_types=1);
 
+it('reads into a caller-owned buffer without allocating', function () {
+    // The renderer calls this every animation frame, so it must fill a buffer it
+    // already owns. Slots older than the history keep the caller's fill value,
+    // which is what makes a fresh tape scroll in from the right.
+    visit('/__audio-harness')->assertScript(<<<'JS'
+        (() => {
+            const t = window.audioHarness.tapeBuffer.createTape(8);
+            [1, 2, 3].forEach((v) => t.push(v));
+
+            const out = new Float32Array(6);
+            t.readInto(out, -100);
+
+            return Array.from(out).join(',');
+        })()
+    JS, '-100,-100,-100,1,2,3');
+});
+
+it('gives a short buffer the newest samples, not the oldest', function () {
+    visit('/__audio-harness')->assertScript(<<<'JS'
+        (() => {
+            const t = window.audioHarness.tapeBuffer.createTape(8);
+            [1, 2, 3, 4, 5].forEach((v) => t.push(v));
+
+            const out = new Float32Array(3);
+            t.readInto(out, -100);
+
+            return Array.from(out).join(',');
+        })()
+    JS, '3,4,5');
+});
+
+it('reads correctly after the ring has wrapped', function () {
+    visit('/__audio-harness')->assertScript(<<<'JS'
+        (() => {
+            const t = window.audioHarness.tapeBuffer.createTape(4);
+            [1, 2, 3, 4, 5, 6].forEach((v) => t.push(v));
+
+            const out = new Float32Array(4);
+            t.readInto(out, -100);
+
+            return Array.from(out).join(',');
+        })()
+    JS, '3,4,5,6');
+});
+
 it('keeps samples in insertion order until capacity', function () {
     visit('/__audio-harness')->assertScript(<<<'JS'
         (() => {
