@@ -21,6 +21,8 @@ export default function audioRecorder(config) {
         mediaRecorder: null,
         mediaStream: null,
         captureStream: null,
+        micOpen: false,
+        permissionGranted: false,
         selectedDeviceId: null,
         chunks: [],
         sessionId: null,
@@ -149,14 +151,19 @@ export default function audioRecorder(config) {
         },
 
         // -- Permission Handling --
+        /**
+         * Note whether permission was already granted, but do not open the microphone.
+         *
+         * Opening it here lights the browser's own recording indicator the moment the
+         * page loads — long before the user presses record — which strips that
+         * indicator of any meaning. The stream is opened at mic-check time instead,
+         * and the existing countdown hides the ~200-500ms it costs to reopen.
+         */
         async checkExistingPermission() {
             try {
                 if (navigator.permissions?.query) {
                     const result = await navigator.permissions.query({ name: 'microphone' });
-                    if (result.state === 'granted') {
-                        await this.setupStream();
-                        this.state = 'ready';
-                    }
+                    this.permissionGranted = result.state === 'granted';
                 }
             } catch {
                 // Firefox doesn't support microphone permission query
@@ -169,6 +176,7 @@ export default function audioRecorder(config) {
 
             try {
                 await this.setupStream();
+                this.permissionGranted = true;
                 this.state = 'ready';
             } catch (err) {
                 this.handlePermissionError(err);
@@ -214,8 +222,37 @@ export default function audioRecorder(config) {
             });
 
             this.captureStream = this.buildGainChain(this.mediaStream) ?? this.mediaStream;
+            this.micOpen = true;
 
             this.drawWaveform();
+        },
+
+        /**
+         * Close the microphone and tear the audio graph down.
+         *
+         * Only stopping the tracks of the raw getUserMedia stream releases the
+         * hardware and puts the browser's recording indicator out. The capture
+         * stream's tracks belong to the Web Audio destination node and hold no
+         * device, but they keep the graph alive and stay "live" for anything still
+         * holding the stream, so stop them too. When the gain chain could not be
+         * built the two are the same object.
+         */
+        releaseStream() {
+            [this.captureStream, this.mediaStream].forEach((stream) => {
+                stream?.getTracks().forEach((track) => track.stop());
+            });
+
+            if (this.audioContext && this.audioContext.state !== 'closed') {
+                this.audioContext.close().catch(() => {});
+            }
+
+            // Null the streams so the next start re-opens the microphone instead of
+            // handing MediaRecorder a set of dead tracks.
+            this.mediaStream = null;
+            this.captureStream = null;
+            this.audioContext = null;
+            this.analyserNode = null;
+            this.micOpen = false;
         },
 
         /**
@@ -394,7 +431,11 @@ export default function audioRecorder(config) {
 
         // -- Recording Controls --
         async startRecording() {
-            if (this.state === 'idle') {
+            // Keyed off the stream rather than the state name: the microphone is now
+            // opened on demand, so 'idle' no longer implies "never had permission"
+            // and 'ready' no longer implies "stream is open". The stream itself is
+            // the only honest answer to whether we still need to open one.
+            if (!this.captureStream) {
                 await this.requestPermission();
                 if (this.state !== 'ready') return;
             }
@@ -623,6 +664,12 @@ export default function audioRecorder(config) {
             if (this.state !== 'stopping') return;
 
             this.state = 'processing';
+
+            // Recording is over on every path from here, so let the microphone go
+            // now rather than after the upload settles. The browser's indicator
+            // then goes out exactly when recording stops, including when the
+            // upload fails and the user sits on the retry button.
+            this.releaseStream();
 
             // In live mode, chunks are already uploaded via the live endpoint
             if (this.liveMode && this.isLongRecording) {
@@ -972,7 +1019,8 @@ export default function audioRecorder(config) {
 
         // -- Reset & Cleanup --
         resetRecorder() {
-            this.state = this.mediaStream ? 'ready' : 'idle';
+            this.releaseStream();
+            this.state = 'idle';
             this.timer = 0;
             this.chunks = [];
             this.recordedBlob = null;
@@ -984,9 +1032,7 @@ export default function audioRecorder(config) {
             this.pendingChunkUploads = 0;
             this.isLongRecording = false;
 
-            if (this.mediaStream) {
-                this.drawWaveform();
-            }
+            // The waveform canvas is hidden while idle, so there is nothing to paint.
         },
 
         cleanup() {
@@ -999,25 +1045,7 @@ export default function audioRecorder(config) {
                 this.animationFrame = null;
             }
 
-            // The microphone is only released by stopping the tracks of the raw
-            // getUserMedia stream. The capture stream's tracks belong to the Web Audio
-            // destination node and hold no hardware, but they keep the graph alive and
-            // stay "live" for anything still holding the stream, so stop them too. When
-            // the gain chain could not be built the two are the same object.
-            [this.captureStream, this.mediaStream].forEach((stream) => {
-                stream?.getTracks().forEach((track) => track.stop());
-            });
-
-            if (this.audioContext && this.audioContext.state !== 'closed') {
-                this.audioContext.close().catch(() => {});
-            }
-
-            // Null the streams so resetRecorder() falls back to 'idle' and re-opens the
-            // microphone instead of reporting 'ready' on top of dead tracks.
-            this.mediaStream = null;
-            this.captureStream = null;
-            this.audioContext = null;
-            this.analyserNode = null;
+            this.releaseStream();
         },
     };
 }
