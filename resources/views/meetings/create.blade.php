@@ -183,25 +183,6 @@
             </div>
         </div>
 
-        {{-- Settings --}}
-        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-5">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('nav.settings') }}</h2>
-
-            {{-- Language --}}
-            <div>
-                <label for="language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Language') }}</label>
-                <select name="language" id="language"
-                    class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
-                    <option value="ms" {{ old('language', auth()->user()->currentOrganization?->language ?? 'en') === 'ms' ? 'selected' : '' }}>Bahasa Melayu</option>
-                    <option value="en" {{ old('language', auth()->user()->currentOrganization?->language ?? 'en') === 'en' ? 'selected' : '' }}>English</option>
-                </select>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('AI-generated content will be in this language') }}</p>
-                @error('language')
-                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-        </div>
-
         {{-- Additional Information --}}
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 space-y-5">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Additional Information') }}</h2>
@@ -212,6 +193,20 @@
                 <input type="text" name="prepared_by" id="prepared_by" value="{{ old('prepared_by', auth()->user()->name) }}" required
                     class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
                 @error('prepared_by')
+                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Language --}}
+            <div>
+                <label for="language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Language') }}</label>
+                <select name="language" id="language"
+                    class="w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-2 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none">
+                    <option value="ms" {{ old('language', auth()->user()->currentOrganization?->language ?? 'ms') === 'ms' ? 'selected' : '' }}>Bahasa Melayu</option>
+                    <option value="en" {{ old('language', auth()->user()->currentOrganization?->language ?? 'ms') === 'en' ? 'selected' : '' }}>English</option>
+                </select>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('AI-generated content will be in this language') }}</p>
+                @error('language')
                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                 @enderror
             </div>
