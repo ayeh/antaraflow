@@ -119,6 +119,14 @@ export default function audioRecorder(config) {
         hasPendingRecovery: false,
         recoveryTimestamp: null,
 
+        // Screen wake lock held for the duration of a recording. The generation
+        // counter identifies which lock a 'release' event belongs to; the
+        // sentinel itself cannot be compared by identity, because anything
+        // stored on the component may come back wrapped in Alpine's reactive
+        // proxy and no longer be `===` the object we handed over.
+        _wakeLock: null,
+        _wakeLockGeneration: 0,
+
         // Tab indicator. The originals are captured once and put back on the
         // way out, so a recorder that has finished leaves no trace in the tab.
         _originalTitle: '',
@@ -189,6 +197,10 @@ export default function audioRecorder(config) {
                 if (document.visibilityState === 'visible' && this._recordingStartTime && ['recording', 'paused'].includes(this.state)) {
                     if (this.state === 'recording') {
                         this.timer = Math.floor((Date.now() - this._recordingStartTime - this._pausedDuration) / 1000);
+
+                        // A hidden tab loses its wake lock to the browser, so
+                        // coming back is the moment to take another one.
+                        this.acquireWakeLock();
                     }
                     // Restart waveform animation if it stopped
                     this.startWaveform();
@@ -763,6 +775,49 @@ export default function audioRecorder(config) {
             this.audioLevel = 0;
         },
 
+        // -- Screen Wake Lock --
+        /**
+         * Keep the screen on while recording. Besides keeping the indicator
+         * visible, this materially reduces the chance of a mobile browser
+         * suspending the recorder when the screen locks.
+         */
+        async acquireWakeLock() {
+            if (this._wakeLock) {
+                return;
+            }
+
+            const generation = ++this._wakeLockGeneration;
+
+            try {
+                const sentinel = await navigator.wakeLock?.request('screen');
+
+                if (!sentinel) {
+                    return;
+                }
+
+                // The browser releases the lock by itself whenever the tab is
+                // hidden. Left in place, the spent sentinel would look like a
+                // lock we still hold and the re-acquire below would be skipped
+                // for the rest of the meeting.
+                sentinel.addEventListener?.('release', () => {
+                    if (this._wakeLockGeneration === generation) {
+                        this._wakeLock = null;
+                    }
+                });
+
+                this._wakeLock = sentinel;
+            } catch {
+                // Wake lock is best-effort; recording continues without it.
+            }
+        },
+
+        releaseWakeLock() {
+            const sentinel = this._wakeLock;
+            this._wakeLock = null;
+
+            sentinel?.release?.()?.catch?.(() => {});
+        },
+
         // -- Tab Indicator --
         /**
          * Mirror recording state into the tab title and favicon, so the signal
@@ -947,6 +1002,7 @@ export default function audioRecorder(config) {
 
             this.pulseOn = true;
             this.startTimerTick();
+            this.acquireWakeLock();
 
             // In live mode, switch to chunked mode immediately with 30-second intervals
             if (this.liveMode) {
@@ -1096,6 +1152,7 @@ export default function audioRecorder(config) {
             this.playBeep(500, 150);
             clearInterval(this.timerInterval);
             clearTimeout(this.chunkInterval);
+            this.releaseWakeLock();
 
             const stopTimeout = setTimeout(() => {
                 if (this.state === 'stopping') {
@@ -1502,6 +1559,7 @@ export default function audioRecorder(config) {
                 this.animationFrame = null;
             }
 
+            this.releaseWakeLock();
             this.restoreTabIndicator();
             this.releaseStream();
         },
