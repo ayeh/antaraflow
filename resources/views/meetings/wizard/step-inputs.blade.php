@@ -6,6 +6,59 @@
     100% { transform: translateX(200%); width: 50%; }
 }
 .progress-bar-indeterminate { animation: progress-slide 1.5s ease-in-out infinite; }
+
+/*
+    Recorder micro-interactions.
+
+    Every animation here has to say something true about state. The meter was
+    rebuilt precisely because decorative motion had taught people that movement
+    on this panel means nothing, so anything added back has to earn its place:
+    the countdown digit pops and walks teal → amber → crimson because time is
+    running out, the record icon morphs circle → rounded square because that is
+    the recorder idiom for "committed", the tape wakes and collapses because the
+    capture starts and ends.
+
+    Easing and timing follow the house style already set by the confirm modal
+    (see components/confirm-modal.blade.php), whose _cm-icon, _cm-strip and
+    _cm-shake keyframes are reused below rather than duplicated.
+*/
+@keyframes _rec-pop {
+    0%   { opacity: 0; transform: scale(.55); }
+    60%  { opacity: 1; transform: scale(1.16); }
+    80%  { transform: scale(.95); }
+    100% { transform: scale(1); }
+}
+@keyframes _rec-breathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.03); }
+}
+
+._rec-spring  { animation: _rec-pop .35s cubic-bezier(.34,1.56,.64,1) both; }
+
+/* The idle record button breathes: a call to action, not a status light. It is
+   held to 3% at 2.5s, and it lives on the button alone — the tape stays flat
+   and dead until something is actually being captured. */
+._rec-breathe { animation: _rec-breathe 2.5s ease-in-out infinite; }
+
+._rec-morph        { border-radius: 50%; transition: border-radius .35s cubic-bezier(.34,1.56,.64,1), transform .35s cubic-bezier(.34,1.56,.64,1); }
+._rec-morph-square { border-radius: 28%; transform: scale(.88); }
+
+@media (prefers-reduced-motion: reduce) {
+    /* The tape's wake, its collapse and the processing shimmer are painted on a
+       canvas, where this query cannot reach them; audio-recorder.js reads the
+       same preference through matchMedia and skips them. The level meter itself
+       keeps updating either way — it is data, not decoration — and loses only
+       its attack/release easing and its peak decay. */
+    ._rec-spring,
+    ._rec-breathe,
+    ._rec-morph,
+    ._cm-icon,
+    ._cm-strip,
+    ._cm-shake {
+        animation: none !important;
+        transition: none !important;
+    }
+}
 </style>
 <div
     x-data="{
@@ -707,6 +760,7 @@
                                 cancelUrl: '{{ route('meetings.audio-chunks.destroy', $meeting) }}',
                                 meetingId: {{ $meeting->id }},
                                 i18n: {
+                                    recording: '{{ __('RECORDING') }}',
                                     recordingInProgress: '{{ __('Recording is in progress. Are you sure you want to leave?') }}',
                                     micDenied: '{{ __('Microphone access denied. Please allow microphone access in your browser settings.') }}',
                                     micNotFound: '{{ __('No microphone found. Please connect a microphone and try again.') }}',
@@ -724,6 +778,42 @@
                             })"
                             class="mt-4 rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden"
                         >
+                            {{-- Sticky status pill.
+
+                                 Worded, not merely coloured: a red dot alone is
+                                 invisible to a colour-blind user and reads as
+                                 decoration to everyone else. The word is what makes
+                                 it unmistakable, and the elapsed time is what proves
+                                 the recording is still advancing.
+
+                                 Teleported to <body> so it survives the wizard hiding
+                                 this step, and so no ancestor transform or overflow
+                                 can re-anchor or clip a fixed element.
+
+                                 Offsets: the mobile bottom nav is 64px tall at z-50,
+                                 so the pill sits at 80px (the same clearance the FAB
+                                 uses) with a lower z-index — it can never cover the
+                                 nav. Horizontally centred, which keeps it off the
+                                 bottom-right FAB and off the desktop sidebar. --}}
+                            <template x-teleport="body">
+                                <div id="recorder-status-pill"
+                                     x-show="['recording', 'paused'].includes(state)"
+                                     x-cloak
+                                     role="status"
+                                     aria-live="polite"
+                                     class="fixed left-1/2 -translate-x-1/2 bottom-20 md:bottom-6 z-40
+                                            pointer-events-none select-none
+                                            flex items-center gap-2 rounded-full px-4 py-2 shadow-lg
+                                            text-sm font-semibold tracking-wide text-white"
+                                     :class="state === 'recording' ? 'bg-red-600' : 'bg-amber-600'"
+                                     style="margin-bottom: env(safe-area-inset-bottom)">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-white transition-opacity duration-300"
+                                          :class="(state === 'recording' && ! pulseOn) ? 'opacity-30' : 'opacity-100'"></span>
+                                    <span x-text="state === 'recording' ? @js(__('RECORDING')) : @js(__('PAUSED'))"></span>
+                                    <span class="font-mono font-normal tabular-nums" x-text="formattedTimer"></span>
+                                </div>
+                            </template>
+
                             {{-- Recovery Banner --}}
                             <template x-if="hasPendingRecovery">
                                 <div class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 p-3 flex items-center justify-between">
@@ -752,6 +842,30 @@
                                 </div>
                             </template>
 
+                            {{-- Quiet-voice warning: raised once per recording, never repeated --}}
+                            <div x-show="showQuietWarning"
+                                 x-cloak
+                                 x-transition
+                                 {{-- Shakes on arrival, borrowing the confirm dialog's own
+                                      keyframes. A banner that slides in politely is a banner
+                                      that gets read after the meeting. --}}
+                                 :class="showQuietWarning && '_cm-shake'"
+                                 class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 px-4 py-2 flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-2">
+                                    <svg class="h-4 w-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    </svg>
+                                    <p class="text-xs text-amber-700 dark:text-amber-300">
+                                        {{ __('Voices are too quiet — move the laptop closer to whoever is speaking.') }}
+                                    </p>
+                                </div>
+                                <button type="button"
+                                        @click="showQuietWarning = false"
+                                        class="text-xs text-amber-700 dark:text-amber-300 hover:underline flex-shrink-0">
+                                    {{ __('Dismiss') }}
+                                </button>
+                            </div>
+
                             <div class="p-4">
                                 {{-- Header --}}
                                 <div class="flex items-center justify-between mb-3">
@@ -760,6 +874,7 @@
                                              :class="{
                                                  'bg-gray-100 dark:bg-slate-700': state === 'idle',
                                                  'bg-green-100 dark:bg-green-900/30': state === 'ready',
+                                                 'bg-teal-100 dark:bg-teal-900/30': isChecking,
                                                  'bg-red-100 dark:bg-red-900/30': ['recording', 'countdown'].includes(state),
                                                  'bg-amber-100 dark:bg-amber-900/30': state === 'paused',
                                                  'bg-blue-100 dark:bg-blue-900/30': isProcessing,
@@ -771,6 +886,7 @@
                                                  :class="{
                                                      'bg-gray-400': state === 'idle',
                                                      'bg-green-500': state === 'ready' || state === 'complete',
+                                                     'bg-teal-500': isChecking,
                                                      'bg-red-500': state === 'countdown',
                                                      'bg-amber-500': state === 'paused',
                                                      'bg-blue-500': isProcessing,
@@ -801,26 +917,77 @@
                                             height="64"
                                             class="w-full h-full"></canvas>
 
-                                    {{-- Countdown Overlay --}}
+                                    {{-- Countdown Overlay.
+
+                                         Keyed on the digit so each tick is a new element and the
+                                         pop replays, and coloured teal → amber → crimson on the
+                                         way down: the motion and the colour both say the same
+                                         thing the number says, which is that time is nearly up. --}}
                                     <div x-show="state === 'countdown'"
                                          x-transition
-                                         class="absolute inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm">
-                                        <span x-text="countdownValue"
-                                              class="text-3xl font-bold text-white"></span>
+                                         class="absolute inset-0 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
+                                        <template x-for="digit in [countdownValue]" :key="digit">
+                                            <span id="recorder-countdown-digit"
+                                                  x-text="digit"
+                                                  class="_rec-spring text-4xl font-bold tabular-nums drop-shadow"
+                                                  :style="{ color: digit >= 3 ? '#0D7377' : (digit === 2 ? '#D97706' : '#DC2626') }"></span>
+                                        </template>
                                     </div>
                                 </div>
 
                                 {{-- Controls --}}
                                 <div class="flex items-center gap-2">
-                                    {{-- Start Recording (idle / ready) --}}
-                                    <template x-if="['idle', 'ready'].includes(state)">
-                                        <button @click="startRecording()"
-                                                class="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
-                                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                                                <circle cx="12" cy="12" r="6" />
-                                            </svg>
-                                            <span x-text="state === 'ready' ? 'Record' : 'Start Recording'"></span>
-                                        </button>
+                                    {{-- Test mic / Start Recording (idle / ready / counting down).
+
+                                         The button stays mounted through the countdown so its icon
+                                         can morph circle → rounded square — the recorder idiom for
+                                         "committed" — instead of the control vanishing and a
+                                         different one appearing in its place. --}}
+                                    <template x-if="['idle', 'ready', 'countdown'].includes(state)">
+                                        <div class="flex w-full items-center gap-2">
+                                            {{-- A quiet room is only fixable before the meeting starts,
+                                                 so the verdict has to be available before it does. --}}
+                                            <button id="recorder-mic-check"
+                                                    type="button"
+                                                    x-show="state !== 'countdown'"
+                                                    @click="runMicCheck()"
+                                                    class="inline-flex flex-shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                                </svg>
+                                                <span x-text="micCheckResult ? @js(__('Test again')) : @js(__('Test mic'))"></span>
+                                            </button>
+                                            <button id="recorder-record"
+                                                    @click="startRecording()"
+                                                    :disabled="state === 'countdown'"
+                                                    class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
+                                                    :class="state === 'countdown' ? 'cursor-default' : '_rec-breathe'">
+                                                <span class="_rec-morph block h-4 w-4 bg-current"
+                                                      :class="state === 'countdown' && '_rec-morph-square'"></span>
+                                                <span x-text="state === 'countdown'
+                                                    ? @js(__('Starting...'))
+                                                    : (state === 'ready' ? 'Record' : 'Start Recording')"></span>
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    {{-- Mic check in flight. Five seconds of nothing is a long time to
+                                         stare at, so the wait is counted down and can be abandoned. --}}
+                                    <template x-if="isChecking">
+                                        <div class="flex w-full items-center justify-between gap-3">
+                                            <div class="flex items-center gap-2 text-sm text-teal-700 dark:text-teal-300" role="status" aria-live="polite">
+                                                <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                                </svg>
+                                                <span>{{ __('Testing microphone — keep talking') }}</span>
+                                                <span class="font-mono tabular-nums" x-text="micCheckRemaining + 's'"></span>
+                                            </div>
+                                            <button type="button"
+                                                    @click="cancelMicCheck()"
+                                                    class="flex-shrink-0 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
+                                                {{ __('Cancel') }}
+                                            </button>
+                                        </div>
                                     </template>
 
                                     {{-- Pause / Stop (recording) --}}
@@ -902,14 +1069,18 @@
                                     {{-- Complete --}}
                                     <template x-if="state === 'complete'">
                                         <div class="w-full space-y-2">
+                                            {{-- Completion borrows the confirm dialog's icon pop and
+                                                 its strip: the same gesture the rest of the app
+                                                 already uses to say "that worked". --}}
+                                            <div class="_cm-strip h-[3px] w-full rounded-full bg-green-500"></div>
                                             <div class="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="_cm-icon h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                                 </svg>
                                                 <span x-text="successMessage"></span>
                                             </div>
                                             <button @click="resetRecorder()"
-                                                    class="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
+                                                    class="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors">
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                                     <circle cx="12" cy="12" r="6" />
                                                 </svg>
@@ -952,10 +1123,92 @@
                                     </template>
                                 </div>
 
+                                {{-- Mic check verdict.
+
+                                     A verdict that only says "too quiet" leaves the user
+                                     exactly where they were, so the amber one names the
+                                     three things that actually fix it — and every one of
+                                     them can be done from this panel, before recording. --}}
+                                <div id="recorder-mic-verdict"
+                                     x-show="micCheckResult && ['idle', 'ready'].includes(state)"
+                                     x-cloak
+                                     x-transition
+                                     role="status"
+                                     aria-live="polite"
+                                     class="mt-3 rounded-lg border px-3 py-2"
+                                     :class="{
+                                         'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800': micCheckResult === 'good',
+                                         'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800': micCheckResult === 'quiet',
+                                         'bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600': micCheckResult === 'unmeasurable',
+                                     }">
+                                    <template x-if="micCheckResult === 'good'">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="h-4 w-4 flex-shrink-0 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <p class="text-xs text-green-700 dark:text-green-300">
+                                                {{ __('Microphone sounds good — voices are coming through clearly.') }}
+                                            </p>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="micCheckResult === 'quiet'">
+                                        <div class="flex items-start gap-2">
+                                            <svg class="h-4 w-4 mt-0.5 flex-shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                            </svg>
+                                            <div>
+                                                <p class="text-xs font-medium text-amber-700 dark:text-amber-300">
+                                                    {{ __('Too quiet to transcribe reliably.') }}
+                                                </p>
+                                                <ul class="mt-1 space-y-0.5 text-xs text-amber-600 dark:text-amber-400 list-disc list-inside">
+                                                    <li>{{ __('Move the laptop closer to whoever will be speaking.') }}</li>
+                                                    <li>{{ __('Check the microphone is not muted or covered.') }}</li>
+                                                    <li x-show="inputDevices.length > 1">{{ __('Try another microphone below.') }}</li>
+                                                </ul>
+                                                <button type="button"
+                                                        @click="runMicCheck()"
+                                                        class="mt-1.5 text-xs font-medium text-amber-700 dark:text-amber-300 hover:underline">
+                                                    {{ __('Test again') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="micCheckResult === 'unmeasurable'">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="h-4 w-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                                                {{ __('This browser would not let us measure the level. Recording still works.') }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                {{-- Microphone picker: only worth showing when there is a choice to make --}}
+                                <div x-show="inputDevices.length > 1" x-cloak class="mt-3">
+                                    <label for="recorder-mic-device" class="mb-1 block text-xs text-gray-500 dark:text-gray-400">{{ __('Microphone') }}</label>
+                                    <select
+                                        id="recorder-mic-device"
+                                        x-model="selectedDeviceId"
+                                        @change="selectInputDevice($event.target.value)"
+                                        :disabled="isMicrophoneBusy()"
+                                        :title="isMicrophoneBusy() ? @js(__('Stop the recording before switching microphone.')) : null"
+                                        class="w-full rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <template x-for="device in inputDevices" :key="device.deviceId">
+                                            <option :value="device.deviceId" x-text="device.label || @js(__('Microphone'))"></option>
+                                        </template>
+                                    </select>
+                                </div>
+
                                 {{-- Language selector --}}
-                                <div x-show="['idle', 'ready', 'countdown'].includes(state)" x-cloak class="mt-3">
+                                <div x-show="['idle', 'ready', 'checking', 'countdown'].includes(state)" x-cloak class="mt-3">
                                     <select
                                         x-model="language"
+                                        aria-label="{{ __('Language') }}"
                                         :disabled="state !== 'ready'"
                                         class="w-full rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
