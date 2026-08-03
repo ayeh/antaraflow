@@ -16,10 +16,9 @@ it('can create a mention record', function (): void {
     $meeting = \App\Domain\Meeting\Models\MinutesOfMeeting::factory()->for($org)->create();
     $comment = Comment::factory()->create(['organization_id' => $org->id, 'user_id' => $user->id]);
 
-    $mention = MomMention::create([
+    $mention = MomMention::createForOrganization($org->id, [
         'comment_id' => $comment->id,
         'mentioned_user_id' => $mentionedUser->id,
-        'organization_id' => $org->id,
         'minutes_of_meeting_id' => $meeting->id,
         'is_read' => false,
     ]);

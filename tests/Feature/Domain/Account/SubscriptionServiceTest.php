@@ -24,8 +24,7 @@ beforeEach(function () {
 
     $this->org = Organization::factory()->create();
 
-    OrganizationSubscription::withoutGlobalScopes()->create([
-        'organization_id' => $this->org->id,
+    OrganizationSubscription::createForOrganization($this->org->id, [
         'subscription_plan_id' => $this->plan->id,
         'status' => 'active',
         'starts_at' => now(),
