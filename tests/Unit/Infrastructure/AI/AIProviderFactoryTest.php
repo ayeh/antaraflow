@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+uses(\Tests\TestCase::class);
+
 use App\Infrastructure\AI\AIProviderFactory;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
 use App\Infrastructure\AI\Providers\AnthropicProvider;

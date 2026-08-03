@@ -46,7 +46,7 @@ test('branding service returns defaults when no settings exist', function () {
 
     expect($all)
         ->toBeArray()
-        ->toHaveKey('app_name', 'antaraFLOW')
+        ->toHaveKey('app_name', 'antaraNote')
         ->toHaveKey('primary_color', '#7c3aed')
         ->toHaveKey('secondary_color', '#3b82f6')
         ->toHaveKey('footer_text', '')

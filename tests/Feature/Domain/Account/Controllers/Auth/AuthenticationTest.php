@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 
 uses(RefreshDatabase::class);
 
 test('user can register', function () {
+    Notification::fake();
+
     $response = $this->post(route('register'), [
         'name' => 'John Doe',
         'email' => 'john@example.com',
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
+        'password' => 'Password1',
+        'password_confirmation' => 'Password1',
     ]);
 
     $response->assertRedirect(route('onboarding.step', ['step' => 1]));
@@ -24,8 +27,8 @@ test('registration creates default organization', function () {
     $this->post(route('register'), [
         'name' => 'Jane Doe',
         'email' => 'jane@example.com',
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
+        'password' => 'Password1',
+        'password_confirmation' => 'Password1',
     ]);
 
     $user = User::query()->where('email', 'jane@example.com')->first();
@@ -47,7 +50,7 @@ test('user can login', function () {
         'password' => 'password123',
     ]);
 
-    $response->assertRedirect(route('organizations.index'));
+    $response->assertRedirect(route('dashboard'));
     $this->assertAuthenticatedAs($user);
 });
 

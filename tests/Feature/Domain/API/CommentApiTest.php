@@ -22,6 +22,7 @@ beforeEach(function (): void {
         'secret_hash' => hash('sha256', $rawToken),
         'is_active' => true,
         'expires_at' => null,
+        'permissions' => ['*'],
     ]);
     $this->headers = ['Authorization' => 'Bearer '.$rawToken];
     $this->meeting = MinutesOfMeeting::factory()->create(['organization_id' => $this->org->id]);

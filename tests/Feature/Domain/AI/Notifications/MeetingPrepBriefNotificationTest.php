@@ -98,5 +98,6 @@ test('returns correct array data for database notification', function () {
         'meeting_id' => $this->meeting->id,
         'meeting_title' => 'Board Strategy Review',
         'estimated_prep_minutes' => 25,
+        'message' => 'Meeting prep brief ready for "Board Strategy Review"',
     ]);
 });

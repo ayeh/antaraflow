@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Account\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 
 uses(RefreshDatabase::class);
 
@@ -51,11 +52,13 @@ it('skips onboarding and marks complete', function () {
 });
 
 it('redirects to onboarding after registration', function () {
+    Notification::fake();
+
     $response = $this->post(route('register'), [
         'name' => 'New User',
         'email' => 'newuser@example.com',
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
+        'password' => 'Password1',
+        'password_confirmation' => 'Password1',
     ]);
 
     $response->assertRedirect(route('onboarding.step', ['step' => 1]));

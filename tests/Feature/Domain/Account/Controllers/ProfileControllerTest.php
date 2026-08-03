@@ -52,12 +52,12 @@ test('user can update password', function () {
 
     $response = $this->actingAs($this->user)->put(route('profile.password'), [
         'current_password' => 'oldpassword123',
-        'password' => 'newpassword123',
-        'password_confirmation' => 'newpassword123',
+        'password' => 'NewPassword1',
+        'password_confirmation' => 'NewPassword1',
     ]);
 
     $response->assertRedirect(route('profile.edit'));
-    $this->assertTrue(Hash::check('newpassword123', $this->user->fresh()->password));
+    $this->assertTrue(Hash::check('NewPassword1', $this->user->fresh()->password));
 });
 
 test('user cannot update password with wrong current password', function () {

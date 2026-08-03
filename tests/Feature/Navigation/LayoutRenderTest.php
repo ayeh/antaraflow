@@ -19,7 +19,7 @@ it('renders the app shell with appState Alpine component', function () {
     $this->actingAs($this->user)
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertSee('x-data="appState"', false)
+        ->assertSee('x-data="appState(', false)
         ->assertSee('commandPaletteOpen', false)
         ->assertSee('cycleTheme', false)
         ->assertSee('fabExpanded', false);

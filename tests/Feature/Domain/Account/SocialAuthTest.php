@@ -65,8 +65,8 @@ it('creates a new user from google callback', function () {
     $this->assertAuthenticated();
 });
 
-it('links existing user by email match on callback', function () {
-    $existingUser = User::factory()->create([
+it('rejects social callback when email matches an existing account without that social link', function () {
+    User::factory()->create([
         'email' => 'existing@example.com',
         'current_organization_id' => $this->org->id,
     ]);
@@ -80,15 +80,13 @@ it('links existing user by email match on callback', function () {
 
     $response = $this->get(route('social.callback', 'github'));
 
-    $response->assertRedirect(route('dashboard'));
+    $response->assertRedirect(route('login'));
+    $response->assertSessionHasErrors();
 
-    $this->assertDatabaseHas('social_accounts', [
-        'user_id' => $existingUser->id,
+    $this->assertDatabaseMissing('social_accounts', [
         'provider' => 'github',
         'provider_id' => 'github-99999',
     ]);
-
-    expect(User::query()->where('email', 'existing@example.com')->count())->toBe(1);
 });
 
 it('logs in existing linked user on callback', function () {

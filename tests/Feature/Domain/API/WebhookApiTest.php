@@ -21,6 +21,7 @@ beforeEach(function (): void {
         'secret_hash' => hash('sha256', $rawToken),
         'is_active' => true,
         'expires_at' => null,
+        'permissions' => ['*'],
     ]);
     $this->headers = ['Authorization' => 'Bearer '.$rawToken];
 });

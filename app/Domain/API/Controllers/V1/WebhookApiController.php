@@ -38,7 +38,7 @@ class WebhookApiController extends ApiController
         // Return secret only on creation (it's hidden from normal serialization)
         return response()->json([
             'data' => $webhook,
-            'secret' => $webhook->getOriginal('secret') ? decrypt($webhook->getRawOriginal('secret')) : $webhook->secret,
+            'secret' => $webhook->secret,
             'note' => 'Store this secret securely. It will not be shown again.',
         ], 201);
     }

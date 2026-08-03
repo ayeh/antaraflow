@@ -32,6 +32,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'preferences',
         'current_organization_id',
         'avatar_path',
+        'timezone',
+        'language',
     ];
 
     /**

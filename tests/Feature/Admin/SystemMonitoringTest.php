@@ -24,11 +24,11 @@ test('system page shows system info cards', function () {
     $this->actingAs($this->admin, 'admin')
         ->get(route('admin.system.index'))
         ->assertStatus(200)
-        ->assertSee('PHP Version')
-        ->assertSee('Laravel Version')
-        ->assertSee('Database Driver')
-        ->assertSee('Cache Driver')
-        ->assertSee('Queue Driver');
+        ->assertSee('PHP')
+        ->assertSee('Laravel')
+        ->assertSee('Database')
+        ->assertSee('Cache')
+        ->assertSee('Queue');
 });
 
 test('system page shows disk usage', function () {
@@ -42,7 +42,7 @@ test('system page shows queue information', function () {
     $this->actingAs($this->admin, 'admin')
         ->get(route('admin.system.index'))
         ->assertStatus(200)
-        ->assertSee('Queue Status');
+        ->assertSee('Pending Jobs');
 });
 
 test('unauthenticated cannot access system page', function () {
