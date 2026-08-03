@@ -280,3 +280,46 @@ test('admin can change and remove a lower-ranked member', function () {
         'user_id' => $member->id,
     ]);
 });
+
+test('the remove-member confirm message escapes a breakout payload in a member name', function () {
+    /**
+     * A member's display name is self-editable, so it is attacker-controlled
+     * input reaching another admin's session. It was interpolated raw into an
+     * inline onsubmit handler; @js() is what stops a crafted name from running
+     * as JavaScript when the owner clicks Remove.
+     */
+    [$owner, $org] = ownerOfOrganization();
+
+    $payload = "x'); window.__pwned2 = 1; ('";
+    $member = User::factory()->create(['name' => $payload]);
+    $org->members()->attach($member, ['role' => UserRole::Member->value]);
+
+    $response = $this->actingAs($owner)
+        ->get(route('organizations.members.index', $org))
+        ->assertStatus(200);
+
+    $response->assertSee('Remove x\u0027); window.__pwned2 = 1; (\u0027 from this organization?', false)
+        ->assertDontSee('Remove x&#039;); window.__pwned2 = 1; (&#039; from this organization?', false);
+});
+
+test('the revoke-invitation confirm message escapes a breakout payload in the invitation email', function () {
+    /**
+     * The invitation email is stored free text. Same inline-onsubmit sink as
+     * the remove-member row directly above it in the same view.
+     */
+    [$owner, $org] = ownerOfOrganization();
+
+    $payload = "x'); window.__pwned2 = 1; ('@example.com";
+    OrganizationInvitation::factory()->create([
+        'organization_id' => $org->id,
+        'email' => $payload,
+        'invited_by_user_id' => $owner->id,
+    ]);
+
+    $response = $this->actingAs($owner)
+        ->get(route('organizations.members.index', $org))
+        ->assertStatus(200);
+
+    $response->assertSee('Revoke the invitation for x\u0027); window.__pwned2 = 1; (\u0027@example.com?', false)
+        ->assertDontSee('Revoke the invitation for x&#039;); window.__pwned2 = 1; (&#039;@example.com?', false);
+});

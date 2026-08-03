@@ -99,3 +99,28 @@ test('unauthenticated user cannot access users', function () {
     $this->get(route('admin.users.index'))
         ->assertRedirect(route('admin.login'));
 });
+
+test('the impersonate confirm message escapes a breakout payload in the user name', function () {
+    /**
+     * The impersonate form's confirm message interpolated $user->name raw into
+     * an inline onsubmit handler. A user controls their own display name, so a
+     * crafted one broke out of the JS string literal and ran in the SUPERADMIN
+     * session the moment the admin clicked Impersonate. @js() escapes the
+     * apostrophe to ', which the JS parser reads as a character and the
+     * HTML parser leaves alone -- unlike {{ }}'s &#039;, which the browser
+     * decodes back to an apostrophe before Alpine/JS ever sees it.
+     */
+    $payload = "x'); window.__pwned2 = 1; ('";
+    $user = User::factory()->create(['name' => $payload]);
+
+    $response = $this->actingAs($this->admin, 'admin')
+        ->get(route('admin.users.show', $user))
+        ->assertStatus(200);
+
+    // Anchored to the message context ("as ... Continue?"), unique to the
+    // onsubmit handler -- the name also renders, correctly HTML-escaped,
+    // elsewhere on the page. The JS-safe \u0027 is what ships; the &#039; the
+    // browser would decode back into a live apostrophe must not reach the sink.
+    $response->assertSee('as x\u0027); window.__pwned2 = 1; (\u0027. Continue?', false)
+        ->assertDontSee('as x&#039;); window.__pwned2 = 1; (&#039;. Continue?', false);
+});
