@@ -418,3 +418,57 @@ it('starts the meter loop itself rather than trusting the stream setup to have d
 
     expect($result)->toBe('good');
 });
+
+it('brings the meter loop back when it dies partway through a check', function () {
+    $this->actingAs($this->user);
+
+    /**
+     * Arming the loop once, before the wait, only helps if it then survives
+     * the whole five seconds. The production failure was a loop that was not
+     * running while `state` was 'checking', and the cause was never
+     * identified — so the check cannot assume the loop it started is the loop
+     * that is still there when the verdict is computed.
+     *
+     * Kill it the way it actually dies: `animationFrame` back to null with no
+     * frame scheduled, and nothing on the page aware anything happened.
+     */
+    $result = visit(recorderStep())->script(withMicCheck(<<<'JS'
+        recorder.setupStream = async () => {
+            recorder.micOpen = true;
+            recorder.captureStream = { getTracks: () => [] };
+            recorder.analyserNode = {
+                fftSize: 2048,
+                getByteTimeDomainData: (buffer) => {
+                    for (let i = 0; i < buffer.length; i++) {
+                        buffer[i] = 128 + (i % 2 === 0 ? 64 : -64);   // -6 dBFS
+                    }
+                },
+            };
+        };
+
+        // The very first frame of the check dies silently, before a single
+        // sample is taken. Every frame after it is the real one.
+        const liveFrame = recorder.drawWaveform.bind(recorder);
+        let deaths = 0;
+
+        recorder.drawWaveform = function () {
+            if (deaths === 0) {
+                deaths++;
+                this.animationFrame = null;
+
+                return;
+            }
+
+            return liveFrame();
+        };
+
+        await recorder.runMicCheck(600);
+
+        return { deaths, verdict: recorder.micCheckResult };
+    JS));
+
+    // Without a re-arm the loop stays dead for the whole check and the verdict
+    // describes nothing at all.
+    expect($result['deaths'])->toBe(1)
+        ->and($result['verdict'])->toBe('good');
+});

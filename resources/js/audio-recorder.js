@@ -511,6 +511,17 @@ export default function audioRecorder(config) {
                     return;
                 }
 
+                // Re-arm the meter loop on every tick, not once before the wait.
+                // Arming it up front only helps if the loop then survives the
+                // whole check, and it has at least two ways not to: an unhandled
+                // throw inside a frame, and any early return that forgets to
+                // schedule the next one. Both leave `animationFrame` null with
+                // nothing left to restart it, and the check goes on to judge
+                // however few frames it managed before that. Here the loop comes
+                // back within a tick whatever killed it. Idempotent, so a
+                // healthy loop pays one truthy check per 50ms.
+                this.startWaveform();
+
                 this.micCheckRemaining = Math.max(1, Math.ceil((durationMs - elapsedMs) / 1000));
 
                 await new Promise((resolve) => setTimeout(resolve, MIC_CHECK_TICK_MS));
