@@ -22,8 +22,7 @@ class CommentService
 
     public function addComment(Model $commentable, User $user, string $body, ?int $parentId): Comment
     {
-        $comment = Comment::query()->create([
-            'organization_id' => $user->current_organization_id,
+        $comment = Comment::createForOrganization($user->current_organization_id, [
             'commentable_type' => $commentable->getMorphClass(),
             'commentable_id' => $commentable->getKey(),
             'user_id' => $user->id,
@@ -62,10 +61,9 @@ class CommentService
                 ->first();
 
             if ($mentioned && $mentioned->id !== $author->id && $meetingId !== null) {
-                MomMention::create([
+                MomMention::createForOrganization($author->current_organization_id, [
                     'comment_id' => $comment->id,
                     'mentioned_user_id' => $mentioned->id,
-                    'organization_id' => $author->current_organization_id,
                     'minutes_of_meeting_id' => $meetingId,
                     'is_read' => false,
                 ]);

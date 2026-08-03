@@ -156,7 +156,7 @@ class OrganizationController extends Controller
                 'subscription_plan_id' => $request->input('plan_id'),
             ]);
         } else {
-            $organization->subscriptions()->create([
+            \App\Domain\Account\Models\OrganizationSubscription::createForOrganization($organization->id, [
                 'subscription_plan_id' => $request->input('plan_id'),
                 'status' => 'active',
                 'starts_at' => now(),

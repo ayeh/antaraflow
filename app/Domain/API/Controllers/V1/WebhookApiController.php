@@ -26,8 +26,7 @@ class WebhookApiController extends ApiController
     {
         $orgId = $this->organizationId($request);
 
-        $webhook = WebhookEndpoint::query()->create([
-            'organization_id' => $orgId,
+        $webhook = WebhookEndpoint::createForOrganization($orgId, [
             'url' => $request->validated('url'),
             'events' => $request->validated('events'),
             'description' => $request->validated('description'),

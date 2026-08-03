@@ -43,12 +43,11 @@ class CommentApiController extends ApiController
             ->firstOrFail();
 
         $data = $request->validated();
-        $data['organization_id'] = $this->organizationId($request);
         $data['commentable_type'] = MinutesOfMeeting::class;
         $data['commentable_id'] = $meeting->id;
         $data['user_id'] = $this->resolveCreatedBy($this->organizationId($request));
 
-        $comment = Comment::query()->create($data);
+        $comment = Comment::createForOrganization($this->organizationId($request), $data);
         $comment->load('user');
 
         return response()->json(new CommentResource($comment), 201);

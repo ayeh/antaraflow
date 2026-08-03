@@ -134,9 +134,8 @@ class OfflineDataController extends Controller
      */
     private function processComment(MinutesOfMeeting $meeting, array $payload, $user): Comment
     {
-        return Comment::create([
+        return Comment::createForOrganization($meeting->organization_id, [
             'user_id' => $user->id,
-            'organization_id' => $meeting->organization_id,
             'commentable_type' => MinutesOfMeeting::class,
             'commentable_id' => $meeting->id,
             'body' => $payload['body'] ?? '',

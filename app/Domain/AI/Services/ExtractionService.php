@@ -95,8 +95,7 @@ class ExtractionService
             $priorityValue = strtolower($item['priority'] ?? 'medium');
             $priority = ActionItemPriority::tryFrom($priorityValue) ?? ActionItemPriority::Medium;
 
-            ActionItem::query()->create([
-                'organization_id' => $mom->organization_id,
+            ActionItem::createForOrganization($mom->organization_id, [
                 'minutes_of_meeting_id' => $mom->id,
                 'created_by' => $user->id,
                 'assigned_to' => $assignedTo,

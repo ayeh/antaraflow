@@ -81,7 +81,6 @@ class ActionItemApiController extends ApiController
             ], 422);
         }
 
-        $data['organization_id'] = $orgId;
         $data['status'] = ActionItemStatus::Open;
         $data['priority'] = isset($data['priority'])
             ? ActionItemPriority::from($data['priority'])
@@ -89,7 +88,7 @@ class ActionItemApiController extends ApiController
 
         $data['created_by'] = $this->resolveCreatedBy($orgId);
 
-        $actionItem = ActionItem::query()->create($data);
+        $actionItem = ActionItem::createForOrganization($orgId, $data);
 
         return response()->json(new ActionItemResource($actionItem), 201);
     }

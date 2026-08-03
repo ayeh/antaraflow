@@ -68,8 +68,7 @@ class ResellerService
             ->first();
 
         if ($freePlan) {
-            OrganizationSubscription::withoutGlobalScopes()->create([
-                'organization_id' => $organization->id,
+            OrganizationSubscription::createForOrganization($organization->id, [
                 'subscription_plan_id' => $freePlan->id,
                 'status' => 'active',
                 'starts_at' => now(),

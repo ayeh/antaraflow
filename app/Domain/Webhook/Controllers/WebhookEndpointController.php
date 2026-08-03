@@ -45,12 +45,11 @@ class WebhookEndpointController extends Controller
         $this->authorize('create', WebhookEndpoint::class);
 
         $data = $request->validated();
-        $data['organization_id'] = $request->user()->current_organization_id;
         $data['created_by'] = $request->user()->id;
         $data['secret'] = Str::random(32);
         $data['is_active'] = $request->boolean('is_active', true);
 
-        WebhookEndpoint::query()->create($data);
+        WebhookEndpoint::createForOrganization($request->user()->current_organization_id, $data);
 
         return redirect()->route('webhooks.index')
             ->with('success', __('Webhook endpoint created successfully.'));

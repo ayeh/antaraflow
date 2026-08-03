@@ -46,12 +46,11 @@ class MeetingApiController extends ApiController
     {
         $orgId = $this->organizationId($request);
         $data = $request->validated();
-        $data['organization_id'] = $orgId;
         $data['status'] = MeetingStatus::Draft;
 
         $data['created_by'] = $this->resolveCreatedBy($orgId);
 
-        $meeting = MinutesOfMeeting::query()->create($data);
+        $meeting = MinutesOfMeeting::createForOrganization($orgId, $data);
 
         return response()->json(new MeetingResource($meeting), 201);
     }

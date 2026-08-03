@@ -22,7 +22,7 @@
     $popBase = 'absolute left-0 top-full z-30 mt-2 w-[17rem] rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 shadow-xl space-y-3';
     $popLabel = 'block text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500';
     $miniInput = 'w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 px-3 py-1.5 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none';
-    $pillBase = 'rounded-md px-2.5 py-1 text-xs font-semibold transition-colors cursor-pointer';
+    $pillBase = 'rounded-md px-2.5 py-1 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap';
 @endphp
 
 @section('content')

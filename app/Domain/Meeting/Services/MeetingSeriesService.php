@@ -59,8 +59,7 @@ class MeetingSeriesService
                 default => $nextDate->copy()->addWeek(),
             };
 
-            $meeting = MinutesOfMeeting::query()->create([
-                'organization_id' => $series->organization_id,
+            $meeting = MinutesOfMeeting::createForOrganization($series->organization_id, [
                 'meeting_series_id' => $series->id,
                 'created_by' => $user->id,
                 'title' => $series->name,

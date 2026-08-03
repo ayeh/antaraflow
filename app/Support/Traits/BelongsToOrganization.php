@@ -21,6 +21,28 @@ trait BelongsToOrganization
         });
     }
 
+    /**
+     * Create a record belonging to an explicit organisation.
+     *
+     * organization_id is deliberately kept out of $fillable so a request can never
+     * mass-assign it. That also means passing it to create() silently drops it, and
+     * the creating hook above then falls back to the *acting user's* organisation —
+     * wrong whenever the record belongs elsewhere, and a NOT NULL failure when there
+     * is no authenticated user at all (queued jobs, console commands, API tokens).
+     *
+     * Use this wherever the owning organisation is known explicitly.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public static function createForOrganization(int $organizationId, array $attributes): static
+    {
+        $model = new static($attributes);
+        $model->organization_id = $organizationId;
+        $model->save();
+
+        return $model;
+    }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

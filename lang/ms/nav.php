@@ -10,7 +10,7 @@ return [
     'ai_tools' => 'Alat AI',
     'ai_tools_note' => 'Buka mesyuarat untuk mengakses ciri AI',
     'analytics' => 'Analitik',
-    'insights' => 'Wawasan',
+    'insights' => 'Penemuan',
     'reports' => 'Laporan',
     'settings' => 'Tetapan',
     'home' => 'Utama',
