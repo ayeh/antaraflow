@@ -255,7 +255,7 @@
                     this.comments.push(data?.comment || data?.data || {
                         id: Date.now(),
                         body: this.commentBody,
-                        user: { name: '{{ auth()->user()->name }}' },
+                        user: { name: @js(auth()->user()->name) },
                         created_at: new Date().toISOString(),
                         replies: [],
                     });

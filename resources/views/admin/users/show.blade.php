@@ -85,7 +85,7 @@
             </form>
 
             <form method="POST" action="{{ route('admin.users.impersonate', $user) }}"
-                  onsubmit="confirmThenSubmit(event, 'You will be logged in as {{ $user->name }}. Continue?')">
+                  onsubmit="confirmThenSubmit(event, @js('You will be logged in as '.$user->name.'. Continue?'))">
                 @csrf
                 <button type="submit"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors">

@@ -345,3 +345,130 @@ it('says so plainly when the level cannot be measured at all', function () {
     $page->assertVisible('#recorder-mic-verdict')
         ->assertSee('would not let us measure the level');
 });
+
+it('does not blame the browser when the check collected no frames', function () {
+    $this->actingAs($this->user);
+
+    /**
+     * Production returned 'unmeasurable' — "this browser would not let us
+     * measure the level" — while the analyser was present, the context was
+     * running and the stream was live. The browser could measure perfectly
+     * well; the meter loop was not running, so nothing was ever read from it.
+     * An analyser with no frames means the check did not happen, and that is
+     * what the panel has to say.
+     */
+    $page = visit(recorderStep());
+
+    $verdict = $page->script(withMicCheck(<<<'JS'
+        recorder.setupStream = async () => {
+            recorder.micOpen = true;
+            recorder.captureStream = { getTracks: () => [] };
+            recorder.analyserNode = {
+                fftSize: 2048,
+                getByteTimeDomainData: (buffer) => buffer.fill(128),
+            };
+        };
+
+        // The meter loop is dead, exactly as it was in production.
+        recorder.startWaveform = () => {};
+
+        await recorder.runMicCheck(400);
+
+        return recorder.micCheckResult;
+    JS));
+
+    expect($verdict)->toBe('incomplete');
+
+    $page->assertVisible('#recorder-mic-verdict')
+        ->assertSee('The check did not finish, so nothing was measured.')
+        // Nothing is wrong with the microphone, so the only honest next step
+        // is another go at the check.
+        ->assertSee('Test again')
+        ->assertDontSee('would not let us measure the level');
+});
+
+it('starts the meter loop itself rather than trusting the stream setup to have done it', function () {
+    $this->actingAs($this->user);
+
+    /**
+     * The check is computed from frames the meter loop pushes. When that loop
+     * is not running the check judges an empty list, which is how a live
+     * microphone came to be reported on as if it had never been heard. Opening
+     * the stream is no longer the only thing that can arm the loop.
+     */
+    $result = visit(recorderStep())->script(withMicCheck(<<<'JS'
+        recorder.setupStream = async () => {
+            recorder.micOpen = true;
+            recorder.captureStream = { getTracks: () => [] };
+            recorder.analyserNode = {
+                fftSize: 2048,
+                getByteTimeDomainData: (buffer) => {
+                    for (let i = 0; i < buffer.length; i++) {
+                        buffer[i] = 128 + (i % 2 === 0 ? 64 : -64);   // -6 dBFS
+                    }
+                },
+            };
+            // Deliberately does not call startWaveform().
+        };
+
+        await recorder.runMicCheck(400);
+
+        return recorder.micCheckResult;
+    JS));
+
+    expect($result)->toBe('good');
+});
+
+it('brings the meter loop back when it dies partway through a check', function () {
+    $this->actingAs($this->user);
+
+    /**
+     * Arming the loop once, before the wait, only helps if it then survives
+     * the whole five seconds. The production failure was a loop that was not
+     * running while `state` was 'checking', and the cause was never
+     * identified — so the check cannot assume the loop it started is the loop
+     * that is still there when the verdict is computed.
+     *
+     * Kill it the way it actually dies: `animationFrame` back to null with no
+     * frame scheduled, and nothing on the page aware anything happened.
+     */
+    $result = visit(recorderStep())->script(withMicCheck(<<<'JS'
+        recorder.setupStream = async () => {
+            recorder.micOpen = true;
+            recorder.captureStream = { getTracks: () => [] };
+            recorder.analyserNode = {
+                fftSize: 2048,
+                getByteTimeDomainData: (buffer) => {
+                    for (let i = 0; i < buffer.length; i++) {
+                        buffer[i] = 128 + (i % 2 === 0 ? 64 : -64);   // -6 dBFS
+                    }
+                },
+            };
+        };
+
+        // The very first frame of the check dies silently, before a single
+        // sample is taken. Every frame after it is the real one.
+        const liveFrame = recorder.drawWaveform.bind(recorder);
+        let deaths = 0;
+
+        recorder.drawWaveform = function () {
+            if (deaths === 0) {
+                deaths++;
+                this.animationFrame = null;
+
+                return;
+            }
+
+            return liveFrame();
+        };
+
+        await recorder.runMicCheck(600);
+
+        return { deaths, verdict: recorder.micCheckResult };
+    JS));
+
+    // Without a re-arm the loop stays dead for the whole check and the verdict
+    // describes nothing at all.
+    expect($result['deaths'])->toBe(1)
+        ->and($result['verdict'])->toBe('good');
+});

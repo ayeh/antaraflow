@@ -471,6 +471,14 @@ export default function audioRecorder(config) {
                 return;
             }
 
+            // The verdict is computed from frames the meter loop pushes, so a
+            // stopped loop means a check that collects nothing and reports on
+            // nothing. setupStream() starts the loop, but making the check
+            // depend on that alone is what produced a verdict about zero
+            // samples in production. This is idempotent — a running loop is
+            // left exactly as it is.
+            this.startWaveform();
+
             await this.listenForMicCheck(durationMs);
 
             const samples = this._micCheckSamples ?? [];
@@ -503,6 +511,17 @@ export default function audioRecorder(config) {
                     return;
                 }
 
+                // Re-arm the meter loop on every tick, not once before the wait.
+                // Arming it up front only helps if the loop then survives the
+                // whole check, and it has at least two ways not to: an unhandled
+                // throw inside a frame, and any early return that forgets to
+                // schedule the next one. Both leave `animationFrame` null with
+                // nothing left to restart it, and the check goes on to judge
+                // however few frames it managed before that. Here the loop comes
+                // back within a tick whatever killed it. Idempotent, so a
+                // healthy loop pays one truthy check per 50ms.
+                this.startWaveform();
+
                 this.micCheckRemaining = Math.max(1, Math.ceil((durationMs - elapsedMs) / 1000));
 
                 await new Promise((resolve) => setTimeout(resolve, MIC_CHECK_TICK_MS));
@@ -517,18 +536,33 @@ export default function audioRecorder(config) {
          * cannot hear the room. Frames below the speech floor are room tone and
          * are dropped, or every verdict would be dragged down by the silence
          * between words.
+         *
+         * @param {number[]} samples Levels the meter measured, in dBFS.
+         * @param {boolean} hasAnalyser Whether there was anything to measure
+         *        with. Taken as an argument rather than read off the component
+         *        so the mapping from evidence to verdict stays a pure function
+         *        a test can drive directly with either combination; the default
+         *        means the one production call site cannot forget to supply it.
+         * @return {'good'|'quiet'|'incomplete'|'unmeasurable'}
          */
-        micCheckVerdict(samples) {
+        micCheckVerdict(samples, hasAnalyser = !! this.analyserNode) {
             const speech = samples
                 .filter((dbfs) => dbfs > MIC_CHECK_SPEECH_FLOOR_DBFS)
                 .sort((a, b) => a - b);
 
             if (samples.length === 0) {
-                // No frames at all means there was no analyser to read, which
-                // happens when Web Audio could not be built. Recording still
-                // works on the raw stream; we simply cannot judge it, and
-                // guessing either way would be a lie.
-                return 'unmeasurable';
+                // Zero frames has two causes and they are not the same failure.
+                //
+                // No analyser means Web Audio could not be built: the browser
+                // really cannot tell us the level, the recording still works on
+                // the raw stream, and guessing a verdict would be a lie.
+                //
+                // An analyser we never read a frame from means the meter loop
+                // was not running and the check simply did not happen. Reporting
+                // that as "this browser cannot measure" blames the browser for a
+                // limitation it does not have, and leaves the user with nothing
+                // to do about a check that would very likely work on a retry.
+                return hasAnalyser ? 'incomplete' : 'unmeasurable';
             }
 
             if (speech.length === 0) {
@@ -802,7 +836,17 @@ export default function audioRecorder(config) {
             }
 
             const canvas = this.$refs.waveformCanvas;
-            if (!canvas) return;
+
+            // Losing the canvas for a frame must not end the loop. Returning
+            // here without scheduling anything left `animationFrame` null with
+            // nothing left to re-arm it, so the meter stayed dead — and so did
+            // the mic check, which reads the samples this loop pushes. Wait for
+            // the canvas the same way the branch above does.
+            if (!canvas) {
+                this.animationFrame = requestAnimationFrame(() => this.drawWaveform());
+
+                return;
+            }
 
             const ctx = this.canvasContext;
             const width = canvas.width;

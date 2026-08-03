@@ -104,7 +104,7 @@
                             @can('manageMembers', $organization)
                                 <td class="px-6 py-4 text-right">
                                     @if ($canManage)
-                                        <form method="POST" action="{{ route('members.destroy', $member) }}" onsubmit="confirmThenSubmit(event, '{{ __('Remove :name from this organization?', ['name' => $member->name]) }}', { title: '{{ __('Remove member') }}', confirmLabel: '{{ __('Remove') }}', type: 'danger' })">
+                                        <form method="POST" action="{{ route('members.destroy', $member) }}" onsubmit="confirmThenSubmit(event, @js(__('Remove :name from this organization?', ['name' => $member->name])), { title: @js(__('Remove member')), confirmLabel: @js(__('Remove')), type: 'danger' })">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">{{ __('Remove') }}</button>
@@ -155,7 +155,7 @@
                                                 @csrf
                                                 <button type="submit" class="text-sm text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 transition-colors">{{ __('Resend') }}</button>
                                             </form>
-                                            <form method="POST" action="{{ route('organizations.invitations.destroy', [$organization, $invitation]) }}" onsubmit="confirmThenSubmit(event, '{{ __('Revoke the invitation for :email?', ['email' => $invitation->email]) }}', { title: '{{ __('Revoke invitation') }}', confirmLabel: '{{ __('Revoke') }}', type: 'warning' })">
+                                            <form method="POST" action="{{ route('organizations.invitations.destroy', [$organization, $invitation]) }}" onsubmit="confirmThenSubmit(event, @js(__('Revoke the invitation for :email?', ['email' => $invitation->email])), { title: @js(__('Revoke invitation')), confirmLabel: @js(__('Revoke')), type: 'warning' })">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">{{ __('Revoke') }}</button>
