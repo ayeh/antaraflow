@@ -1635,6 +1635,7 @@
     "The audio file must not exceed 500MB.": "Fail audio tidak boleh melebihi 500MB.",
     "The audio must be a valid file.": "Audio mesti berupa fail yang sah.",
     "The base URL must be a valid URL.": "URL asas mesti berupa URL yang sah.",
+    "The check did not finish, so nothing was measured. Recording still works.": "Ujian tidak sempat selesai, jadi tiada apa-apa yang diukur. Rakaman tetap berfungsi.",
     "The chunk index must be an integer.": "Indeks kepingan mesti integer.",
     "The chunk index must be at least 0.": "Indeks kepingan mesti sekurang-kurangnya 0.",
     "The chunk must be a valid file.": "Kepingan mesti berupa fail yang sah.",

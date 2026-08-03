@@ -345,3 +345,76 @@ it('says so plainly when the level cannot be measured at all', function () {
     $page->assertVisible('#recorder-mic-verdict')
         ->assertSee('would not let us measure the level');
 });
+
+it('does not blame the browser when the check collected no frames', function () {
+    $this->actingAs($this->user);
+
+    /**
+     * Production returned 'unmeasurable' — "this browser would not let us
+     * measure the level" — while the analyser was present, the context was
+     * running and the stream was live. The browser could measure perfectly
+     * well; the meter loop was not running, so nothing was ever read from it.
+     * An analyser with no frames means the check did not happen, and that is
+     * what the panel has to say.
+     */
+    $page = visit(recorderStep());
+
+    $verdict = $page->script(withMicCheck(<<<'JS'
+        recorder.setupStream = async () => {
+            recorder.micOpen = true;
+            recorder.captureStream = { getTracks: () => [] };
+            recorder.analyserNode = {
+                fftSize: 2048,
+                getByteTimeDomainData: (buffer) => buffer.fill(128),
+            };
+        };
+
+        // The meter loop is dead, exactly as it was in production.
+        recorder.startWaveform = () => {};
+
+        await recorder.runMicCheck(400);
+
+        return recorder.micCheckResult;
+    JS));
+
+    expect($verdict)->toBe('incomplete');
+
+    $page->assertVisible('#recorder-mic-verdict')
+        ->assertSee('The check did not finish, so nothing was measured.')
+        // Nothing is wrong with the microphone, so the only honest next step
+        // is another go at the check.
+        ->assertSee('Test again')
+        ->assertDontSee('would not let us measure the level');
+});
+
+it('starts the meter loop itself rather than trusting the stream setup to have done it', function () {
+    $this->actingAs($this->user);
+
+    /**
+     * The check is computed from frames the meter loop pushes. When that loop
+     * is not running the check judges an empty list, which is how a live
+     * microphone came to be reported on as if it had never been heard. Opening
+     * the stream is no longer the only thing that can arm the loop.
+     */
+    $result = visit(recorderStep())->script(withMicCheck(<<<'JS'
+        recorder.setupStream = async () => {
+            recorder.micOpen = true;
+            recorder.captureStream = { getTracks: () => [] };
+            recorder.analyserNode = {
+                fftSize: 2048,
+                getByteTimeDomainData: (buffer) => {
+                    for (let i = 0; i < buffer.length; i++) {
+                        buffer[i] = 128 + (i % 2 === 0 ? 64 : -64);   // -6 dBFS
+                    }
+                },
+            };
+            // Deliberately does not call startWaveform().
+        };
+
+        await recorder.runMicCheck(400);
+
+        return recorder.micCheckResult;
+    JS));
+
+    expect($result)->toBe('good');
+});

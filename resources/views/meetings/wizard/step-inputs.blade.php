@@ -1139,7 +1139,7 @@
                                      :class="{
                                          'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800': micCheckResult === 'good',
                                          'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800': micCheckResult === 'quiet',
-                                         'bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600': micCheckResult === 'unmeasurable',
+                                         'bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-600': ['unmeasurable', 'incomplete'].includes(micCheckResult),
                                      }">
                                     <template x-if="micCheckResult === 'good'">
                                         <div class="flex items-center gap-2">
@@ -1183,6 +1183,28 @@
                                             <p class="text-xs text-gray-600 dark:text-gray-400">
                                                 {{ __('This browser would not let us measure the level. Recording still works.') }}
                                             </p>
+                                        </div>
+                                    </template>
+
+                                    {{-- The check ran but nothing reached it. That is not the same
+                                         as a browser that cannot measure, and saying so blamed the
+                                         browser for a limitation it did not have. Say what actually
+                                         happened and offer the one thing that fixes it. --}}
+                                    <template x-if="micCheckResult === 'incomplete'">
+                                        <div class="flex items-start gap-2">
+                                            <svg class="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <div>
+                                                <p class="text-xs text-gray-600 dark:text-gray-400">
+                                                    {{ __('The check did not finish, so nothing was measured. Recording still works.') }}
+                                                </p>
+                                                <button type="button"
+                                                        @click="runMicCheck()"
+                                                        class="mt-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:underline">
+                                                    {{ __('Test again') }}
+                                                </button>
+                                            </div>
                                         </div>
                                     </template>
                                 </div>
