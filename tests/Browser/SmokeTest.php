@@ -49,3 +49,22 @@ it('survives an apostrophe in the signed-in user name on the meeting wizard', fu
     visit(route('meetings.show', $meeting).'?step=3')
         ->assertNoJavaScriptErrors();
 });
+
+it('does not execute a script smuggled through the action-item assignee filter', function () {
+    /**
+     * `assignee` comes straight off the query string into a single-quoted JS
+     * literal inside an x-data expression. {{ }} escapes the apostrophe to
+     * &#039;, but the HTML parser decodes it again before Alpine reads the
+     * attribute, so a crafted link broke out of the literal and ran arbitrary
+     * JavaScript in the session of whoever followed it.
+     */
+    $this->actingAs(memberNamed('Filter Tester'));
+
+    $payload = urlencode("'+(window.__pwned=1)+'");
+
+    $page = visit(route('action-items.dashboard')."?assignee={$payload}");
+
+    expect($page->script('() => window.__pwned ?? null'))->toBeNull();
+
+    $page->assertNoJavaScriptErrors();
+});

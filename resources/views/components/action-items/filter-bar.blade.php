@@ -14,7 +14,7 @@
     x-data="{
         statuses: @js($activeStatusValues),
         priorities: @js($activePriorityValues),
-        assignee: '{{ $assigneeFilter ?? '' }}',
+        assignee: @js($assigneeFilter ?? ''),
         toggleStatus(val) {
             this.statuses.includes(val)
                 ? this.statuses = this.statuses.filter(s => s !== val)
