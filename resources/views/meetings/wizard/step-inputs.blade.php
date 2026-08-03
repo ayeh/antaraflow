@@ -491,7 +491,7 @@
             <div class="p-6 pb-4">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Inputs') }}</h2>
-                    <span class="text-sm text-gray-500 dark:text-gray-400" x-text="stats.total + ' total'"></span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400" x-text="stats.total + ' ' + @js(__('total'))"></span>
                 </div>
 
                 {{-- Filter Tabs --}}
@@ -564,7 +564,7 @@
                                             </template>
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="item.original_filename || 'Audio Recording'"></p>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="item.original_filename || @js(__('Audio Recording'))"></p>
                                             <div class="flex items-center gap-2 mt-0.5 flex-wrap">
                                                 <span class="text-xs text-gray-500 dark:text-gray-400" x-text="formatSize(item.file_size)"></span>
                                                 <span x-show="item.duration_seconds" class="text-xs text-gray-500 dark:text-gray-400" x-text="formatDuration(item.duration_seconds)" x-cloak></span>
@@ -596,7 +596,9 @@
                                                 :class="item.status === 'processing' ? 'bg-blue-500' : 'bg-gray-400'"></div>
                                         </div>
                                         <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5"
-                                            x-text="item.status === 'pending' ? 'Waiting for a worker to pick up this job...' : 'Transcribing audio with AI. Large files may take a few minutes.'"></p>
+                                            x-text="item.status === 'pending'
+                                                ? @js(__('Waiting for a worker to pick up this job...'))
+                                                : @js(__('Transcribing audio with AI. Large files may take a few minutes.'))"></p>
                                     </div>
                                 </template>
 
@@ -643,7 +645,7 @@
                                         </svg>
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="item.original_filename || 'Document'"></p>
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="item.original_filename || @js(__('Document'))"></p>
                                         <div class="flex items-center gap-2 mt-0.5 flex-wrap">
                                             <span class="text-xs text-gray-500 dark:text-gray-400" x-text="formatSize(item.file_size)"></span>
                                             <span class="text-xs text-gray-500 dark:text-gray-400" x-text="item.mime_type || 'document'"></span>
@@ -837,7 +839,7 @@
                                 <div class="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-4 py-2 flex items-center gap-2">
                                     <div class="h-2 w-2 rounded-full bg-red-500 animate-pulse flex-shrink-0"></div>
                                     <p class="text-xs text-red-700 dark:text-red-300">
-                                        Recording is active — you can switch tabs or apps freely. Recording will continue in the background.
+                                        {{ __('Recording is active — you can switch tabs or apps freely. Recording will continue in the background.') }}
                                     </p>
                                 </div>
                             </template>
@@ -902,7 +904,7 @@
                                          :class="state === 'paused' ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'">
                                         <div x-show="state === 'recording'" class="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
                                         <span x-text="formattedTimer"></span>
-                                        <span x-show="state === 'paused'" class="text-xs font-sans">(Paused)</span>
+                                        <span x-show="state === 'paused'" class="text-xs font-sans">{{ __('(Paused)') }}</span>
                                     </div>
                                 </div>
 
@@ -966,7 +968,7 @@
                                                       :class="state === 'countdown' && '_rec-morph-square'"></span>
                                                 <span x-text="state === 'countdown'
                                                     ? @js(__('Starting...'))
-                                                    : (state === 'ready' ? 'Record' : 'Start Recording')"></span>
+                                                    : (state === 'ready' ? @js(__('Record')) : @js(__('Start Recording')))"></span>
                                             </button>
                                         </div>
                                     </template>
@@ -1253,7 +1255,7 @@
                                 <div x-show="isLongRecording && state === 'recording'"
                                      x-cloak
                                      class="mt-2 text-xs text-gray-400 dark:text-gray-500">
-                                    Progressive upload active — <span x-text="uploadedChunks"></span> chunks uploaded
+                                    {{ __('Progressive upload active —') }} <span x-text="uploadedChunks"></span> {{ __('chunks uploaded') }}
                                 </div>
                             </div>
                         </div>
@@ -1440,7 +1442,7 @@
 
                                 <div class="flex-1"></div>
 
-                                <button type="button" @click="toggleFullscreen()" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" :title="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
+                                <button type="button" @click="toggleFullscreen()" class="p-1.5 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" :title="isFullscreen ? @js(__('Exit Fullscreen')) : @js(__('Fullscreen'))">
                                     <svg x-show="!isFullscreen" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
                                     <svg x-show="isFullscreen" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4v4a1 1 0 01-1 1H4m16 0h-4a1 1 0 01-1-1V4m0 16v-4a1 1 0 011-1h4M4 15h4a1 1 0 011 1v4"/></svg>
                                 </button>
@@ -1494,7 +1496,7 @@
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <span x-text="loading ? 'Saving...' : 'Save Note'"></span>
+                                <span x-text="loading ? @js(__('Saving...')) : @js(__('Save Note'))"></span>
                             </button>
                         </div>
                     </div>
@@ -1583,7 +1585,7 @@
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </template>
-                        <span x-text="generating ? 'Generating...' : 'Generate MOM'"></span>
+                        <span x-text="generating ? @js(__('Generating...')) : @js(__('Generate MOM'))"></span>
                     </button>
 
                     {{-- Progress Bar --}}

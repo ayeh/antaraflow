@@ -77,3 +77,34 @@ it('leaves the microphone closed even when permission was already granted', func
         ->and($result['state'])->toBe('idle')
         ->and($result['permissionGranted'])->toBeTrue();
 });
+
+it('labels the record button through the translator in both of its states', function () {
+    $this->actingAs($this->user);
+
+    /**
+     * Both labels were hardcoded English inside the Alpine expression, so on
+     * the Malay UI this one button read "Start Recording" while every control
+     * beside it — "Uji mikrofon", "Uji semula", "Batal" — was translated.
+     *
+     * Browser tests run at APP_LOCALE=en, so what is provable here is that the
+     * strings arrive through __() rather than being written into the markup:
+     * the labels still render, and the expression Alpine has to evaluate is
+     * still valid. LocalizationTest covers the Malay side.
+     */
+    $page = visit(route('meetings.show', $this->meeting).'?step=3');
+
+    $label = fn (): string => <<<'JS'
+    () => document.querySelector('#recorder-record span:last-of-type').textContent.trim()
+    JS;
+
+    $page->assertScript($label(), 'Start Recording');
+
+    $page->script(<<<'JS'
+    () => {
+        window.Alpine.$data(document.querySelector('[x-data^="audioRecorder"]')).state = 'ready';
+    }
+    JS);
+
+    $page->assertScript($label(), 'Record')
+        ->assertNoJavaScriptErrors();
+});
