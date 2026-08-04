@@ -73,6 +73,7 @@ Route::get('locale/{locale}', [LocaleController::class, 'update'])->name('locale
 Route::middleware('throttle:10,1')->group(function () {
     Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessController::class, 'show'])->name('guest.meeting');
     Route::get('guest/{token}', [GuestAccessController::class, 'show'])->name('guest.mom');
+    Route::get('mom/confirm/{token}', [\App\Domain\Meeting\Controllers\GuestConfirmationController::class, 'show'])->name('mom.confirm');
 });
 
 // QR Registration (public)
