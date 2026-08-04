@@ -5,6 +5,8 @@ use App\Domain\AI\Jobs\CheckStaleDecisionsJob;
 use App\Domain\AI\Jobs\GeneratePrepBriefsJob;
 use App\Domain\AI\Jobs\GenerateProactiveInsightsJob;
 use App\Domain\Analytics\Jobs\GenerateDailyAnalyticsSnapshotJob;
+use App\Domain\Meeting\Jobs\CloseExpiredCirculationsJob;
+use App\Domain\Meeting\Jobs\SendCirculationReminders;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -30,3 +32,6 @@ Schedule::command('ai:check-budget')->hourly();
 Schedule::job(new CheckStaleDecisionsJob)->weeklyOn(1, '09:00');
 
 Schedule::job(new GenerateProactiveInsightsJob)->dailyAt('07:00');
+
+Schedule::job(new CloseExpiredCirculationsJob)->hourly()->withoutOverlapping();
+Schedule::job(new SendCirculationReminders)->hourly()->withoutOverlapping();
