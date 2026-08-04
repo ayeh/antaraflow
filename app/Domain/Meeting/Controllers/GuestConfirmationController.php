@@ -117,6 +117,31 @@ class GuestConfirmationController extends Controller
             ->with('success', 'Remark anda telah dihantar.');
     }
 
+    /** Explicitly declare amendments — POST /mom/confirm/{token}/amendments */
+    public function amendments(Request $request, string $token): RedirectResponse
+    {
+        $recipient = MomCirculationRecipient::withoutGlobalScopes()
+            ->where('token', $token)
+            ->firstOrFail();
+
+        $circulation = $recipient->circulation()->withoutGlobalScopes()->firstOrFail();
+
+        if ($circulation->deadline_at->isPast()) {
+            return redirect()->route('mom.confirm', $token)
+                ->with('error', 'Tempoh pengesahan telah tamat.');
+        }
+
+        $recipient->update([
+            'response' => 'amendment_requested',
+            'responded_at' => now(),
+            'responded_ip' => $request->ip(),
+            'responded_user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->route('mom.confirm', $token)
+            ->with('success', 'Pindaan anda telah dihantar. Anda akan dimaklumkan bila minit dikemas kini.');
+    }
+
     /** Withdraw the guest's confirmation — DELETE /mom/confirm/{token} */
     public function destroy(Request $request, string $token): RedirectResponse
     {

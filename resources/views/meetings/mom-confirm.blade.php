@@ -226,10 +226,13 @@
                         ✅ Sahkan Minit
                     </button>
                 </form>
-                <button type="button"
-                        class="flex-none rounded-xl border border-gray-300 text-gray-700 text-sm font-medium px-4 py-3 hover:bg-gray-50 active:scale-95 transition-all">
-                    💬 Pindaan
-                </button>
+                <form method="POST" action="{{ route('mom.amendments.store', $recipient->token) }}" class="flex-none">
+                    @csrf
+                    <button type="submit"
+                            class="rounded-xl border border-gray-300 text-gray-700 text-sm font-medium px-4 py-3 hover:bg-gray-50 active:scale-95 transition-all">
+                        💬 Pindaan
+                    </button>
+                </form>
             </div>
         </div>
     @endif
