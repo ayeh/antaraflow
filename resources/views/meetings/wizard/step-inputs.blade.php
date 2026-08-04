@@ -483,16 +483,16 @@
             x-transition:leave-end="opacity-0 translate-y-4 scale-90"
             class="pointer-events-auto"
         >
-            <div class="_upload-in flex items-center gap-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 border border-green-200 dark:border-green-800 pl-4 pr-3 py-3">
-                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
-                    <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="_upload-in flex items-center gap-3 bg-gray-900/90 backdrop-blur-sm rounded-2xl shadow-2xl pl-4 pr-3 py-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                     </svg>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white leading-tight truncate" x-text="uploadSuccess.filename"></p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1.5">
-                        <svg class="animate-spin h-3 w-3 text-violet-500 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                    <p class="text-sm font-semibold text-white leading-tight truncate" x-text="uploadSuccess.filename"></p>
+                    <p class="text-xs text-gray-400 mt-0.5 flex items-center gap-1.5">
+                        <svg class="animate-spin h-3 w-3 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
@@ -501,14 +501,14 @@
                 </div>
                 <button type="button"
                     @click="uploadSuccess.show = false; if (uploadSuccessTimer) clearTimeout(uploadSuccessTimer)"
-                    class="flex-shrink-0 p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                    class="flex-shrink-0 p-1.5 rounded-full text-gray-500 hover:text-white hover:bg-white/10 transition-colors">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
-            <div class="mt-1.5 h-0.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden mx-3">
-                <div class="h-full bg-green-400 dark:bg-green-500 progress-bar-indeterminate rounded-full"></div>
+            <div class="mt-1.5 h-0.5 bg-white/10 rounded-full overflow-hidden mx-3">
+                <div class="h-full bg-green-400 progress-bar-indeterminate rounded-full"></div>
             </div>
         </div>
     </div>
