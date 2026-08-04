@@ -9,5 +9,6 @@ enum MeetingStatus: string
     case Draft = 'draft';
     case InProgress = 'in_progress';
     case Finalized = 'finalized';
+    case PendingConfirmation = 'pending_confirmation';
     case Approved = 'approved';
 }
