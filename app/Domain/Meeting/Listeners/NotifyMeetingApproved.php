@@ -18,7 +18,7 @@ class NotifyMeetingApproved implements ShouldQueue
         foreach ($meeting->attendees as $attendee) {
             if ($attendee->user_id) {
                 $user = User::find($attendee->user_id);
-                $user?->notify(new MeetingApprovedNotification($meeting, $event->approvedBy));
+                $user?->notify(new MeetingApprovedNotification($meeting, $event->approvedBy, $event->circulation));
             }
         }
     }
