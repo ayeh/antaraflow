@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Collaboration\Models;
 
+use App\Domain\Meeting\Models\MomCirculationRecipient;
 use App\Models\User;
 use App\Support\Traits\BelongsToOrganization;
 use Database\Factories\CommentFactory;
@@ -23,6 +24,7 @@ class Comment extends Model
         'commentable_type',
         'commentable_id',
         'user_id',
+        'mom_circulation_recipient_id',
         'body',
         'parent_id',
         'client_visible',
@@ -49,6 +51,11 @@ class Comment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function circulationRecipient(): BelongsTo
+    {
+        return $this->belongsTo(MomCirculationRecipient::class, 'mom_circulation_recipient_id');
     }
 
     public function parent(): BelongsTo
