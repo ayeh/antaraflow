@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Domain\AI\Commands;
 
 use App\Domain\Admin\Services\AiControlService;
+use App\Domain\AI\Models\OrganizationAiBudget;
 use App\Domain\AI\Notifications\AiBudgetAlertNotification;
+use App\Domain\AI\Notifications\OrgBudgetWarningNotification;
 use App\Domain\AI\Services\AiUsageRecorder;
+use App\Domain\AI\Services\OrgBudgetService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
@@ -17,7 +20,7 @@ class CheckAiUsageBudgetCommand extends Command
 
     protected $description = 'Check today\'s AI spend against configured budgets; alert and auto-disable when exceeded';
 
-    public function handle(AiControlService $control, AiUsageRecorder $usage): int
+    public function handle(AiControlService $control, AiUsageRecorder $usage, OrgBudgetService $orgBudget): int
     {
         $spend = $usage->todaySpend();
         $dailyBudget = $control->dailyBudget();
@@ -51,9 +54,58 @@ class CheckAiUsageBudgetCommand extends Command
             }
         }
 
+        $this->checkOrgBudgets($control, $orgBudget);
+
         $this->info('Budget check complete.');
 
         return self::SUCCESS;
+    }
+
+    private function checkOrgBudgets(AiControlService $control, OrgBudgetService $orgBudget): void
+    {
+        $email = $control->alertEmail();
+        $telegram = $control->alertTelegramChatId();
+
+        if (! $email && ! $telegram) {
+            return;
+        }
+
+        OrganizationAiBudget::query()
+            ->with('organization')
+            ->get()
+            ->each(function (OrganizationAiBudget $budget) use ($orgBudget, $email, $telegram): void {
+                $utilisation = $orgBudget->utilisation($budget->organization_id);
+
+                if ($utilisation === null) {
+                    return;
+                }
+
+                $level = match (true) {
+                    $utilisation >= 1.0 => 'org_critical',
+                    $utilisation >= 0.8 => 'org_warning',
+                    default => null,
+                };
+
+                if ($level === null) {
+                    return;
+                }
+
+                $cacheKey = "org_budget_alert_{$budget->organization_id}_{$level}_".now()->toDateString();
+
+                if (Cache::get($cacheKey)) {
+                    return;
+                }
+
+                $orgName = $budget->organization?->name ?? "Org #{$budget->organization_id}";
+
+                Notification::route('mail', $email)
+                    ->route('telegram', $telegram)
+                    ->notify(new OrgBudgetWarningNotification($level, $orgName, $utilisation, $budget));
+
+                Cache::put($cacheKey, true, now()->endOfDay());
+
+                $this->warn("Org budget alert [{$level}] dispatched for {$orgName} (utilisation: ".round($utilisation * 100).'%).');
+            });
     }
 
     private function dispatchAlert(
