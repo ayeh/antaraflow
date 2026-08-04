@@ -225,6 +225,11 @@
         @include('meetings.partials.preparation-modal', ['inOverflow' => true])
     @endif
 
+    {{-- Secretary monitoring panel: visible while awaiting recipient confirmation --}}
+    @if($meeting->status === \App\Support\Enums\MeetingStatus::PendingConfirmation)
+        @include('meetings.partials.circulation-monitor', ['circulation' => $openCirculation])
+    @endif
+
     {{-- Stepper Bar --}}
     @include('meetings.wizard.stepper')
 

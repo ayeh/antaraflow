@@ -232,11 +232,18 @@ class MeetingController extends Controller
             )
             ->get(['id', 'name', 'is_system', 'is_default', 'organization_id']);
 
+        $openCirculation = $meeting->circulations()
+            ->where('status', 'open')
+            ->with('recipients')
+            ->latest()
+            ->first();
+
         return view('meetings.show', compact(
             'meeting', 'isEditable', 'orgMembers',
             'attendeeStats', 'actionItemStats',
             'comments', 'shares', 'decisionTracker',
             'relatedMeetings', 'exportTemplates',
+            'openCirculation',
         ));
     }
 

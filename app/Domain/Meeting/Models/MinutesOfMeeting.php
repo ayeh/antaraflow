@@ -203,6 +203,11 @@ class MinutesOfMeeting extends Model
         return $this->hasMany(MomGuestAccess::class, 'minutes_of_meeting_id');
     }
 
+    public function circulations(): HasMany
+    {
+        return $this->hasMany(MomCirculation::class, 'minutes_of_meeting_id');
+    }
+
     public function voiceNotes(): HasMany
     {
         return $this->hasMany(VoiceNote::class);
