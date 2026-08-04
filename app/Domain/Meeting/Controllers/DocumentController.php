@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DocumentController extends Controller
 {
@@ -42,6 +43,19 @@ class DocumentController extends Controller
         return response()->json([
             'document' => $document,
             'message' => 'Document uploaded successfully.',
+        ]);
+    }
+
+    public function preview(MinutesOfMeeting $meeting, MomDocument $document): BinaryFileResponse
+    {
+        $this->authorize('view', $meeting);
+
+        $path = Storage::disk('local')->path($document->file_path);
+
+        abort_if(! file_exists($path), 404);
+
+        return response()->file($path, [
+            'Content-Type' => $document->mime_type ?: 'application/octet-stream',
         ]);
     }
 

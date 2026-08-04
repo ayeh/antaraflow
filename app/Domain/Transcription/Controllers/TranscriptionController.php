@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class TranscriptionController extends Controller
 {
@@ -44,6 +45,20 @@ class TranscriptionController extends Controller
 
         return redirect()->route('meetings.show', $meeting)
             ->with('success', __('Audio uploaded and transcription started.'));
+    }
+
+    public function stream(MinutesOfMeeting $meeting, AudioTranscription $transcription): BinaryFileResponse
+    {
+        $this->authorize('view', $meeting);
+
+        $path = $this->audioStorageService->getFullPath($transcription->file_path);
+
+        abort_if(! file_exists($path), 404);
+
+        return response()->file($path, [
+            'Content-Type' => $transcription->mime_type ?: 'audio/webm',
+            'Accept-Ranges' => 'bytes',
+        ]);
     }
 
     public function show(MinutesOfMeeting $meeting, AudioTranscription $transcription): View
