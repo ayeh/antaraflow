@@ -1712,6 +1712,7 @@ export default function audioRecorder(config) {
             if (this.liveMode && this.isLongRecording) {
                 this.state = 'complete';
                 this.successMessage = this.config.i18n?.recordingStopped || 'Recording stopped. Audio chunks have been sent for transcription.';
+                this.$dispatch('recording-complete', { transcription: null });
                 return;
             }
 

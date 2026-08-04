@@ -412,9 +412,9 @@
         handleRecordingComplete(detail) {
             if (detail?.transcription) {
                 this.transcriptions.push(detail.transcription);
-                this.showUploadPill(detail.transcription.original_filename || @js(__('Recording')));
-                this.$dispatch('navigate-inputs');
             }
+            this.showUploadPill(detail?.transcription?.original_filename || @js(__('Recording')));
+            this.$dispatch('navigate-inputs');
         },
 
         pollTimer: null,
@@ -467,21 +467,21 @@
     @recording-complete.window="handleRecordingComplete($event.detail)"
     class="space-y-6"
 >
-    {{-- Upload Success Pill (floating, prominent) --}}
+    {{-- Upload Success Pill (floating toast, bottom-right) --}}
     <div
         x-show="uploadSuccess.show"
         x-cloak
-        class="fixed top-6 left-0 right-0 flex justify-center z-50 pointer-events-none"
+        class="fixed bottom-6 right-4 sm:right-6 z-[200] w-full max-w-sm pointer-events-none"
     >
         <div
             x-show="uploadSuccess.show"
             x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 -translate-y-3 scale-90"
+            x-transition:enter-start="opacity-0 translate-y-4 scale-90"
             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-            x-transition:leave-end="opacity-0 -translate-y-3 scale-90"
-            class="pointer-events-auto w-full max-w-sm mx-4"
+            x-transition:leave-end="opacity-0 translate-y-4 scale-90"
+            class="pointer-events-auto"
         >
             <div class="_upload-in flex items-center gap-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 border border-green-200 dark:border-green-800 pl-4 pr-3 py-3">
                 <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
