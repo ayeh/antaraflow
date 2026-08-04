@@ -6,6 +6,42 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $meeting->title }} — Pengesahan Minit</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        @media print {
+            /* Hide interactive elements */
+            .fixed,
+            .sticky,
+            button,
+            form,
+            [x-show],
+            [x-data] button {
+                display: none !important;
+            }
+
+            /* Remove backgrounds for ink saving */
+            .bg-amber-50,
+            .bg-white {
+                background: white !important;
+            }
+
+            /* Clean typography */
+            body {
+                font-size: 11pt;
+                color: #000;
+            }
+
+            /* Ensure content fills page width */
+            .max-w-2xl {
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+
+            /* Remove bottom padding added for sticky bar */
+            .pb-32 {
+                padding-bottom: 0 !important;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
