@@ -477,6 +477,7 @@ export default function audioRecorder(config) {
             // depend on that alone is what produced a verdict about zero
             // samples in production. This is idempotent — a running loop is
             // left exactly as it is.
+            this.startSweep('in');
             this.startWaveform();
 
             await this.listenForMicCheck(durationMs);
