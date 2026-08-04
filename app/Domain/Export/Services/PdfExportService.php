@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Export\Services;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Support\Enums\MeetingStatus;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 
@@ -36,6 +37,25 @@ class PdfExportService
             $this->translator->applyTranslations($meeting, $language);
         }
 
-        return $this->renderer->renderHtml($meeting, $template, $language);
+        $html = $this->renderer->renderHtml($meeting, $template, $language);
+
+        if ($meeting->status === MeetingStatus::Approved) {
+            $circulation = $meeting->circulations()
+                ->where('status', 'closed_approved')
+                ->with('recipients')
+                ->latest()
+                ->first();
+
+            if ($circulation) {
+                $confirmationHtml = view('pdf.mom-confirmation-page', [
+                    'meeting' => $meeting,
+                    'circulation' => $circulation,
+                ])->render();
+
+                $html = str_replace('</body>', $confirmationHtml.'</body>', $html);
+            }
+        }
+
+        return $html;
     }
 }
