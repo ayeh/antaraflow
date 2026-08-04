@@ -69,6 +69,54 @@ class GuestConfirmationController extends Controller
             ->with('success', 'Minit telah disahkan. Terima kasih.');
     }
 
+    /** Store a guest remark anchored to a topic or action item — POST /mom/confirm/{token}/remark */
+    public function remark(Request $request, string $token): RedirectResponse
+    {
+        $recipient = MomCirculationRecipient::withoutGlobalScopes()
+            ->where('token', $token)
+            ->firstOrFail();
+
+        $circulation = $recipient->circulation()->withoutGlobalScopes()->firstOrFail();
+
+        if ($circulation->deadline_at->isPast()) {
+            return redirect()->route('mom.confirm', $token)
+                ->with('error', 'Tempoh pengesahan telah tamat.');
+        }
+
+        $validated = $request->validate([
+            'commentable_type' => ['required', 'in:topic,action_item'],
+            'commentable_id' => ['required', 'integer'],
+            'body' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $commentableClass = match ($validated['commentable_type']) {
+            'topic' => \App\Domain\AI\Models\MomTopic::class,
+            'action_item' => \App\Domain\ActionItem\Models\ActionItem::class,
+        };
+
+        // Security: verify the commentable belongs to this meeting's circulation.
+        $commentable = $commentableClass::withoutGlobalScopes()
+            ->where('id', $validated['commentable_id'])
+            ->where('minutes_of_meeting_id', $circulation->minutes_of_meeting_id)
+            ->firstOrFail();
+
+        \App\Domain\Collaboration\Models\Comment::createForOrganization($circulation->organization_id, [
+            'user_id' => null,
+            'mom_circulation_recipient_id' => $recipient->id,
+            'commentable_type' => $commentableClass,
+            'commentable_id' => $commentable->id,
+            'body' => $validated['body'],
+            'client_visible' => true,
+        ]);
+
+        if ($recipient->response !== 'confirmed') {
+            $recipient->update(['response' => 'amendment_requested']);
+        }
+
+        return redirect()->route('mom.confirm', $token)
+            ->with('success', 'Remark anda telah dihantar.');
+    }
+
     /** Withdraw the guest's confirmation — DELETE /mom/confirm/{token} */
     public function destroy(Request $request, string $token): RedirectResponse
     {

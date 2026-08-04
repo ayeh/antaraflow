@@ -98,14 +98,23 @@
                                     class="mt-2 text-xs text-blue-600 hover:underline">
                                 💬 Remark
                             </button>
-                            <div x-show="remarkOpen" x-cloak class="mt-2">
+                            <form method="POST" action="{{ route('mom.remark', $recipient->token) }}"
+                                  x-show="remarkOpen" x-cloak class="mt-2">
+                                @csrf
+                                <input type="hidden" name="commentable_type" value="topic">
+                                <input type="hidden" name="commentable_id" value="{{ $topic->id }}">
                                 <textarea
-                                    name="remark[topic][{{ $topic->id }}]"
+                                    name="body"
                                     rows="3"
                                     placeholder="Tulis pembetulan atau ulasan..."
                                     class="w-full rounded-lg border-gray-300 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                    required
                                 ></textarea>
-                            </div>
+                                <button type="submit"
+                                        class="mt-1 text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                    Hantar Remark
+                                </button>
+                            </form>
                         </div>
                     @endforeach
                 </div>
@@ -145,14 +154,23 @@
                                     class="mt-2 text-xs text-blue-600 hover:underline">
                                 💬 Remark
                             </button>
-                            <div x-show="remarkOpen" x-cloak class="mt-2">
+                            <form method="POST" action="{{ route('mom.remark', $recipient->token) }}"
+                                  x-show="remarkOpen" x-cloak class="mt-2">
+                                @csrf
+                                <input type="hidden" name="commentable_type" value="action_item">
+                                <input type="hidden" name="commentable_id" value="{{ $item->id }}">
                                 <textarea
-                                    name="remark[action_item][{{ $item->id }}]"
+                                    name="body"
                                     rows="2"
                                     placeholder="Tulis ulasan..."
                                     class="w-full rounded-lg border-gray-300 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                    required
                                 ></textarea>
-                            </div>
+                                <button type="submit"
+                                        class="mt-1 text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                    Hantar Remark
+                                </button>
+                            </form>
                         </div>
                     @endforeach
                 </div>
