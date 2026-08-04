@@ -63,8 +63,8 @@ test('confirmation page shows deadline banner with deadline text', function () {
 
     $this->get(route('mom.confirm', $recipient->token))
         ->assertOk()
-        ->assertSee('Sila sahkan sebelum')
-        ->assertSee('Tiada maklum balas akan dianggap sebagai pengesahan');
+        ->assertSee(__('mom.deadline_banner', ['deadline' => '']))
+        ->assertSee(__('mom.deadline_warning'));
 });
 
 test('confirmation page shows unconfirmed action bar when not yet confirmed', function () {
@@ -91,7 +91,7 @@ test('confirmation page shows unconfirmed action bar when not yet confirmed', fu
 
     $this->get(route('mom.confirm', $recipient->token))
         ->assertOk()
-        ->assertSee('Sahkan Minit');
+        ->assertSee(__('mom.confirm_button'));
 });
 
 test('confirmation page shows confirmed state when already confirmed', function () {
@@ -119,5 +119,5 @@ test('confirmation page shows confirmed state when already confirmed', function 
 
     $this->get(route('mom.confirm', $recipient->token))
         ->assertOk()
-        ->assertSee('Anda telah mengesahkan minit ini');
+        ->assertSee(__('mom.confirmed_at', ['time' => '']));
 });

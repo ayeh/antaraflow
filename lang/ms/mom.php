@@ -1,0 +1,32 @@
+<?php
+
+return [
+
+    'confirm_button' => 'Sahkan Minit',
+    'amendment_button' => 'Pindaan',
+    'deadline_banner' => 'Sila sahkan sebelum :deadline',
+    'deadline_warning' => 'Tiada maklum balas akan dianggap sebagai pengesahan.',
+    'not_you' => 'Bukan anda?',
+    'you_are' => 'Anda: :name (:email)',
+    'withdrawal_link' => 'Tarik balik pengesahan',
+    'confirmed_at' => 'Anda telah mengesahkan minit ini pada :time',
+    'remark_placeholder' => 'Tulis pembetulan atau ulasan...',
+    'remark_submit' => 'Hantar',
+    'remark_success' => 'Remark anda telah dihantar.',
+    'amendment_success' => 'Pindaan anda telah dihantar. Anda akan dimaklumkan bila minit dikemas kini.',
+    'confirm_success' => 'Minit telah disahkan. Terima kasih.',
+    'withdraw_success' => 'Pengesahan telah ditarik balik.',
+    'deadline_passed' => 'Tempoh pengesahan telah tamat.',
+    'verification_title' => 'Pengesahan Dokumen',
+    'verification_subtitle' => 'Halaman ini mengesahkan integriti dokumen sahaja. Kandungan mesyuarat tidak didedahkan.',
+    'minutes_confirmed' => 'Minit Disahkan',
+    'not_confirmed' => 'Status Tidak Disahkan',
+    'monitoring_panel_title' => 'Pengesahan · Pusingan :round',
+    'not_opened' => 'Belum buka',
+    'explicitly_confirmed' => 'Disahkan',
+    'amendment_requested' => 'Pindaan',
+    'minor_correction' => 'Pembetulan kecil',
+    'material_amendment' => 'Pindaan material → Pusingan 2',
+    'reject' => 'Tolak',
+
+];

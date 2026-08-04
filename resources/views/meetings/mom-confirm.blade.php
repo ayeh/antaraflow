@@ -67,10 +67,10 @@
     {{-- Sticky deadline banner --}}
     <div class="sticky top-0 z-20 bg-amber-50 border-b border-amber-200 px-4 py-3">
         <p class="text-sm font-medium text-amber-800 max-w-2xl mx-auto">
-            ⏳ Sila sahkan sebelum {{ $circulation->deadline_at->format('d M Y, g:i A') }}
+            ⏳ {{ __('mom.deadline_banner', ['deadline' => $circulation->deadline_at->format('d M Y, g:i A')]) }}
         </p>
         <p class="text-xs text-amber-600 mt-0.5 max-w-2xl mx-auto">
-            Tiada maklum balas akan dianggap sebagai pengesahan.
+            {{ __('mom.deadline_warning') }}
         </p>
     </div>
 
@@ -80,7 +80,7 @@
             <span class="text-sm text-gray-600">
                 Anda: <strong>{{ $recipient->name }}</strong> ({{ $recipient->email }})
             </span>
-            <a href="#" class="text-xs text-blue-600 hover:underline">Bukan anda?</a>
+            <a href="#" class="text-xs text-blue-600 hover:underline">{{ __('mom.not_you') }}</a>
         </div>
     </div>
 
@@ -233,6 +233,25 @@
             </section>
         @endif
 
+        {{-- Conversion CTA: shown only after confirmation --}}
+        @if($recipient->isConfirmed())
+        <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+            <p class="text-sm font-medium text-blue-800">
+                Ingin minit mesyuarat anda sendiri direkod dan diedarkan secara automatik?
+            </p>
+            <p class="text-xs text-blue-600 mt-1">
+                antaraNote merekod, meringkaskan, dan mengedarkan minit untuk semua jenis mesyuarat.
+            </p>
+            <a href="{{ route('register') }}?name={{ urlencode($recipient->name) }}&email={{ urlencode($recipient->email) }}"
+               class="mt-3 inline-block text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded px-3 py-1.5">
+                Daftar percuma →
+            </a>
+            <p class="text-xs text-blue-400 mt-2">
+                Maklumat anda tidak dikongsi tanpa kebenaran anda.
+            </p>
+        </div>
+        @endif
+
         <x-antara-note-footer />
     </div>
 
@@ -241,13 +260,13 @@
         <div class="fixed bottom-0 inset-x-0 bg-green-50 border-t border-green-200 px-4 py-4">
             <div class="max-w-2xl mx-auto">
                 <p class="text-center text-sm font-medium text-green-700">
-                    ✅ Anda telah mengesahkan minit ini pada {{ $recipient->responded_at?->format('d M Y, g:i A') }}
+                    ✅ {{ __('mom.confirmed_at', ['time' => $recipient->responded_at?->format('d M Y, g:i A')]) }}
                 </p>
                 <p class="text-center text-xs text-green-600 mt-1">
                     <form method="POST" action="{{ route('mom.confirm.destroy', $recipient->token) }}">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="text-xs text-green-600 underline">Tarik balik pengesahan</button>
+                        <button type="submit" class="text-xs text-green-600 underline">{{ __('mom.withdrawal_link') }}</button>
                     </form>
                 </p>
             </div>
@@ -259,14 +278,14 @@
                     @csrf
                     <button type="submit"
                             class="w-full rounded-xl bg-blue-600 text-white text-sm font-semibold py-3 hover:bg-blue-700 active:scale-95 transition-all">
-                        ✅ Sahkan Minit
+                        ✅ {{ __('mom.confirm_button') }}
                     </button>
                 </form>
                 <form method="POST" action="{{ route('mom.amendments.store', $recipient->token) }}" class="flex-none">
                     @csrf
                     <button type="submit"
                             class="rounded-xl border border-gray-300 text-gray-700 text-sm font-medium px-4 py-3 hover:bg-gray-50 active:scale-95 transition-all">
-                        💬 Pindaan
+                        💬 {{ __('mom.amendment_button') }}
                     </button>
                 </form>
             </div>

@@ -55,7 +55,7 @@ class GuestConfirmationController extends Controller
 
         if ($circulation->deadline_at->isPast()) {
             return redirect()->route('mom.confirm', $token)
-                ->with('error', 'Tempoh pengesahan telah tamat.');
+                ->with('error', __('mom.deadline_passed'));
         }
 
         $recipient->update([
@@ -66,7 +66,7 @@ class GuestConfirmationController extends Controller
         ]);
 
         return redirect()->route('mom.confirm', $token)
-            ->with('success', 'Minit telah disahkan. Terima kasih.');
+            ->with('success', __('mom.confirm_success'));
     }
 
     /** Store a guest remark anchored to a topic or action item — POST /mom/confirm/{token}/remark */
@@ -80,7 +80,7 @@ class GuestConfirmationController extends Controller
 
         if ($circulation->deadline_at->isPast()) {
             return redirect()->route('mom.confirm', $token)
-                ->with('error', 'Tempoh pengesahan telah tamat.');
+                ->with('error', __('mom.deadline_passed'));
         }
 
         $validated = $request->validate([
@@ -114,7 +114,7 @@ class GuestConfirmationController extends Controller
         }
 
         return redirect()->route('mom.confirm', $token)
-            ->with('success', 'Remark anda telah dihantar.');
+            ->with('success', __('mom.remark_success'));
     }
 
     /** Explicitly declare amendments — POST /mom/confirm/{token}/amendments */
@@ -128,7 +128,7 @@ class GuestConfirmationController extends Controller
 
         if ($circulation->deadline_at->isPast()) {
             return redirect()->route('mom.confirm', $token)
-                ->with('error', 'Tempoh pengesahan telah tamat.');
+                ->with('error', __('mom.deadline_passed'));
         }
 
         $recipient->update([
@@ -139,7 +139,7 @@ class GuestConfirmationController extends Controller
         ]);
 
         return redirect()->route('mom.confirm', $token)
-            ->with('success', 'Pindaan anda telah dihantar. Anda akan dimaklumkan bila minit dikemas kini.');
+            ->with('success', __('mom.amendment_success'));
     }
 
     /** Withdraw the guest's confirmation — DELETE /mom/confirm/{token} */
@@ -153,7 +153,7 @@ class GuestConfirmationController extends Controller
 
         if ($circulation->deadline_at->isPast()) {
             return redirect()->route('mom.confirm', $token)
-                ->with('error', 'Tempoh pengesahan telah tamat.');
+                ->with('error', __('mom.deadline_passed'));
         }
 
         $recipient->update([
@@ -164,6 +164,6 @@ class GuestConfirmationController extends Controller
         ]);
 
         return redirect()->route('mom.confirm', $token)
-            ->with('info', 'Pengesahan telah ditarik balik.');
+            ->with('info', __('mom.withdraw_success'));
     }
 }
