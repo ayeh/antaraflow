@@ -471,7 +471,7 @@
     <div
         x-show="uploadSuccess.show"
         x-cloak
-        class="fixed bottom-6 right-4 sm:right-6 z-[200] w-full max-w-sm pointer-events-none"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] w-full max-w-sm pointer-events-none"
     >
         <div
             x-show="uploadSuccess.show"
