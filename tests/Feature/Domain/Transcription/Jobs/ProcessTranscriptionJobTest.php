@@ -139,6 +139,40 @@ test('job sets processing status before transcribing', function () {
         ->and($transcription->status)->toBe(TranscriptionStatus::Completed);
 });
 
+it('preprocesses audio with quality filters', function (): void {
+    $source = sys_get_temp_dir().'/preprocess_source_'.uniqid().'.wav';
+
+    Process::run([
+        'ffmpeg', '-hide_banner', '-loglevel', 'error',
+        '-f', 'lavfi', '-i', 'sine=frequency=440:duration=5',
+        '-y', $source,
+    ])->throw();
+
+    $job = new ProcessTranscriptionJob(AudioTranscription::factory()->create());
+    $processed = $job->preprocessAudio($source);
+
+    try {
+        expect($processed)->not->toBe($source)
+            ->and(file_exists($processed))->toBeTrue()
+            ->and(filesize($processed))->toBeGreaterThan(0);
+    } finally {
+        @unlink($source);
+        if ($processed !== $source) {
+            @unlink($processed);
+        }
+    }
+})->skip(fn () => ! ffmpegAvailable(), 'ffmpeg is required for this test.');
+
+it('falls back to the original path when preprocessing fails', function (): void {
+    $job = new ProcessTranscriptionJob(AudioTranscription::factory()->create());
+    $fakePath = sys_get_temp_dir().'/nonexistent_audio_'.uniqid().'.webm';
+
+    // ffmpeg fails because the input file does not exist — verifies graceful fallback
+    $result = $job->preprocessAudio($fakePath);
+
+    expect($result)->toBe($fakePath);
+})->skip(fn () => ! ffmpegAvailable(), 'ffmpeg is required for this test.');
+
 it('compresses audio to fit under the size limit', function (): void {
     $source = sys_get_temp_dir().'/compress_source_'.uniqid().'.wav';
 

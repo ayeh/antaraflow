@@ -19,6 +19,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 
@@ -32,6 +33,9 @@ class ProcessTranscriptionJob implements ShouldQueue
 
     /** Maximum file size in bytes for the Whisper API (25 MB). */
     private const MAX_FILE_SIZE = 25 * 1024 * 1024;
+
+    /** Opus bitrate used for standard preprocessing (32 kbps ≈ 14.4 MB/hr, well within the API limit). */
+    private const DEFAULT_BITRATE = 32_000;
 
     /** Lowest Opus bitrate worth attempting before giving up on a recording. */
     private const MIN_BITRATE = 6_000;
@@ -66,15 +70,18 @@ class ProcessTranscriptionJob implements ShouldQueue
             'started_at' => now(),
         ]);
 
-        $compressedPath = null;
+        $processedPath = null;
 
         try {
             $filePath = Storage::disk('local')->path($this->transcription->file_path);
 
-            // Compress large files to fit within the transcription size limit
-            if (file_exists($filePath) && filesize($filePath) > self::MAX_FILE_SIZE) {
-                $filePath = $this->compressAudio($filePath);
-                $compressedPath = $filePath;
+            // Normalise and enhance audio before transcription
+            if (file_exists($filePath)) {
+                $preprocessed = $this->preprocessAudio($filePath);
+                if ($preprocessed !== $filePath) {
+                    $processedPath = $preprocessed;
+                    $filePath = $preprocessed;
+                }
             }
 
             $meeting = $this->transcription->minutesOfMeeting;
@@ -120,9 +127,8 @@ class ProcessTranscriptionJob implements ShouldQueue
 
             throw $e;
         } finally {
-            // Clean up temporary compressed file
-            if ($compressedPath && file_exists($compressedPath)) {
-                @unlink($compressedPath);
+            if ($processedPath && file_exists($processedPath)) {
+                @unlink($processedPath);
             }
         }
     }
@@ -157,6 +163,56 @@ class ProcessTranscriptionJob implements ShouldQueue
         }
 
         return $result;
+    }
+
+    /**
+     * Normalise audio quality and convert to the optimal format before transcription.
+     *
+     * Applies a highpass filter (removes low-frequency rumble below 80 Hz) and EBU R128
+     * loudness normalisation, then encodes to mono 16 kHz Opus at 32 kbps. At that
+     * rate a 7-hour recording fits within the 25 MB API limit, so compressAudio() is
+     * only invoked as a safety net for extraordinary-length files.
+     *
+     * Returns the original path unchanged when ffmpeg is unavailable or fails so the
+     * job can still proceed with the raw upload.
+     */
+    public function preprocessAudio(string $filePath): string
+    {
+        $outputPath = sys_get_temp_dir().'/whisper_pre_'.uniqid().'.ogg';
+
+        $result = Process::timeout(300)->run([
+            'ffmpeg', '-hide_banner', '-loglevel', 'error',
+            '-i', $filePath,
+            '-af', 'highpass=f=80,loudnorm=I=-16:TP=-1.5:LRA=11',
+            '-ar', '16000',
+            '-ac', '1',
+            '-c:a', 'libopus',
+            '-b:a', (string) self::DEFAULT_BITRATE,
+            '-y',
+            $outputPath,
+        ]);
+
+        if ($result->failed() || ! file_exists($outputPath) || filesize($outputPath) === 0) {
+            Log::warning('Audio preprocessing failed; using original file.', [
+                'transcription_id' => $this->transcription->id,
+                'error' => $result->errorOutput(),
+            ]);
+            @unlink($outputPath);
+
+            return $filePath;
+        }
+
+        if (filesize($outputPath) > self::MAX_FILE_SIZE) {
+            try {
+                $compressed = $this->compressAudio($outputPath);
+            } finally {
+                @unlink($outputPath);
+            }
+
+            return $compressed;
+        }
+
+        return $outputPath;
     }
 
     /**
