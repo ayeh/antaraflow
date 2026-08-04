@@ -54,9 +54,16 @@ function withMeter(string $body): string
             };
         };
 
-        /** Draw n frames, spaced in real time so attack/release actually advance. */
+        /**
+         * Drive n frames, spaced in real time so attack/release actually advance.
+         *
+         * Measuring and painting run on separate clocks in production — a timer
+         * for the level, requestAnimationFrame for the picture — so a frame here
+         * is one turn of each, in that order.
+         */
         const drawFrames = async (n) => {
             for (let i = 0; i < n; i++) {
+                recorder.sampleTick();
                 recorder.drawWaveform();
                 await new Promise((resolve) => setTimeout(resolve, 20));
             }
@@ -170,6 +177,7 @@ it('moves only while audio is actually being captured', function () {
 
         const frames = [];
         for (let i = 0; i < 6; i++) {
+            recorder.sampleTick();
             recorder.drawWaveform();
             frames.push(canvas.toDataURL());
             await new Promise((resolve) => setTimeout(resolve, 25));

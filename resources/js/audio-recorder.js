@@ -32,6 +32,24 @@ const MIC_CHECK_MS = 5000;
 const MIC_CHECK_TICK_MS = 50;
 
 /**
+ * How often the level is measured, in milliseconds.
+ *
+ * Measuring used to happen inside the requestAnimationFrame loop, which a
+ * browser stops entirely for a tab that is not visible — measured on Chrome as
+ * 0 frames per second while hidden, against 60 while visible. The recorder
+ * explicitly invites people to switch away mid-meeting, so every measurement
+ * stopped exactly when the app had promised it would keep working: the mic
+ * check collected nothing and reported 'incomplete', and the too-quiet warning
+ * could never fire.
+ *
+ * A timer is throttled to roughly once a second when hidden rather than
+ * stopped, which is coarse but sufficient — the quiet warning is a fifteen
+ * second observation and the check's verdict is a median. 16ms keeps the
+ * visible cadence the same ~60Hz the tape was drawn for.
+ */
+const SAMPLE_INTERVAL_MS = 16;
+
+/**
  * Frames quieter than this are room tone rather than someone speaking, and
  * counting them would drag every verdict down to "quiet" no matter how well
  * the microphone hears the person talking.
@@ -112,6 +130,7 @@ export default function audioRecorder(config) {
         successMessage: '',
         canvasContext: null,
         animationFrame: null,
+        sampleTimer: null,
         showCountdown: true,
         audioContext: null,
         analyserNode: null,
@@ -797,11 +816,53 @@ export default function audioRecorder(config) {
          * three times per frame.
          */
         startWaveform() {
+            this.startSampling();
+
             if (this.animationFrame) {
                 return;
             }
 
             this.drawWaveform();
+        },
+
+        /**
+         * Begin measuring the level, on a clock the render loop has no say over.
+         *
+         * Painting and measuring want different clocks. Painting belongs on
+         * requestAnimationFrame, which is right to stop for a tab nobody is
+         * looking at. Measuring feeds the mic check's verdict and the too-quiet
+         * warning, both of which have to survive exactly the backgrounding the
+         * recorder tells people is safe — so it runs on a timer instead.
+         *
+         * Idempotent: a running sampler is left alone.
+         */
+        startSampling() {
+            if (this.sampleTimer) {
+                return;
+            }
+
+            this.sampleTimer = setInterval(() => this.sampleTick(), SAMPLE_INTERVAL_MS);
+        },
+
+        /**
+         * One turn of the sampler: measure, but only when there is a capture to
+         * measure and something to measure it with.
+         *
+         * Separate from the timer that drives it so the decision of *when* a
+         * level counts lives in one place that a test can call directly, rather
+         * than being restated inside a callback the test has to fake.
+         */
+        sampleTick() {
+            if (['recording', 'checking'].includes(this.state) && this.analyserNode) {
+                this.sampleLevel(performance.now());
+            }
+        },
+
+        stopSampling() {
+            if (this.sampleTimer) {
+                clearInterval(this.sampleTimer);
+                this.sampleTimer = null;
+            }
         },
 
         /**
@@ -863,18 +924,10 @@ export default function audioRecorder(config) {
 
             const nowMs = performance.now();
 
-            // Measure before the paint gate, never after it.
-            //
-            // Sampling used to sit below the canvas checks, so any frame that
-            // could not resolve the canvas returned without measuring. The mic
-            // check reads the samples this loop pushes, so a canvas the loop
-            // could not reach did not merely blank the meter — it collected
-            // nothing for five seconds and reported 'incomplete' about a
-            // microphone that was working the whole time. What is measured has
-            // nothing to do with what is drawn, so it no longer waits on it.
-            if (['recording', 'checking'].includes(this.state) && this.analyserNode) {
-                this.sampleLevel(nowMs);
-            }
+            // Nothing is measured here. This function paints what startSampling()
+            // has already recorded, so a frame that cannot resolve its canvas —
+            // or a tab that stops issuing frames altogether — costs a picture and
+            // nothing else. It used to cost the mic check's entire verdict.
 
             // Losing the canvas for a frame must not end the loop. Returning
             // here without scheduling anything left `animationFrame` null with
@@ -2037,6 +2090,7 @@ export default function audioRecorder(config) {
                 this.animationFrame = null;
             }
 
+            this.stopSampling();
             this.releaseWakeLock();
             this.restoreTabIndicator();
             this.releaseStream();

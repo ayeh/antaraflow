@@ -75,6 +75,13 @@ function withMicCheck(string $body): string
 
         recorder.releaseStream = () => { recorder.micOpen = false; };
 
+        /** What the meter currently looks like, for asserting it did not change. */
+        const canvasSignature = () => {
+            const canvas = document.querySelector('[x-data^="audioRecorder"] canvas');
+
+            return canvas ? canvas.toDataURL() : 'no-canvas';
+        };
+
         try {
             {$body}
         } finally {
@@ -471,4 +478,60 @@ it('brings the meter loop back when it dies partway through a check', function (
     // describes nothing at all.
     expect($result['deaths'])->toBe(1)
         ->and($result['verdict'])->toBe('good');
+});
+
+it('reaches a verdict even when no frame is ever painted', function () {
+    $this->actingAs($this->user);
+
+    // A tab the user switches away from stops issuing animation frames
+    // altogether — measured on Chrome as 0 per second while hidden, against 60
+    // while visible. The recorder tells people that leaving is safe, so the
+    // check has to survive them doing it. Nothing here paints at all.
+    $result = visit(recorderStep())->script(withMicCheck(<<<'JS'
+        fakeMicrophone(64);   // -6 dBFS, comfortably audible
+
+        // Painting is replaced by a no-op for the whole check: the loop may be
+        // asked to run, but not one pixel is ever produced.
+        recorder.drawWaveform = function () {
+            this.animationFrame = null;
+        };
+
+        const before = canvasSignature();
+
+        await recorder.runMicCheck(600);
+
+        return {
+            verdict: recorder.micCheckResult,
+            measuredDbfs: recorder._smoothedDbfs,
+            canvasUntouched: canvasSignature() === before,
+        };
+    JS));
+
+    // The level was measured and judged without a picture ever being drawn.
+    expect($result['verdict'])->toBe('good')
+        ->and($result['canvasUntouched'])->toBeTrue()
+        ->and($result['measuredDbfs'])->toBeGreaterThan(-20)
+        ->and($result['measuredDbfs'])->toBeLessThan(0);
+});
+
+it('reaches a verdict even when the canvas cannot be resolved', function () {
+    $this->actingAs($this->user);
+
+    // After a wizard step swap Alpine hands back an empty $refs while the
+    // canvas is still in the document. Measuring used to sit behind that
+    // lookup, so a canvas the loop could not name cost the whole verdict
+    // rather than merely the picture.
+    $result = visit(recorderStep())->script(withMicCheck(<<<'JS'
+        fakeMicrophone(64);
+
+        recorder.canvasContext = null;
+        recorder.resolveCanvas = () => null;
+
+        await recorder.runMicCheck(600);
+
+        return { verdict: recorder.micCheckResult, context: recorder.canvasContext };
+    JS));
+
+    expect($result['verdict'])->toBe('good')
+        ->and($result['context'])->toBeNull();
 });

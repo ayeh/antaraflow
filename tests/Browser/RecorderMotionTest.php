@@ -58,8 +58,14 @@ function withRecorderMotion(string $body): string
             };
         };
 
+        /**
+         * Measuring and painting run on separate clocks in production — a timer
+         * for the level, requestAnimationFrame for the picture — so a frame here
+         * is one turn of each, in that order.
+         */
         const drawFrames = async (n) => {
             for (let i = 0; i < n; i++) {
+                recorder.sampleTick();
                 recorder.drawWaveform();
                 await new Promise((resolve) => setTimeout(resolve, 20));
             }
@@ -348,6 +354,7 @@ it('keeps the level meter alive when the user has asked for reduced motion', fun
 
         const frames = [];
         for (let i = 0; i < 6; i++) {
+            recorder.sampleTick();
             recorder.drawWaveform();
             frames.push(canvas.toDataURL());
             await new Promise((resolve) => setTimeout(resolve, 25));
@@ -408,6 +415,7 @@ it('lands the meter straight on the reading when easing is not wanted', function
         await drawFrames(10);
 
         stubAnalyser(1);
+        recorder.sampleTick();
         recorder.drawWaveform();
 
         return recorder._smoothedDbfs;
