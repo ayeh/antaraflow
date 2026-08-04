@@ -74,6 +74,8 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessController::class, 'show'])->name('guest.meeting');
     Route::get('guest/{token}', [GuestAccessController::class, 'show'])->name('guest.mom');
     Route::get('mom/confirm/{token}', [\App\Domain\Meeting\Controllers\GuestConfirmationController::class, 'show'])->name('mom.confirm');
+    Route::post('mom/confirm/{token}', [\App\Domain\Meeting\Controllers\GuestConfirmationController::class, 'store'])->name('mom.confirm.store');
+    Route::delete('mom/confirm/{token}', [\App\Domain\Meeting\Controllers\GuestConfirmationController::class, 'destroy'])->name('mom.confirm.destroy');
 });
 
 // QR Registration (public)

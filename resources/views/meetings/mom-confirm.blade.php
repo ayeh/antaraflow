@@ -190,17 +190,24 @@
                     ✅ Anda telah mengesahkan minit ini pada {{ $recipient->responded_at?->format('d M Y, g:i A') }}
                 </p>
                 <p class="text-center text-xs text-green-600 mt-1">
-                    <a href="#" class="underline">Tarik balik pengesahan</a>
+                    <form method="POST" action="{{ route('mom.confirm.destroy', $recipient->token) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-xs text-green-600 underline">Tarik balik pengesahan</button>
+                    </form>
                 </p>
             </div>
         </div>
     @else
         <div class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 px-4 py-4">
             <div class="max-w-2xl mx-auto flex gap-3">
-                <button type="button"
-                        class="flex-1 rounded-xl bg-blue-600 text-white text-sm font-semibold py-3 hover:bg-blue-700 active:scale-95 transition-all">
-                    ✅ Sahkan Minit
-                </button>
+                <form method="POST" action="{{ route('mom.confirm.store', $recipient->token) }}" class="flex-1">
+                    @csrf
+                    <button type="submit"
+                            class="w-full rounded-xl bg-blue-600 text-white text-sm font-semibold py-3 hover:bg-blue-700 active:scale-95 transition-all">
+                        ✅ Sahkan Minit
+                    </button>
+                </form>
                 <button type="button"
                         class="flex-none rounded-xl border border-gray-300 text-gray-700 text-sm font-medium px-4 py-3 hover:bg-gray-50 active:scale-95 transition-all">
                     💬 Pindaan
