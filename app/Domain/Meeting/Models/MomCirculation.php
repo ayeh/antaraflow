@@ -14,6 +14,7 @@ class MomCirculation extends Model
     use BelongsToOrganization;
 
     protected $fillable = [
+        'minutes_of_meeting_id',
         'subject',
         'body_note',
         'deadline_at',
