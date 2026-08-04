@@ -12,8 +12,7 @@ class ProjectService
     /** @param array<string, mixed> $data */
     public function create(array $data, User $user): Project
     {
-        return Project::create([
-            'organization_id' => $user->current_organization_id,
+        return Project::createForOrganization($user->current_organization_id, [
             'created_by' => $user->id,
             'name' => $data['name'],
             'code' => $data['code'] ?? null,

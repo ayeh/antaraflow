@@ -57,9 +57,8 @@ class VoiceNoteController extends Controller
             $meeting->organization_id,
         );
 
-        $voiceNote = VoiceNote::query()->create([
+        $voiceNote = VoiceNote::createForOrganization($meeting->organization_id, [
             'minutes_of_meeting_id' => $meeting->id,
-            'organization_id' => $meeting->organization_id,
             'created_by' => $request->user()->id,
             'file_path' => $path,
             'mime_type' => $request->file('audio')->getMimeType() ?? 'audio/webm',

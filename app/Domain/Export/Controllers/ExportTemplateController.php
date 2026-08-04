@@ -35,10 +35,9 @@ class ExportTemplateController
             ExportTemplate::query()->where('organization_id', $orgId)->update(['is_default' => false]);
         }
 
-        ExportTemplate::create(array_merge(
+        ExportTemplate::createForOrganization($orgId, array_merge(
             $request->validated(),
             [
-                'organization_id' => $orgId,
                 'is_default' => $request->boolean('is_default'),
                 'is_system' => false,
                 'created_by' => $request->user()->id,

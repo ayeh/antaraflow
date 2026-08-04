@@ -75,8 +75,7 @@ class AiProviderConfigController extends Controller
                     ->update(['is_default' => false]);
             }
 
-            AiProviderConfig::query()->create([
-                'organization_id' => $organization->id,
+            AiProviderConfig::createForOrganization($organization->id, [
                 'provider' => $validated['provider'],
                 'display_name' => $validated['display_name'],
                 'api_key_encrypted' => isset($validated['api_key']) && $validated['api_key'] !== null

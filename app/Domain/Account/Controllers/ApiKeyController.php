@@ -56,8 +56,7 @@ class ApiKeyController extends Controller
         $prefix = Str::random(8);
         $fullKey = "af_{$prefix}_{$rawKey}";
 
-        ApiKey::query()->create([
-            'organization_id' => $organization->id,
+        ApiKey::createForOrganization($organization->id, [
             'name' => $validated['name'],
             'key' => $prefix,
             'secret_hash' => hash('sha256', $fullKey),

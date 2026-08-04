@@ -21,8 +21,7 @@ class ShareService
 
     public function shareWithUser(MinutesOfMeeting $meeting, int $userId, SharePermission $permission, User $sharedBy): MeetingShare
     {
-        $share = MeetingShare::query()->create([
-            'organization_id' => $meeting->organization_id,
+        $share = MeetingShare::createForOrganization($meeting->organization_id, [
             'minutes_of_meeting_id' => $meeting->id,
             'shared_with_user_id' => $userId,
             'shared_by_user_id' => $sharedBy->id,
@@ -36,8 +35,7 @@ class ShareService
 
     public function generateShareLink(MinutesOfMeeting $meeting, SharePermission $permission, User $sharedBy, ?Carbon $expiresAt = null): MeetingShare
     {
-        $share = MeetingShare::query()->create([
-            'organization_id' => $meeting->organization_id,
+        $share = MeetingShare::createForOrganization($meeting->organization_id, [
             'minutes_of_meeting_id' => $meeting->id,
             'shared_with_user_id' => null,
             'shared_by_user_id' => $sharedBy->id,
