@@ -35,6 +35,7 @@ use App\Domain\Attendee\Controllers\QrRegistrationController;
 use App\Domain\Calendar\Controllers\CalendarConnectionController;
 use App\Domain\Calendar\Controllers\CalendarWebhookController;
 use App\Domain\Meeting\Controllers\BoardSettingController;
+use App\Domain\Meeting\Controllers\CirculateController;
 use App\Domain\Meeting\Controllers\DocumentController;
 use App\Domain\Meeting\Controllers\GuestAccessController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
@@ -181,6 +182,7 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
     Route::post('meetings/{meeting}/approve', [MeetingController::class, 'approve'])->name('meetings.approve');
     Route::post('meetings/{meeting}/revert', [MeetingController::class, 'revert'])->name('meetings.revert');
     Route::post('meetings/{meeting}/duplicate', [MeetingController::class, 'duplicate'])->name('meetings.duplicate');
+    Route::post('meetings/{meeting}/circulate', CirculateController::class)->name('meetings.circulate');
     Route::get('meetings/{meeting}/versions', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'index'])->name('meetings.versions.index');
     Route::get('meetings/{meeting}/versions/{version}', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'show'])->name('meetings.versions.show');
 
