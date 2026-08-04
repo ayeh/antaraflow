@@ -43,6 +43,14 @@
 ._rec-morph        { border-radius: 50%; transition: border-radius .35s cubic-bezier(.34,1.56,.64,1), transform .35s cubic-bezier(.34,1.56,.64,1); }
 ._rec-morph-square { border-radius: 28%; transform: scale(.88); }
 
+@keyframes _upload-in {
+    0%   { opacity: 0; transform: scale(.6) translateY(-12px); }
+    60%  { opacity: 1; transform: scale(1.06) translateY(2px); }
+    80%  { transform: scale(.97) translateY(0); }
+    100% { transform: scale(1) translateY(0); }
+}
+._upload-in { animation: _upload-in .38s cubic-bezier(.34,1.56,.64,1) both; }
+
 @media (prefers-reduced-motion: reduce) {
     /* The tape's wake, its collapse and the processing shimmer are painted on a
        canvas, where this query cannot reach them; audio-recorder.js reads the
@@ -68,6 +76,11 @@
         loading: false,
         successMessage: '',
         errorMessage: '',
+        uploadSuccess: { show: false, filename: '' },
+        uploadSuccessTimer: null,
+        expandedAudio: {},
+        audioStreamUrlPattern: @js(route('meetings.transcriptions.stream', [$meeting, '__ID__'])),
+        documentPreviewUrlPattern: @js(route('meetings.documents.preview', [$meeting, '__ID__'])),
         transcriptions: @js($meeting->transcriptions->toArray()),
         manualNotes: @js($meeting->manualNotes->load('createdBy')->toArray()),
         documents: @js($meeting->documents->toArray()),
@@ -152,6 +165,22 @@
             return map[status] || map.pending;
         },
 
+        audioStreamUrl(id) {
+            return this.audioStreamUrlPattern.replace('__ID__', id);
+        },
+
+        documentPreviewUrl(id) {
+            return this.documentPreviewUrlPattern.replace('__ID__', id);
+        },
+
+        showUploadPill(filename) {
+            if (this.uploadSuccessTimer) clearTimeout(this.uploadSuccessTimer);
+            this.uploadSuccess = { show: true, filename: filename || @js(__('Recording')) };
+            this.uploadSuccessTimer = setTimeout(() => {
+                this.uploadSuccess = { show: false, filename: '' };
+            }, 6000);
+        },
+
         async uploadAudio(event) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
@@ -186,8 +215,7 @@
                             created_at: new Date().toISOString(),
                         });
                     }
-                    this.successMessage = '{{ __('Audio uploaded. Transcription processing will begin shortly.') }}';
-                    setTimeout(() => this.successMessage = '', 4000);
+                    this.showUploadPill(files[0].name);
                 } else {
                     const data = await response.json().catch(() => null);
                     this.errorMessage = data?.message || 'Failed to upload audio file.';
@@ -384,8 +412,8 @@
         handleRecordingComplete(detail) {
             if (detail?.transcription) {
                 this.transcriptions.push(detail.transcription);
-                this.successMessage = '{{ __('Browser recording uploaded. Transcription processing...') }}';
-                setTimeout(() => this.successMessage = '', 4000);
+                this.showUploadPill(detail.transcription.original_filename || @js(__('Recording')));
+                this.$dispatch('navigate-inputs');
             }
         },
 
@@ -439,6 +467,52 @@
     @recording-complete.window="handleRecordingComplete($event.detail)"
     class="space-y-6"
 >
+    {{-- Upload Success Pill (floating, prominent) --}}
+    <div
+        x-show="uploadSuccess.show"
+        x-cloak
+        class="fixed top-6 left-0 right-0 flex justify-center z-50 pointer-events-none"
+    >
+        <div
+            x-show="uploadSuccess.show"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 -translate-y-3 scale-90"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 -translate-y-3 scale-90"
+            class="pointer-events-auto w-full max-w-sm mx-4"
+        >
+            <div class="_upload-in flex items-center gap-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 border border-green-200 dark:border-green-800 pl-4 pr-3 py-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                    <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white leading-tight truncate" x-text="uploadSuccess.filename"></p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1.5">
+                        <svg class="animate-spin h-3 w-3 text-violet-500 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        {{ __('Transcription in progress...') }}
+                    </p>
+                </div>
+                <button type="button"
+                    @click="uploadSuccess.show = false; if (uploadSuccessTimer) clearTimeout(uploadSuccessTimer)"
+                    class="flex-shrink-0 p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-1.5 h-0.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden mx-3">
+                <div class="h-full bg-green-400 dark:bg-green-500 progress-bar-indeterminate rounded-full"></div>
+            </div>
+        </div>
+    </div>
+
     {{-- Flash Messages --}}
     <div x-show="successMessage" x-transition x-cloak class="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3">
         <div class="flex items-center gap-2">
@@ -588,6 +662,29 @@
                                     @endif
                                 </div>
 
+                                {{-- Audio player --}}
+                                <div class="px-3 pb-2">
+                                    <button
+                                        type="button"
+                                        @click="expandedAudio[item.id] = !expandedAudio[item.id]"
+                                        class="inline-flex items-center gap-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
+                                    >
+                                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path x-show="!expandedAudio[item.id]" d="M8 5v14l11-7z"/>
+                                            <path x-show="expandedAudio[item.id]" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                                        </svg>
+                                        <span x-text="expandedAudio[item.id] ? @js(__('Hide Player')) : @js(__('Play Audio'))"></span>
+                                    </button>
+                                    <audio
+                                        x-show="expandedAudio[item.id]"
+                                        :src="expandedAudio[item.id] ? audioStreamUrl(item.id) : null"
+                                        controls
+                                        preload="none"
+                                        class="mt-1.5 w-full h-9"
+                                        x-cloak
+                                    ></audio>
+                                </div>
+
                                 {{-- Progress bar (pending / processing, not stuck) --}}
                                 <template x-if="(item.status === 'pending' || item.status === 'processing') && !isStuck(item)">
                                     <div class="px-3 pb-3">
@@ -654,19 +751,34 @@
                                         </div>
                                     </div>
                                 </div>
-                                @if($isEditable)
-                                    <button
-                                        type="button"
-                                        @click="deleteDocument(item.id)"
-                                        :disabled="loading"
-                                        class="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
-                                        title="{{ __('Remove') }}"
+                                <div class="flex items-center gap-1 flex-shrink-0">
+                                    <a
+                                        :href="documentPreviewUrl(item.id)"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                        title="{{ __('Preview') }}"
                                     >
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
-                                    </button>
-                                @endif
+                                        {{ __('Preview') }}
+                                    </a>
+                                    @if($isEditable)
+                                        <button
+                                            type="button"
+                                            @click="deleteDocument(item.id)"
+                                            :disabled="loading"
+                                            class="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                                            title="{{ __('Remove') }}"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
                         </template>
 

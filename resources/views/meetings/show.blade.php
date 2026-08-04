@@ -5,7 +5,13 @@
 <div x-data="{
         activeStep: {{ (int) request('step', 1) }},
         isEditable: @json($isEditable),
-     }">
+     }"
+     x-init="$watch('activeStep', s => {
+         const url = new URL(window.location);
+         url.searchParams.set('step', s);
+         history.replaceState({}, '', url);
+     })"
+     @navigate-inputs.window="activeStep = 3">
 
     {{-- Meeting Title --}}
     <div class="mb-4">

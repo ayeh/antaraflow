@@ -299,7 +299,9 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
         Route::patch('transcriptions/{transcription}/speakers', [\App\Domain\Transcription\Controllers\SpeakerController::class, 'update'])->name('transcriptions.speakers.update');
         Route::get('transcriptions/{transcription}/speaker-suggestions', [\App\Domain\Transcription\Controllers\SpeakerController::class, 'suggestions'])->name('transcriptions.speaker-suggestions');
         Route::post('transcriptions/{transcription}/diarize', [SpeakerDiarizationController::class, 'analyze'])->name('transcriptions.diarize');
+        Route::get('transcriptions/{transcription}/stream', [TranscriptionController::class, 'stream'])->name('transcriptions.stream');
         Route::resource('documents', DocumentController::class)->only(['store', 'destroy']);
+        Route::get('documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
         Route::resource('manual-notes', ManualNoteController::class);
         Route::post('extract', [ExtractionController::class, 'extract'])->name('extract');
         Route::post('generate', [ExtractionController::class, 'generate'])->name('generate');
