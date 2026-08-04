@@ -57,4 +57,9 @@ class MinutesOfMeetingFactory extends Factory
     {
         return $this->state(['status' => MeetingStatus::Approved]);
     }
+
+    public function pendingConfirmation(): static
+    {
+        return $this->state(['status' => MeetingStatus::PendingConfirmation]);
+    }
 }

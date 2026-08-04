@@ -83,6 +83,10 @@ class MeetingService
 
     public function update(MinutesOfMeeting $mom, array $data): MinutesOfMeeting
     {
+        if ($mom->status === MeetingStatus::PendingConfirmation) {
+            throw new \DomainException(__('Cannot edit a meeting that is pending confirmation. Use the amendment flow instead.'));
+        }
+
         if ($mom->status === MeetingStatus::Approved) {
             throw new \DomainException(__('Cannot edit an approved meeting.'));
         }
