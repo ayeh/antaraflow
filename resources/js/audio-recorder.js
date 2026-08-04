@@ -229,7 +229,7 @@ export default function audioRecorder(config) {
             this.$watch('state', () => this.syncTabIndicator());
 
             this.$nextTick(() => {
-                const canvas = this.$refs.waveformCanvas;
+                const canvas = this.resolveCanvas();
                 if (canvas) {
                     this.canvasContext = canvas.getContext('2d');
                 }
@@ -818,32 +818,68 @@ export default function audioRecorder(config) {
          * once and written over in place, and the tape itself is a fixed-capacity
          * ring.
          */
+        /**
+         * The meter's canvas, found without trusting `$refs`.
+         *
+         * `$refs` is not dependable here. The recorder lives inside the wizard,
+         * and once a step swap has re-rendered the panel Alpine's ref registry
+         * for this component comes back empty while the canvas element itself is
+         * still in the document and still the one the cached context draws to.
+         * A lookup that only consulted `$refs` therefore reported "no canvas"
+         * about a canvas that was right there, and the frame gave up.
+         *
+         * The cached context's own canvas is the most reliable answer, so it is
+         * tried first; the DOM query is the last resort for the first frame,
+         * before any context exists.
+         *
+         * @return {HTMLCanvasElement|null}
+         */
+        resolveCanvas() {
+            const canvas = this.canvasContext?.canvas
+                ?? this.$refs?.waveformCanvas
+                ?? this.$el?.querySelector('[x-ref="waveformCanvas"]');
+
+            // A canvas torn out of the document paints nowhere. Drop the stale
+            // context so the next frame re-resolves and re-acquires one.
+            if (canvas && !canvas.isConnected) {
+                this.canvasContext = null;
+
+                return this.$el?.querySelector('[x-ref="waveformCanvas"]') ?? null;
+            }
+
+            return canvas ?? null;
+        },
+
         drawWaveform() {
             // The pending frame has now run; a null handle is what lets
             // startWaveform() tell a stopped loop from a running one.
             this.animationFrame = null;
 
-            // Re-acquire canvas context if not yet available (canvas may have been hidden during init)
-            if (!this.canvasContext) {
-                const canvas = this.$refs.waveformCanvas;
-                if (canvas) {
-                    this.canvasContext = canvas.getContext('2d');
-                }
+            const canvas = this.resolveCanvas();
+
+            if (canvas && !this.canvasContext) {
+                this.canvasContext = canvas.getContext('2d');
             }
 
-            if (!this.canvasContext) {
-                this.animationFrame = requestAnimationFrame(() => this.drawWaveform());
-                return;
-            }
+            const nowMs = performance.now();
 
-            const canvas = this.$refs.waveformCanvas;
+            // Measure before the paint gate, never after it.
+            //
+            // Sampling used to sit below the canvas checks, so any frame that
+            // could not resolve the canvas returned without measuring. The mic
+            // check reads the samples this loop pushes, so a canvas the loop
+            // could not reach did not merely blank the meter — it collected
+            // nothing for five seconds and reported 'incomplete' about a
+            // microphone that was working the whole time. What is measured has
+            // nothing to do with what is drawn, so it no longer waits on it.
+            if (['recording', 'checking'].includes(this.state) && this.analyserNode) {
+                this.sampleLevel(nowMs);
+            }
 
             // Losing the canvas for a frame must not end the loop. Returning
             // here without scheduling anything left `animationFrame` null with
-            // nothing left to re-arm it, so the meter stayed dead — and so did
-            // the mic check, which reads the samples this loop pushes. Wait for
-            // the canvas the same way the branch above does.
-            if (!canvas) {
+            // nothing left to re-arm it, so the meter stayed dead.
+            if (!canvas || !this.canvasContext) {
                 this.animationFrame = requestAnimationFrame(() => this.drawWaveform());
 
                 return;
@@ -865,12 +901,9 @@ export default function audioRecorder(config) {
             // genuinely open and genuinely being listened to, which is exactly
             // what a moving tape claims. It is also the only feedback the user
             // has that the check is doing anything at all.
-            const nowMs = performance.now();
             const sweep = this.currentSweep(nowMs);
 
             if (['recording', 'checking'].includes(this.state) && this.analyserNode) {
-                this.sampleLevel(nowMs);
-
                 if (sweep?.phase === 'in') {
                     this.paintWakeLine(ctx, width, height, sweep.progress);
                 }
