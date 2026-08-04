@@ -188,6 +188,7 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
     Route::post('meetings/{meeting}/revert', [MeetingController::class, 'revert'])->name('meetings.revert');
     Route::post('meetings/{meeting}/duplicate', [MeetingController::class, 'duplicate'])->name('meetings.duplicate');
     Route::post('meetings/{meeting}/circulate', CirculateController::class)->name('meetings.circulate');
+    Route::post('meetings/{meeting}/amendments/{comment}/decide', \App\Domain\Meeting\Controllers\AmendmentDecisionController::class)->name('meetings.amendment.decide');
     Route::get('meetings/{meeting}/versions', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'index'])->name('meetings.versions.index');
     Route::get('meetings/{meeting}/versions/{version}', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'show'])->name('meetings.versions.show');
 

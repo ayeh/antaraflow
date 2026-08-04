@@ -21,6 +21,7 @@ class MomCirculation extends Model
         'status',
         'round',
         'sent_by',
+        'closed_at',
     ];
 
     /** @return array<string, string> */

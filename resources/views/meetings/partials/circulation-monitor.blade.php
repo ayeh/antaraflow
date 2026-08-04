@@ -80,5 +80,54 @@
         @endforeach
 
     </ul>
+
+    {{-- Amendment queue: pending remarks from guests --}}
+    @php
+        $pendingRemarks = \App\Domain\Collaboration\Models\Comment::withoutGlobalScopes()
+            ->whereHas('circulationRecipient', fn ($q) => $q->where('mom_circulation_id', $circulation->id))
+            ->whereNull('resolved_at')
+            ->with('circulationRecipient')
+            ->get();
+    @endphp
+
+    @if($pendingRemarks->isNotEmpty())
+    <div class="border-t border-gray-100 dark:border-slate-700 px-4 py-3">
+        <h4 class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+            {{ __('Pending Remarks') }}
+        </h4>
+        @foreach($pendingRemarks as $remark)
+        <div class="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-800">
+            <p class="text-xs text-gray-500 dark:text-slate-400">
+                {{ $remark->circulationRecipient?->name }} · {{ $remark->created_at->format('d M, g:i A') }}
+            </p>
+            <p class="text-sm text-gray-800 dark:text-slate-200 mt-1">{{ $remark->body }}</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+                <form method="POST" action="{{ route('meetings.amendment.decide', [$meeting, $remark]) }}">
+                    @csrf
+                    <input type="hidden" name="decision" value="minor">
+                    <button type="submit" class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-900/60">
+                        {{ __('Minor correction') }}
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('meetings.amendment.decide', [$meeting, $remark]) }}">
+                    @csrf
+                    <input type="hidden" name="decision" value="material">
+                    <button type="submit" class="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/60">
+                        {{ __('Material amendment') }} → {{ __('Round') }} {{ $circulation->round + 1 }}
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('meetings.amendment.decide', [$meeting, $remark]) }}">
+                    @csrf
+                    <input type="hidden" name="decision" value="reject">
+                    <button type="submit" class="text-xs px-2 py-1 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 rounded hover:bg-gray-200 dark:hover:bg-slate-600">
+                        {{ __('Reject') }}
+                    </button>
+                </form>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    @endif
+
 </div>
 @endif

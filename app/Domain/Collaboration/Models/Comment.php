@@ -28,6 +28,8 @@ class Comment extends Model
         'body',
         'parent_id',
         'client_visible',
+        'resolved_at',
+        'resolution',
     ];
 
     /** @return array<string, string> */
@@ -35,6 +37,7 @@ class Comment extends Model
     {
         return [
             'client_visible' => 'boolean',
+            'resolved_at' => 'datetime',
         ];
     }
 
