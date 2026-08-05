@@ -29,6 +29,6 @@ class CirculateController extends Controller
         );
 
         return redirect()->route('meetings.show', $meeting)
-            ->with('success', 'Minit telah diedarkan untuk pengesahan.');
+            ->with('success', __('mom.circulate_success'));
     }
 }

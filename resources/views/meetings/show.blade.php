@@ -221,7 +221,7 @@
                     <button @click="open = true"
                         class="h-9 px-4 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 transition-colors inline-flex items-center gap-1.5 whitespace-nowrap">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                        {{ __('Circulate') }}
+                        {{ __('mom.circulate_button') }}
                     </button>
 
                     <div x-show="open" class="fixed inset-0 z-50 overflow-y-auto" aria-modal="true" x-cloak>
@@ -233,7 +233,7 @@
                                 class="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-2xl mb-10">
 
                                 <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Edar Minit untuk Pengesahan') }}</h3>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('mom.circulate_modal_title') }}</h3>
                                     <button @click="open = false" type="button" class="text-gray-400 hover:text-gray-500">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                     </button>
@@ -243,18 +243,18 @@
                                     @csrf
                                     <div class="px-6 py-5 space-y-5">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{{ __('Subjek E-mel') }}</label>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{{ __('mom.circulate_email_subject_label') }}</label>
                                             <input type="text" name="subject" required
-                                                value="{{ __('Minit Mesyuarat') . ' – ' . $meeting->title }}"
+                                                value="{{ __('mom.circulate_subject_prefix') . ' – ' . $meeting->title }}"
                                                 class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent">
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{{ __('Nota (pilihan)') }}</label>
-                                            <textarea name="body_note" rows="2" placeholder="{{ __('Nota tambahan untuk penerima...') }}"
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{{ __('mom.circulate_body_note_label') }}</label>
+                                            <textarea name="body_note" rows="2" placeholder="{{ __('mom.circulate_body_note_placeholder') }}"
                                                 class="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{{ __('Tarikh Akhir Pengesahan') }}</label>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{{ __('mom.circulate_deadline_label') }}</label>
                                             <input type="date" name="deadline" required
                                                 min="{{ now()->addDay()->toDateString() }}"
                                                 value="{{ now()->addDays(7)->toDateString() }}"
@@ -262,16 +262,16 @@
                                         </div>
                                         <div>
                                             <div class="flex items-center justify-between mb-2">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">{{ __('Penerima') }}</label>
-                                                <button type="button" @click="addRecipient()" class="text-xs text-green-600 dark:text-green-400 hover:underline">+ {{ __('Tambah') }}</button>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">{{ __('mom.circulate_recipients_label') }}</label>
+                                                <button type="button" @click="addRecipient()" class="text-xs text-green-600 dark:text-green-400 hover:underline">{{ __('mom.circulate_add_recipient') }}</button>
                                             </div>
                                             <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
                                                 <template x-for="(r, i) in recipients" :key="i">
                                                     <div class="flex gap-2 items-center">
                                                         <input type="hidden" :name="`recipients[${i}][mom_attendee_id]`" :value="r.mom_attendee_id">
-                                                        <input type="text" :name="`recipients[${i}][name]`" x-model="r.name" placeholder="{{ __('Nama') }}" required
+                                                        <input type="text" :name="`recipients[${i}][name]`" x-model="r.name" placeholder="{{ __('mom.circulate_name_placeholder') }}" required
                                                             class="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-sm text-gray-900 dark:text-white">
-                                                        <input type="email" :name="`recipients[${i}][email]`" x-model="r.email" placeholder="{{ __('E-mel') }}" required
+                                                        <input type="email" :name="`recipients[${i}][email]`" x-model="r.email" placeholder="{{ __('mom.circulate_email_placeholder') }}" required
                                                             class="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-sm text-gray-900 dark:text-white">
                                                         <button type="button" @click="removeRecipient(i)" class="text-red-400 hover:text-red-600 shrink-0">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -282,8 +282,8 @@
                                         </div>
                                     </div>
                                     <div class="px-6 py-4 border-t border-gray-200 dark:border-slate-700 flex justify-end gap-3">
-                                        <button type="button" @click="open = false" class="h-9 px-4 rounded-xl text-sm font-medium text-gray-600 dark:text-slate-300 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Batal') }}</button>
-                                        <button type="submit" :disabled="recipients.length === 0" class="h-9 px-4 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">{{ __('Edar Sekarang') }}</button>
+                                        <button type="button" @click="open = false" class="h-9 px-4 rounded-xl text-sm font-medium text-gray-600 dark:text-slate-300 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('mom.circulate_cancel') }}</button>
+                                        <button type="submit" :disabled="recipients.length === 0" class="h-9 px-4 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">{{ __('mom.circulate_submit') }}</button>
                                     </div>
                                 </form>
                             </div>

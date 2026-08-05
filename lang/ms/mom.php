@@ -29,4 +29,19 @@ return [
     'material_amendment' => 'Pindaan material → Pusingan 2',
     'reject' => 'Tolak',
 
+    'circulate_button' => 'Edar',
+    'circulate_modal_title' => 'Edar Minit untuk Pengesahan',
+    'circulate_email_subject_label' => 'Subjek E-mel',
+    'circulate_body_note_label' => 'Nota (pilihan)',
+    'circulate_body_note_placeholder' => 'Nota tambahan untuk penerima...',
+    'circulate_deadline_label' => 'Tarikh Akhir Pengesahan',
+    'circulate_recipients_label' => 'Penerima',
+    'circulate_add_recipient' => '+ Tambah',
+    'circulate_name_placeholder' => 'Nama',
+    'circulate_email_placeholder' => 'E-mel',
+    'circulate_cancel' => 'Batal',
+    'circulate_submit' => 'Edar Sekarang',
+    'circulate_subject_prefix' => 'Minit Mesyuarat',
+    'circulate_success' => 'Minit telah diedarkan untuk pengesahan.',
+
 ];

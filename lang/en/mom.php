@@ -29,4 +29,19 @@ return [
     'material_amendment' => 'Material amendment → Round 2',
     'reject' => 'Reject',
 
+    'circulate_button' => 'Circulate',
+    'circulate_modal_title' => 'Circulate Minutes for Confirmation',
+    'circulate_email_subject_label' => 'Email Subject',
+    'circulate_body_note_label' => 'Note (optional)',
+    'circulate_body_note_placeholder' => 'Additional note for recipients...',
+    'circulate_deadline_label' => 'Confirmation Deadline',
+    'circulate_recipients_label' => 'Recipients',
+    'circulate_add_recipient' => '+ Add',
+    'circulate_name_placeholder' => 'Name',
+    'circulate_email_placeholder' => 'Email',
+    'circulate_cancel' => 'Cancel',
+    'circulate_submit' => 'Circulate Now',
+    'circulate_subject_prefix' => 'Minutes of Meeting',
+    'circulate_success' => 'Minutes have been circulated for confirmation.',
+
 ];
