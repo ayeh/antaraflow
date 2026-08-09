@@ -7,6 +7,7 @@ namespace App\Domain\Meeting\Controllers;
 use App\Domain\Meeting\Mail\CirculationInviteMail;
 use App\Domain\Meeting\Models\MomCirculation;
 use App\Domain\Meeting\Models\MomCirculationRecipient;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -15,6 +16,8 @@ use Illuminate\Support\Str;
 
 class CirculationRecipientController extends Controller
 {
+    use AuthorizesRequests;
+
     public function store(Request $request, MomCirculation $circulation): RedirectResponse
     {
         $this->authorize('update', $circulation->meeting);
