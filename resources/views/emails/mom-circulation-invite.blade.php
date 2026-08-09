@@ -19,6 +19,11 @@
     @if($branding->get('email_header_html'))
         {!! $branding->get('email_header_html') !!}
     @endif
+    @if($branding->get('logo_url'))
+        <div style="margin-bottom: 16px;">
+            <img src="{{ $branding->get('logo_url') }}" alt="{{ $branding->appName() }}" style="max-height: 50px; max-width: 180px;">
+        </div>
+    @endif
 
     <div class="header">
         <h2>{{ $recipient->circulation->subject }}</h2>
