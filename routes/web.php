@@ -1,9 +1,11 @@
 <?php
 
 use App\Domain\Account\Controllers\ApiKeySettingsController;
+use App\Domain\Account\Controllers\Auth\ForgotPasswordController;
 use App\Domain\Account\Controllers\Auth\LoginController;
 use App\Domain\Account\Controllers\Auth\LogoutController;
 use App\Domain\Account\Controllers\Auth\RegisterController;
+use App\Domain\Account\Controllers\Auth\ResetPasswordController;
 use App\Domain\Account\Controllers\IntegrationSettingsController;
 use App\Domain\Account\Controllers\InvitationAcceptController;
 use App\Domain\Account\Controllers\InvitationController;
@@ -117,6 +119,11 @@ Route::middleware('guest')->group(function () {
 
     Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->middleware('throttle:10,1')->name('social.redirect');
     Route::get('auth/{provider}/callback', [SocialAuthController::class, 'callback'])->middleware('throttle:10,1')->name('social.callback');
+
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('reset-password', [ResetPasswordController::class, 'reset'])->middleware('throttle:5,1')->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {

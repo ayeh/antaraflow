@@ -3,6 +3,12 @@
 @section('content')
 <h2 class="text-xl font-bold text-gray-900 mb-6">{{ __('auth.login') }}</h2>
 
+@if(session('status'))
+    <div class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+        {{ session('status') }}
+    </div>
+@endif
+
 @if($errors->any())
     <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
         <ul class="list-disc list-inside space-y-1">
@@ -22,7 +28,10 @@
     </div>
 
     <div>
-        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">{{ __('auth.password_label') }}</label>
+        <div class="flex items-center justify-between mb-1">
+            <label for="password" class="block text-sm font-medium text-gray-700">{{ __('auth.password_label') }}</label>
+            <a href="{{ route('password.request') }}" class="text-xs link-primary hover:opacity-80">{{ __('auth.forgot_password') }}</a>
+        </div>
         <input type="password" id="password" name="password" required class="focus-primary w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none">
     </div>
 

@@ -27,5 +27,12 @@ return [
     'or_continue_with' => 'atau teruskan dengan',
     'already_have_account' => 'Sudah mempunyai akaun?',
     'dont_have_account' => 'Tiada akaun?',
+    'forgot_password' => 'Lupa Kata Laluan?',
+    'forgot_password_description' => 'Masukkan alamat e-mel anda dan kami akan hantar pautan untuk menetapkan semula kata laluan anda.',
+    'send_reset_link' => 'Hantar Pautan Reset',
+    'reset_password' => 'Tetapkan Semula Kata Laluan',
+    'new_password' => 'Kata Laluan Baharu',
+    'confirm_new_password' => 'Sahkan Kata Laluan Baharu',
+    'back_to_login' => '← Kembali ke Log Masuk',
 
 ];
