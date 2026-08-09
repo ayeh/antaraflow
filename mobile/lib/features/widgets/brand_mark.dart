@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 
-/// The antaraNote mark: a lime tile carrying a navy "n", with the wordmark
-/// set "antara" light and "Note" bold.
+/// The antaraNote mark.
 ///
-/// The glyph is drawn as type rather than loaded from an asset, so the real
-/// logo file should replace it before release — the script "n" in the brand
-/// asset is a custom form no installed face will reproduce exactly.
+/// Renders the real logo file when it is present. The script "n" in the mark is
+/// a custom letterform, so the drawn fallback below is an approximation and is
+/// only there to keep the app building before the asset lands — it must not
+/// reach a release.
+///
+/// Drop these into mobile/assets/images/:
+///   logo-mark.png     the lime tile alone, square, ideally 512×512
+///   logo-lockup.png   tile plus wordmark, transparent, ideally 1024 wide
 class BrandMark extends StatelessWidget {
   const BrandMark({
     super.key,
@@ -19,13 +23,44 @@ class BrandMark extends StatelessWidget {
   final double size;
   final bool showWordmark;
 
-  /// On a dark ground the wordmark flips to white; the tile does not change,
-  /// because lime on navy is the mark's own contrast and it survives anywhere.
+  /// Only affects the drawn wordmark fallback. The supplied lockup art is used
+  /// as-is; a reverse version should be a separate asset if one is needed.
   final bool onDark;
+
+  static const _markAsset = 'assets/images/logo-mark.png';
+  static const _lockupAsset = 'assets/images/logo-lockup.png';
 
   @override
   Widget build(BuildContext context) {
-    final tile = Container(
+    if (!showWordmark) {
+      return Image.asset(
+        _markAsset,
+        width: size,
+        height: size,
+        filterQuality: FilterQuality.medium,
+        errorBuilder: (context, _, _) => _DrawnTile(size: size),
+      );
+    }
+
+    return Image.asset(
+      _lockupAsset,
+      height: size,
+      filterQuality: FilterQuality.medium,
+      errorBuilder: (context, _, _) => _DrawnLockup(size: size, onDark: onDark),
+    );
+  }
+}
+
+/// Stand-in for the tile. Approximate by definition — the real glyph is drawn,
+/// not typeset.
+class _DrawnTile extends StatelessWidget {
+  const _DrawnTile({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
@@ -45,19 +80,25 @@ class BrandMark extends StatelessWidget {
         ),
       ),
     );
+  }
+}
 
-    if (!showWordmark) {
-      return tile;
-    }
+class _DrawnLockup extends StatelessWidget {
+  const _DrawnLockup({required this.size, required this.onDark});
 
+  final double size;
+  final bool onDark;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        tile,
+        _DrawnTile(size: size),
         SizedBox(width: size * 0.32),
         Text.rich(
-          TextSpan(
-            children: const [
+          const TextSpan(
+            children: [
               TextSpan(
                 text: 'antara',
                 style: TextStyle(fontWeight: FontWeight.w400),

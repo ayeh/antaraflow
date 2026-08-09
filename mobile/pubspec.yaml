@@ -75,6 +75,13 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # Brand assets. BrandMark looks for logo-mark.png and logo-lockup.png here
+  # and falls back to a drawn approximation when they are absent, so the app
+  # builds either way — but the drawn form is not the real mark and must not
+  # ship.
+  assets:
+    - assets/images/
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

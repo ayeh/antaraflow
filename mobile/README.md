@@ -54,9 +54,29 @@ need are already declared — microphone and background audio on iOS, microphone
 plus the foreground-service types on Android — so the recorder can be added
 without touching platform configuration.
 
-## Fonts
+## Brand assets still needed
 
-The theme names Plus Jakarta Sans and Inter per the brand book, but the files are
-not bundled. Drop the licensed `.ttf` files into `assets/fonts/`, declare them in
-`pubspec.yaml`, and every text style picks them up. Until then Flutter falls back
-to the platform font, which is legible but off-brand.
+The palette and type come from the live platform branding settings. Two things
+cannot be reproduced from settings alone and are not in this repository:
+
+**The logo.** `BrandMark` loads these and falls back to a drawn approximation
+when they are missing, so the app builds either way — but the "n" is a custom
+letterform and the fallback must not ship.
+
+```
+mobile/assets/images/logo-mark.png     lime tile alone, square, 512×512
+mobile/assets/images/logo-lockup.png   tile + wordmark, transparent, ~1024 wide
+```
+
+Nothing else needs changing once they are dropped in.
+
+**Nunito.** Put the `.ttf` files in `assets/fonts/` and declare them in
+`pubspec.yaml`; every text style then picks them up. Until then the theme falls
+back to the platform's rounded face, which is close but not the brand face.
+
+**Launcher icons** are still Flutter's default. They need generating from
+`logo-mark.png` once it exists.
+
+> Note: `docs/brand/BRAND-REFERENCE.md`, `docs/brand/logos/` and
+> `public/design-system.html` all describe older brands — teal and gold, and
+> purple respectively. None of them match what ships. Do not use them.
