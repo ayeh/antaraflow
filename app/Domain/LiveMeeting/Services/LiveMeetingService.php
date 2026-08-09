@@ -89,6 +89,19 @@ class LiveMeetingService
         ]);
     }
 
+    /**
+     * A chunk already held for this session, if any.
+     *
+     * Mobile clients retry from a durable upload queue, so the same chunk will
+     * arrive twice whenever a response is lost in flight. Recognising it lets
+     * the caller answer "already have it" instead of storing the audio twice
+     * and transcribing — and billing — it again.
+     */
+    public function findExistingChunk(LiveMeetingSession $session, int $chunkNumber): ?LiveTranscriptChunk
+    {
+        return $session->chunks()->where('chunk_number', $chunkNumber)->first();
+    }
+
     public function processChunk(
         LiveMeetingSession $session,
         UploadedFile $file,
@@ -121,10 +134,11 @@ class LiveMeetingService
     /**
      * @return array{session: LiveMeetingSession, chunks: \Illuminate\Database\Eloquent\Collection, extractions: \Illuminate\Database\Eloquent\Collection}
      */
-    public function getSessionState(LiveMeetingSession $session): array
+    public function getSessionState(LiveMeetingSession $session, ?int $sinceChunk = null): array
     {
         $completedChunks = $session->chunks()
             ->where('status', ChunkStatus::Completed)
+            ->when($sinceChunk !== null, fn ($query) => $query->where('chunk_number', '>', $sinceChunk))
             ->orderBy('chunk_number')
             ->get();
 
@@ -136,6 +150,42 @@ class LiveMeetingService
             'session' => $session,
             'chunks' => $completedChunks,
             'extractions' => $extractions,
+        ];
+    }
+
+    /**
+     * What the client needs to pick up where it left off.
+     *
+     * A phone can be killed by the OS mid-meeting, and a websocket can miss
+     * messages while the screen is off. On reconnect the app asks for this and
+     * resends only the gaps, which is what keeps a merged transcript whole.
+     *
+     * @return array{next_chunk_number: int, missing_chunks: array<int, int>, stats: array<string, int>}
+     */
+    public function getResumeState(LiveMeetingSession $session): array
+    {
+        $chunks = $session->chunks()->get(['chunk_number', 'status']);
+
+        $received = $chunks->pluck('chunk_number')->all();
+        $highest = $received === [] ? -1 : max($received);
+
+        $missing = [];
+        for ($number = 0; $number < $highest; $number++) {
+            if (! in_array($number, $received, true)) {
+                $missing[] = $number;
+            }
+        }
+
+        return [
+            'next_chunk_number' => $highest + 1,
+            'missing_chunks' => $missing,
+            'stats' => [
+                'chunks_total' => $chunks->count(),
+                'chunks_completed' => $chunks->where('status', ChunkStatus::Completed)->count(),
+                'chunks_pending' => $chunks->where('status', ChunkStatus::Pending)->count(),
+                'chunks_processing' => $chunks->where('status', ChunkStatus::Processing)->count(),
+                'chunks_failed' => $chunks->where('status', ChunkStatus::Failed)->count(),
+            ],
         ];
     }
 

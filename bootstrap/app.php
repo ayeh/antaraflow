@@ -15,6 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function () {
             Route::middleware('web')
                 ->group(base_path('routes/admin.php'));
+
+            // SubstituteBindings is not implicit here: routes registered
+            // through `then` get no middleware group, so without it every
+            // route-model parameter arrives as an empty model.
+            Route::prefix('api/mobile/v1')
+                ->middleware([\Illuminate\Routing\Middleware\SubstituteBindings::class])
+                ->name('mobile.')
+                ->group(base_path('routes/mobile.php'));
         },
     )
     ->withCommands([
@@ -32,6 +40,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'org.suspended' => \App\Domain\Admin\Middleware\CheckOrganizationSuspended::class,
             'admin.auth' => \App\Domain\Admin\Middleware\AdminAuthenticated::class,
             'onboarding' => \App\Domain\Account\Middleware\OnboardingMiddleware::class,
+            'mobile.org' => \App\Domain\API\Middleware\Mobile\ResolveMobileOrganization::class,
+            'mobile.version' => \App\Domain\API\Middleware\Mobile\EnsureClientVersion::class,
+            'mobile.idempotency' => \App\Domain\API\Middleware\Mobile\MobileIdempotency::class,
         ]);
 
         $middleware->prependToPriorityList(
@@ -40,5 +51,5 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        \App\Domain\API\Exceptions\MobileExceptionRenderer::register($exceptions);
     })->create();

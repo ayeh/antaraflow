@@ -31,5 +31,9 @@ Broadcast::channel('organization.{orgId}', function (User $user, int $orgId) {
 Broadcast::channel('live-meeting.{sessionId}', function (User $user, int $sessionId) {
     $session = \App\Domain\LiveMeeting\Models\LiveMeetingSession::find($sessionId);
 
-    return $session && $session->meeting->organization_id === $user->current_organization_id;
+    // The session itself is not tenant-scoped, but its meeting is: for someone
+    // in another organisation the relation resolves to null, which has to read
+    // as "denied" rather than blowing up on a property of null.
+    return $session?->meeting?->organization_id === $user->current_organization_id
+        && $user->current_organization_id !== null;
 });
