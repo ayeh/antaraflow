@@ -70,8 +70,8 @@ class EnsureClientVersion
     private function storeUrl(?string $platform): ?string
     {
         return match ($platform) {
-            'ios' => 'https://apps.apple.com/app/antaraflow',
-            'android' => 'https://play.google.com/store/apps/details?id=cloud.antara.flow',
+            'ios' => 'https://apps.apple.com/app/antaranote',
+            'android' => 'https://play.google.com/store/apps/details?id=cloud.antara.note',
             default => null,
         };
     }
