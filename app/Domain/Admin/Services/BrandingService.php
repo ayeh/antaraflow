@@ -7,6 +7,7 @@ namespace App\Domain\Admin\Services;
 use App\Domain\Account\Models\Organization;
 use App\Domain\Admin\Models\PlatformSetting;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class BrandingService
 {
@@ -55,6 +56,18 @@ class BrandingService
     public function appName(): string
     {
         return (string) $this->get('app_name', 'antaraNote');
+    }
+
+    public function logoUrl(): string
+    {
+        $url = (string) $this->get('logo_url', '');
+        if ($url) {
+            return $url;
+        }
+
+        $path = (string) $this->get('logo_path', '');
+
+        return $path ? Storage::disk('public')->url($path) : '';
     }
 
     /** @return array<string, mixed> */

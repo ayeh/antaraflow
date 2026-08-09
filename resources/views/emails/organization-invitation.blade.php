@@ -17,9 +17,9 @@
     @if($branding->get('email_header_html'))
         {!! $branding->get('email_header_html') !!}
     @endif
-    @if($branding->get('logo_url'))
+    @if($branding->logoUrl())
         <div style="margin-bottom: 16px;">
-            <img src="{{ $branding->get('logo_url') }}" alt="{{ $branding->appName() }}" style="max-height: 50px; max-width: 180px;">
+            <img src="{{ $branding->logoUrl() }}" alt="{{ $branding->appName() }}" style="max-height: 50px; max-width: 180px;">
         </div>
     @endif
     <div class="header">
@@ -27,7 +27,7 @@
     </div>
 
     <div class="body-content">
-        <p>{{ __("You've been invited to join") }} <strong>{{ $organizationName }}</strong> {{ __('on :app as a', ['app' => config('app.name')]) }} <strong>{{ ucfirst($role) }}</strong>.</p>
+        <p>{{ __("You've been invited to join") }} <strong>{{ $organizationName }}</strong> {{ __('on :app as a', ['app' => $branding->appName()]) }} <strong>{{ ucfirst($role) }}</strong>.</p>
         <p>{{ __('Click the button below to accept the invitation. If you don\'t have an account yet, you\'ll be able to create one.') }}</p>
     </div>
 
