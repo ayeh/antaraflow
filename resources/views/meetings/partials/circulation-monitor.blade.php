@@ -45,7 +45,19 @@
                     <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ $recipient->name }}</p>
                     <p class="text-xs text-gray-400 dark:text-slate-500">{{ $recipient->email }}</p>
                 </div>
-                <span class="text-xs text-red-500 dark:text-red-400 font-medium">{{ __('Not opened') }}</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-red-500 dark:text-red-400 font-medium">{{ __('Not opened') }}</span>
+                    @if($circulation->isOpen() && ! $recipient->hasResponded())
+                        <form method="POST" action="{{ route('circulation.recipients.destroy', [$circulation, $recipient]) }}"
+                              onsubmit="confirmThenSubmit(event, @js(__('Remove :name from this circulation?', ['name' => $recipient->name])), { title: @js(__('mom.remove_recipient')), confirmLabel: @js(__('mom.remove_recipient')), type: 'danger' })">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-xs text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400">
+                                {{ __('mom.remove_recipient') }}
+                            </button>
+                        </form>
+                    @endif
+                </div>
             </li>
         @endforeach
 
@@ -75,11 +87,51 @@
                     <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ $recipient->name }}</p>
                     <p class="text-xs text-gray-400 dark:text-slate-500">{{ __('Opened, awaiting response') }}</p>
                 </div>
-                <span class="text-xs text-gray-500 dark:text-slate-400">○</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-gray-500 dark:text-slate-400">○</span>
+                    @if($circulation->isOpen())
+                        <form method="POST" action="{{ route('circulation.recipients.destroy', [$circulation, $recipient]) }}"
+                              onsubmit="confirmThenSubmit(event, @js(__('Remove :name from this circulation?', ['name' => $recipient->name])), { title: @js(__('mom.remove_recipient')), confirmLabel: @js(__('mom.remove_recipient')), type: 'danger' })">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-xs text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400">
+                                {{ __('mom.remove_recipient') }}
+                            </button>
+                        </form>
+                    @endif
+                </div>
             </li>
         @endforeach
 
     </ul>
+
+    {{-- Add recipient (only when circulation is open) --}}
+    @if($circulation->isOpen())
+    <div class="border-t border-gray-100 dark:border-slate-700 px-4 py-3" x-data="{ open: false }">
+        <button type="button" @click="open = !open"
+                class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+            + {{ __('mom.add_recipient') }}
+        </button>
+
+        <form x-show="open" x-cloak method="POST"
+              action="{{ route('circulation.recipients.store', $circulation) }}"
+              class="mt-3 flex flex-col sm:flex-row gap-2">
+            @csrf
+            <input type="text" name="name" placeholder="{{ __('mom.recipient_name_placeholder') }}" required
+                   class="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm px-3 py-1.5 outline-none focus:ring-1 focus:ring-indigo-500 dark:text-slate-100">
+            <input type="email" name="email" placeholder="{{ __('mom.recipient_email_placeholder') }}" required
+                   class="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm px-3 py-1.5 outline-none focus:ring-1 focus:ring-indigo-500 dark:text-slate-100">
+            <button type="submit"
+                    class="px-4 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 whitespace-nowrap">
+                {{ __('mom.add_recipient') }}
+            </button>
+            <button type="button" @click="open = false"
+                    class="px-3 py-1.5 text-xs text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
+                {{ __('Cancel') }}
+            </button>
+        </form>
+    </div>
+    @endif
 
     {{-- Amendment queue: pending remarks from guests --}}
     @php

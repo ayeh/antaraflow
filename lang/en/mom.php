@@ -43,5 +43,12 @@ return [
     'circulate_submit' => 'Circulate Now',
     'circulate_subject_prefix' => 'Minutes of Meeting',
     'circulate_success' => 'Minutes have been circulated for confirmation.',
+    'recipient_added' => ':name has been added and notified.',
+    'recipient_removed' => ':name has been removed from this circulation.',
+    'add_recipient' => 'Add Recipient',
+    'remove_recipient' => 'Remove',
+    'recipient_name_placeholder' => 'Full name',
+    'recipient_email_placeholder' => 'Email address',
+    'cannot_remove_responded' => 'Cannot remove a recipient who has already responded.',
 
 ];

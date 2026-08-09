@@ -43,5 +43,12 @@ return [
     'circulate_submit' => 'Edar Sekarang',
     'circulate_subject_prefix' => 'Minit Mesyuarat',
     'circulate_success' => 'Minit telah diedarkan untuk pengesahan.',
+    'recipient_added' => ':name telah ditambah dan dimaklumkan.',
+    'recipient_removed' => ':name telah dikeluarkan daripada edaran ini.',
+    'add_recipient' => 'Tambah Penerima',
+    'remove_recipient' => 'Buang',
+    'recipient_name_placeholder' => 'Nama penuh',
+    'recipient_email_placeholder' => 'Alamat e-mel',
+    'cannot_remove_responded' => 'Tidak boleh buang penerima yang sudah memberi maklum balas.',
 
 ];

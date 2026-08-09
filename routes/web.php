@@ -38,6 +38,7 @@ use App\Domain\Calendar\Controllers\CalendarConnectionController;
 use App\Domain\Calendar\Controllers\CalendarWebhookController;
 use App\Domain\Meeting\Controllers\BoardSettingController;
 use App\Domain\Meeting\Controllers\CirculateController;
+use App\Domain\Meeting\Controllers\CirculationRecipientController;
 use App\Domain\Meeting\Controllers\DocumentController;
 use App\Domain\Meeting\Controllers\GuestAccessController;
 use App\Domain\Meeting\Controllers\ManualNoteController;
@@ -196,6 +197,8 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
     Route::post('meetings/{meeting}/revert', [MeetingController::class, 'revert'])->name('meetings.revert');
     Route::post('meetings/{meeting}/duplicate', [MeetingController::class, 'duplicate'])->name('meetings.duplicate');
     Route::post('meetings/{meeting}/circulate', CirculateController::class)->name('meetings.circulate');
+    Route::post('circulations/{circulation}/recipients', [CirculationRecipientController::class, 'store'])->name('circulation.recipients.store');
+    Route::delete('circulations/{circulation}/recipients/{recipient}', [CirculationRecipientController::class, 'destroy'])->name('circulation.recipients.destroy');
     Route::post('meetings/{meeting}/amendments/{comment}/decide', \App\Domain\Meeting\Controllers\AmendmentDecisionController::class)->name('meetings.amendment.decide');
     Route::get('meetings/{meeting}/versions', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'index'])->name('meetings.versions.index');
     Route::get('meetings/{meeting}/versions/{version}', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'show'])->name('meetings.versions.show');
