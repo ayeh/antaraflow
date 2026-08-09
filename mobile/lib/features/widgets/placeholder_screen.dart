@@ -29,7 +29,7 @@ class PlaceholderScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 44, color: AppColors.neutral300),
+              Icon(icon, size: 44, color: AppColors.n300),
               const SizedBox(height: 16),
               Text('Not built yet', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 6),
@@ -37,7 +37,7 @@ class PlaceholderScreen extends StatelessWidget {
                 body,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.secondaryLight,
+                  color: AppColors.n500,
                 ),
               ),
             ],

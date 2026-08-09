@@ -26,7 +26,7 @@ class UpgradeGate extends StatelessWidget {
                 const Icon(
                   Icons.system_update_outlined,
                   size: 48,
-                  color: AppColors.accent,
+                  color: AppColors.primary,
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -41,14 +41,14 @@ class UpgradeGate extends StatelessWidget {
                             'needed to continue.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.secondaryLight,
+                    color: AppColors.n500,
                   ),
                 ),
                 if (requirement.storeUrl != null) ...[
                   const SizedBox(height: 28),
                   FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.accent,
+                      backgroundColor: AppColors.primary,
                     ),
                     onPressed: () {},
                     child: const Text('Open the store'),

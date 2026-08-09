@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../widgets/brand_mark.dart';
 import 'auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -56,14 +57,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const _BrandMark(),
+                    const Center(child: BrandMark(size: 46)),
                     const SizedBox(height: 32),
                     Text('Sign in', style: theme.textTheme.headlineMedium),
                     const SizedBox(height: 8),
                     Text(
                       'Between Words and Action',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.secondaryLight,
+                        color: AppColors.n500,
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -119,7 +120,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     FilledButton(
                       onPressed: state.isSubmitting ? null : _submit,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.accent,
+                        backgroundColor: AppColors.primary,
                       ),
                       child: state.isSubmitting
                           ? const SizedBox.square(
@@ -143,61 +144,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// The three dots from the brand book: two teal, a gap, then gold. The gap is
-/// the point — "antara" means between — so it is never closed up.
-class _BrandMark extends StatelessWidget {
-  const _BrandMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            _Dot(color: AppColors.primaryDark),
-            SizedBox(width: 8),
-            _Dot(color: AppColors.primary),
-            SizedBox(width: 22),
-            _Dot(color: AppColors.accent),
-          ],
-        ),
-        const SizedBox(height: 16),
-        RichText(
-          text: TextSpan(
-            style: Theme.of(context).textTheme.headlineSmall,
-            children: const [
-              TextSpan(
-                text: 'antara',
-                style: TextStyle(fontWeight: FontWeight.w400),
-              ),
-              TextSpan(
-                text: 'Note',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Dot extends StatelessWidget {
-  const _Dot({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 14,
-      height: 14,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }

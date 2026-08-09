@@ -2,16 +2,23 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-/// Theme built from the brand book's colour and type scales.
+/// Theme built from the live branding settings.
 ///
-/// Font families are named but the files are not bundled yet — drop the
-/// licensed Plus Jakarta Sans and Inter files into assets/fonts/ and declare
-/// them in pubspec.yaml, and every text style here picks them up. Until then
-/// Flutter falls back to the platform font, which is legible but off-brand.
+/// Nunito is named for both roles but the file is not bundled yet — drop
+/// Nunito into assets/fonts/ and declare it in pubspec.yaml and every style
+/// here picks it up. The fallback list reaches for the platform's rounded face
+/// first, which is far closer to Nunito than the default humanist sans.
 abstract final class AppTheme {
-  static const headingFont = 'Plus Jakarta Sans';
-  static const bodyFont = 'Inter';
+  static const headingFont = 'Nunito';
+  static const bodyFont = 'Nunito';
   static const monoFont = 'JetBrains Mono';
+
+  /// SF Pro Rounded on Apple platforms; Android falls through to Roboto.
+  static const roundedFallback = <String>[
+    '.SF Pro Rounded',
+    'SF Pro Rounded',
+    'Varela Round',
+  ];
 
   /// Board members skew older than the average phone user; nothing in the app
   /// goes below 12sp and body text sits at 14.
@@ -21,15 +28,15 @@ abstract final class AppTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       primary: AppColors.primary,
-      secondary: AppColors.secondary,
-      tertiary: AppColors.accent,
+      secondary: AppColors.navy,
+      tertiary: AppColors.lime,
       error: AppColors.danger,
       surface: Colors.white,
     );
 
     return _base(scheme).copyWith(
-      scaffoldBackgroundColor: AppColors.neutral50,
-      dividerColor: AppColors.neutral200,
+      scaffoldBackgroundColor: AppColors.n50,
+      dividerColor: AppColors.n200,
     );
   }
 
@@ -37,8 +44,11 @@ abstract final class AppTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.dark,
-      primary: const Color(0xFF2DD4BF),
-      tertiary: const Color(0xFFF59E0B),
+      // The brand green is bright enough to hold up on a dark ground; the lime
+      // becomes the accent because navy disappears against it.
+      primary: AppColors.lime,
+      secondary: const Color(0xFF9DB4FF),
+      tertiary: AppColors.primary,
       error: const Color(0xFFF87171),
     );
 
@@ -52,13 +62,14 @@ abstract final class AppTheme {
       useMaterial3: true,
       colorScheme: scheme,
       fontFamily: bodyFont,
+      fontFamilyFallback: roundedFallback,
       textTheme: _textTheme(
-        isLight ? AppColors.neutral900 : Colors.white,
-        isLight ? AppColors.neutral700 : const Color(0xFFCBD5E1),
+        isLight ? AppColors.navy : Colors.white,
+        isLight ? AppColors.n700 : const Color(0xFFC3CAD9),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,
-        foregroundColor: isLight ? AppColors.neutral900 : Colors.white,
+        foregroundColor: isLight ? AppColors.navy : Colors.white,
         elevation: 0,
         scrolledUnderElevation: 1,
         centerTitle: false,
@@ -66,7 +77,7 @@ abstract final class AppTheme {
           fontFamily: headingFont,
           fontSize: _scale.h2,
           fontWeight: FontWeight.w700,
-          color: isLight ? AppColors.neutral900 : Colors.white,
+          color: isLight ? AppColors.navy : Colors.white,
         ),
       ),
       cardTheme: CardThemeData(
@@ -75,7 +86,7 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
           side: BorderSide(
-            color: isLight ? AppColors.neutral200 : Colors.transparent,
+            color: isLight ? AppColors.n200 : Colors.transparent,
           ),
         ),
         margin: EdgeInsets.zero,
@@ -90,8 +101,9 @@ abstract final class AppTheme {
           ),
           textStyle: const TextStyle(
             fontFamily: bodyFont,
+            fontFamilyFallback: roundedFallback,
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -112,11 +124,11 @@ abstract final class AppTheme {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.neutral200),
+          borderSide: const BorderSide(color: AppColors.n200),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.neutral200),
+          borderSide: const BorderSide(color: AppColors.n200),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -127,7 +139,7 @@ abstract final class AppTheme {
         height: 68,
         elevation: 0,
         backgroundColor: scheme.surface,
-        indicatorColor: AppColors.primaryLight,
+        indicatorColor: AppColors.primarySoft,
         labelTextStyle: WidgetStateProperty.all(
           const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
         ),
@@ -145,6 +157,7 @@ abstract final class AppTheme {
     TextStyle h(double size, {FontWeight weight = FontWeight.w700}) =>
         TextStyle(
           fontFamily: headingFont,
+          fontFamilyFallback: roundedFallback,
           fontSize: size,
           fontWeight: weight,
           height: 1.3,
@@ -154,6 +167,7 @@ abstract final class AppTheme {
     TextStyle b(double size, {FontWeight weight = FontWeight.w400}) =>
         TextStyle(
           fontFamily: bodyFont,
+          fontFamilyFallback: roundedFallback,
           fontSize: size,
           fontWeight: weight,
           height: 1.6,

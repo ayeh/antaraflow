@@ -83,7 +83,7 @@ class _Greeting extends StatelessWidget {
           organization,
           style: Theme.of(
             context,
-          ).textTheme.bodyMedium?.copyWith(color: AppColors.secondaryLight),
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.n500),
         ),
       ],
     );
@@ -115,8 +115,8 @@ class _AttentionGrid extends StatelessWidget {
             label: 'To approve',
             count: unread.pendingApprovals,
             colour: unread.pendingApprovals > 0
-                ? AppColors.accent
-                : AppColors.secondaryLight,
+                ? AppColors.primary
+                : AppColors.n500,
             icon: Icons.approval_outlined,
           ),
         ),
@@ -181,7 +181,7 @@ class _EmptyState extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
         child: Column(
           children: [
-            Icon(icon, size: 36, color: AppColors.neutral300),
+            Icon(icon, size: 36, color: AppColors.n300),
             const SizedBox(height: 12),
             Text(title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4),
@@ -190,7 +190,7 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.secondaryLight),
+              ).textTheme.bodySmall?.copyWith(color: AppColors.n500),
             ),
           ],
         ),

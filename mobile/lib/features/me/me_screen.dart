@@ -25,14 +25,14 @@ class MeScreen extends ConsumerWidget {
                   children: [
                     CircleAvatar(
                       radius: 26,
-                      backgroundColor: AppColors.primaryLight,
+                      backgroundColor: AppColors.primarySoft,
                       foregroundImage: user.avatarUrl == null
                           ? null
                           : NetworkImage(user.avatarUrl!),
                       child: Text(
                         user.initials,
                         style: const TextStyle(
-                          color: AppColors.primaryDark,
+                          color: AppColors.primaryDeep,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -49,7 +49,7 @@ class MeScreen extends ConsumerWidget {
                           Text(
                             user.email,
                             style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: AppColors.secondaryLight),
+                                ?.copyWith(color: AppColors.n500),
                           ),
                         ],
                       ),
