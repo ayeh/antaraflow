@@ -43,7 +43,7 @@ class _Swipe extends StatefulWidget {
 class _SwipeState extends State<_Swipe> with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 380),
+    duration: AppTheme.enter,
     value: widget.animate ? 0 : 1,
   );
 

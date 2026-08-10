@@ -173,7 +173,7 @@ class _Tab extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.danger,
-                        borderRadius: BorderRadius.circular(3),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusS),
                       ),
                       child: Text(
                         '$badge',
@@ -219,10 +219,10 @@ class _RecordButton extends StatelessWidget {
       child: Center(
         child: Material(
           color: AppColors.recording,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
             child: const SizedBox(
               width: 58,
               height: 46,

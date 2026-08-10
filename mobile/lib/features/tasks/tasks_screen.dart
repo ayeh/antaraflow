@@ -135,7 +135,7 @@ class _Grouped extends StatelessWidget {
       for (final task in items)
         GutterRow(
           gutter: task.dueDate == null
-              ? '—'
+              ? 'nil'
               : DateFormat('d MMM').format(task.dueDate!),
           gutterCaption: task.dueDate == null
               ? 'no date'

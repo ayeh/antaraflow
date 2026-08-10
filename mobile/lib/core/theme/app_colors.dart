@@ -48,9 +48,17 @@ abstract final class AppColors {
   static const paper = Color(0xFFFBFAF7);
   static const paperRaised = Color(0xFFFFFFFF);
 
-  /// Hairlines. This interface rules its lists rather than boxing them.
+  /// Hairlines between list rows. Decorative separators, not component
+  /// boundaries, so the 3:1 floor does not apply to them.
   static const rule = Color(0xFFE4E2DC);
+
+  /// Quiet dividers and the outline button.
   static const ruleStrong = Color(0xFFCFCCC4);
+
+  /// The edge of an input. This one *is* a component boundary and has to reach
+  /// 3:1 against the field: #CFCCC4 was 1.60:1, so a text box was effectively
+  /// invisible to anyone who needs contrast to find it.
+  static const fieldEdge = Color(0xFF8C877B);
 
   static const ink = Color(0xFF11142B);
 

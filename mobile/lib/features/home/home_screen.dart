@@ -101,8 +101,6 @@ class _Standing extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(data.organization.name.toUpperCase(), style: AppTheme.eyebrow()),
-          const SizedBox(height: 14),
           DefaultTextStyle.merge(
             style: theme.textTheme.headlineSmall!.copyWith(height: 1.35),
             child: Wrap(
@@ -198,7 +196,7 @@ class _Empty extends StatelessWidget {
           SizedBox(
             width: AppTheme.gutter,
             child: Text(
-              '—',
+              'nil',
               style: AppTheme.mono(size: 13, colour: AppColors.inkFaint),
             ),
           ),

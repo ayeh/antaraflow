@@ -149,9 +149,12 @@ abstract final class AppTheme {
         filled: true,
         fillColor: isLight ? AppColors.paperRaised : scheme.surfaceContainerHighest,
         contentPadding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-        border: _fieldBorder(AppColors.ruleStrong),
-        enabledBorder: _fieldBorder(AppColors.ruleStrong),
-        focusedBorder: _fieldBorder(scheme.primary, width: 2),
+        border: _fieldBorder(AppColors.fieldEdge),
+        enabledBorder: _fieldBorder(AppColors.fieldEdge),
+        // primaryInk, not the brand green: green on white is 2.94:1 and fails
+        // the 3:1 floor for a non-text component, and a focus ring nobody can
+        // see is the one failure that locks keyboard users out entirely.
+        focusedBorder: _fieldBorder(AppColors.primaryInk, width: 2),
         errorBorder: _fieldBorder(AppColors.danger),
         focusedErrorBorder: _fieldBorder(AppColors.danger, width: 2),
         labelStyle: TextStyle(color: soft, fontWeight: FontWeight.w600),
@@ -184,13 +187,17 @@ abstract final class AppTheme {
   static TextTheme _textTheme(Color ink, Color soft) {
     // Nunito is a rounded humanist. Set loose it reads soft; set tight and
     // heavy it reads certain, which is what a governance record needs.
+    //
+    // Tracking is expressed relative to size. A flat -0.6px is -0.018em at 34
+    // but -0.035em at 17, so small headings were being tracked twice as tight
+    // as large ones — and titleMedium at 17 is the size this app uses most.
     TextStyle h(double size, {FontWeight weight = FontWeight.w800}) => TextStyle(
       fontFamily: headingFont,
       fontFamilyFallback: roundedFallback,
       fontSize: size,
       fontWeight: weight,
       height: 1.15,
-      letterSpacing: -0.6,
+      letterSpacing: size * (size >= 27 ? -0.018 : -0.010),
       color: ink,
     );
 
@@ -250,13 +257,17 @@ abstract final class AppTheme {
   }
 }
 
+/// A 1.25 scale from the 14pt body up.
+///
+/// The previous steps were 1.21 and 1.24 at the two sizes nearest body text,
+/// which is why a row title never quite separated from its subtitle.
 class _TypeScale {
   const _TypeScale();
 
-  final double display = 34;
-  final double h1 = 27;
-  final double h2 = 21;
-  final double h3 = 17;
+  final double display = 34.5;
+  final double h1 = 27.5;
+  final double h2 = 22;
+  final double h3 = 17.5;
   final double body = 14;
 
   /// Nothing in this app goes below 12. Board members skew older than the

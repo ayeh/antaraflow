@@ -37,7 +37,9 @@ class LedgerScaffold extends StatelessWidget {
         ? child
         : RefreshIndicator(
             onRefresh: onRefresh!,
-            color: AppColors.primary,
+            // Brand green is 2.94:1 on white and fails the 3:1 floor for a
+            // non-text component.
+            color: AppColors.primaryInk,
             backgroundColor: AppColors.paperRaised,
             child: child,
           );
