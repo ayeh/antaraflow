@@ -32,7 +32,7 @@ class MeScreen extends ConsumerWidget {
                       child: Text(
                         user.initials,
                         style: const TextStyle(
-                          color: AppColors.primaryDeep,
+                          color: AppColors.primaryInk,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

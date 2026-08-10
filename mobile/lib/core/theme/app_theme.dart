@@ -2,27 +2,48 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-/// Theme built from the live branding settings.
+/// Theme for a record, not a feed.
 ///
-/// Nunito is named for both roles but the file is not bundled yet — drop
-/// Nunito into assets/fonts/ and declare it in pubspec.yaml and every style
-/// here picks it up. The fallback list reaches for the platform's rounded face
-/// first, which is far closer to Nunito than the default humanist sans.
+/// The interface antaraNote produces is a minute book: what was decided, who
+/// moved it, when it was carried. So the type is set tight and structural, the
+/// figures are monospaced and column-aligned, and lists are ruled rather than
+/// boxed — a card around every row turns a record into a stream of unrelated
+/// objects.
+///
+/// Nunito is named for both text roles but the file is not bundled. Drop it
+/// into assets/fonts/ and declare it in pubspec.yaml and every style here picks
+/// it up; until then the fallback reaches for the platform's rounded face,
+/// which is much closer than the default humanist sans.
 abstract final class AppTheme {
   static const headingFont = 'Nunito';
   static const bodyFont = 'Nunito';
+
+  /// Everything that counts or ticks: reference numbers, timers, tallies,
+  /// due dates. Figures that shift width as they change are unreadable in a
+  /// column, which is most of this app.
   static const monoFont = 'JetBrains Mono';
 
-  /// SF Pro Rounded on Apple platforms; Android falls through to Roboto.
   static const roundedFallback = <String>[
     '.SF Pro Rounded',
     'SF Pro Rounded',
     'Varela Round',
   ];
 
-  /// Board members skew older than the average phone user; nothing in the app
-  /// goes below 12sp and body text sits at 14.
-  static const _scale = _TypeScale();
+  static const monoFallback = <String>['SF Mono', 'Menlo', 'monospace'];
+
+  /// Width of the reference gutter that every list aligns to.
+  static const gutter = 62.0;
+
+  /// One radius system: small for tags and badges, medium for anything
+  /// interactive. Nothing else.
+  static const radiusS = 3.0;
+  static const radiusM = 6.0;
+
+  /// A strong ease-out. The built-in curves are too weak to read as deliberate.
+  static const easeOut = Cubic(0.23, 1, 0.32, 1);
+  static const enter = Duration(milliseconds: 280);
+
+  static const scale = _TypeScale();
 
   static ThemeData get light {
     final scheme = ColorScheme.fromSeed(
@@ -31,12 +52,12 @@ abstract final class AppTheme {
       secondary: AppColors.navy,
       tertiary: AppColors.lime,
       error: AppColors.danger,
-      surface: Colors.white,
+      surface: AppColors.paperRaised,
     );
 
     return _base(scheme).copyWith(
-      scaffoldBackgroundColor: AppColors.n50,
-      dividerColor: AppColors.n200,
+      scaffoldBackgroundColor: AppColors.paper,
+      dividerColor: AppColors.rule,
     );
   }
 
@@ -44,8 +65,9 @@ abstract final class AppTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.dark,
-      // The brand green is bright enough to hold up on a dark ground; the lime
-      // becomes the accent because navy disappears against it.
+      // Navy disappears against a dark ground, so the lime takes the accent
+      // and the green stays for actions. Inverting the light theme naively
+      // would leave half the interface invisible.
       primary: AppColors.lime,
       secondary: const Color(0xFF9DB4FF),
       tertiary: AppColors.primary,
@@ -57,132 +79,173 @@ abstract final class AppTheme {
 
   static ThemeData _base(ColorScheme scheme) {
     final isLight = scheme.brightness == Brightness.light;
+    final ink = isLight ? AppColors.ink : Colors.white;
+    final soft = isLight ? AppColors.inkSoft : const Color(0xFFA6A9BE);
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       fontFamily: bodyFont,
       fontFamilyFallback: roundedFallback,
-      textTheme: _textTheme(
-        isLight ? AppColors.navy : Colors.white,
-        isLight ? AppColors.n700 : const Color(0xFFC3CAD9),
+      textTheme: _textTheme(ink, soft),
+      dividerTheme: DividerThemeData(
+        color: isLight ? AppColors.rule : const Color(0xFF262A44),
+        thickness: 1,
+        space: 1,
       ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: scheme.surface,
-        foregroundColor: isLight ? AppColors.navy : Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 1,
-        centerTitle: false,
-        titleTextStyle: TextStyle(
-          fontFamily: headingFont,
-          fontSize: _scale.h2,
-          fontWeight: FontWeight.w700,
-          color: isLight ? AppColors.navy : Colors.white,
-        ),
-      ),
+      // Cards are reserved for things that genuinely are discrete objects.
+      // Lists use rules.
       cardTheme: CardThemeData(
         elevation: 0,
-        color: isLight ? Colors.white : scheme.surfaceContainerHighest,
+        color: isLight ? AppColors.paperRaised : scheme.surfaceContainerHighest,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(radiusM),
           side: BorderSide(
-            color: isLight ? AppColors.n200 : Colors.transparent,
+            color: isLight ? AppColors.rule : Colors.transparent,
           ),
         ),
         margin: EdgeInsets.zero,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          // 52 rather than the Material default 40: this is a one-handed app
-          // used standing up in a meeting room.
-          minimumSize: const Size.fromHeight(52),
+          // Held one-handed, standing up, in a meeting room.
+          minimumSize: const Size.fromHeight(54),
+          // Square-ish. A pill would soften the whole page toward "app"; this
+          // is meant to read as a stamped action.
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(radiusM),
           ),
+          backgroundColor: AppColors.primary,
+          // Navy on the brand green is 4.75:1 and passes body contrast, so the
+          // green needs no darkening. White on it is 2.94:1 and fails even the
+          // large-text floor.
+          foregroundColor: AppColors.navy,
+          disabledBackgroundColor: AppColors.rule,
+          disabledForegroundColor: AppColors.inkFaint,
           textStyle: const TextStyle(
             fontFamily: bodyFont,
             fontFamilyFallback: roundedFallback,
             fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.2,
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+          minimumSize: const Size.fromHeight(54),
+          side: const BorderSide(color: AppColors.ruleStrong),
+          foregroundColor: ink,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusM)),
+          textStyle: const TextStyle(
+            fontFamily: bodyFont,
+            fontFamilyFallback: roundedFallback,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isLight ? Colors.white : scheme.surfaceContainerHighest,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.n200),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.n200),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: scheme.primary, width: 2),
-        ),
-      ),
-      navigationBarTheme: NavigationBarThemeData(
-        height: 68,
-        elevation: 0,
-        backgroundColor: scheme.surface,
-        indicatorColor: AppColors.primarySoft,
-        labelTextStyle: WidgetStateProperty.all(
-          const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        fillColor: isLight ? AppColors.paperRaised : scheme.surfaceContainerHighest,
+        contentPadding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+        border: _fieldBorder(AppColors.ruleStrong),
+        enabledBorder: _fieldBorder(AppColors.ruleStrong),
+        focusedBorder: _fieldBorder(scheme.primary, width: 2),
+        errorBorder: _fieldBorder(AppColors.danger),
+        focusedErrorBorder: _fieldBorder(AppColors.danger, width: 2),
+        labelStyle: TextStyle(color: soft, fontWeight: FontWeight.w600),
+        floatingLabelStyle: TextStyle(
+          color: scheme.primary,
+          fontWeight: FontWeight.w700,
         ),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        backgroundColor: AppColors.navyDeep,
+        contentTextStyle: const TextStyle(
+          fontFamily: bodyFont,
+          fontFamilyFallback: roundedFallback,
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
         ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusM)),
       ),
     );
   }
 
-  static TextTheme _textTheme(Color heading, Color body) {
-    TextStyle h(double size, {FontWeight weight = FontWeight.w700}) =>
-        TextStyle(
-          fontFamily: headingFont,
-          fontFamilyFallback: roundedFallback,
-          fontSize: size,
-          fontWeight: weight,
-          height: 1.3,
-          color: heading,
-        );
+  static OutlineInputBorder _fieldBorder(Color colour, {double width = 1}) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(radiusM),
+      borderSide: BorderSide(color: colour, width: width),
+    );
+  }
 
-    TextStyle b(double size, {FontWeight weight = FontWeight.w400}) =>
-        TextStyle(
-          fontFamily: bodyFont,
-          fontFamilyFallback: roundedFallback,
-          fontSize: size,
-          fontWeight: weight,
-          height: 1.6,
-          color: body,
-        );
+  static TextTheme _textTheme(Color ink, Color soft) {
+    // Nunito is a rounded humanist. Set loose it reads soft; set tight and
+    // heavy it reads certain, which is what a governance record needs.
+    TextStyle h(double size, {FontWeight weight = FontWeight.w800}) => TextStyle(
+      fontFamily: headingFont,
+      fontFamilyFallback: roundedFallback,
+      fontSize: size,
+      fontWeight: weight,
+      height: 1.15,
+      letterSpacing: -0.6,
+      color: ink,
+    );
+
+    TextStyle b(double size, {FontWeight weight = FontWeight.w400}) => TextStyle(
+      fontFamily: bodyFont,
+      fontFamilyFallback: roundedFallback,
+      fontSize: size,
+      fontWeight: weight,
+      height: 1.55,
+      color: ink,
+    );
 
     return TextTheme(
-      displaySmall: h(_scale.display),
-      headlineMedium: h(_scale.h1),
-      headlineSmall: h(_scale.h2),
-      titleMedium: h(_scale.h3, weight: FontWeight.w600),
+      displaySmall: h(scale.display),
+      headlineMedium: h(scale.h1),
+      headlineSmall: h(scale.h2),
+      titleMedium: h(scale.h3, weight: FontWeight.w700),
+      titleSmall: b(14, weight: FontWeight.w700),
       bodyLarge: b(16),
-      bodyMedium: b(_scale.body),
-      bodySmall: b(_scale.small),
-      labelLarge: b(_scale.body, weight: FontWeight.w600),
+      bodyMedium: b(scale.body),
+      bodySmall: b(scale.small).copyWith(color: soft, height: 1.45),
+      labelLarge: b(scale.body, weight: FontWeight.w700),
+    );
+  }
+
+  /// Monospaced figures. Tabular so columns do not jitter as values change.
+  static TextStyle mono({
+    double size = 12,
+    FontWeight weight = FontWeight.w500,
+    Color? colour,
+    double tracking = 0.2,
+  }) {
+    return TextStyle(
+      fontFamily: monoFont,
+      fontFamilyFallback: monoFallback,
+      fontSize: size,
+      fontWeight: weight,
+      letterSpacing: tracking,
+      height: 1.3,
+      color: colour,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+  }
+
+  /// Small structural labels. Uppercase with wide tracking, used to name a
+  /// region without competing with its content.
+  static TextStyle eyebrow({Color? colour}) {
+    return TextStyle(
+      fontFamily: bodyFont,
+      fontFamilyFallback: roundedFallback,
+      fontSize: 10.5,
+      fontWeight: FontWeight.w800,
+      letterSpacing: 1.3,
+      height: 1.2,
+      color: colour ?? AppColors.inkFaint,
     );
   }
 }
@@ -190,10 +253,13 @@ abstract final class AppTheme {
 class _TypeScale {
   const _TypeScale();
 
-  final double display = 36;
-  final double h1 = 28;
-  final double h2 = 22;
-  final double h3 = 18;
+  final double display = 34;
+  final double h1 = 27;
+  final double h2 = 21;
+  final double h3 = 17;
   final double body = 14;
+
+  /// Nothing in this app goes below 12. Board members skew older than the
+  /// average phone user.
   final double small = 12;
 }
