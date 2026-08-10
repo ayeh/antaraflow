@@ -54,28 +54,26 @@ need are already declared — microphone and background audio on iOS, microphone
 plus the foreground-service types on Android — so the recorder can be added
 without touching platform configuration.
 
-## Brand assets still needed
+## Brand assets
 
-The palette and type come from the live platform branding settings. Two things
-cannot be reproduced from settings alone and are not in this repository:
+Palette and type come from the live platform branding settings. The artwork is
+in `assets/images/`: `logo-mark.png` (512², the tile) and `logo-lockup.png`
+(1024×144, tile plus wordmark). `BrandMark` loads them and only falls back to a
+drawn approximation if they go missing.
 
-**The logo.** `BrandMark` loads these and falls back to a drawn approximation
-when they are missing, so the app builds either way — but the "n" is a custom
-letterform and the fallback must not ship.
+Launcher icons are generated from `logo-mark.png`. Two constraints to keep if
+they are ever regenerated:
 
-```
-mobile/assets/images/logo-mark.png     lime tile alone, square, 512×512
-mobile/assets/images/logo-lockup.png   tile + wordmark, transparent, ~1024 wide
-```
+- **iOS icons carry no alpha.** The App Store rejects an alpha channel, and iOS
+  applies its own corner mask — so the tile is flattened onto its own lime and
+  bled to the full square.
+- **The Android adaptive foreground sits at 62% of the canvas.** Anything
+  outside the safe zone gets cropped by whatever shape the launcher uses.
 
-Nothing else needs changing once they are dropped in.
-
-**Nunito.** Put the `.ttf` files in `assets/fonts/` and declare them in
-`pubspec.yaml`; every text style then picks them up. Until then the theme falls
-back to the platform's rounded face, which is close but not the brand face.
-
-**Launcher icons** are still Flutter's default. They need generating from
-`logo-mark.png` once it exists.
+**Still needed: Nunito.** Put the `.ttf` files in `assets/fonts/` and declare
+them in `pubspec.yaml`; every text style then picks them up. Until then the
+theme falls back to the platform's rounded face, which is close but not the
+brand face.
 
 > Note: `docs/brand/BRAND-REFERENCE.md`, `docs/brand/logos/` and
 > `public/design-system.html` all describe older brands — teal and gold, and
