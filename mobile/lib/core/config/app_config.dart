@@ -7,12 +7,13 @@ class AppConfig {
 
   /// Base URL of the API, without a trailing slash.
   ///
-  /// The Android emulator reaches the host machine at 10.0.2.2, never at
-  /// localhost, so the default here is the one that works on a simulator rather
-  /// than the one that reads more naturally.
+  /// Herd parks this project at antaraflow.test — the folder name as-is, not a
+  /// kebab-cased version of it. The Android emulator cannot reach the host by
+  /// name at all and needs `--dart-define=API_BASE_URL=http://10.0.2.2:8000`
+  /// against `php artisan serve`.
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://antara-flow.test',
+    defaultValue: 'https://antaraflow.test',
   );
 
   static const String apiPrefix = '/api/mobile/v1';

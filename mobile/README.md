@@ -9,7 +9,7 @@ The API base URL is a compile-time constant, so a debug build can point at Herd
 while a release build points at production without a code change deciding it.
 
 ```bash
-flutter run --dart-define=API_BASE_URL=https://antara-flow.test
+flutter run --dart-define=API_BASE_URL=https://antaraflow.test
 ```
 
 The Android emulator cannot reach `localhost` — the host machine is `10.0.2.2`:

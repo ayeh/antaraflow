@@ -49,6 +49,17 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!--
+	  Permits cleartext HTTP to the local machine only, so the app can talk to
+	  `php artisan serve` on 127.0.0.1 during development. Traffic to the
+	  internet stays subject to App Transport Security, so this does not weaken
+	  anything in a release build.
+	-->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>antaraNote records meeting audio so it can produce a transcript and draft the minutes. Recording only happens while you have a session running, and everyone present should be told.</string>
 	<key>UIBackgroundModes</key>
