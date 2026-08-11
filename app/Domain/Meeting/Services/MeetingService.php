@@ -163,7 +163,11 @@ class MeetingService
             throw new \DomainException(__('Only finalized meetings can be approved.'));
         }
 
-        $mom->update(['status' => MeetingStatus::Approved]);
+        $mom->update([
+            'status' => MeetingStatus::Approved,
+            'approved_at' => now(),
+            'approved_by' => $user->id,
+        ]);
         $this->auditService->log('approved', $mom);
 
         MeetingApproved::dispatch($mom, $user);
@@ -174,8 +178,8 @@ class MeetingService
 
     public function revertToDraft(MinutesOfMeeting $mom, User $user): MinutesOfMeeting
     {
-        if ($mom->status !== MeetingStatus::Finalized) {
-            throw new \DomainException(__('Only finalized meetings can be reverted to draft.'));
+        if (! in_array($mom->status, [MeetingStatus::Finalized, MeetingStatus::Approved])) {
+            throw new \DomainException(__('Only finalized or approved meetings can be reverted to draft.'));
         }
 
         $this->versionService->createVersion($mom, $user, 'Reverted to draft');

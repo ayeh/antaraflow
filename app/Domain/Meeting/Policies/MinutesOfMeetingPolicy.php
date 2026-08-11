@@ -107,6 +107,23 @@ class MinutesOfMeetingPolicy
         );
     }
 
+    public function revert(User $user, MinutesOfMeeting $meeting): bool
+    {
+        if ($meeting->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
+        if (! in_array($meeting->status, [MeetingStatus::Finalized, MeetingStatus::Approved])) {
+            return false;
+        }
+
+        return $this->authorizationService->hasPermission(
+            $user,
+            $user->currentOrganization,
+            'edit_meeting',
+        );
+    }
+
     public function startLive(User $user, MinutesOfMeeting $meeting): bool
     {
         if ($meeting->organization_id !== $user->current_organization_id) {

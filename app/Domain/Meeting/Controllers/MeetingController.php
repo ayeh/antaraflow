@@ -306,7 +306,7 @@ class MeetingController extends Controller
 
     public function revert(MinutesOfMeeting $meeting, Request $request): RedirectResponse
     {
-        $this->authorize('update', $meeting);
+        $this->authorize('revert', $meeting);
 
         try {
             $this->meetingService->revertToDraft($meeting, $request->user());
