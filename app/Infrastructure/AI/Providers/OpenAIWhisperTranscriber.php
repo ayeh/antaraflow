@@ -77,7 +77,7 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
         // these meetings switch between Malay and English mid-sentence, so
         // auto-detection beats committing to whichever code was stored.
         $response = Http::withToken($this->config['api_key'])
-            ->timeout(300)
+            ->timeout(600)
             ->attach('file', fopen($filePath, 'r'), basename($filePath))
             ->post('https://api.openai.com/v1/audio/transcriptions', $payload);
 
