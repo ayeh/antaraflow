@@ -15,12 +15,8 @@ class LiveExtractionUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * @param  array<string, mixed>  $extractions
-     */
     public function __construct(
         public readonly LiveMeetingSession $session,
-        public readonly array $extractions,
     ) {}
 
     /** @return array<int, \Illuminate\Broadcasting\Channel> */
@@ -36,7 +32,6 @@ class LiveExtractionUpdated implements ShouldBroadcast
     {
         return [
             'session_id' => $this->session->id,
-            'extractions' => $this->extractions,
         ];
     }
 }
