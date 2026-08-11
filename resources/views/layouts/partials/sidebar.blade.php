@@ -288,6 +288,35 @@ $isSettingsActive = request()->routeIs(
         <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ auth()->user()->currentOrganization->name }}</p>
         @endif
     </div>
+
+    {{-- Organization Switcher --}}
+    @php($userOrganizations = auth()->user()->organizations)
+    @if($userOrganizations->count() > 1)
+    <div class="border-t border-slate-100 dark:border-slate-700 mt-2 pt-2 mx-2">
+        <div class="px-3 pb-1">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('nav.settings_workspace') }}</span>
+        </div>
+        <div class="space-y-0.5">
+            @foreach($userOrganizations as $org)
+                @if($org->id === auth()->user()->current_organization_id)
+                    <div class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span class="truncate">{{ $org->name }}</span>
+                    </div>
+                @else
+                    <form method="POST" action="{{ route('organizations.switch', $org) }}">
+                        @csrf
+                        <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-left text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                            <svg class="w-4 h-4 shrink-0 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                            <span class="truncate">{{ $org->name }}</span>
+                        </button>
+                    </form>
+                @endif
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- Personal Settings --}}
     <div class="px-4 pt-2 pb-1">
         <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{{ __('nav.personal') }}</span>

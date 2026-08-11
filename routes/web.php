@@ -20,6 +20,7 @@ use App\Domain\Account\Controllers\ProfileSettingsController;
 use App\Domain\Account\Controllers\ResellerController;
 use App\Domain\Account\Controllers\SecuritySettingsController;
 use App\Domain\Account\Controllers\SocialAuthController;
+use App\Domain\Account\Controllers\SwitchOrganizationController;
 use App\Domain\ActionItem\Controllers\ActionItemBulkController;
 use App\Domain\ActionItem\Controllers\ActionItemController;
 use App\Domain\ActionItem\Controllers\ActionItemDashboardController;
@@ -167,6 +168,7 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
     Route::get('organizations/{organization}/settings', [OrganizationSettingsController::class, 'edit'])->name('organizations.settings.edit');
     Route::put('organizations/{organization}/settings', [OrganizationSettingsController::class, 'update'])->name('organizations.settings.update');
     Route::post('organizations/{organization}/settings/logo', [OrganizationSettingsController::class, 'uploadLogo'])->name('organizations.settings.logo');
+    Route::post('organizations/{organization}/switch', SwitchOrganizationController::class)->name('organizations.switch');
 
     // Attendee Groups
     Route::resource('attendee-groups', \App\Domain\Attendee\Controllers\AttendeeGroupController::class)->except(['show']);
