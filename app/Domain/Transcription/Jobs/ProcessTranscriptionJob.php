@@ -10,6 +10,8 @@ use App\Domain\Transcription\Events\TranscriptionCompleted;
 use App\Domain\Transcription\Events\TranscriptionFailed;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Domain\Transcription\Services\TranscriptionHintBuilder;
+use App\Infrastructure\AI\Contracts\TranscriberInterface;
+use App\Infrastructure\AI\DTOs\TranscriptionResult;
 use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
 use App\Infrastructure\AI\TranscriberFactory;
 use App\Support\Enums\TranscriptionMode;
@@ -49,6 +51,9 @@ class ProcessTranscriptionJob implements ShouldQueue
     /** How many times to re-encode at a lower bitrate before failing. */
     private const MAX_COMPRESSION_ATTEMPTS = 3;
 
+    /** Duration in seconds of each chunk when splitting an oversized file. */
+    private const CHUNK_DURATION = 600;
+
     public function __construct(
         public AudioTranscription $transcription,
     ) {}
@@ -87,12 +92,16 @@ class ProcessTranscriptionJob implements ShouldQueue
             $meeting = $this->transcription->minutesOfMeeting;
             $hints = app(TranscriptionHintBuilder::class);
 
-            $result = $transcriber->transcribe($filePath, [
+            $transcribeOptions = [
                 'language' => $this->transcription->language,
                 'languages' => $hints->languagesFor($meeting),
                 'keywords' => $hints->keywordsFor($meeting),
                 'duration_seconds' => $this->transcription->duration_seconds,
-            ]);
+            ];
+
+            $result = file_exists($filePath) && filesize($filePath) > self::MAX_FILE_SIZE
+                ? $this->transcribeChunked($transcriber, $filePath, $transcribeOptions)
+                : $transcriber->transcribe($filePath, $transcribeOptions);
 
             $this->transcription->update([
                 'status' => TranscriptionStatus::Completed,
@@ -131,6 +140,93 @@ class ProcessTranscriptionJob implements ShouldQueue
                 @unlink($processedPath);
             }
         }
+    }
+
+    /**
+     * Split the audio into CHUNK_DURATION-second pieces and transcribe each one.
+     *
+     * Whisper's 25 MB file-size cap makes a single API call impractical for
+     * recordings longer than roughly 90 minutes at 32 kbps. Splitting with
+     * ffmpeg and transcribing each chunk avoids that limit; timestamps in each
+     * result are shifted by the chunk's offset so the combined segments sit at
+     * their true positions in the recording.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    private function transcribeChunked(TranscriberInterface $transcriber, string $filePath, array $options): TranscriptionResult
+    {
+        $totalDuration = (float) ($options['duration_seconds'] ?? 0);
+        $chunks = $totalDuration > 0
+            ? (int) ceil($totalDuration / self::CHUNK_DURATION)
+            : 1;
+
+        $allSegments = [];
+        $fullTexts = [];
+        $detectedLanguage = null;
+        $accumulatedDuration = 0;
+
+        for ($i = 0; $i < $chunks; $i++) {
+            $startSec = $i * self::CHUNK_DURATION;
+            $chunkPath = sys_get_temp_dir().'/whisper_chunk_'.uniqid().'.ogg';
+
+            try {
+                $split = Process::timeout(120)->run([
+                    'ffmpeg', '-hide_banner', '-loglevel', 'error',
+                    '-ss', (string) $startSec,
+                    '-t', (string) self::CHUNK_DURATION,
+                    '-i', $filePath,
+                    '-c', 'copy',
+                    '-y', $chunkPath,
+                ]);
+
+                if ($split->failed() || ! file_exists($chunkPath) || filesize($chunkPath) === 0) {
+                    Log::warning('Audio chunk split failed; skipping chunk.', [
+                        'transcription_id' => $this->transcription->id,
+                        'chunk' => $i,
+                        'error' => $split->errorOutput(),
+                    ]);
+
+                    continue;
+                }
+
+                $chunkResult = $transcriber->transcribe(
+                    $chunkPath,
+                    array_merge($options, ['duration_seconds' => self::CHUNK_DURATION]),
+                );
+
+                foreach ($chunkResult->segments as $segment) {
+                    $allSegments[] = new TranscriptionSegmentData(
+                        text: $segment->text,
+                        startTime: $segment->startTime + $startSec,
+                        endTime: $segment->endTime + $startSec,
+                        speaker: $segment->speaker,
+                        confidence: $segment->confidence,
+                    );
+                }
+
+                if ($chunkResult->fullText !== '') {
+                    $fullTexts[] = $chunkResult->fullText;
+                }
+
+                if ($detectedLanguage === null) {
+                    $detectedLanguage = $chunkResult->language;
+                }
+
+                $accumulatedDuration += $chunkResult->durationSeconds ?? self::CHUNK_DURATION;
+            } finally {
+                if (file_exists($chunkPath)) {
+                    @unlink($chunkPath);
+                }
+            }
+        }
+
+        return new TranscriptionResult(
+            fullText: implode(' ', $fullTexts),
+            confidence: null,
+            segments: $allSegments,
+            language: $detectedLanguage,
+            durationSeconds: $accumulatedDuration > 0 ? (int) round($accumulatedDuration) : (int) $totalDuration,
+        );
     }
 
     /**
