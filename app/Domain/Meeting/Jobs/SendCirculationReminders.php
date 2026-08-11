@@ -30,12 +30,20 @@ class SendCirculationReminders implements ShouldQueue
                         continue;
                     }
 
+                    // Only send once per 24-hour window per recipient.
+                    if ($recipient->last_reminder_sent_at !== null &&
+                        $recipient->last_reminder_sent_at->diffInHours(now()) < 24) {
+                        continue;
+                    }
+
                     Mail::to($recipient->email)->send(
                         new CirculationReminderMail(
                             recipient: $recipient,
                             hasOpened: $recipient->open_count > 0,
                         )
                     );
+
+                    $recipient->update(['last_reminder_sent_at' => now()]);
                 }
             });
     }

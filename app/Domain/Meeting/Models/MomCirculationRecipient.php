@@ -22,6 +22,7 @@ class MomCirculationRecipient extends Model
         'first_opened_at',
         'last_opened_at',
         'open_count',
+        'last_reminder_sent_at',
         'responded_ip',
         'responded_user_agent',
     ];
@@ -35,6 +36,7 @@ class MomCirculationRecipient extends Model
             'first_opened_at' => 'datetime',
             'last_opened_at' => 'datetime',
             'open_count' => 'integer',
+            'last_reminder_sent_at' => 'datetime',
         ];
     }
 
