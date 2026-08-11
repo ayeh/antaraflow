@@ -6,7 +6,17 @@ plugins {
 
 android {
     namespace = "cloud.antara.note"
-    compileSdk = flutter.compileSdkVersion
+
+    // Pinned rather than taking flutter.compileSdkVersion, which is 36 in this
+    // Flutter release. flutter_secure_storage and permission_handler_android
+    // both ship AAR metadata demanding 37, and the build fails outright at
+    // checkDebugAarMetadata without it — the app has never been buildable for
+    // Android as configured.
+    //
+    // Compiling against a newer SDK does not change runtime behaviour; that is
+    // targetSdk's job, and it stays where Flutter puts it.
+    compileSdk = 37
+
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
