@@ -12,6 +12,7 @@ import '../../domain/models/live_session.dart';
 import 'audio_chunker.dart';
 import 'chunk_outbox.dart';
 import 'live_activity.dart';
+import 'recording_service.dart';
 
 final liveRepositoryProvider = Provider<LiveRepository>((ref) {
   return LiveRepository(client: ref.watch(apiClientProvider));
@@ -109,6 +110,7 @@ class RecorderController extends StateNotifier<RecorderState> {
 
   final _chunker = AudioChunker();
   final _activity = LiveActivity();
+  final _service = RecordingService();
   ChunkOutbox? _outbox;
   StreamSubscription<AudioChunk>? _chunkSub;
   Timer? _ticker;
@@ -153,6 +155,7 @@ class RecorderController extends StateNotifier<RecorderState> {
       );
 
       unawaited(_activity.start(title: title, elapsed: recorded));
+      unawaited(_service.start(title));
 
       _ticker = Timer.periodic(const Duration(milliseconds: 500), (_) {
         if (mounted) state = state.copyWith(elapsed: _chunker.position);
@@ -248,6 +251,7 @@ class RecorderController extends StateNotifier<RecorderState> {
     _ticker?.cancel();
     _activityTicker?.cancel();
     unawaited(_activity.end());
+    unawaited(_service.stop());
     await _chunker.stop();
 
     final undelivered = await _outbox?.drain() ?? 0;
@@ -295,8 +299,9 @@ class RecorderController extends StateNotifier<RecorderState> {
     _ticker?.cancel();
     _activityTicker?.cancel();
     // Leaving the screen while a session runs must not leave a card on the
-    // lock screen with nothing behind it.
+    // lock screen, or a notification, with nothing behind it.
     unawaited(_activity.end());
+    unawaited(_service.stop());
     await _chunkSub?.cancel();
     await _chunker.dispose();
     await _outbox?.close();
