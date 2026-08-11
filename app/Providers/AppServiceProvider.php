@@ -67,7 +67,13 @@ use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->bind(
+            \App\Infrastructure\Notifications\Push\PushSender::class,
+            \App\Infrastructure\Notifications\Push\FcmHttpV1Sender::class,
+        );
+    }
 
     public function boot(): void
     {
@@ -155,6 +161,10 @@ class AppServiceProvider extends ServiceProvider
 
         Notification::extend('telegram', function ($app) {
             return $app->make(TelegramChannel::class);
+        });
+
+        Notification::extend('push', function ($app) {
+            return $app->make(\App\Infrastructure\Notifications\Channels\PushChannel::class);
         });
 
         // Production safety checks

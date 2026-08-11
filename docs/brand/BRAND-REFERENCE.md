@@ -1,6 +1,26 @@
 # antaraNote Brand Reference
 
-> Condensed brand guide for developers and implementers. Full brand book: `antaraNote-Brand-Book.docx`
+> Condensed brand guide for developers and implementers.
+
+## Where the brand actually lives
+
+**The platform branding settings are the source of truth**, not this file. They
+are edited under super admin → branding and are what renders in production.
+This document tracks them; when the two disagree, the settings win and this
+document is wrong.
+
+Three places in this repository described *different* brands at the same time,
+and it cost a full rebuild of the mobile app's theme in August 2026:
+
+| Location | What it said | Status |
+|----------|--------------|--------|
+| Branding settings (live) | Green, lime, navy · Nunito · lime tile with a navy "n" | **Correct** |
+| This file, before Aug 2026 | Teal + amber gold · Plus Jakarta Sans / Inter · three dots | Now corrected |
+| `docs/brand/logos/final-*.svg` | The teal three-dot mark | **Still stale — do not use** |
+| `public/design-system.html` | Purple `#7C3AED` | **Still stale — do not use** |
+| `public/icons/icon-*.png` | Purple PWA icons | **Still stale — do not use** |
+
+If you change the branding settings, update this file in the same change.
 
 ---
 
@@ -24,28 +44,34 @@
 
 ---
 
-## Logo — Spaced Gold Mark
+## Logo
 
-3 dots in a horizontal row: 2 teal dots close together + 1 gold dot spaced apart. The gap = "antara" (between). Gold = the outcome/note.
+A **lime rounded-square tile carrying a navy lowercase "n"**, with the wordmark
+set "antara" regular and "Note" bold, both in navy.
 
-```
-●● · ●    ←  Deep Teal, Teal, [gap], Gold
-```
+- Tile: Signal Lime `#87FF51`, corner radius roughly 28% of the tile
+- Glyph: Deep Navy `#01266E`, a **custom script letterform**
+- Wordmark: Deep Navy `#01266E`
 
-**Construction:**
-- Dot 1: Deep Teal `#095153` — Dot 2: Nusantara Teal `#0D7377` — Dot 3: Amber Gold `#D97706`
-- Tight gap (dots 1–2): 23px center-to-center
-- Wide gap (dots 2–3): 34px center-to-center — the "antara"
-- Dot radius: 9px at 1x scale
-- Subtle dashed line (gold, 30% opacity) bridges the gap
+**The "n" cannot be typeset.** It is a drawn form and no installed face
+reproduces it. Anything that needs the mark must load the artwork; an
+approximation set in an italic sans is not the logo and must not ship.
 
-**Variations:** Primary (mark+wordmark), Stacked, Icon Only, Wordmark Only, Reverse (on navy), Monochrome (single teal).
+### Where the artwork lives
 
-**Rules:**
-- Clear space = height of "a" on all sides
-- Minimum size: 24px height (digital), 10mm (print)
-- Never close the "antara" gap or rearrange dot order
-- Always on solid backgrounds
+Uploaded through the branding settings, so the file sits on the server rather
+than in this repository. Fetch it rather than redrawing it.
+
+`docs/brand/logos/final-*.svg` are the **superseded** teal three-dot mark and
+`generate-logos-final.js` regenerates that old mark. Both should be replaced or
+deleted; they are kept here only so nobody mistakes them for current.
+
+**Rules**
+
+- Clear space equal to the tile's corner radius on all sides
+- Minimum tile size 24px digital
+- Never recolour the tile or the glyph
+- The lockup is horizontal; a stacked version needs its own artwork
 
 ---
 
@@ -53,63 +79,86 @@
 
 ### Primary
 
-| Token | Name | Hex | Tailwind |
-|-------|------|-----|----------|
-| `primary` | Nusantara Teal | `#0D7377` | `text-[#0D7377]` / `bg-[#0D7377]` |
-| `primary-dark` | Deep Teal | `#095153` | `text-[#095153]` / `bg-[#095153]` |
-| `primary-light` | Soft Teal | `#E6F4F4` | `text-[#E6F4F4]` / `bg-[#E6F4F4]` |
+| Token | Name | Hex | Notes |
+|-------|------|-----|-------|
+| `primary` | Brand Green | `#37AD00` | Primary actions, active states |
+| `primary-deep` | Deep Green | `#2B8A00` | Small text and icons — `primary` is only ~3:1 on white |
+| `primary-soft` | Soft Green | `#EFFBE7` | Selected rows, quiet emphasis |
 
 ### Secondary
 
-| Token | Name | Hex | Tailwind |
-|-------|------|-----|----------|
-| `secondary` | Slate Navy | `#1E293B` | `text-slate-800` |
-| `secondary-light` | Cool Gray | `#64748B` | `text-slate-500` |
-
-### Accent
-
-| Token | Name | Hex | Tailwind |
-|-------|------|-----|----------|
-| `accent` | Amber Gold | `#D97706` | `text-amber-600` / `bg-amber-600` |
+| Token | Name | Hex | Notes |
+|-------|------|-----|-------|
+| `lime` | Signal Lime | `#87FF51` | **Surfaces only.** ~1.4:1 on white — must never carry text |
+| `navy` | Deep Navy | `#01266E` | Headings, body text, the wordmark |
 
 ### Semantic
 
-| Token | Name | Hex | Tailwind |
-|-------|------|-----|----------|
-| `success` | Emerald | `#059669` | `text-emerald-600` |
-| `warning` | Warm Amber | `#F59E0B` | `text-amber-400` |
-| `danger` | Crimson | `#DC2626` | `text-red-600` |
-| `info` | Sky Blue | `#0284C7` | `text-sky-600` |
+| Token | Name | Hex |
+|-------|------|-----|
+| `danger` | `#EF4444` |
+| `success` | `#22C55E` |
+| `warning` | `#F59E0B` |
+| `info` | `#0284C7` |
 
 ### Neutrals
 
-| Token | Hex | Tailwind | Usage |
-|-------|-----|----------|-------|
-| `neutral-50` | `#F8FAFC` | `bg-slate-50` | Page backgrounds |
-| `neutral-100` | `#F1F5F9` | `bg-slate-100` | Card backgrounds |
-| `neutral-200` | `#E2E8F0` | `border-slate-200` | Borders, dividers |
-| `neutral-300` | `#CBD5E1` | `text-slate-300` | Disabled states |
-| `neutral-700` | `#334155` | `text-slate-700` | Body text |
-| `neutral-900` | `#0F172A` | `text-slate-900` | Headings |
+Not defined in the branding settings. These are biased a few degrees toward the
+navy so greys read as part of the palette rather than as a default.
 
-### Print Colors (CMYK / Pantone)
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `n50` | `#F7F9FC` | Page backgrounds |
+| `n100` | `#EFF2F8` | Card backgrounds |
+| `n200` | `#DFE4EE` | Borders, dividers |
+| `n300` | `#C3CAD9` | Disabled states |
+| `n500` | `#6B7590` | Secondary text |
+| `n700` | `#313A52` | Body text |
+| `n900` | `#0B1330` | Headings on light |
 
-| Color | CMYK | Pantone |
-|-------|------|---------|
-| Nusantara Teal | 89, 3, 0, 53 | 7714 C |
-| Deep Teal | 89, 2, 0, 67 | 7722 C |
-| Slate Navy | 49, 31, 0, 77 | 533 C |
-| Amber Gold | 0, 45, 97, 15 | 144 C |
+### Contrast rules that are easy to get wrong
+
+- **Lime never carries text.** It holds the mark, fills a chip, tints a
+  selected row. Text on lime fails at any size.
+- **Brand green is borderline for text.** Around 3:1 against white — fine for
+  large text, buttons and UI, not for small body copy. Use `primary-deep`.
+- **Navy disappears on dark grounds.** In a dark theme, lime becomes primary
+  and navy is replaced; inverting the light theme naively does not work.
+
+### Print Colors
+
+Not yet specified for the current palette. The previous table listed Pantone
+matches for the retired teal and gold brand and has been removed rather than
+left to mislead.
+
+Two of these are hard to reproduce in print and should be matched by a printer
+against a physical proof rather than converted arithmetically:
+
+- **Signal Lime `#87FF51`** sits outside CMYK gamut. Expect a noticeably duller
+  result, or specify a spot colour.
+- **Brand Green `#37AD00`** is also out of gamut at full saturation.
+
+Get a Pantone match commissioned before any printed material goes out.
 
 ---
 
 ## Typography
 
-| Role | Font | Weights | CSS |
-|------|------|---------|-----|
-| Display / Headlines | Plus Jakarta Sans | 600, 700 | `font-family: 'Plus Jakarta Sans', sans-serif` |
-| Body | Inter | 400, 500 | `font-family: 'Inter', sans-serif` |
-| Monospace / Data | JetBrains Mono | 400 | `font-family: 'JetBrains Mono', monospace` |
+**Nunito** for both headings and body, per the branding settings.
+
+| Role | Font | Weights |
+|------|------|---------|
+| Headings | Nunito | 700, 800 |
+| Body | Nunito | 400, 500, 600 |
+| Data / monospace | JetBrains Mono | 400 |
+
+Monospace is not set in the branding settings. It is used for anything that
+counts or ticks — timers, reference numbers, tallies, chunk counts — so figures
+do not shift as values change.
+
+Where Nunito is unavailable, fall back to the platform's *rounded* face
+(`ui-rounded` in CSS, `.SF Pro Rounded` on Apple) rather than the default
+humanist sans; it is far closer.
 
 ### Type Scale
 
@@ -125,7 +174,7 @@
 ### Google Fonts Import
 
 ```html
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Inter:wght@400;500&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
 ```
 
 ---
@@ -151,23 +200,25 @@
 
 | Element | Spec |
 |---------|------|
-| Sidebar | Teal (`#0D7377`) background, white text |
-| Headers / Nav | Slate Navy (`#1E293B`) |
-| Primary CTA | Amber Gold (`#D97706`) |
-| Body text | Slate 700 (`#334155`) |
-| Headings | Slate 900 (`#0F172A`), Plus Jakarta Sans |
-| Body font | Inter |
-| Card backgrounds | Slate 50 (`#F8FAFC`) or Slate 100 (`#F1F5F9`) |
-| Borders | Slate 200 (`#E2E8F0`) |
-| Login screen | Dot Pattern at 5% opacity, centered logo, teal button |
+| Primary CTA | Brand Green (`#37AD00`), white text |
+| Headings | Deep Navy (`#01266E`), Nunito 700–800 |
+| Body text | `#313A52` on light, Nunito 400 |
+| Secondary text | `#6B7590` |
+| Nav / active state | Brand Green |
+| Selected row tint | Soft Green (`#EFFBE7`) |
+| Card backgrounds | White, `#DFE4EE` border |
+| Page background | `#F7F9FC` |
+| Small text on colour | `#2B8A00`, never `#37AD00` |
+| Recording indicator | `#EF4444`, reserved — nothing else uses it |
 
 ---
 
 ## Imagery
 
-- **Photography:** Clean, high-key, teal duotone overlay. Malaysian/SEA diversity.
-- **Icons:** 1.5px stroke, rounded corners, teal primary. No gradients, no 3D.
-- **Patterns:** Dot Pattern (three-dot motif repeated at 5% opacity in staggered grid), grid dots.
+- **Photography:** Clean, high-key. Malaysian/SEA diversity.
+- **Icons:** 1.5px stroke, rounded corners, brand green. No gradients, no 3D.
+- **Patterns:** None currently defined. The old three-dot pattern is retired
+  along with the mark it came from.
 
 ---
 
@@ -175,8 +226,23 @@
 
 | File | Purpose |
 |------|---------|
-| `docs/brand/antaraNote-Brand-Book.docx` | Full 20-page brand book (bilingual) |
-| `docs/brand/generate-brand-book.js` | Script to regenerate the DOCX |
 | `docs/brand/BRAND-REFERENCE.md` | This file — developer quick reference |
-| `docs/brand/logos/final-*.svg` | Final Spaced Gold logo suite (6 variations) |
-| `docs/brand/logos/generate-logos-final.js` | Script to regenerate final logos |
+| Branding settings (super admin) | **Source of truth** for colour, type and logo |
+| `docs/brand/antaraNote-Brand-Book.docx` | **Stale** — describes the teal and gold brand |
+| `docs/brand/generate-brand-book.js` | **Stale** — regenerates the old DOCX |
+| `docs/brand/logos/final-*.svg` | **Stale** — the retired three-dot mark |
+| `docs/brand/logos/generate-logos-final.js` | **Stale** — regenerates the old mark |
+| `public/design-system.html` | **Stale** — purple palette, unrelated to any current brand |
+| `public/icons/icon-*.png` | **Stale** — purple PWA icons |
+
+### Known consumers of the brand
+
+| Consumer | Reads from |
+|----------|-----------|
+| Web app | `BrandingService` → branding settings |
+| Emails | `BrandingService::logoUrl()` |
+| Mobile app | `mobile/lib/core/theme/app_colors.dart`, mirrored by hand |
+| Mobile logo | `mobile/assets/images/logo-{mark,lockup}.png` |
+
+The mobile theme is a hand-kept mirror, not a live read. Changing the branding
+settings does **not** restyle the app — update `app_colors.dart` too.

@@ -80,7 +80,7 @@ trap '"$PHP_BIN" artisan up >/dev/null 2>&1 || true' EXIT
 "$PHP_BIN" artisan config:cache
 "$PHP_BIN" artisan route:cache
 "$PHP_BIN" artisan view:cache
-"$PHP_BIN" artisan icons:cache 2>/dev/null || true
+
 
 # Harden file permissions
 chmod 600 .env

@@ -6,13 +6,15 @@ namespace App\Domain\Transcription\Notifications;
 
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Infrastructure\Notifications\Messages\TeamsMessage;
+use App\Infrastructure\Notifications\Push\PushMessage;
+use App\Support\Traits\SendsMobilePush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 class TranscriptionCompletedNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsMobilePush;
 
     public function __construct(
         public AudioTranscription $transcription,
@@ -27,7 +29,16 @@ class TranscriptionCompletedNotification extends Notification implements ShouldQ
             $channels[] = 'teams';
         }
 
-        return $channels;
+        return $this->withPush($notifiable, $channels);
+    }
+
+    public function toPush(object $notifiable): PushMessage
+    {
+        return new PushMessage(
+            title: __('Transcript ready'),
+            body: $this->transcription->minutesOfMeeting?->title ?? __('Your recording'),
+            deepLink: "antaraflow://meetings/{$this->transcription->minutes_of_meeting_id}",
+        );
     }
 
     public function toTeams(object $notifiable): TeamsMessage

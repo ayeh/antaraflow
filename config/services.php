@@ -69,4 +69,9 @@ return [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
     ],
 
+    'fcm' => [
+        'project_id' => env('FCM_PROJECT_ID'),
+        'credentials' => env('FCM_CREDENTIALS_PATH', storage_path('app/private/fcm-service-account.json')),
+    ],
+
 ];

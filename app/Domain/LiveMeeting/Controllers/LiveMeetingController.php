@@ -70,7 +70,7 @@ class LiveMeetingController extends Controller
         abort_if(! $session->isActive(), 409, 'Session is not active.');
 
         $request->validate([
-            'audio' => ['required', 'file', 'mimetypes:audio/webm,audio/mp4,audio/ogg,audio/wav,audio/x-m4a,audio/mpeg,audio/mp3,video/webm'],
+            'audio' => ['required', 'file', 'mimetypes:'.implode(',', \App\Domain\LiveMeeting\Support\AudioChunkFormats::MIMETYPES)],
             'chunk_number' => ['required', 'integer', 'min:0'],
             'start_time' => ['required', 'numeric', 'min:0'],
             'end_time' => ['required', 'numeric', 'gt:start_time'],

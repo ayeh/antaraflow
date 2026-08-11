@@ -43,8 +43,6 @@ class LiveExtractionJob implements ShouldQueue
         // real content outright if the worker died in between.
         app(ExtractionService::class)->extractAll($meeting, $transcriptText);
 
-        $extractions = $meeting->extractions()->latest()->get()->toArray();
-
-        event(new LiveExtractionUpdated($this->session, $extractions));
+        event(new LiveExtractionUpdated($this->session));
     }
 }

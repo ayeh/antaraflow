@@ -221,9 +221,8 @@ export default function liveMeetingDashboard(config) {
             }
         },
 
-        handleExtractionUpdated(data) {
-            this.extractions = data.extractions;
-            this.lastExtractionUpdate = new Date().toISOString();
+        async handleExtractionUpdated(data) {
+            await this.fetchLatestState();
             this.isExtracting = false;
         },
 

@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace App\Domain\Collaboration\Notifications;
 
 use App\Domain\Collaboration\Models\Comment;
+use App\Infrastructure\Notifications\Push\PushMessage;
+use App\Support\Traits\SendsMobilePush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class MentionedInCommentNotification extends Notification
 {
-    use Queueable;
+    use Queueable, SendsMobilePush;
 
     public function __construct(
         public Comment $comment,
@@ -21,7 +23,18 @@ class MentionedInCommentNotification extends Notification
     /** @return list<string> */
     public function via(object $notifiable): array
     {
-        return $this->sendEmail ? ['database', 'mail'] : ['database'];
+        $channels = $this->sendEmail ? ['database', 'mail'] : ['database'];
+
+        return $this->withPush($notifiable, $channels);
+    }
+
+    public function toPush(object $notifiable): PushMessage
+    {
+        return new PushMessage(
+            title: __('You were mentioned'),
+            body: str((string) $this->comment->body)->stripTags()->limit(120)->toString(),
+            deepLink: "antaraflow://meetings/{$this->comment->commentable_id}",
+        );
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -41,6 +54,7 @@ class MentionedInCommentNotification extends Notification
             'commenter' => $this->comment->user->name,
             'meeting_id' => $this->comment->commentable_id,
             'message' => __(':name mentioned you in a comment', ['name' => $this->comment->user->name]),
+            'deep_link' => "antaraflow://meetings/{$this->comment->commentable_id}",
         ];
     }
 }

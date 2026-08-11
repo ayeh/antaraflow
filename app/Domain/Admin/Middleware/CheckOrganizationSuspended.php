@@ -15,6 +15,14 @@ class CheckOrganizationSuspended
         $user = $request->user();
 
         if ($user && $user->currentOrganization && $user->currentOrganization->is_suspended) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $user->currentOrganization->suspended_reason
+                        ?: __('This organization is suspended.'),
+                    'code' => 'ORGANIZATION_SUSPENDED',
+                ], 403);
+            }
+
             return response()->view('errors.suspended', [
                 'reason' => $user->currentOrganization->suspended_reason,
             ], 403);

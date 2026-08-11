@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\ActionItem\Notifications;
 
 use App\Domain\ActionItem\Models\ActionItem;
+use App\Infrastructure\Notifications\Push\PushMessage;
+use App\Support\Traits\SendsMobilePush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +14,7 @@ use Illuminate\Notifications\Notification;
 
 class ActionItemAssignedNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsMobilePush;
 
     public function __construct(
         public ActionItem $actionItem,
@@ -21,7 +23,17 @@ class ActionItemAssignedNotification extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return $this->withPush($notifiable, ['mail', 'database']);
+    }
+
+    public function toPush(object $notifiable): PushMessage
+    {
+        return new PushMessage(
+            title: __('New action item'),
+            body: __(':title', ['title' => $this->actionItem->title]),
+            deepLink: "antaraflow://action-items/{$this->actionItem->id}",
+            data: ['action_item_id' => (string) $this->actionItem->id],
+        );
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -55,6 +67,7 @@ class ActionItemAssignedNotification extends Notification implements ShouldQueue
             'title' => $this->actionItem->title,
             'meeting_title' => $this->actionItem->meeting?->title,
             'message' => __('You\'ve been assigned: ":title"', ['title' => $this->actionItem->title]),
+            'deep_link' => "antaraflow://action-items/{$this->actionItem->id}",
         ];
     }
 }

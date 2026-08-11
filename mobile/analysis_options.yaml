@@ -1,0 +1,25 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # Treat a forgotten await as a build failure. In an offline-first app a
+    # dropped future is a write that silently never happened.
+    unawaited_futures: error
+    # An unhandled model field is usually a contract drift against the API.
+    invalid_annotation_target: ignore
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+
+linter:
+  rules:
+    # Dart forbids `required this._field` for private fields in named
+    # parameters, so this rule fires on a pattern it also makes impossible.
+    prefer_initializing_formals: false
+
+    prefer_single_quotes: true
+    require_trailing_commas: true
+    avoid_print: true
+    unawaited_futures: true
+    use_super_parameters: true
+    sort_child_properties_last: true

@@ -7,7 +7,9 @@ namespace App\Domain\Meeting\Notifications;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Meeting\Models\MomCirculation;
 use App\Infrastructure\Notifications\Messages\TeamsMessage;
+use App\Infrastructure\Notifications\Push\PushMessage;
 use App\Models\User;
+use App\Support\Traits\SendsMobilePush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -15,7 +17,7 @@ use Illuminate\Notifications\Notification;
 
 class MeetingApprovedNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsMobilePush;
 
     public function __construct(
         public MinutesOfMeeting $meeting,
@@ -40,7 +42,16 @@ class MeetingApprovedNotification extends Notification implements ShouldQueue
             $channels[] = 'teams';
         }
 
-        return $channels;
+        return $this->withPush($notifiable, $channels);
+    }
+
+    public function toPush(object $notifiable): PushMessage
+    {
+        return new PushMessage(
+            title: __('Minutes approved'),
+            body: $this->meeting->title,
+            deepLink: "antaraflow://meetings/{$this->meeting->id}",
+        );
     }
 
     public function toMail(object $notifiable): MailMessage
