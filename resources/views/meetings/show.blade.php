@@ -291,11 +291,25 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('meetings.approve', $meeting) }}" class="inline">
+                <form method="POST" action="{{ route('meetings.approve', $meeting) }}" class="inline"
+                      x-data
+                      @submit.prevent="if (confirm('{{ __('Approve this MOM directly without circulation? This cannot be undone.') }}')) $el.submit()">
                     @csrf
-                    <button type="submit" class="h-9 px-4 border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center whitespace-nowrap">{{ __('Approve') }}</button>
+                    <button type="submit" class="h-9 px-4 border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center whitespace-nowrap">{{ __('Approve Directly') }}</button>
                 </form>
             @endif
+
+            {{-- Revert to Draft: Finalized or Approved --}}
+            @can('revert', $meeting)
+                @if(in_array($meeting->status, [\App\Support\Enums\MeetingStatus::Finalized, \App\Support\Enums\MeetingStatus::Approved]))
+                    <form method="POST" action="{{ route('meetings.revert', $meeting) }}" class="inline"
+                          x-data
+                          @submit.prevent="if (confirm('{{ __('Revert this MOM back to draft?') }}')) $el.submit()">
+                        @csrf
+                        <button type="submit" class="h-9 px-4 border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center whitespace-nowrap">{{ __('Revert to Draft') }}</button>
+                    </form>
+                @endif
+            @endcan
             </div>
         </div>
 
