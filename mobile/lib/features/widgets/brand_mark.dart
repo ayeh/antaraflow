@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme.dart';
 
 /// The antaraNote mark.
 ///
@@ -23,8 +24,11 @@ class BrandMark extends StatelessWidget {
   final double size;
   final bool showWordmark;
 
-  /// Only affects the drawn wordmark fallback. The supplied lockup art is used
-  /// as-is; a reverse version should be a separate asset if one is needed.
+  /// The lockup artwork sets the wordmark in navy ink, which disappears on a
+  /// navy ground. There is no reverse lockup, so on dark the lockup is
+  /// composed instead: the real tile — which carries the custom "n" and is
+  /// lime on any ground — beside the wordmark set in Nunito, the brand face
+  /// the app now bundles. Only the glyph is bespoke; the wordmark is type.
   final bool onDark;
 
   static const _markAsset = 'assets/images/logo-mark.png';
@@ -42,6 +46,10 @@ class BrandMark extends StatelessWidget {
       );
     }
 
+    if (onDark) {
+      return _ReverseLockup(size: size);
+    }
+
     return Image.asset(
       _lockupAsset,
       height: size,
@@ -49,6 +57,58 @@ class BrandMark extends StatelessWidget {
       errorBuilder: (context, _, _) => _DrawnLockup(size: size, onDark: onDark),
     );
   }
+}
+
+/// The lockup for a dark ground: real tile, typeset wordmark.
+class _ReverseLockup extends StatelessWidget {
+  const _ReverseLockup({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    TextSpan part(String text, FontWeight weight) => TextSpan(
+      text: text,
+      style: TextStyle(
+        fontWeight: weight,
+        fontVariations: AppTheme.axis(weight),
+      ),
+    );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Image.asset(
+          _BrandAssets.mark,
+          width: size,
+          height: size,
+          filterQuality: FilterQuality.medium,
+          errorBuilder: (context, _, _) => _DrawnTile(size: size),
+        ),
+        SizedBox(width: size * 0.32),
+        Text.rich(
+          TextSpan(
+            children: [
+              part('antara', FontWeight.w400),
+              part('Note', FontWeight.w800),
+            ],
+          ),
+          style: TextStyle(
+            fontFamily: AppTheme.headingFont,
+            fontFamilyFallback: AppTheme.roundedFallback,
+            fontSize: size * 0.62,
+            height: 1.1,
+            letterSpacing: size * -0.012,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+abstract final class _BrandAssets {
+  static const mark = 'assets/images/logo-mark.png';
 }
 
 /// Stand-in for the tile. Approximate by definition — the real glyph is drawn,
@@ -74,6 +134,7 @@ class _DrawnTile extends StatelessWidget {
           fontSize: size * 0.62,
           height: 1.05,
           fontWeight: FontWeight.w800,
+          fontVariations: AppTheme.axis(FontWeight.w800),
           fontStyle: FontStyle.italic,
           letterSpacing: -0.5,
           color: AppColors.navy,
@@ -97,15 +158,21 @@ class _DrawnLockup extends StatelessWidget {
         _DrawnTile(size: size),
         SizedBox(width: size * 0.32),
         Text.rich(
-          const TextSpan(
+          TextSpan(
             children: [
               TextSpan(
                 text: 'antara',
-                style: TextStyle(fontWeight: FontWeight.w400),
+                style: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontVariations: AppTheme.axis(FontWeight.w400),
+                ),
               ),
               TextSpan(
                 text: 'Note',
-                style: TextStyle(fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontVariations: AppTheme.axis(FontWeight.w800),
+                ),
               ),
             ],
           ),

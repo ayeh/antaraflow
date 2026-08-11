@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/bootstrap.dart';
@@ -10,6 +11,7 @@ import '../widgets/error_view.dart';
 import '../widgets/gutter_row.dart';
 import '../widgets/ledger_scaffold.dart';
 import '../widgets/marker.dart';
+import '../widgets/rolling_count.dart';
 
 /// What needs deciding, not a dashboard of charts.
 ///
@@ -35,14 +37,12 @@ class HomeScreen extends ConsumerWidget {
           onPressed: () {},
         ),
       ],
-      onRefresh: () async => ref.invalidate(bootstrapProvider),
+      onRefresh: () async {
+        ref.invalidate(bootstrapProvider);
+        ref.invalidate(upcomingProvider);
+      },
       child: bootstrap.when(
-        loading: () => const Center(
-          child: SizedBox.square(
-            dimension: 22,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
+        loading: () => const _Loading(),
         error: (error, _) => ErrorView(
           error: error,
           onRetry: () => ref.invalidate(bootstrapProvider),
@@ -59,26 +59,139 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _Body extends StatelessWidget {
+/// The sittings that have not happened yet.
+///
+/// Read from the calendar endpoint rather than the meetings list, which is
+/// ordered newest-first and would need the whole archive pulled down to find
+/// the three that matter.
+final upcomingProvider = FutureProvider<List<Upcoming>>((ref) async {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+
+  final rows = await ref
+      .watch(apiClientProvider)
+      .getList(
+        '/meetings/calendar',
+        query: {
+          'from': today.toIso8601String(),
+          'to': today.add(const Duration(days: 14)).toIso8601String(),
+        },
+      );
+
+  // A sitting that started twenty minutes ago is still the next one — someone
+  // walking in late needs it at the top, not filtered out.
+  final grace = now.subtract(const Duration(hours: 1));
+
+  return rows
+      .cast<Map<String, dynamic>>()
+      .map(Upcoming.fromJson)
+      .where((meeting) => meeting.date != null && meeting.date!.isAfter(grace))
+      .take(3)
+      .toList();
+});
+
+class Upcoming {
+  const Upcoming({
+    required this.id,
+    required this.title,
+    this.date,
+    this.location,
+  });
+
+  factory Upcoming.fromJson(Map<String, dynamic> json) => Upcoming(
+    id: json['id'] as int,
+    title: json['title'] as String? ?? 'Untitled',
+    date: DateTime.tryParse(json['meeting_date'] as String? ?? ''),
+    location: json['location'] as String?,
+  );
+
+  final int id;
+  final String title;
+  final DateTime? date;
+  final String? location;
+
+  bool get isToday {
+    final at = date;
+    if (at == null) return false;
+
+    final now = DateTime.now();
+    return at.year == now.year && at.month == now.month && at.day == now.day;
+  }
+
+  bool get isSoon {
+    final at = date;
+    if (at == null) return false;
+
+    final until = at.difference(DateTime.now());
+
+    return until < const Duration(minutes: 30) &&
+        until > const Duration(hours: -1);
+  }
+}
+
+class _Body extends ConsumerWidget {
   const _Body({required this.data});
 
   final BootstrapData data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final upcoming = ref.watch(upcomingProvider);
+
     return ListView(
       padding: const EdgeInsets.only(bottom: 120),
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
         _Standing(data: data),
         const SectionRule(label: 'Up next'),
-        const _Empty(
-          line: 'Nothing scheduled',
-          detail: 'Meetings you are invited to appear here.',
-        ),
+        ...switch (upcoming) {
+          AsyncData(:final value) when value.isEmpty => const [
+            _Empty(
+              line: 'Nothing scheduled',
+              detail: 'Meetings you are invited to appear here.',
+            ),
+          ],
+          AsyncData(:final value) => [
+            for (final meeting in value) _UpcomingRow(meeting: meeting),
+          ],
+          AsyncError() => const [
+            _Empty(
+              line: 'Could not load the diary',
+              detail: 'Pull down to try again.',
+            ),
+          ],
+          _ => const [GutterRowSkeleton(titleFraction: 0.62)],
+        },
         const SectionRule(label: 'Waiting on you'),
         _Waiting(unread: data.unread),
       ],
+    );
+  }
+}
+
+class _UpcomingRow extends StatelessWidget {
+  const _UpcomingRow({required this.meeting});
+
+  final Upcoming meeting;
+
+  @override
+  Widget build(BuildContext context) {
+    final at = meeting.date;
+
+    return GutterRow(
+      gutter: at == null ? 'nil' : DateFormat('HH:mm').format(at),
+      gutterCaption: at == null
+          ? 'undated'
+          : (meeting.isToday
+                ? 'today'
+                : DateFormat('EEE d').format(at).toLowerCase()),
+      title: meeting.title,
+      subtitle: meeting.location,
+      // The only row on this screen that ever turns amber, and only in the
+      // half hour where somebody should be walking towards the room.
+      severity: meeting.isSoon ? AppColors.warning : null,
+      status: meeting.isSoon ? 'now' : null,
+      onTap: () {},
     );
   }
 }
@@ -93,6 +206,7 @@ class _Standing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final style = theme.textTheme.headlineSmall!;
     final due = data.unread.actionItemsDue;
     final clear = due == 0;
 
@@ -102,16 +216,23 @@ class _Standing extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           DefaultTextStyle.merge(
-            style: theme.textTheme.headlineSmall!.copyWith(height: 1.35),
+            style: style.copyWith(height: 1.35),
             child: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 const Text('You have '),
                 Marker(
-                  child: Text(
-                    clear ? 'nothing due' : '$due due today',
-                    style: theme.textTheme.headlineSmall,
-                  ),
+                  child: clear
+                      ? Text('nothing due', style: style)
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Rolls when the count changes, so clearing a task
+                            // is visible here rather than silently different.
+                            RollingCount(value: due, style: style),
+                            Text(' due today', style: style),
+                          ],
+                        ),
                 ),
                 const Text('.'),
               ],
@@ -170,6 +291,53 @@ class _Waiting extends StatelessWidget {
     }
 
     return Column(children: rows);
+  }
+}
+
+class _Loading extends StatelessWidget {
+  const _Loading();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: const [
+        Padding(
+          padding: EdgeInsets.fromLTRB(20, 30, 20, 22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Bar(height: 22, width: 250),
+              SizedBox(height: 14),
+              _Bar(height: 11, width: 190),
+            ],
+          ),
+        ),
+        SectionRule(label: 'Up next'),
+        GutterRowSkeleton(titleFraction: 0.62),
+        SectionRule(label: 'Waiting on you'),
+        GutterRowSkeleton(titleFraction: 0.44),
+      ],
+    );
+  }
+}
+
+class _Bar extends StatelessWidget {
+  const _Bar({required this.height, required this.width});
+
+  final double height;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: AppColors.rule,
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
   }
 }
 

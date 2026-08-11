@@ -22,6 +22,8 @@ class GutterRow extends StatefulWidget {
     this.onTap,
     this.trailing,
     this.dimmed = false,
+    this.struck = false,
+    this.heroTag,
   });
 
   /// The monospaced reference. Kept short — this column is narrow by design.
@@ -44,6 +46,13 @@ class GutterRow extends StatefulWidget {
   final Widget? trailing;
   final bool dimmed;
 
+  /// Draws a line through the title. Animated, because the line being drawn is
+  /// the confirmation that the tick registered.
+  final bool struck;
+
+  /// Flies the gutter cell to the masthead of whatever this row opens.
+  final Object? heroTag;
+
   @override
   State<GutterRow> createState() => _GutterRowState();
 }
@@ -61,12 +70,16 @@ class _GutterRowState extends State<GutterRow> {
     final theme = Theme.of(context);
     final accent = widget.severity ?? AppColors.inkFaint;
 
-    final content = Container(
-      decoration: BoxDecoration(
-        color: _pressed ? AppColors.primarySoft : Colors.transparent,
-        border: const Border(bottom: BorderSide(color: AppColors.rule)),
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 15, 18, 15),
+    // The row's own text is collapsed into a single announcement, but the
+    // trailing widget is left out of it: it is frequently a control — the
+    // checkbox on a task — and folding it into the row's label is how a
+    // checkbox ends up unreachable by anyone using a screen reader.
+    final described = Semantics(
+      // Title first. Read in layout order a screen reader announces the date
+      // and reference before the thing they belong to, which is backwards.
+      label: _semanticLabel,
+      button: widget.onTap != null,
+      excludeSemantics: true,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -75,19 +88,24 @@ class _GutterRowState extends State<GutterRow> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.gutter,
-                  style: AppTheme.mono(
-                    size: 12,
-                    weight: FontWeight.w700,
-                    colour: widget.severity ?? AppColors.inkSoft,
+                _maybeHero(
+                  Text(
+                    widget.gutter,
+                    style: AppTheme.mono(
+                      size: 12,
+                      weight: FontWeight.w700,
+                      colour: widget.severity ?? AppColors.inkSoft,
+                    ),
                   ),
                 ),
                 if (widget.gutterCaption != null) ...[
                   const SizedBox(height: 3),
                   Text(
                     widget.gutterCaption!,
-                    style: AppTheme.mono(size: 10.5, colour: AppColors.inkFaint),
+                    style: AppTheme.mono(
+                      size: 10.5,
+                      colour: AppColors.inkFaint,
+                    ),
                   ),
                 ],
               ],
@@ -98,9 +116,12 @@ class _GutterRowState extends State<GutterRow> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.title,
-                  style: theme.textTheme.titleMedium?.copyWith(height: 1.3),
+                _Struck(
+                  struck: widget.struck,
+                  text: widget.title,
+                  style:
+                      theme.textTheme.titleMedium?.copyWith(height: 1.3) ??
+                      const TextStyle(),
                 ),
                 // Subtitle and tag share one line. Given each its own, a list
                 // of twenty sittings runs to three screens and the gutter
@@ -128,6 +149,20 @@ class _GutterRowState extends State<GutterRow> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+
+    final content = Container(
+      decoration: BoxDecoration(
+        color: _pressed ? AppColors.primarySoft : Colors.transparent,
+        border: const Border(bottom: BorderSide(color: AppColors.rule)),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 15, 18, 15),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: described),
           if (widget.trailing != null) ...[
             const SizedBox(width: 10),
             widget.trailing!,
@@ -153,13 +188,17 @@ class _GutterRowState extends State<GutterRow> {
       ),
     );
 
-    return Semantics(
-      // Title first. Read in layout order a screen reader announces the date
-      // and reference before the thing they belong to, which is backwards.
-      label: _semanticLabel,
-      button: widget.onTap != null,
-      excludeSemantics: true,
-      child: Opacity(opacity: widget.dimmed ? 0.45 : 1, child: pressable),
+    return Opacity(opacity: widget.dimmed ? 0.45 : 1, child: pressable);
+  }
+
+  Widget _maybeHero(Widget child) {
+    if (widget.heroTag == null) return child;
+
+    return Hero(
+      tag: widget.heroTag!,
+      flightShuttleBuilder: (_, _, _, _, _) =>
+          Material(type: MaterialType.transparency, child: child),
+      child: child,
     );
   }
 
@@ -174,6 +213,110 @@ class _GutterRowState extends State<GutterRow> {
 
     return parts.join('. ');
   }
+}
+
+/// Rules a line through the title, one wrapped line at a time.
+///
+/// A `TextDecoration.lineThrough` would appear all at once, which reads as the
+/// row having always been done. Drawn, it reads as somebody striking it out.
+///
+/// The text is laid out a second time here only to read its line metrics: a
+/// single line across the whole block strikes the first line of a two-line
+/// title and underlines nothing on the second, which looks like a mistake
+/// rather than a completed item.
+class _Struck extends StatelessWidget {
+  const _Struck({
+    required this.struck,
+    required this.text,
+    required this.style,
+  });
+
+  final bool struck;
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduced = MediaQuery.disableAnimationsOf(context);
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: struck ? 1.0 : 0.0),
+      duration: Duration(milliseconds: reduced ? 0 : 300),
+      curve: AppTheme.easeOut,
+      builder: (context, extent, child) {
+        return CustomPaint(
+          foregroundPainter: _StrikePainter(
+            extent: extent,
+            text: text,
+            style: style,
+            direction: Directionality.of(context),
+            scaler: MediaQuery.textScalerOf(context),
+          ),
+          child: child,
+        );
+      },
+      child: Text(text, style: style),
+    );
+  }
+}
+
+class _StrikePainter extends CustomPainter {
+  _StrikePainter({
+    required this.extent,
+    required this.text,
+    required this.style,
+    required this.direction,
+    required this.scaler,
+  });
+
+  final double extent;
+  final String text;
+  final TextStyle style;
+  final TextDirection direction;
+  final TextScaler scaler;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (extent <= 0) return;
+
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: direction,
+      textScaler: scaler,
+    )..layout(maxWidth: size.width);
+
+    final lines = painter.computeLineMetrics();
+    if (lines.isEmpty) return;
+
+    final paint = Paint()
+      ..color = AppColors.inkSoft
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+
+    // One continuous stroke that runs off the end of each line and picks up at
+    // the start of the next, the way a pen would.
+    final total = lines.fold<double>(0, (sum, line) => sum + line.width);
+    var remaining = total * extent;
+
+    for (final line in lines) {
+      if (remaining <= 0) break;
+
+      final drawn = remaining < line.width ? remaining : line.width;
+      final y = line.baseline - (style.fontSize ?? 14) * 0.28;
+
+      canvas.drawLine(
+        Offset(line.left, y),
+        Offset(line.left + drawn, y),
+        paint,
+      );
+
+      remaining -= line.width;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_StrikePainter old) =>
+      old.extent != extent || old.text != text;
 }
 
 /// Flat, ruled tag. No fill, no pill — a filled pill on every row would put

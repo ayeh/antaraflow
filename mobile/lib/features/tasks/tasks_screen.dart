@@ -1,26 +1,55 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/error/api_exception.dart';
+import '../../core/haptics.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../widgets/error_view.dart';
 import '../widgets/gutter_row.dart';
 import '../widgets/ledger_scaffold.dart';
+import 'tasks_controller.dart';
 
 /// Action items assigned to the person holding the phone.
 ///
 /// Grouped by when, not by which committee: the question being asked is "what
 /// is late", never "what belongs to the audit committee". Overdue sits first
 /// and carries the only red on the screen.
-final tasksProvider = FutureProvider<List<TaskItem>>((ref) async {
-  final rows = await ref
-      .watch(apiClientProvider)
-      .getList('/action-items', query: {'assigned_to_me': 1, 'per_page': 100});
+final tasksProvider = AsyncNotifierProvider<TasksNotifier, List<TaskItem>>(
+  TasksNotifier.new,
+);
 
-  return rows.cast<Map<String, dynamic>>().map(TaskItem.fromJson).toList();
-});
+class TasksNotifier extends AsyncNotifier<List<TaskItem>> {
+  @override
+  Future<List<TaskItem>> build() async {
+    final rows = await ref
+        .read(apiClientProvider)
+        .getList(
+          '/action-items',
+          query: {'assigned_to_me': 1, 'per_page': 100},
+        );
+
+    return rows.cast<Map<String, dynamic>>().map(TaskItem.fromJson).toList();
+  }
+
+  /// Swaps one item in place without refetching the list.
+  ///
+  /// A tick must not reload the list under the thumb that made it. Where the
+  /// row is *shown* while it settles is the screen's business — see
+  /// `_GroupedState` — but the data changes here immediately.
+  void replace(int id, TaskItem updated) {
+    final current = state.valueOrNull;
+    if (current == null) return;
+
+    state = AsyncData([
+      for (final task in current) task.id == id ? updated : task,
+    ]);
+  }
+}
 
 class TaskItem {
   const TaskItem({
@@ -38,7 +67,8 @@ class TaskItem {
     status: json['status'] as String? ?? 'open',
     isOverdue: json['is_overdue'] as bool? ?? false,
     dueDate: DateTime.tryParse(json['due_date'] as String? ?? ''),
-    meetingTitle: (json['meeting'] as Map<String, dynamic>?)?['title'] as String?,
+    meetingTitle:
+        (json['meeting'] as Map<String, dynamic>?)?['title'] as String?,
   );
 
   final int id;
@@ -47,6 +77,15 @@ class TaskItem {
   final bool isOverdue;
   final DateTime? dueDate;
   final String? meetingTitle;
+
+  TaskItem copyWith({String? status}) => TaskItem(
+    id: id,
+    title: title,
+    status: status ?? this.status,
+    isOverdue: isOverdue,
+    dueDate: dueDate,
+    meetingTitle: meetingTitle,
+  );
 
   bool get isDone => status == 'completed' || status == 'cancelled';
 
@@ -71,14 +110,11 @@ class TasksScreen extends ConsumerWidget {
       meta: tasks.valueOrNull == null
           ? null
           : '${tasks.value!.where((t) => !t.isDone).length} OPEN · ASSIGNED TO YOU',
-      onRefresh: () async => ref.invalidate(tasksProvider),
+      onRefresh: () async => ref.refresh(tasksProvider.future),
       child: tasks.when(
-        loading: () => const Center(
-          child: SizedBox.square(
-            dimension: 22,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
+        // The list holds its shape while it loads rather than throwing the
+        // layout away for a spinner and snapping it back.
+        loading: () => const _Loading(),
         error: (error, _) => ErrorView(
           error: error,
           onRetry: () => ref.invalidate(tasksProvider),
@@ -89,22 +125,78 @@ class TasksScreen extends ConsumerWidget {
   }
 }
 
-class _Grouped extends StatelessWidget {
+enum _Group { overdue, today, later, closed }
+
+class _Grouped extends ConsumerStatefulWidget {
   const _Grouped({required this.tasks});
 
   final List<TaskItem> tasks;
 
   @override
-  Widget build(BuildContext context) {
-    final open = tasks.where((t) => !t.isDone).toList();
-    final overdue = open.where((t) => t.isOverdue).toList();
-    final today = open.where((t) => t.isDueToday).toList();
-    final later = open
-        .where((t) => !t.isOverdue && !t.isDueToday)
-        .toList();
-    final done = tasks.where((t) => t.isDone).toList();
+  ConsumerState<_Grouped> createState() => _GroupedState();
+}
 
-    if (tasks.isEmpty) return const _NoTasks();
+class _GroupedState extends ConsumerState<_Grouped> {
+  /// Rows whose group changed, held where they were for a moment longer.
+  ///
+  /// Without this the tick is pointless: the instant an item is completed it
+  /// belongs to Closed, so it leaves the section under the thumb that ticked
+  /// it and the strike-through is never seen. Worse, Closed is folded, so the
+  /// row appears to vanish. Holding it in place lets the line finish drawing,
+  /// and lets somebody who ticked the wrong row untick it without going
+  /// looking for it.
+  static const _settle = Duration(milliseconds: 2400);
+
+  final _held = <int, _Group>{};
+  final _timers = <int, Timer>{};
+
+  @override
+  void didUpdateWidget(_Grouped old) {
+    super.didUpdateWidget(old);
+
+    final before = {for (final task in old.tasks) task.id: _naturalGroup(task)};
+
+    for (final task in widget.tasks) {
+      final was = before[task.id];
+      if (was == null || was == _naturalGroup(task)) continue;
+      if (_held.containsKey(task.id)) continue;
+
+      _held[task.id] = was;
+      _timers[task.id] = Timer(_settle, () {
+        if (mounted) setState(() => _held.remove(task.id));
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final timer in _timers.values) {
+      timer.cancel();
+    }
+    super.dispose();
+  }
+
+  _Group _naturalGroup(TaskItem task) {
+    if (task.isDone) return _Group.closed;
+    if (task.isOverdue) return _Group.overdue;
+    if (task.isDueToday) return _Group.today;
+
+    return _Group.later;
+  }
+
+  _Group _groupOf(TaskItem task) => _held[task.id] ?? _naturalGroup(task);
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.tasks.isEmpty) return const _NoTasks();
+
+    List<TaskItem> inGroup(_Group group) =>
+        widget.tasks.where((task) => _groupOf(task) == group).toList();
+
+    final overdue = inGroup(_Group.overdue);
+    final today = inGroup(_Group.today);
+    final later = inGroup(_Group.later);
+    final done = inGroup(_Group.closed);
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -112,28 +204,35 @@ class _Grouped extends StatelessWidget {
       children: [
         if (overdue.isNotEmpty) ...[
           SectionRule(label: 'Overdue', trailing: '${overdue.length}'),
-          ..._rows(overdue, AppColors.danger),
+          ..._rows(context, ref, overdue, AppColors.danger),
         ],
         if (today.isNotEmpty) ...[
           SectionRule(label: 'Due today', trailing: '${today.length}'),
-          ..._rows(today, AppColors.warning),
+          ..._rows(context, ref, today, AppColors.warning),
         ],
         if (later.isNotEmpty) ...[
           SectionRule(label: 'Later', trailing: '${later.length}'),
-          ..._rows(later, null),
+          ..._rows(context, ref, later, null),
         ],
-        if (done.isNotEmpty) ...[
-          SectionRule(label: 'Closed', trailing: '${done.length}'),
-          ..._rows(done, null, dimmed: true),
-        ],
+        // Folded away. Closed items are the largest group on any list that has
+        // been used for a while, and none of them need an answer.
+        if (done.isNotEmpty)
+          _Closed(rows: _rows(context, ref, done, null, dimmed: true)),
       ],
     );
   }
 
-  List<Widget> _rows(List<TaskItem> items, Color? severity, {bool dimmed = false}) {
+  List<Widget> _rows(
+    BuildContext context,
+    WidgetRef ref,
+    List<TaskItem> items,
+    Color? severity, {
+    bool dimmed = false,
+  }) {
     return [
       for (final task in items)
         GutterRow(
+          key: ValueKey(task.id),
           gutter: task.dueDate == null
               ? 'nil'
               : DateFormat('d MMM').format(task.dueDate!),
@@ -144,36 +243,206 @@ class _Grouped extends StatelessWidget {
           subtitle: task.meetingTitle,
           severity: severity,
           dimmed: dimmed,
+          struck: task.isDone,
           onTap: () {},
-          trailing: _Check(done: task.isDone),
+          trailing: _Check(
+            done: task.isDone,
+            onChanged: (value) => _tick(context, ref, task, value),
+          ),
         ),
     ];
+  }
+
+  Future<void> _tick(
+    BuildContext context,
+    WidgetRef ref,
+    TaskItem task,
+    bool done,
+  ) async {
+    // Before the request. The tick is the feedback; waiting on a server to
+    // give it is how a checkbox ends up tapped twice.
+    Haptics.tick();
+
+    try {
+      await ref.read(taskTickProvider).setDone(task, done: done);
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+}
+
+class _Closed extends StatefulWidget {
+  const _Closed({required this.rows});
+
+  final List<Widget> rows;
+
+  @override
+  State<_Closed> createState() => _ClosedState();
+}
+
+class _ClosedState extends State<_Closed> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        InkWell(
+          onTap: () {
+            Haptics.select();
+            setState(() => _open = !_open);
+          },
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 26, 20, 10),
+            child: Row(
+              children: [
+                Text('CLOSED', style: AppTheme.eyebrow()),
+                const SizedBox(width: 12),
+                const Expanded(child: Divider(color: AppColors.rule)),
+                const SizedBox(width: 12),
+                Text(
+                  '${widget.rows.length}',
+                  style: AppTheme.mono(size: 11, colour: AppColors.inkFaint),
+                ),
+                AnimatedRotation(
+                  turns: _open ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 220),
+                  curve: AppTheme.easeOut,
+                  child: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: AppColors.inkFaint,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedCrossFade(
+          firstChild: const SizedBox(width: double.infinity),
+          secondChild: Column(children: widget.rows),
+          crossFadeState: _open
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 260),
+          sizeCurve: AppTheme.easeOut,
+        ),
+      ],
+    );
   }
 }
 
 /// A ruled square rather than a checkbox widget, so it matches the tags and
 /// the badges instead of importing a second visual language.
+///
+/// The tick is drawn rather than revealed: a checkmark that fades in reads as
+/// state arriving from somewhere else, one that draws reads as this tap.
 class _Check extends StatelessWidget {
-  const _Check({required this.done});
+  const _Check({required this.done, required this.onChanged});
 
   final bool done;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 22,
-      height: 22,
-      decoration: BoxDecoration(
-        color: done ? AppColors.primary : Colors.transparent,
-        border: Border.all(
-          color: done ? AppColors.primary : AppColors.ruleStrong,
-          width: 1.5,
+    return Semantics(
+      checked: done,
+      label: 'Mark complete',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onChanged(!done),
+        child: Padding(
+          // The square is 22pt; the target around it is 44.
+          padding: const EdgeInsets.all(11),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: AppTheme.easeOut,
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              color: done ? AppColors.primary : Colors.transparent,
+              border: Border.all(
+                color: done ? AppColors.primary : AppColors.ruleStrong,
+                width: 1.5,
+              ),
+              borderRadius: BorderRadius.circular(AppTheme.radiusS),
+            ),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(end: done ? 1.0 : 0.0),
+              duration: Duration(
+                milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 240,
+              ),
+              curve: AppTheme.easeOut,
+              builder: (context, extent, _) =>
+                  CustomPaint(painter: _TickPainter(extent: extent)),
+            ),
+          ),
         ),
-        borderRadius: BorderRadius.circular(AppTheme.radiusS),
       ),
-      child: done
-          ? const Icon(Icons.check, size: 15, color: AppColors.navy)
-          : null,
+    );
+  }
+}
+
+class _TickPainter extends CustomPainter {
+  _TickPainter({required this.extent});
+
+  final double extent;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (extent <= 0) return;
+
+    final start = Offset(size.width * 0.22, size.height * 0.52);
+    final elbow = Offset(size.width * 0.42, size.height * 0.72);
+    final end = Offset(size.width * 0.78, size.height * 0.30);
+
+    final paint = Paint()
+      ..color = AppColors.navy
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke;
+
+    // The short leg is drawn first and takes the first third of the time, the
+    // way a tick is actually made.
+    const pivot = 0.34;
+
+    if (extent <= pivot) {
+      canvas.drawLine(start, Offset.lerp(start, elbow, extent / pivot)!, paint);
+      return;
+    }
+
+    final path = Path()
+      ..moveTo(start.dx, start.dy)
+      ..lineTo(elbow.dx, elbow.dy);
+
+    final along = (extent - pivot) / (1 - pivot);
+    final tip = Offset.lerp(elbow, end, along)!;
+    path.lineTo(tip.dx, tip.dy);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_TickPainter old) => old.extent != extent;
+}
+
+class _Loading extends StatelessWidget {
+  const _Loading();
+
+  @override
+  Widget build(BuildContext context) {
+    const widths = [0.66, 0.81, 0.52, 0.74, 0.6];
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        const SectionRule(label: 'Loading'),
+        for (final width in widths) GutterRowSkeleton(titleFraction: width),
+      ],
     );
   }
 }

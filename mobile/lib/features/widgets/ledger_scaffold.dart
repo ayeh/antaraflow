@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/haptics.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -19,12 +20,25 @@ class LedgerScaffold extends StatelessWidget {
     this.actions,
     this.leading,
     this.onRefresh,
+    this.reference,
+    this.heroTag,
   });
 
   final String title;
 
   /// The monospaced provenance line: reference number, date, count.
   final String? meta;
+
+  /// The record's own number, set above the title.
+  ///
+  /// Separate from [meta] because it is the one part of the provenance that
+  /// also exists in the list this screen was opened from, and so is the part
+  /// that can travel between them.
+  final String? reference;
+
+  /// Ties [reference] to the gutter cell it was opened from, so the number
+  /// flies up into the masthead instead of the page arriving from nowhere.
+  final Object? heroTag;
 
   final List<Widget>? actions;
   final Widget? leading;
@@ -36,7 +50,13 @@ class LedgerScaffold extends StatelessWidget {
     final body = onRefresh == null
         ? child
         : RefreshIndicator(
-            onRefresh: onRefresh!,
+            onRefresh: () async {
+              // Fired when the gesture commits, not when the data lands: the
+              // thumb is still on the glass here, and this is the moment the
+              // pull is confirmed as having been far enough.
+              Haptics.tick();
+              await onRefresh!();
+            },
             // Brand green is 2.94:1 on white and fails the 3:1 floor for a
             // non-text component.
             color: AppColors.primaryInk,
@@ -53,6 +73,8 @@ class LedgerScaffold extends StatelessWidget {
             meta: meta,
             actions: actions,
             leading: leading,
+            reference: reference,
+            heroTag: heroTag,
           ),
           Expanded(child: body),
         ],
@@ -67,12 +89,16 @@ class _Masthead extends StatelessWidget {
     this.meta,
     this.actions,
     this.leading,
+    this.reference,
+    this.heroTag,
   });
 
   final String title;
   final String? meta;
   final List<Widget>? actions;
   final Widget? leading;
+  final String? reference;
+  final Object? heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -95,11 +121,15 @@ class _Masthead extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (reference != null) ...[
+                    _Reference(text: reference!, heroTag: heroTag),
+                    const SizedBox(height: 7),
+                  ],
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineMedium?.copyWith(color: Colors.white),
                   ),
                   if (meta != null) ...[
                     const SizedBox(height: 6),
@@ -122,6 +152,38 @@ class _Masthead extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The record number, in the masthead and in flight from the list.
+class _Reference extends StatelessWidget {
+  const _Reference({required this.text, this.heroTag});
+
+  final String text;
+  final Object? heroTag;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = Text(
+      text,
+      style: AppTheme.mono(
+        size: 12,
+        weight: FontWeight.w700,
+        colour: AppColors.lime,
+        tracking: 0.6,
+      ),
+    );
+
+    if (heroTag == null) return label;
+
+    // Material, because a Hero in flight is outside the tree that was giving
+    // the text its ground, and bare text mid-air paints its own debug banner.
+    return Hero(
+      tag: heroTag!,
+      flightShuttleBuilder: (_, _, _, _, _) =>
+          Material(type: MaterialType.transparency, child: label),
+      child: label,
     );
   }
 }

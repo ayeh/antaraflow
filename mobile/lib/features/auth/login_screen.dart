@@ -154,8 +154,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onPressed: state.isSubmitting ? null : () {},
                           style: TextButton.styleFrom(
                             foregroundColor: AppColors.primaryInk,
-                            textStyle: const TextStyle(
+                            textStyle: TextStyle(
                               fontWeight: FontWeight.w700,
+                              fontVariations: AppTheme.axis(FontWeight.w700),
                               fontSize: 14,
                             ),
                           ),
@@ -258,9 +259,9 @@ class _ErrorNotice extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.ink,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.ink),
             ),
           ),
         ],

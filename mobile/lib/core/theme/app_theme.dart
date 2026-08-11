@@ -10,10 +10,9 @@ import 'app_colors.dart';
 /// boxed — a card around every row turns a record into a stream of unrelated
 /// objects.
 ///
-/// Nunito is named for both text roles but the file is not bundled. Drop it
-/// into assets/fonts/ and declare it in pubspec.yaml and every style here picks
-/// it up; until then the fallback reaches for the platform's rounded face,
-/// which is much closer than the default humanist sans.
+/// Both faces are bundled as variable fonts, so weight is set on the `wght`
+/// axis. The fallbacks below still matter — they cover the frame or two before
+/// the asset is resolved, and anything the font has no glyph for.
 abstract final class AppTheme {
   static const headingFont = 'Nunito';
   static const bodyFont = 'Nunito';
@@ -44,6 +43,25 @@ abstract final class AppTheme {
   static const enter = Duration(milliseconds: 280);
 
   static const scale = _TypeScale();
+
+  /// The weight axis of a variable font.
+  ///
+  /// On a variable face Flutter picks the instance from `fontVariations`, not
+  /// from `fontWeight`. Set only `fontWeight` and every string renders at the
+  /// default 400 and the platform fakes the bold ones by smearing the strokes,
+  /// which on a rounded face fills in the counters and looks like a rendering
+  /// fault. Both are given: the axis draws the weight, `fontWeight` keeps the
+  /// style honest for anything that inspects it.
+  static List<FontVariation> axis(FontWeight weight) => [
+    FontVariation('wght', weight.value.toDouble()),
+  ];
+
+  /// Applies a weight to an existing style, on both the axis and the property.
+  ///
+  /// Use this instead of `copyWith(fontWeight:)` anywhere a style's weight is
+  /// changed after the fact — a bare copyWith leaves the axis behind.
+  static TextStyle at(TextStyle style, FontWeight weight) =>
+      style.copyWith(fontWeight: weight, fontVariations: axis(weight));
 
   static ThemeData get light {
     final scheme = ColorScheme.fromSeed(
@@ -122,11 +140,12 @@ abstract final class AppTheme {
           foregroundColor: AppColors.navy,
           disabledBackgroundColor: AppColors.rule,
           disabledForegroundColor: AppColors.inkFaint,
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontFamily: bodyFont,
             fontFamilyFallback: roundedFallback,
             fontSize: 16,
             fontWeight: FontWeight.w800,
+            fontVariations: axis(FontWeight.w800),
             letterSpacing: 0.2,
           ),
         ),
@@ -136,18 +155,23 @@ abstract final class AppTheme {
           minimumSize: const Size.fromHeight(54),
           side: const BorderSide(color: AppColors.ruleStrong),
           foregroundColor: ink,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusM)),
-          textStyle: const TextStyle(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusM),
+          ),
+          textStyle: TextStyle(
             fontFamily: bodyFont,
             fontFamilyFallback: roundedFallback,
             fontSize: 15,
             fontWeight: FontWeight.w700,
+            fontVariations: axis(FontWeight.w700),
           ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isLight ? AppColors.paperRaised : scheme.surfaceContainerHighest,
+        fillColor: isLight
+            ? AppColors.paperRaised
+            : scheme.surfaceContainerHighest,
         contentPadding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
         border: _fieldBorder(AppColors.fieldEdge),
         enabledBorder: _fieldBorder(AppColors.fieldEdge),
@@ -157,22 +181,30 @@ abstract final class AppTheme {
         focusedBorder: _fieldBorder(AppColors.primaryInk, width: 2),
         errorBorder: _fieldBorder(AppColors.danger),
         focusedErrorBorder: _fieldBorder(AppColors.danger, width: 2),
-        labelStyle: TextStyle(color: soft, fontWeight: FontWeight.w600),
+        labelStyle: TextStyle(
+          color: soft,
+          fontWeight: FontWeight.w600,
+          fontVariations: axis(FontWeight.w600),
+        ),
         floatingLabelStyle: TextStyle(
           color: scheme.primary,
           fontWeight: FontWeight.w700,
+          fontVariations: axis(FontWeight.w700),
         ),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.navyDeep,
-        contentTextStyle: const TextStyle(
+        contentTextStyle: TextStyle(
           fontFamily: bodyFont,
           fontFamilyFallback: roundedFallback,
           color: Colors.white,
           fontWeight: FontWeight.w600,
+          fontVariations: axis(FontWeight.w600),
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusM)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+        ),
       ),
     );
   }
@@ -191,24 +223,28 @@ abstract final class AppTheme {
     // Tracking is expressed relative to size. A flat -0.6px is -0.018em at 34
     // but -0.035em at 17, so small headings were being tracked twice as tight
     // as large ones — and titleMedium at 17 is the size this app uses most.
-    TextStyle h(double size, {FontWeight weight = FontWeight.w800}) => TextStyle(
-      fontFamily: headingFont,
-      fontFamilyFallback: roundedFallback,
-      fontSize: size,
-      fontWeight: weight,
-      height: 1.15,
-      letterSpacing: size * (size >= 27 ? -0.018 : -0.010),
-      color: ink,
-    );
+    TextStyle h(double size, {FontWeight weight = FontWeight.w800}) =>
+        TextStyle(
+          fontFamily: headingFont,
+          fontFamilyFallback: roundedFallback,
+          fontSize: size,
+          fontWeight: weight,
+          fontVariations: axis(weight),
+          height: 1.15,
+          letterSpacing: size * (size >= 27 ? -0.018 : -0.010),
+          color: ink,
+        );
 
-    TextStyle b(double size, {FontWeight weight = FontWeight.w400}) => TextStyle(
-      fontFamily: bodyFont,
-      fontFamilyFallback: roundedFallback,
-      fontSize: size,
-      fontWeight: weight,
-      height: 1.55,
-      color: ink,
-    );
+    TextStyle b(double size, {FontWeight weight = FontWeight.w400}) =>
+        TextStyle(
+          fontFamily: bodyFont,
+          fontFamilyFallback: roundedFallback,
+          fontSize: size,
+          fontWeight: weight,
+          fontVariations: axis(weight),
+          height: 1.55,
+          color: ink,
+        );
 
     return TextTheme(
       displaySmall: h(scale.display),
@@ -235,6 +271,7 @@ abstract final class AppTheme {
       fontFamilyFallback: monoFallback,
       fontSize: size,
       fontWeight: weight,
+      fontVariations: axis(weight),
       letterSpacing: tracking,
       height: 1.3,
       color: colour,
@@ -250,6 +287,7 @@ abstract final class AppTheme {
       fontFamilyFallback: roundedFallback,
       fontSize: 10.5,
       fontWeight: FontWeight.w800,
+      fontVariations: axis(FontWeight.w800),
       letterSpacing: 1.3,
       height: 1.2,
       color: colour ?? AppColors.inkFaint,
