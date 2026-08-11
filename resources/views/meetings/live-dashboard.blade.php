@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="max-w-[1600px] mx-auto"
+     @recording-complete.window="handleRecordingComplete($event.detail)"
      x-data="liveMeetingDashboard({
         meetingId: {{ $meeting->id }},
         sessionId: {{ $session->id }},
@@ -530,6 +531,52 @@
                         </div>
                     </dl>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Upload Success Toast (floating pill, bottom-centre) --}}
+    <div
+        x-show="uploadToast.show"
+        x-cloak
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] w-full max-w-sm pointer-events-none"
+    >
+        <div
+            x-show="uploadToast.show"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 scale-90"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 scale-90"
+            class="pointer-events-auto"
+        >
+            <div class="flex items-center gap-3 bg-gray-900/90 backdrop-blur-sm rounded-2xl shadow-2xl pl-4 pr-3 py-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-semibold text-white leading-tight truncate" x-text="uploadToast.filename"></p>
+                    <p class="text-xs text-gray-400 mt-0.5 flex items-center gap-1.5">
+                        <svg class="animate-spin h-3 w-3 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        {{ __('Transcription in progress...') }}
+                    </p>
+                </div>
+                <button type="button"
+                    @click="uploadToast.show = false; if (uploadToastTimer) clearTimeout(uploadToastTimer)"
+                    class="flex-shrink-0 p-1.5 rounded-full text-gray-500 hover:text-white hover:bg-white/10 transition-colors">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-1.5 h-0.5 bg-white/10 rounded-full overflow-hidden mx-3">
+                <div class="h-full bg-green-400 progress-bar-indeterminate rounded-full"></div>
             </div>
         </div>
     </div>

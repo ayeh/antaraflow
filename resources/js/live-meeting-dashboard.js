@@ -59,6 +59,22 @@ export default function liveMeetingDashboard(config) {
         // Collapsed sections in extractions panel
         collapsedSections: {},
 
+        // Upload toast
+        uploadToast: { show: false, filename: '' },
+        uploadToastTimer: null,
+
+        showUploadToast(filename) {
+            if (this.uploadToastTimer) clearTimeout(this.uploadToastTimer);
+            this.uploadToast = { show: true, filename: filename || 'Recording' };
+            this.uploadToastTimer = setTimeout(() => {
+                this.uploadToast = { show: false, filename: '' };
+            }, 8000);
+        },
+
+        handleRecordingComplete(detail) {
+            this.showUploadToast(detail?.transcription?.original_filename || 'Recording');
+        },
+
         // Polling
         pollInterval: null,
 
