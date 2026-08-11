@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +11,7 @@ import '../../domain/models/bootstrap.dart';
 import '../home/home_screen.dart';
 import '../me/me_screen.dart';
 import '../meetings/meetings_screen.dart';
+import '../recorder/record_entry.dart';
 import '../recorder/start_recording_sheet.dart';
 import '../tasks/tasks_screen.dart';
 
@@ -32,12 +35,48 @@ class AppShell extends ConsumerStatefulWidget {
 class _AppShellState extends ConsumerState<AppShell> {
   int _index = 0;
 
+  /// The widget, the Action button and Siri all land here.
+  final _entry = RecordEntry();
+
   static const _tabs = <Widget>[
     HomeScreen(),
     MeetingsScreen(),
     TasksScreen(),
     MeScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // After the first frame: a cold launch from the widget has a request
+    // waiting, and opening the recorder needs a Navigator that exists.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final waiting = await _entry.listen(_openRecorder);
+      if (waiting) unawaited(_openRecorder());
+    });
+  }
+
+  @override
+  void dispose() {
+    _entry.dispose();
+    super.dispose();
+  }
+
+  /// True while the sheet or the recorder is up, so a second request — a
+  /// cold-launch flag followed by a live call — does not stack another.
+  bool _entering = false;
+
+  Future<void> _openRecorder() async {
+    if (!mounted || _entering) return;
+
+    _entering = true;
+    try {
+      await startRecording(context, ref);
+    } finally {
+      _entering = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

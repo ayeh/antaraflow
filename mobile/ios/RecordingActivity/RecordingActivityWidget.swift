@@ -158,6 +158,8 @@ enum Brand {
 @main
 struct RecordingActivityBundle: WidgetBundle {
   var body: some Widget {
+    RecordWidget()
+
     if #available(iOS 16.2, *) {
       RecordingActivityWidget()
     }

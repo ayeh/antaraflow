@@ -62,6 +62,19 @@
 	</dict>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>antaraNote records meeting audio so it can produce a transcript and draft the minutes. Recording only happens while you have a session running, and everyone present should be told.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>cloud.antara.note</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>antaranote</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIBackgroundModes</key>

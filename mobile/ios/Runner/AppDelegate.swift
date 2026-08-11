@@ -15,6 +15,7 @@ import UIKit
 
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "LiveActivityBridge") {
       LiveActivityBridge.register(with: registrar.messenger())
+      RecordEntryBridge.register(with: registrar.messenger())
     }
   }
 }
