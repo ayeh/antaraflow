@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AE0000000000000000000002 /* GlassPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE0000000000000000000001 /* GlassPlatformView.swift */; };
 		AD0000000000000000000004 /* RecordEntryBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000001 /* RecordEntryBridge.swift */; };
 		AD0000000000000000000005 /* StartRecordingIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000002 /* StartRecordingIntent.swift */; };
 		AD0000000000000000000006 /* RecordWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000000000000000000003 /* RecordWidget.swift */; };
@@ -68,6 +69,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AE0000000000000000000001 /* GlassPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassPlatformView.swift; sourceTree = "<group>"; };
 		AD0000000000000000000001 /* RecordEntryBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordEntryBridge.swift; sourceTree = "<group>"; };
 		AD0000000000000000000002 /* StartRecordingIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartRecordingIntent.swift; sourceTree = "<group>"; };
 		AD0000000000000000000003 /* RecordWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordWidget.swift; sourceTree = "<group>"; };
@@ -179,6 +181,7 @@
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 				AC0000000000000000000004 /* RecordingActivityAttributes.swift */,
 				AD0000000000000000000001 /* RecordEntryBridge.swift */,
+				AE0000000000000000000001 /* GlassPlatformView.swift */,
 				AD0000000000000000000002 /* StartRecordingIntent.swift */,
 				AC0000000000000000000005 /* LiveActivityBridge.swift */,
 			);
@@ -381,6 +384,7 @@
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				AC0000000000000000000008 /* RecordingActivityAttributes.swift in Sources */,
 				AD0000000000000000000004 /* RecordEntryBridge.swift in Sources */,
+				AE0000000000000000000002 /* GlassPlatformView.swift in Sources */,
 				AD0000000000000000000005 /* StartRecordingIntent.swift in Sources */,
 				AC0000000000000000000009 /* LiveActivityBridge.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
