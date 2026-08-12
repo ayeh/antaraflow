@@ -10,6 +10,7 @@ use App\Domain\AI\Services\OrgBudgetService;
 use App\Domain\LiveMeeting\Enums\ChunkStatus;
 use App\Domain\LiveMeeting\Events\TranscriptionChunkProcessed;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
+use App\Domain\Transcription\Services\AudioConditioner;
 use App\Domain\Transcription\Services\TranscriptionHintBuilder;
 use App\Infrastructure\AI\Exceptions\AiQuotaExceededException;
 use App\Infrastructure\AI\Exceptions\OrgBudgetExceededException;
@@ -73,13 +74,25 @@ class LiveTranscriptionJob implements ShouldQueue
             feature: self::CIRCUIT,
         );
 
+        $conditioned = null;
+
         try {
             $filePath = Storage::disk('local')->path($this->chunk->audio_file_path);
+
+            // A phone on a boardroom table hears the room, not a headset. Left
+            // raw, quiet speech sits near the noise floor and comes back as
+            // gaps; the same chunks conditioned land 15 dB louder without
+            // clipping. The upload path has always done this — live never did.
+            $conditioned = app(AudioConditioner::class)->condition(
+                $filePath,
+                timeoutSeconds: 30,
+                logContext: ['chunk_id' => $this->chunk->id],
+            );
 
             $meeting = $this->chunk->session?->meeting;
             $hints = app(TranscriptionHintBuilder::class);
 
-            $result = $transcriber->transcribe($filePath, [
+            $result = $transcriber->transcribe($conditioned ?? $filePath, [
                 'language' => $meeting?->language ?? 'en',
                 'languages' => $hints->languagesFor($meeting),
                 'keywords' => $hints->keywordsFor($meeting),
@@ -107,6 +120,12 @@ class LiveTranscriptionJob implements ShouldQueue
             ]);
 
             throw $e;
+        } finally {
+            // A retried chunk conditions again, so nothing here is worth
+            // keeping — and a sitting is hundreds of chunks on a shared box.
+            if ($conditioned !== null) {
+                @unlink($conditioned);
+            }
         }
     }
 
