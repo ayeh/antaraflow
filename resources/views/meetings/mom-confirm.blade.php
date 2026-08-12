@@ -74,18 +74,11 @@
     {{-- Brand header --}}
     <div class="text-white px-4 py-3" style="background-color: var(--brand-primary);">
         <div class="max-w-2xl mx-auto flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 50" width="22" height="16" aria-hidden="true">
-                <rect x="0"  y="21" width="7" height="16" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="11" y="10" width="7" height="36" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="22" y="16" width="7" height="25" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="33" y="4"  width="7" height="50" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="44" y="13" width="7" height="31" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="55" y="8"  width="7" height="43" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="66" y="19" width="7" height="22" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-            </svg>
-            <span class="font-semibold text-sm tracking-tight">
-                <span style="font-weight:400;">antara</span><span style="font-weight:700;">Note</span>
-            </span>
+            @php $headerLogo = $branding->logoUrl(); @endphp
+            @if($headerLogo)
+                <img src="{{ $headerLogo }}" alt="{{ $branding->appName() }}" class="h-6 w-auto object-contain brightness-0 invert">
+            @endif
+            <span class="font-semibold text-sm tracking-tight">{{ $branding->appName() }}</span>
             <span class="text-white/50 text-sm">&mdash; Pengesahan Minit</span>
         </div>
     </div>
