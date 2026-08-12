@@ -173,13 +173,13 @@
                                     @if(!empty($ds['made_by']) && $ds['made_by'] !== 'Unspecified speaker')
                                         <span class="text-xs text-gray-500 dark:text-gray-400">— {{ $ds['made_by'] }}</span>
                                     @endif
-                                    <div class="flex items-center gap-2 mt-1">
+                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
                                         <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium
                                             {{ match($ds['status']) { 'followed_up' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300', 'stale' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', default => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' } }}">
                                             {{ match($ds['status']) { 'followed_up' => 'Followed Up', 'stale' => 'Stale (' . $ds['days_since'] . 'd)', default => 'Pending' } }}
                                         </span>
                                         @foreach($ds['linked_action_items'] as $linkedItem)
-                                            <span class="text-xs text-gray-500 dark:text-gray-400">→ {{ $linkedItem['title'] }}</span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400 break-words">→ {{ $linkedItem['title'] }}</span>
                                         @endforeach
                                     </div>
                                 </div>

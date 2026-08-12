@@ -5,8 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $meeting->title }} — Pengesahan Minit</title>
+    @php
+        $faviconSrc = $branding->get('favicon_path') ? Storage::url($branding->get('favicon_path')) : ($branding->get('favicon_url') ?: asset('favicon.ico'));
+    @endphp
+    <link rel="icon" href="{{ $faviconSrc }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
+        :root {
+            --brand-primary: {{ $branding->get('primary_color', '#7c3aed') }};
+            --brand-p50:  color-mix(in srgb, var(--brand-primary)  5%, white);
+            --brand-p100: color-mix(in srgb, var(--brand-primary) 10%, white);
+            --brand-p200: color-mix(in srgb, var(--brand-primary) 20%, white);
+            --brand-p300: color-mix(in srgb, var(--brand-primary) 40%, white);
+            --brand-p400: color-mix(in srgb, var(--brand-primary) 60%, white);
+            --brand-p500: color-mix(in srgb, var(--brand-primary) 80%, white);
+            --brand-p600: var(--brand-primary);
+            --brand-p700: color-mix(in srgb, var(--brand-primary) 85%, black);
+            --brand-p800: color-mix(in srgb, var(--brand-primary) 70%, black);
+            --brand-p900: color-mix(in srgb, var(--brand-primary) 15%, #0f172a);
+        }
+        .bg-violet-50  { background-color: var(--brand-p50)  !important; }
+        .bg-violet-100 { background-color: var(--brand-p100) !important; }
+        .bg-violet-200 { background-color: var(--brand-p200) !important; }
+        .bg-violet-600 { background-color: var(--brand-p600) !important; }
+        .bg-violet-700 { background-color: var(--brand-p700) !important; }
+        .hover\:bg-violet-600:hover { background-color: var(--brand-p600) !important; }
+        .hover\:bg-violet-700:hover { background-color: var(--brand-p700) !important; }
+        .text-violet-600 { color: var(--brand-p600) !important; }
+        .text-violet-700 { color: var(--brand-p700) !important; }
+        .text-violet-800 { color: var(--brand-p800) !important; }
+        .border-violet-100 { border-color: var(--brand-p100) !important; }
+        .focus\:ring-violet-500:focus { --tw-ring-color: var(--brand-p500) !important; }
+        .focus\:border-violet-500:focus { border-color: var(--brand-p500) !important; }
         @media print {
             /* Hide interactive elements */
             .fixed,
@@ -46,20 +76,13 @@
 <body class="bg-gray-50 min-h-screen">
 
     {{-- Brand header --}}
-    <div class="text-white px-4 py-3" style="background-color:#095153;">
+    <div class="text-white px-4 py-3" style="background-color: var(--brand-primary);">
         <div class="max-w-2xl mx-auto flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 50" width="22" height="16" aria-hidden="true">
-                <rect x="0"  y="21" width="7" height="16" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="11" y="10" width="7" height="36" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="22" y="16" width="7" height="25" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="33" y="4"  width="7" height="50" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="44" y="13" width="7" height="31" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="55" y="8"  width="7" height="43" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-                <rect x="66" y="19" width="7" height="22" rx="3.5" fill="rgba(255,255,255,0.85)"/>
-            </svg>
-            <span class="font-semibold text-sm tracking-tight">
-                <span style="font-weight:400;">antara</span><span style="font-weight:700;">Note</span>
-            </span>
+            @php $headerLogo = $branding->logoUrl(); @endphp
+            @if($headerLogo)
+                <img src="{{ $headerLogo }}" alt="{{ $branding->appName() }}" class="h-6 w-auto object-contain brightness-0 invert">
+            @endif
+            <span class="font-semibold text-sm tracking-tight">{{ $branding->appName() }}</span>
             <span class="text-white/50 text-sm">&mdash; Pengesahan Minit</span>
         </div>
     </div>
@@ -80,7 +103,7 @@
             <span class="text-sm text-gray-600">
                 Anda: <strong>{{ $recipient->name }}</strong> ({{ $recipient->email }})
             </span>
-            <a href="#" class="text-xs text-blue-600 hover:underline">{{ __('mom.not_you') }}</a>
+            <a href="#" class="text-xs text-violet-600 hover:underline">{{ __('mom.not_you') }}</a>
         </div>
     </div>
 
@@ -131,7 +154,7 @@
                                 <p class="text-sm text-gray-500 mt-1 leading-relaxed">{{ $topic->description }}</p>
                             @endif
                             <button @click="remarkOpen = !remarkOpen"
-                                    class="mt-2 text-xs text-blue-600 hover:underline">
+                                    class="mt-2 text-xs text-violet-600 hover:underline">
                                 💬 Remark
                             </button>
                             <form method="POST" action="{{ route('mom.remark', $recipient->token) }}"
@@ -143,11 +166,11 @@
                                     name="body"
                                     rows="3"
                                     placeholder="Tulis pembetulan atau ulasan..."
-                                    class="w-full rounded-lg border-gray-300 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                    class="w-full rounded-lg border-gray-300 text-sm shadow-sm focus:ring-violet-500 focus:border-violet-500"
                                     required
                                 ></textarea>
                                 <button type="submit"
-                                        class="mt-1 text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                        class="mt-1 text-xs bg-violet-600 text-white px-3 py-1 rounded hover:bg-violet-700">
                                     Hantar Remark
                                 </button>
                             </form>
@@ -187,7 +210,7 @@
                                 @endif
                             </div>
                             <button @click="remarkOpen = !remarkOpen"
-                                    class="mt-2 text-xs text-blue-600 hover:underline">
+                                    class="mt-2 text-xs text-violet-600 hover:underline">
                                 💬 Remark
                             </button>
                             <form method="POST" action="{{ route('mom.remark', $recipient->token) }}"
@@ -199,11 +222,11 @@
                                     name="body"
                                     rows="2"
                                     placeholder="Tulis ulasan..."
-                                    class="w-full rounded-lg border-gray-300 text-sm shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                    class="w-full rounded-lg border-gray-300 text-sm shadow-sm focus:ring-violet-500 focus:border-violet-500"
                                     required
                                 ></textarea>
                                 <button type="submit"
-                                        class="mt-1 text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                        class="mt-1 text-xs bg-violet-600 text-white px-3 py-1 rounded hover:bg-violet-700">
                                     Hantar Remark
                                 </button>
                             </form>
@@ -235,18 +258,18 @@
 
         {{-- Conversion CTA: shown only after confirmation --}}
         @if($recipient->isConfirmed())
-        <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-            <p class="text-sm font-medium text-blue-800">
+        <div class="mt-4 p-4 bg-violet-50 rounded-lg border border-violet-100">
+            <p class="text-sm font-medium text-violet-800">
                 Ingin minit mesyuarat anda sendiri direkod dan diedarkan secara automatik?
             </p>
-            <p class="text-xs text-blue-600 mt-1">
+            <p class="text-xs text-violet-700 mt-1">
                 antaraNote merekod, meringkaskan, dan mengedarkan minit untuk semua jenis mesyuarat.
             </p>
             <a href="{{ route('register') }}?name={{ urlencode($recipient->name) }}&email={{ urlencode($recipient->email) }}"
-               class="mt-3 inline-block text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded px-3 py-1.5">
+               class="mt-3 inline-block text-xs font-medium text-white bg-violet-600 hover:bg-violet-700 rounded px-3 py-1.5">
                 Daftar percuma →
             </a>
-            <p class="text-xs text-blue-400 mt-2">
+            <p class="text-xs text-gray-400 mt-2">
                 Maklumat anda tidak dikongsi tanpa kebenaran anda.
             </p>
         </div>
@@ -277,7 +300,7 @@
                 <form method="POST" action="{{ route('mom.confirm.store', $recipient->token) }}" class="flex-1">
                     @csrf
                     <button type="submit"
-                            class="w-full rounded-xl bg-blue-600 text-white text-sm font-semibold py-3 hover:bg-blue-700 active:scale-95 transition-all">
+                            class="w-full rounded-xl bg-violet-600 text-white text-sm font-semibold py-3 hover:bg-violet-700 active:scale-95 transition-all">
                         ✅ {{ __('mom.confirm_button') }}
                     </button>
                 </form>
