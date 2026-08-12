@@ -7,6 +7,7 @@ import '../../core/haptics.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/meeting_detail.dart';
+import '../attendance/attendance_screen.dart';
 import '../recorder/start_recording_sheet.dart';
 import '../widgets/error_view.dart';
 import '../widgets/gutter_row.dart';
@@ -158,6 +159,11 @@ class _Body extends ConsumerWidget {
   final bool justSettled;
   final ValueChanged<MeetingStep> onStep;
 
+  /// A sign-in desk belongs to a sitting that is still happening. Once the
+  /// minutes are on the record, attendance is history, not a door.
+  bool _canRunDesk(MeetingDetail meeting) =>
+      meeting.permissions.canUpdate && !meeting.status.isClosed;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final step = meeting.nextStep;
@@ -202,12 +208,36 @@ class _Body extends ConsumerWidget {
           ),
           for (final action in meeting.actionItems) _ActionRow(action: action),
         ],
-        if (meeting.attendees.isNotEmpty) ...[
+        if (meeting.attendees.isNotEmpty || _canRunDesk(meeting)) ...[
           SectionRule(
             label: 'Attendance',
-            trailing: '${meeting.presentCount}/${meeting.attendees.length}',
+            trailing: meeting.attendees.isEmpty
+                ? null
+                : '${meeting.presentCount}/${meeting.attendees.length}',
           ),
-          _Attendance(attendees: meeting.attendees),
+          if (meeting.attendees.isNotEmpty)
+            _Attendance(attendees: meeting.attendees),
+          if (_canRunDesk(meeting))
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                meeting.attendees.isEmpty ? 6 : 16,
+                20,
+                0,
+              ),
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => AttendanceScreen(
+                      meetingId: meeting.id,
+                      title: meeting.title,
+                    ),
+                  ),
+                ),
+                icon: const Icon(Icons.qr_code_rounded, size: 17),
+                label: const Text('Sign-in desk'),
+              ),
+            ),
         ],
         if (step != null) ...[
           const SectionRule(label: 'Waiting on you'),
