@@ -52,6 +52,13 @@ class AudioChunker {
   /// repaint at audio rate without rebuilding the screen around it.
   final level = ValueNotifier<double>(0);
 
+  /// Chunks that were cut but could not be written to disk.
+  ///
+  /// Anything above zero means audio from this sitting is gone and no amount
+  /// of waiting will bring it back, so it has to reach the screen rather than
+  /// sit in a log nobody reads.
+  final writeFailures = ValueNotifier<int>(0);
+
   final _buffer = BytesBuilder(copy: false);
   StreamSubscription<Uint8List>? _subscription;
   Directory? _scratch;
@@ -83,6 +90,30 @@ class AudioChunker {
 
   Future<bool> hasPermission() => _recorder.hasPermission();
 
+  /// Everything [start] does apart from opening the microphone.
+  ///
+  /// Split out so the cutter can be driven from a test without a device: the
+  /// arithmetic that decides where chunks begin and end is the part worth
+  /// proving, and it does not need a real microphone to be wrong.
+  @visibleForTesting
+  void prepare(
+    Directory scratch, {
+    int fromChunk = 0,
+    Duration alreadyRecorded = Duration.zero,
+  }) {
+    _scratch = scratch;
+    _chunkNumber = fromChunk;
+    _offset = alreadyRecorded;
+  }
+
+  /// Stands in for the microphone stream.
+  @visibleForTesting
+  void receive(Uint8List data) => _onData(data);
+
+  /// Completes once every chunk cut so far has been written and emitted.
+  @visibleForTesting
+  Future<void> get settled => _writes;
+
   /// [fromChunk] and [alreadyRecorded] come from the server when an existing
   /// session is rejoined; both are zero for a new one.
   Future<void> start(
@@ -90,9 +121,7 @@ class AudioChunker {
     int fromChunk = 0,
     Duration alreadyRecorded = Duration.zero,
   }) async {
-    _scratch = scratch;
-    _chunkNumber = fromChunk;
-    _offset = alreadyRecorded;
+    prepare(scratch, fromChunk: fromChunk, alreadyRecorded: alreadyRecorded);
 
     final stream = await _recorder.startStream(
       const RecordConfig(
@@ -137,6 +166,7 @@ class AudioChunker {
     await _chunks.close();
     await _recorder.dispose();
     level.dispose();
+    writeFailures.dispose();
   }
 
   void _onData(Uint8List data) {
@@ -179,8 +209,22 @@ class AudioChunker {
     final file = File(p.join(scratch.path, 'chunk-$number.wav'));
     final wav = wrapAsWav(payload);
 
+    // The catch has to sit inside the link rather than on the chain. An error
+    // escaping here leaves `_writes` permanently completed with that error,
+    // every `.then` after it is skipped, and the chunker stops emitting for the
+    // rest of the sitting — while the clock keeps counting and the level meter
+    // keeps moving off the live microphone, so every visible sign still says
+    // the meeting is being recorded.
     _writes = _writes.then((_) async {
-      await file.writeAsBytes(wav, flush: true);
+      try {
+        await file.writeAsBytes(wav, flush: true);
+      } catch (_) {
+        // This chunk is gone. Losing fifteen seconds is survivable; losing the
+        // rest of the meeting because of it is not.
+        writeFailures.value++;
+        await _delete(file);
+        return;
+      }
 
       if (!_chunks.isClosed) {
         _chunks.add(
@@ -188,6 +232,17 @@ class AudioChunker {
         );
       }
     });
+  }
+
+  /// Clears away a chunk that failed part-way through being written, so a
+  /// truncated file is never picked up and posted as if it were whole.
+  Future<void> _delete(File file) async {
+    try {
+      if (await file.exists()) await file.delete();
+    } catch (_) {
+      // Already gone, or the directory went with it. Either way there is
+      // nothing here that can be uploaded by mistake.
+    }
   }
 
   Duration _samplesAt(int samples) {
