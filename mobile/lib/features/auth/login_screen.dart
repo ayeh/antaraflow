@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../widgets/brand_mark.dart';
+import '../widgets/ledger_scaffold.dart';
 import 'auth_controller.dart';
 
 /// Sign in.
@@ -50,126 +51,128 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final state = ref.watch(authControllerProvider);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: AppColors.paper,
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            color: AppColors.navyDeep,
-            padding: EdgeInsets.only(
-              top: MediaQuery.paddingOf(context).top + 46,
-              bottom: 40,
-              left: 24,
-              right: 24,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const BrandMark(size: 40, onDark: true),
-                const SizedBox(height: 26),
-                Text(
-                  'Minutes,\nsigned and settled.',
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                    height: 1.12,
+    return LightStatusBar(
+      child: Scaffold(
+        backgroundColor: AppColors.paper,
+        body: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              color: AppColors.navyDeep,
+              padding: EdgeInsets.only(
+                top: MediaQuery.paddingOf(context).top + 46,
+                bottom: 40,
+                left: 24,
+                right: 24,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const BrandMark(size: 40, onDark: true),
+                  const SizedBox(height: 26),
+                  Text(
+                    'Minutes,\nsigned and settled.',
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      color: Colors.white,
+                      height: 1.12,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 30, 24, 32),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text('SIGN IN', style: AppTheme.eyebrow()),
-                      const SizedBox(height: 22),
-                      _Field(
-                        label: 'Email',
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        autofillHints: const [AutofillHints.username],
-                        enabled: !state.isSubmitting,
-                        error: state.fieldErrors['email']?.first,
-                        validate: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Enter your email address'
-                            : null,
-                      ),
-                      const SizedBox(height: 20),
-                      _Field(
-                        label: 'Password',
-                        controller: _passwordController,
-                        obscure: _obscurePassword,
-                        textInputAction: TextInputAction.done,
-                        autofillHints: const [AutofillHints.password],
-                        enabled: !state.isSubmitting,
-                        error: state.fieldErrors['password']?.first,
-                        onSubmitted: (_) => _submit(),
-                        validate: (v) => (v == null || v.isEmpty)
-                            ? 'Enter your password'
-                            : null,
-                        suffix: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            size: 20,
-                          ),
-                          color: AppColors.inkFaint,
-                          tooltip: _obscurePassword
-                              ? 'Show password'
-                              : 'Hide password',
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 30, 24, 32),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 440),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text('SIGN IN', style: AppTheme.eyebrow()),
+                        const SizedBox(height: 22),
+                        _Field(
+                          label: 'Email',
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.username],
+                          enabled: !state.isSubmitting,
+                          error: state.fieldErrors['email']?.first,
+                          validate: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Enter your email address'
+                              : null,
                         ),
-                      ),
-                      if (state.errorMessage != null) ...[
-                        const SizedBox(height: 18),
-                        _ErrorNotice(message: state.errorMessage!),
-                      ],
-                      const SizedBox(height: 28),
-                      FilledButton(
-                        onPressed: state.isSubmitting ? null : _submit,
-                        child: state.isSubmitting
-                            ? const SizedBox.square(
-                                dimension: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.navy,
-                                ),
-                              )
-                            : const Text('Sign in'),
-                      ),
-                      const SizedBox(height: 18),
-                      Center(
-                        child: TextButton(
-                          onPressed: state.isSubmitting ? null : () {},
-                          style: TextButton.styleFrom(
-                            foregroundColor: AppColors.primaryInk,
-                            textStyle: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontVariations: AppTheme.axis(FontWeight.w700),
-                              fontSize: 14,
+                        const SizedBox(height: 20),
+                        _Field(
+                          label: 'Password',
+                          controller: _passwordController,
+                          obscure: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.password],
+                          enabled: !state.isSubmitting,
+                          error: state.fieldErrors['password']?.first,
+                          onSubmitted: (_) => _submit(),
+                          validate: (v) => (v == null || v.isEmpty)
+                              ? 'Enter your password'
+                              : null,
+                          suffix: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              size: 20,
+                            ),
+                            color: AppColors.inkFaint,
+                            tooltip: _obscurePassword
+                                ? 'Show password'
+                                : 'Hide password',
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
                             ),
                           ),
-                          child: const Text('Forgot your password?'),
                         ),
-                      ),
-                    ],
+                        if (state.errorMessage != null) ...[
+                          const SizedBox(height: 18),
+                          _ErrorNotice(message: state.errorMessage!),
+                        ],
+                        const SizedBox(height: 28),
+                        FilledButton(
+                          onPressed: state.isSubmitting ? null : _submit,
+                          child: state.isSubmitting
+                              ? const SizedBox.square(
+                                  dimension: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.navy,
+                                  ),
+                                )
+                              : const Text('Sign in'),
+                        ),
+                        const SizedBox(height: 18),
+                        Center(
+                          child: TextButton(
+                            onPressed: state.isSubmitting ? null : () {},
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primaryInk,
+                              textStyle: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontVariations: AppTheme.axis(FontWeight.w700),
+                                fontSize: 14,
+                              ),
+                            ),
+                            child: const Text('Forgot your password?'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

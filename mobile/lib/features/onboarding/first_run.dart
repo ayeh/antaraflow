@@ -6,6 +6,7 @@ import '../../core/haptics.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../widgets/brand_mark.dart';
+import '../widgets/ledger_scaffold.dart';
 
 /// Whether the three cards have been seen on this device.
 ///
@@ -103,56 +104,58 @@ class _FirstRunState extends ConsumerState<FirstRun> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.navyDeep,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 18, 12, 0),
-              child: Row(
-                children: [
-                  const BrandMark(size: 30, onDark: true),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: _skip,
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF8FA2D6),
-                    ),
-                    child: const Text('Skip'),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: PageView.builder(
-                controller: _pages,
-                itemCount: _cards.length,
-                onPageChanged: (i) => setState(() => _index = i),
-                itemBuilder: (context, i) => _cards[i],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 22),
-              child: Column(
-                children: [
-                  _Progress(count: _cards.length, index: _index),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: _next,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.lime,
-                        foregroundColor: AppColors.navyDeep,
+    return LightStatusBar(
+      child: Scaffold(
+        backgroundColor: AppColors.navyDeep,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 18, 12, 0),
+                child: Row(
+                  children: [
+                    const BrandMark(size: 30, onDark: true),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: _skip,
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF8FA2D6),
                       ),
-                      child: Text(_isLast ? 'Start' : 'Next'),
+                      child: const Text('Skip'),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: PageView.builder(
+                  controller: _pages,
+                  itemCount: _cards.length,
+                  onPageChanged: (i) => setState(() => _index = i),
+                  itemBuilder: (context, i) => _cards[i],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 22),
+                child: Column(
+                  children: [
+                    _Progress(count: _cards.length, index: _index),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: _next,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.lime,
+                          foregroundColor: AppColors.navyDeep,
+                        ),
+                        child: Text(_isLast ? 'Start' : 'Next'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

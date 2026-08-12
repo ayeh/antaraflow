@@ -24,6 +24,15 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<!-- The only cryptography here is HTTPS to note.antara.cloud, which is
+	     exempt. Without this key App Store Connect stops every single build to
+	     ask the same question before it will release it to testers. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<!-- The launch screen has no view controller to ask, so the clock and
+	     signal come from here. Dark glyphs would vanish into the navy. -->
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

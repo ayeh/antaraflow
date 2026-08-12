@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/live_session.dart';
 import '../widgets/brand_mark.dart';
+import '../widgets/ledger_scaffold.dart';
 import 'chunk_outbox.dart';
 import 'recorder_controller.dart';
 import 'waveform.dart';
@@ -100,21 +101,23 @@ class _RecorderScreenState extends ConsumerState<RecorderScreen> {
             cursorColor: AppColors.lime,
           ),
         ),
-        child: Scaffold(
-          backgroundColor: _Dark.ground,
-          body: SafeArea(
-            child: switch (state.phase) {
-              RecorderPhase.preparing => const _Waiting(
-                line: 'Opening the microphone',
-              ),
-              RecorderPhase.denied => const _Denied(),
-              RecorderPhase.failed => _Failed(message: state.error),
-              RecorderPhase.finishing => const _Waiting(
-                line: 'Filing the last of the audio',
-              ),
-              RecorderPhase.finished => _Finished(state: state),
-              _ => _Live(state: state),
-            },
+        child: LightStatusBar(
+          child: Scaffold(
+            backgroundColor: _Dark.ground,
+            body: SafeArea(
+              child: switch (state.phase) {
+                RecorderPhase.preparing => const _Waiting(
+                  line: 'Opening the microphone',
+                ),
+                RecorderPhase.denied => const _Denied(),
+                RecorderPhase.failed => _Failed(message: state.error),
+                RecorderPhase.finishing => const _Waiting(
+                  line: 'Filing the last of the audio',
+                ),
+                RecorderPhase.finished => _Finished(state: state),
+                _ => _Live(state: state),
+              },
+            ),
           ),
         ),
       ),

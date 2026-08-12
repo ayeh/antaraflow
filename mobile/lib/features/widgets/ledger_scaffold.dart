@@ -90,6 +90,26 @@ class LedgerScaffold extends StatelessWidget {
   }
 }
 
+/// Puts the clock, signal and battery in light glyphs.
+///
+/// Every screen in this app that reaches the top of the display reaches it in
+/// navy, and the system default paints those glyphs black. Nothing in Flutter
+/// infers this from the colour underneath — it has to be declared, and any
+/// screen not wrapped in something that declares it gets an unreadable clock.
+class LightStatusBar extends StatelessWidget {
+  const LightStatusBar({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: child,
+    );
+  }
+}
+
 class _Masthead extends StatelessWidget {
   const _Masthead({
     required this.title,
@@ -111,8 +131,7 @@ class _Masthead extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+    return LightStatusBar(
       child: Container(
         width: double.infinity,
         color: AppColors.navyDeep,
