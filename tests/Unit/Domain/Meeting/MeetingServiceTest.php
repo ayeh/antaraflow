@@ -178,26 +178,31 @@ it('revertToDraft() transitions Finalized back to Draft', function () {
     expect($meeting->fresh()->status)->toBe(MeetingStatus::Draft);
 });
 
-it('revertToDraft() throws DomainException on a non-finalized meeting', function () {
+it('revertToDraft() throws DomainException on a draft meeting', function () {
     $meeting = MinutesOfMeeting::factory()->draft()->create([
         'organization_id' => $this->org->id,
         'created_by' => $this->user->id,
     ]);
 
     expect(fn () => $this->service->revertToDraft($meeting, $this->user))
-        ->toThrow(\DomainException::class, 'Only finalized meetings can be reverted to draft.');
+        ->toThrow(\DomainException::class, 'Only finalized or approved meetings can be reverted to draft.');
 });
 
-it('revertToDraft() throws DomainException on an approved meeting', function () {
+/*
+ * Approved records used to be a dead end. Reverting one is now allowed on
+ * purpose — a minute approved by mistake had no way back — so this asserts the
+ * behaviour rather than the exception it used to throw.
+ */
+it('revertToDraft() reopens an approved meeting', function () {
     $meeting = MinutesOfMeeting::factory()->approved()->create([
         'organization_id' => $this->org->id,
         'created_by' => $this->user->id,
     ]);
 
-    expect(fn () => $this->service->revertToDraft($meeting, $this->user))
-        ->toThrow(\DomainException::class);
+    $reverted = $this->service->revertToDraft($meeting, $this->user);
 
-    expect($meeting->fresh()->status)->toBe(MeetingStatus::Approved);
+    expect($reverted->status)->toBe(MeetingStatus::Draft);
+    expect($meeting->fresh()->status)->toBe(MeetingStatus::Draft);
 });
 
 it('delete() soft-deletes the meeting', function () {
