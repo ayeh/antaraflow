@@ -10,6 +10,7 @@ import '../../domain/models/meeting_detail.dart';
 import '../widgets/error_view.dart';
 import '../widgets/gutter_row.dart';
 import '../widgets/ledger_scaffold.dart';
+import 'create_meeting_sheet.dart';
 import 'meeting_detail_screen.dart';
 
 /// The list of recorded meetings.
@@ -151,6 +152,11 @@ class _MeetingsScreenState extends ConsumerState<MeetingsScreen> {
       title: 'Meetings',
       meta: _meta(all, rows, filter),
       actions: [
+        MastheadAction(
+          icon: Icons.add_rounded,
+          tooltip: 'New meeting',
+          onPressed: () => showCreateMeeting(context, ref),
+        ),
         MastheadAction(
           icon: _searching ? Icons.close_rounded : Icons.search_rounded,
           tooltip: _searching ? 'Close search' : 'Search',
