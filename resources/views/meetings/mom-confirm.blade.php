@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $meeting->title }} — Pengesahan Minit</title>
+    @php
+        $faviconSrc = $branding->get('favicon_path') ? Storage::url($branding->get('favicon_path')) : ($branding->get('favicon_url') ?: asset('favicon.ico'));
+    @endphp
+    <link rel="icon" href="{{ $faviconSrc }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         :root {
