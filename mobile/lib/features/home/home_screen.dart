@@ -27,6 +27,7 @@ class HomeScreen extends ConsumerWidget {
     final now = DateTime.now();
 
     return LedgerScaffold(
+      letterhead: true,
       title: _greeting(now),
       meta: DateFormat('EEEE d MMMM · HH:mm').format(now).toUpperCase(),
       actions: [

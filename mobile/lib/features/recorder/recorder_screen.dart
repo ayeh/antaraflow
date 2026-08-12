@@ -7,6 +7,7 @@ import '../../core/haptics.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/live_session.dart';
+import '../widgets/brand_mark.dart';
 import 'chunk_outbox.dart';
 import 'recorder_controller.dart';
 import 'waveform.dart';
@@ -192,6 +193,13 @@ class _Header extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: AppTheme.eyebrow(colour: _Dark.faint),
             ),
+          ),
+          // The one screen other people in the room look at. A phone lies face
+          // up on the table for an hour with this on it, so the mark earns its
+          // place here in a way it does not on a working list.
+          const Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: BrandMark(size: 22, showWordmark: false),
           ),
         ],
       ),

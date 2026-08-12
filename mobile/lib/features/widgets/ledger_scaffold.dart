@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../core/haptics.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import 'brand_mark.dart';
 
 /// Page furniture for every screen.
 ///
@@ -22,6 +23,7 @@ class LedgerScaffold extends StatelessWidget {
     this.onRefresh,
     this.reference,
     this.heroTag,
+    this.letterhead = false,
   });
 
   final String title;
@@ -39,6 +41,10 @@ class LedgerScaffold extends StatelessWidget {
   /// Ties [reference] to the gutter cell it was opened from, so the number
   /// flies up into the masthead instead of the page arriving from nowhere.
   final Object? heroTag;
+
+  /// Sets the mark above the title, the way a minute book carries a letterhead
+  /// on its first page and not on every one after it.
+  final bool letterhead;
 
   final List<Widget>? actions;
   final Widget? leading;
@@ -75,6 +81,7 @@ class LedgerScaffold extends StatelessWidget {
             leading: leading,
             reference: reference,
             heroTag: heroTag,
+            letterhead: letterhead,
           ),
           Expanded(child: body),
         ],
@@ -91,6 +98,7 @@ class _Masthead extends StatelessWidget {
     this.leading,
     this.reference,
     this.heroTag,
+    this.letterhead = false,
   });
 
   final String title;
@@ -99,6 +107,7 @@ class _Masthead extends StatelessWidget {
   final Widget? leading;
   final String? reference;
   final Object? heroTag;
+  final bool letterhead;
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +130,10 @@ class _Masthead extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (letterhead) ...[
+                    const BrandMark(size: 21, onDark: true),
+                    const SizedBox(height: 14),
+                  ],
                   if (reference != null) ...[
                     _Reference(text: reference!, heroTag: heroTag),
                     const SizedBox(height: 7),
