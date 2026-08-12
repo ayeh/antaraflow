@@ -121,6 +121,9 @@ class RecorderController extends StateNotifier<RecorderState> {
 
   ValueListenable<OutboxStatus>? get outbox => _outbox?.status;
 
+  /// Chunks that never made it to disk, and so will never reach the server.
+  ValueListenable<int> get lost => _chunker.writeFailures;
+
   /// Opens the session and the microphone.
   ///
   /// The order matters: the microphone comes first, so somebody who refuses

@@ -105,13 +105,19 @@ class _WavePainter extends CustomPainter {
       final height = (value * size.height * 0.9).clamp(2.0, size.height);
       final x = i * slot + (slot - width) / 2;
 
-      // The newest bars carry the accent; the tail fades back so the eye
-      // reads direction without an arrow telling it to.
-      final leading = i > count - 8;
+      // The newest bars carry the accent and it falls away behind them, so the
+      // eye reads direction without an arrow telling it to.
+      //
+      // Ramped across the last twelve rather than switched on at the eighth: a
+      // hard edge between full lime and a faded tail does not read as one wave
+      // moving, it reads as a bright block parked at the end of a dim one.
+      const ramp = 12;
+      final recency = ((i - (count - ramp)) / ramp).clamp(0.0, 1.0);
+      final alpha =
+          (0.18 + value * 0.34) + (1 - (0.18 + value * 0.34)) * recency;
+
       paint.color = live
-          ? (leading
-                ? AppColors.lime
-                : AppColors.lime.withValues(alpha: 0.18 + value * 0.34))
+          ? AppColors.lime.withValues(alpha: alpha)
           : const Color(0xFF3D5698);
 
       canvas.drawRRect(

@@ -155,7 +155,7 @@ class _Live extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              _OutboxLine(status: controller.outbox),
+              _OutboxLine(status: controller.outbox, lost: controller.lost),
             ],
           ),
         ),
@@ -300,9 +300,14 @@ class _BeaconState extends State<_Beacon> with SingleTickerProviderStateMixin {
 /// fear is that the phone was not really recording, and a silent app gives
 /// them no way to tell the difference until the transcript is short.
 class _OutboxLine extends StatelessWidget {
-  const _OutboxLine({required this.status});
+  const _OutboxLine({required this.status, required this.lost});
 
   final ValueListenable<OutboxStatus>? status;
+
+  /// Chunks that never reached disk. Distinct from a queue that is behind:
+  /// nothing is coming for these, so the line has to stop saying AUTOSAVING as
+  /// though everything were being kept.
+  final ValueListenable<int> lost;
 
   @override
   Widget build(BuildContext context) {
@@ -318,20 +323,30 @@ class _OutboxLine extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: listenable,
       builder: (context, value, _) {
-        final stalled = value.isStalled;
-        final parts = <String>[
-          '${value.sent} SENT',
-          if (value.queued > 0) '${value.queued} QUEUED',
-          if (!stalled) 'AUTOSAVING',
-        ];
+        return ValueListenableBuilder(
+          valueListenable: lost,
+          builder: (context, dropped, _) {
+            final stalled = value.isStalled;
+            final parts = <String>[
+              '${value.sent} SENT',
+              if (value.queued > 0) '${value.queued} QUEUED',
+              if (dropped > 0) '$dropped LOST',
+              if (stalled) 'RETRYING' else if (dropped == 0) 'AUTOSAVING',
+            ];
 
-        return Text(
-          stalled ? '${parts.join(' · ')} · RETRYING' : parts.join(' · '),
-          style: AppTheme.mono(
-            size: 11,
-            colour: stalled ? AppColors.warning : _Dark.faint,
-            tracking: 0.6,
-          ),
+            return Text(
+              parts.join(' · '),
+              style: AppTheme.mono(
+                size: 11,
+                colour: dropped > 0
+                    ? AppColors.danger
+                    : stalled
+                    ? AppColors.warning
+                    : _Dark.faint,
+                tracking: 0.6,
+              ),
+            );
+          },
         );
       },
     );

@@ -1,0 +1,146 @@
+import 'dart:io';
+
+import 'package:antaranote/features/recorder/audio_chunker.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
+
+/// One second of 16 kHz mono 16-bit audio.
+Uint8List seconds(int n) =>
+    Uint8List(AudioChunker.sampleRate * 2 * n)..fillRange(0, 8, 7);
+
+void main() {
+  // AudioChunker builds an AudioRecorder eagerly, which reaches for a platform
+  // channel the moment it is constructed. Nothing here ever opens a
+  // microphone — the cutter is what is under test — so the channel only has to
+  // answer rather than do anything.
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('com.llfbandit.record/messages'),
+          (_) async => null,
+        );
+  });
+
+  late Directory scratch;
+
+  setUp(() {
+    scratch = Directory.systemTemp.createTempSync('chunker');
+  });
+
+  tearDown(() {
+    if (scratch.existsSync()) scratch.deleteSync(recursive: true);
+  });
+
+  test(
+    'cuts a chunk once fifteen seconds have arrived, and not before',
+    () async {
+      final chunker = AudioChunker();
+      final cut = <AudioChunk>[];
+      chunker.chunks.listen(cut.add);
+      chunker.prepare(scratch);
+
+      chunker.receive(seconds(14));
+      await chunker.settled;
+      await pumpEventQueue();
+      expect(cut, isEmpty, reason: 'a partial chunk is not a chunk');
+
+      chunker.receive(seconds(1));
+      await chunker.settled;
+      await pumpEventQueue();
+
+      expect(cut, hasLength(1));
+      expect(cut.single.number, 0);
+      expect(cut.single.start, Duration.zero);
+      expect(cut.single.end, const Duration(seconds: 15));
+    },
+  );
+
+  test('keeps cutting for the length of a sitting', () async {
+    final chunker = AudioChunker();
+    final cut = <AudioChunk>[];
+    chunker.chunks.listen(cut.add);
+    chunker.prepare(scratch);
+
+    for (var i = 0; i < 5; i++) {
+      chunker.receive(seconds(15));
+      await chunker.settled;
+      await pumpEventQueue();
+    }
+
+    expect(cut.map((c) => c.number), [0, 1, 2, 3, 4]);
+    expect(cut.last.end, const Duration(seconds: 75));
+  });
+
+  // The failure that hides itself. The recorder screen keeps counting and the
+  // level meter keeps moving off the live microphone, so every visible sign
+  // says the meeting is being recorded while nothing is reaching the server.
+  test(
+    'a chunk that cannot be written does not stop the ones after it',
+    () async {
+      final chunker = AudioChunker();
+      final cut = <AudioChunk>[];
+      chunker.chunks.listen(cut.add);
+      chunker.prepare(scratch);
+
+      // Whatever takes the scratch directory away mid-meeting — the OS
+      // reclaiming the cache under pressure is the realistic one.
+      scratch.deleteSync(recursive: true);
+      chunker.receive(seconds(15));
+      await chunker.settled;
+      await pumpEventQueue();
+
+      expect(cut, isEmpty, reason: 'this chunk genuinely could not be written');
+      expect(chunker.writeFailures.value, 1, reason: 'and it must be reported');
+
+      scratch.createSync(recursive: true);
+      chunker.receive(seconds(15));
+      await chunker.settled;
+      await pumpEventQueue();
+
+      expect(
+        cut.map((c) => c.number),
+        [1],
+        reason: 'recording continues; one failed write is not the end of it',
+      );
+    },
+  );
+
+  test('a failed write leaves no half-file behind to be uploaded', () async {
+    final chunker = AudioChunker();
+    chunker.chunks.listen((_) {});
+    chunker.prepare(scratch);
+
+    scratch.deleteSync(recursive: true);
+    chunker.receive(seconds(15));
+    await chunker.settled;
+    await pumpEventQueue();
+
+    scratch.createSync(recursive: true);
+    expect(File(p.join(scratch.path, 'chunk-0.wav')).existsSync(), isFalse);
+  });
+
+  test(
+    'a resumed sitting numbers and times chunks from where it left off',
+    () async {
+      final chunker = AudioChunker();
+      final cut = <AudioChunk>[];
+      chunker.chunks.listen(cut.add);
+      chunker.prepare(
+        scratch,
+        fromChunk: 4,
+        alreadyRecorded: const Duration(seconds: 60),
+      );
+
+      chunker.receive(seconds(15));
+      await chunker.settled;
+      await pumpEventQueue();
+
+      expect(cut.single.number, 4);
+      expect(cut.single.start, const Duration(seconds: 60));
+      expect(cut.single.end, const Duration(seconds: 75));
+    },
+  );
+}
