@@ -29,8 +29,10 @@ final class GlassPlatformView: NSObject, FlutterPlatformView {
             glass.tintColor = UIColor(red: 0x01/255, green: 0x26/255, blue: 0x6E/255, alpha: 0.22)
             effectView = UIVisualEffectView(effect: glass)
         } else {
-            // Everything before iOS 26 gets the nearest older material. It is
-            // not Liquid Glass and does not pretend to be.
+            // Unreachable at the current deployment target of iOS 26, and kept
+            // only so that lowering the target again fails soft rather than
+            // losing the bar entirely. It is not Liquid Glass and does not
+            // pretend to be.
             effectView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
         }
 
