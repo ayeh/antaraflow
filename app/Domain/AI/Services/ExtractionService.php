@@ -15,6 +15,7 @@ use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Infrastructure\AI\AIProviderFactory;
 use App\Infrastructure\AI\Contracts\AIProviderInterface;
 use App\Infrastructure\AI\Exceptions\AiDisabledException;
+use App\Infrastructure\AI\Prompts\ExtractionPrompts;
 use App\Models\User;
 use App\Support\Enums\ActionItemPriority;
 use Illuminate\Support\Str;
@@ -195,6 +196,47 @@ class ExtractionService
         }
 
         return implode("\n\n", $parts);
+    }
+
+    /**
+     * How much audio this record was built from, or null when it was not built
+     * from audio at all.
+     */
+    private function recordedSeconds(MinutesOfMeeting $mom): ?int
+    {
+        $seconds = (int) $mom->transcriptions()
+            ->where('status', 'completed')
+            ->sum('duration_seconds');
+
+        return $seconds > 0 ? $seconds : null;
+    }
+
+    /**
+     * Whether the durations the model returned can be true of this recording.
+     *
+     * Asked to estimate from text alone the model returns what an agenda
+     * usually looks like — five topics at three or four minutes each, whether
+     * the recording ran two minutes or two hours. Rather than trim the numbers
+     * into range, which would keep a fabrication and only make it plausible,
+     * the whole set is dropped. No duration is honest; a wrong one is not.
+     *
+     * A minute of slack absorbs rounding, since a topic under a minute is
+     * asked for as 0 and several of those still sum to less than the whole.
+     *
+     * @param  list<array<string, mixed>>  $topics
+     */
+    private static function durationsFit(array $topics, ?int $recordedSeconds): bool
+    {
+        if ($recordedSeconds === null) {
+            return false;
+        }
+
+        $claimed = 0;
+        foreach ($topics as $topic) {
+            $claimed += (int) ($topic['duration_minutes'] ?? 0);
+        }
+
+        return $claimed * 60 <= $recordedSeconds + 60;
     }
 
     private function extractSummary(
@@ -383,12 +425,8 @@ class ExtractionService
             return;
         }
 
-        $prompt = "Identify the main topics discussed in the following meeting transcript. Return a JSON array where each item has:\n"
-            ."- \"title\": Topic title\n"
-            ."- \"description\": Brief description of what was discussed\n"
-            ."- \"duration_minutes\": Estimated duration in minutes (optional)\n\n"
-            ."Respond with ONLY a valid JSON array, no other text.\n\n"
-            ."Transcript:\n{$text}";
+        $recordedSeconds = $this->recordedSeconds($mom);
+        $prompt = ExtractionPrompts::topics($text, $recordedSeconds);
 
         $languageNote = ($language && $language !== 'en') ? ' Respond in '.(['ms' => 'Bahasa Melayu (Malay)'][$language] ?? $language).'.' : '';
         $response = $provider->chat($prompt, ['system' => 'You are an expert at identifying discussion topics from meetings. Always respond with valid JSON.'.$languageNote]);
@@ -400,12 +438,14 @@ class ExtractionService
 
         MomTopic::query()->where('minutes_of_meeting_id', $mom->id)->delete();
 
+        $keepDurations = self::durationsFit($topics, $recordedSeconds);
+
         foreach ($topics as $index => $topic) {
             MomTopic::query()->create([
                 'minutes_of_meeting_id' => $mom->id,
                 'title' => $topic['title'] ?? '',
                 'description' => $topic['description'] ?? null,
-                'duration_minutes' => $topic['duration_minutes'] ?? null,
+                'duration_minutes' => $keepDurations ? ($topic['duration_minutes'] ?? null) : null,
                 'sort_order' => $index,
             ]);
         }

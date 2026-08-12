@@ -10,6 +10,7 @@ use App\Infrastructure\AI\DTOs\ExtractedActionItem;
 use App\Infrastructure\AI\DTOs\ExtractedDecision;
 use App\Infrastructure\AI\DTOs\ExtractedRisk;
 use App\Infrastructure\AI\DTOs\MeetingSummary;
+use App\Infrastructure\AI\Prompts\ExtractionPrompts;
 use Illuminate\Support\Facades\Http;
 
 class AnthropicProvider implements AIProviderInterface
@@ -126,14 +127,9 @@ class AnthropicProvider implements AIProviderInterface
     /** {@inheritDoc} */
     public function extractDecisions(string $text, ?string $language = null): array
     {
-        $prompt = "Extract decisions made during the following meeting transcript. Return a JSON array where each item has:\n"
-            ."- \"decision\": The decision that was made\n"
-            ."- \"context\": Background context for the decision (optional)\n"
-            ."- \"made_by\": Who made or proposed the decision (optional)\n\n"
-            ."Respond with ONLY a valid JSON array, no other text.\n\n"
-            ."Transcript:\n{$text}";
+        $prompt = ExtractionPrompts::decisions($text);
 
-        $system = 'You are an expert at identifying decisions from meetings. Always respond with valid JSON.'.$this->languageInstruction($language);
+        $system = ExtractionPrompts::decisionsSystemMessage().$this->languageInstruction($language);
         $response = $this->chat($prompt, ['system' => $system]);
         $decisions = json_decode($response, true) ?? [];
 
