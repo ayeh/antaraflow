@@ -475,5 +475,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "unassigned": "Unassigned",
+  "unassignedDetail": "Extracted from your sittings with no name on them",
+  "gutterUnassigned": "nobody"
 }

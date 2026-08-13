@@ -961,4 +961,14 @@ class LMs extends L {
   @override
   String get approvalsEmptyDetail =>
       'Minit yang diedarkan kepada anda untuk pengesahan muncul di sini sehingga anda menjawabnya.';
+
+  @override
+  String get unassigned => 'Belum ditugaskan';
+
+  @override
+  String get unassignedDetail =>
+      'Diekstrak daripada mesyuarat anda tanpa nama padanya';
+
+  @override
+  String get gutterUnassigned => 'belum';
 }

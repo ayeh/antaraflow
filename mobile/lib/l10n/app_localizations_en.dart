@@ -953,4 +953,14 @@ class LEn extends L {
   @override
   String get approvalsEmptyDetail =>
       'Minutes circulated to you for confirmation appear here until you answer them.';
+
+  @override
+  String get unassigned => 'Unassigned';
+
+  @override
+  String get unassignedDetail =>
+      'Extracted from your sittings with no name on them';
+
+  @override
+  String get gutterUnassigned => 'nobody';
 }

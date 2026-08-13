@@ -30,9 +30,29 @@ class ActionItemController extends MobileController
         $items = ActionItem::query()
             ->with(['assignedTo:id,name,avatar_path', 'meeting:id,title,mom_number'])
             ->when(
-                $request->boolean('assigned_to_me', true),
+                $request->boolean('assigned_to_me', true) && ! $request->boolean('unassigned'),
                 fn (Builder $q) => $q->where('assigned_to', $this->user($request)->id),
             )
+            // Items the AI extracted but could not put a name to. Scoped to
+            // sittings this person kept or attended rather than the whole
+            // organisation: an unowned task from a meeting they were not in is
+            // somebody else's problem, and the Tasks tab is a personal list.
+            //
+            // The assignee often cannot be matched because it is not a person
+            // — government minutes assign work to MBPJ or a department, and
+            // matchAssignee correctly finds nobody.
+            ->when($request->boolean('unassigned'), function (Builder $q) use ($request) {
+                $userId = $this->user($request)->id;
+
+                $q->whereNull('assigned_to')
+                    ->whereNotIn('status', [
+                        ActionItemStatus::Completed->value,
+                        ActionItemStatus::Cancelled->value,
+                    ])
+                    ->whereHas('meeting', fn (Builder $meeting) => $meeting
+                        ->where('created_by', $userId)
+                        ->orWhereHas('attendees', fn (Builder $a) => $a->where('user_id', $userId)));
+            })
             ->when($request->filled('status'), fn (Builder $q) => $q->where('status', $request->string('status')))
             ->when($request->filled('priority'), fn (Builder $q) => $q->where('priority', $request->string('priority')))
             ->when($request->filled('meeting_id'), fn (Builder $q) => $q->where('minutes_of_meeting_id', $request->integer('meeting_id')))
