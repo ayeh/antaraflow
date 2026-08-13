@@ -12,6 +12,8 @@ use App\Domain\LiveMeeting\Events\TranscriptionChunkProcessed;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
 use App\Domain\Transcription\Services\AudioConditioner;
 use App\Domain\Transcription\Services\TranscriptionHintBuilder;
+use App\Infrastructure\AI\DTOs\TranscriptionResult;
+use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
 use App\Infrastructure\AI\Exceptions\AiQuotaExceededException;
 use App\Infrastructure\AI\Exceptions\OrgBudgetExceededException;
 use App\Infrastructure\AI\TranscriberFactory;
@@ -104,6 +106,7 @@ class LiveTranscriptionJob implements ShouldQueue
 
             $this->chunk->update([
                 'text' => $result->fullText,
+                'segments' => $this->segmentsFrom($result),
                 'speaker' => $speaker,
                 'confidence' => $result->confidence,
                 'status' => ChunkStatus::Completed,
@@ -127,6 +130,34 @@ class LiveTranscriptionJob implements ShouldQueue
                 @unlink($conditioned);
             }
         }
+    }
+
+    /**
+     * The transcriber's segments, flattened for storage.
+     *
+     * Kept because a live sitting has never had any: the merge at the end of a
+     * session joins chunk text into one block, so a recording made on a phone
+     * arrives with no structure to attribute speakers to, and the diarization
+     * the upload path enjoys has nothing to work on.
+     *
+     * Times stay on the chunk's own clock. They are shifted onto the meeting's
+     * timeline at merge, where the chunk's `start_time` is read fresh — baking
+     * the offset in here would survive a later correction to that value.
+     *
+     * An empty array, never null: a chunk the provider returned no segments for
+     * has been transcribed, and must not be mistaken later for one that has not.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function segmentsFrom(TranscriptionResult $result): array
+    {
+        return array_map(static fn (TranscriptionSegmentData $segment): array => [
+            'text' => $segment->text,
+            'start_time' => $segment->startTime,
+            'end_time' => $segment->endTime,
+            'speaker' => $segment->speaker,
+            'confidence' => $segment->confidence,
+        ], $result->segments);
     }
 
     /**
