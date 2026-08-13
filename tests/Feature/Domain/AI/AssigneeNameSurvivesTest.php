@@ -115,3 +115,30 @@ test('the app is told the name', function () {
         ->assertOk()
         ->assertJsonPath('data.0.assignee_name', 'MBPJ');
 });
+
+test('a model saying it found nobody is not stored as a name', function () {
+    extractionWith($this->meeting, [
+        ['title' => 'One', 'assignee' => 'Tidak dinyatakan'],
+        ['title' => 'Two', 'assignee' => 'Not specified'],
+        ['title' => 'Three', 'assignee' => 'N/A'],
+        ['title' => 'Four', 'assignee' => '-'],
+        ['title' => 'Five', 'assignee' => 'TBD'],
+        ['title' => 'Six', 'assignee' => 'tiada.'],
+    ]);
+
+    app(ExtractionService::class)->createActionItemRecords($this->meeting, $this->user);
+
+    expect(ActionItem::query()->whereNotNull('assignee_name')->count())->toBe(0);
+});
+
+test('a real name that merely resembles one of them is kept', function () {
+    extractionWith($this->meeting, [
+        ['title' => 'Keep this', 'assignee' => 'Nadia'],
+        ['title' => 'And this', 'assignee' => 'Unassigned Holdings Sdn Bhd'],
+    ]);
+
+    app(ExtractionService::class)->createActionItemRecords($this->meeting, $this->user);
+
+    expect(ActionItem::query()->pluck('assignee_name')->filter()->values()->all())
+        ->toBe(['Nadia', 'Unassigned Holdings Sdn Bhd']);
+});
