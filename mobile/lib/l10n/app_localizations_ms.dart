@@ -971,4 +971,9 @@ class LMs extends L {
 
   @override
   String get gutterUnassigned => 'belum';
+
+  @override
+  String showingOf(int shown, int total) {
+    return 'Memaparkan $shown daripada $total. Selebihnya di web.';
+  }
 }

@@ -1836,6 +1836,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'nobody'**
   String get gutterUnassigned;
+
+  /// No description provided for @showingOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {shown} of {total}. The rest are on the web.'**
+  String showingOf(int shown, int total);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

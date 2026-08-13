@@ -963,4 +963,9 @@ class LEn extends L {
 
   @override
   String get gutterUnassigned => 'nobody';
+
+  @override
+  String showingOf(int shown, int total) {
+    return 'Showing $shown of $total. The rest are on the web.';
+  }
 }
