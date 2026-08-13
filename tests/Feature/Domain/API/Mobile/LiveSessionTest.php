@@ -472,3 +472,65 @@ test('the session stats stay session-wide, not per device', function () {
 
     expect($stats['chunks_total'])->toBe(2, 'the stats describe the sitting, not one microphone in it');
 });
+
+test('a joining device is told how far past the boundary the sitting is', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+        'config' => ['chunk_interval' => 15],
+    ]);
+
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'laptop-at-the-head',
+        'chunk_number' => 2,
+    ]);
+    $chunk->forceFill(['created_at' => now()->subSeconds(7)])->save();
+
+    $resume = app(\App\Domain\LiveMeeting\Services\LiveMeetingService::class)
+        ->getResumeState($session->fresh(), 'a-phone-that-just-arrived');
+
+    // Seven seconds into the window that opened when chunk 2 arrived, so a
+    // satellite has eight seconds to throw away before it is in step.
+    expect($resume['seconds_into_chunk'])->toBeGreaterThan(6.5)
+        ->and($resume['seconds_into_chunk'])->toBeLessThan(8.0);
+});
+
+// The primary died or lost signal. A satellite joining now should start clean
+// at the next boundary rather than aim at a window that is never coming.
+test('a sitting whose primary has stopped reports no offset at all', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+        'config' => ['chunk_interval' => 15],
+    ]);
+
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 2,
+    ]);
+    $chunk->forceFill(['created_at' => now()->subMinutes(4)])->save();
+
+    $resume = app(\App\Domain\LiveMeeting\Services\LiveMeetingService::class)
+        ->getResumeState($session->fresh());
+
+    expect($resume['seconds_into_chunk'])->toBe(0.0);
+});
+
+test('a sitting with no chunks yet measures from when it started', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+        'started_at' => now()->subSeconds(3),
+        'config' => ['chunk_interval' => 15],
+    ]);
+
+    $resume = app(\App\Domain\LiveMeeting\Services\LiveMeetingService::class)
+        ->getResumeState($session);
+
+    expect($resume['seconds_into_chunk'])->toBeGreaterThan(2.0)
+        ->and($resume['seconds_into_chunk'])->toBeLessThan(4.5);
+});
