@@ -534,3 +534,121 @@ test('a sitting with no chunks yet measures from when it started', function () {
     expect($resume['seconds_into_chunk'])->toBeGreaterThan(2.0)
         ->and($resume['seconds_into_chunk'])->toBeLessThan(4.5);
 });
+
+test('a second phone joining a running sitting is offered the satellite role', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'laptop-at-the-head',
+        'role' => 'primary',
+        'chunk_number' => 0,
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/live/start", [
+            'device_id' => 'phone-at-the-far-end',
+        ])
+        ->assertStatus(409)
+        ->assertJsonPath('resume.role', 'satellite')
+        ->assertJsonPath('resume.next_chunk_number', 0);
+});
+
+// The ordinary rejoin: the app was killed mid-sitting and came back. Demoting
+// it to satellite would quietly stop it being the recording.
+test('the device that was recording rejoins as the recording', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    foreach ([0, 1] as $number) {
+        LiveTranscriptChunk::factory()->create([
+            'live_meeting_session_id' => $session->id,
+            'device_id' => 'laptop-at-the-head',
+            'role' => 'primary',
+            'chunk_number' => $number,
+        ]);
+    }
+
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/live/start", [
+            'device_id' => 'laptop-at-the-head',
+        ])
+        ->assertStatus(409)
+        ->assertJsonPath('resume.role', 'primary')
+        ->assertJsonPath('resume.next_chunk_number', 2);
+});
+
+test('a satellite that dropped out rejoins as a satellite', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'laptop-at-the-head',
+        'role' => 'primary',
+        'chunk_number' => 0,
+    ]);
+    LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'phone-at-the-far-end',
+        'role' => 'satellite',
+        'chunk_number' => 0,
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/live/start", [
+            'device_id' => 'phone-at-the-far-end',
+        ])
+        ->assertStatus(409)
+        ->assertJsonPath('resume.role', 'satellite');
+});
+
+// Somebody pressed Record, the session opened, and the app died before a
+// single chunk was uploaded. There is nothing to be a satellite to.
+test('a device joining a sitting that recorded nothing is the recording', function () {
+    LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/live/start", [
+            'device_id' => 'a-phone-that-just-arrived',
+        ])
+        ->assertStatus(409)
+        ->assertJsonPath('resume.role', 'primary');
+});
+
+// The browser recorder and any app build predating satellites send no device.
+// They have always been the recording and must stay so.
+test('a client that names no device is still the recording', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'laptop-at-the-head',
+        'role' => 'primary',
+        'chunk_number' => 0,
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/live/start")
+        ->assertStatus(409)
+        ->assertJsonPath('resume.role', 'primary')
+        ->assertJsonPath('resume.next_chunk_number', 1);
+});

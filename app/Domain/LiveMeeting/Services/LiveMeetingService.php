@@ -132,6 +132,39 @@ class LiveMeetingService
     }
 
     /**
+     * What a device asking to join an already-running sitting should be.
+     *
+     * The distinction that matters is between an app coming back from being
+     * killed and a second phone arriving to help. Both hit the same 409, and
+     * getting them the wrong way round is expensive in both directions: a
+     * rejoining recorder demoted to satellite stops being the recording, and a
+     * second phone promoted to primary fights the first over chunk numbering.
+     *
+     * A device that has already put audio into this sitting keeps whatever it
+     * was. A device arriving where nothing has been recorded yet can be the
+     * recording. Anything else is help.
+     */
+    public function roleFor(LiveMeetingSession $session, string $deviceId): ChunkRole
+    {
+        // Without a device there is nothing to tell anyone apart by, and the
+        // callers in that position — the browser recorder, and app builds
+        // predating satellites — have always been the recording.
+        if ($deviceId === '') {
+            return ChunkRole::Primary;
+        }
+
+        $mine = $session->chunks()->where('device_id', $deviceId)->first();
+
+        if ($mine !== null) {
+            return $mine->role;
+        }
+
+        return $session->chunks()->exists()
+            ? ChunkRole::Satellite
+            : ChunkRole::Primary;
+    }
+
+    /**
      * @param  array{peak_dbfs?: float, speech_dbfs?: float, noise_dbfs?: float}  $levels
      *                                                                                     How loud the device measured this chunk to be. Empty from any client
      *                                                                                     that does not measure, which is every one of them before the app

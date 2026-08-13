@@ -1243,6 +1243,54 @@ abstract class L {
   /// **'No sound is reaching the microphone'**
   String get recordingNoteSilent;
 
+  /// No description provided for @alreadyRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Already being recorded'**
+  String get alreadyRecording;
+
+  /// No description provided for @helpRecordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this phone as an extra microphone?'**
+  String get helpRecordTitle;
+
+  /// Shown when a second device opens the recorder on a meeting that is already being recorded. It must be clear the audio goes to the organisation exactly as the recording already running does.
+  ///
+  /// In en, this message translates to:
+  /// **'Somebody else is recording this sitting. This phone can listen too — put it nearer whoever is hardest to hear, and the better of the two recordings is used for each moment.'**
+  String get helpRecordDetail;
+
+  /// No description provided for @helpRecordConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'The audio goes to your organisation, the same as the recording already running.'**
+  String get helpRecordConsent;
+
+  /// No description provided for @helpRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Use as extra microphone'**
+  String get helpRecord;
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
+
+  /// No description provided for @extraMicrophone.
+  ///
+  /// In en, this message translates to:
+  /// **'EXTRA MICROPHONE'**
+  String get extraMicrophone;
+
+  /// No description provided for @extraMicrophoneDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone is helping. Stopping it does not stop the meeting recording.'**
+  String get extraMicrophoneDetail;
+
   /// No description provided for @marksSection.
   ///
   /// In en, this message translates to:

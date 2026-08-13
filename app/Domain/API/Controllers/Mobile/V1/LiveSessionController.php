@@ -33,8 +33,11 @@ class LiveSessionController extends MobileController
             'extraction_interval' => ['sometimes', 'integer', 'min:60', 'max:600'],
             'live_extraction' => ['sometimes', 'boolean'],
             'client_id' => ['sometimes', 'string', 'max:64'],
+            'device_id' => ['sometimes', 'string', 'max:64'],
         ]);
-        unset($config['client_id']);
+
+        $deviceId = (string) ($config['device_id'] ?? '');
+        unset($config['client_id'], $config['device_id']);
 
         try {
             $session = $this->liveMeetingService->startSession($meeting, $this->user($request), $config);
@@ -50,7 +53,13 @@ class LiveSessionController extends MobileController
                 'message' => $e->getMessage(),
                 'code' => 'SESSION_ALREADY_ACTIVE',
                 'session' => $active ? $this->sessionPayload($active) : null,
-                'resume' => $active ? $this->liveMeetingService->getResumeState($active) : null,
+                // Scoped to the asking device. Answering with the sitting's
+                // numbering instead would have a second phone upload over
+                // chunks the first one recorded.
+                'resume' => $active ? [
+                    ...$this->liveMeetingService->getResumeState($active, $deviceId ?: null),
+                    'role' => $this->liveMeetingService->roleFor($active, $deviceId)->value,
+                ] : null,
             ], 409);
         }
 
