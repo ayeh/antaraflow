@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/bootstrap.dart';
@@ -29,12 +30,15 @@ class HomeScreen extends ConsumerWidget {
 
     return LedgerScaffold(
       letterhead: true,
-      title: _greeting(now),
-      meta: DateFormat('EEEE d MMMM · HH:mm').format(now).toUpperCase(),
+      title: _greeting(context, now),
+      meta: DateFormat(
+        L.of(context).homeDateLine,
+        Localizations.localeOf(context).toLanguageTag(),
+      ).format(now).toUpperCase(),
       actions: [
         MastheadAction(
           icon: Icons.notifications_none_rounded,
-          tooltip: 'Notifications',
+          tooltip: L.of(context).notifications,
           badge: bootstrap.valueOrNull?.unread.notifications ?? 0,
           onPressed: () async {
             await Navigator.of(context).push(
@@ -64,10 +68,13 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  String _greeting(DateTime now) {
-    if (now.hour < 12) return 'Good morning';
-    if (now.hour < 18) return 'Good afternoon';
-    return 'Good evening';
+  String _greeting(BuildContext context, DateTime now) {
+    final l = L.of(context);
+
+    if (now.hour < 12) return l.goodMorning;
+    if (now.hour < 18) return l.goodAfternoon;
+
+    return l.goodEvening;
   }
 }
 
@@ -155,26 +162,26 @@ class _Body extends ConsumerWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
         _Standing(data: data),
-        const SectionRule(label: 'Up next'),
+        SectionRule(label: L.of(context).upNext),
         ...switch (upcoming) {
-          AsyncData(:final value) when value.isEmpty => const [
+          AsyncData(:final value) when value.isEmpty => [
             _Empty(
-              line: 'Nothing scheduled',
-              detail: 'Meetings you are invited to appear here.',
+              line: L.of(context).nothingScheduled,
+              detail: L.of(context).nothingScheduledDetail,
             ),
           ],
           AsyncData(:final value) => [
             for (final meeting in value) _UpcomingRow(meeting: meeting),
           ],
-          AsyncError() => const [
+          AsyncError() => [
             _Empty(
-              line: 'Could not load the diary',
-              detail: 'Pull down to try again.',
+              line: L.of(context).diaryUnavailable,
+              detail: L.of(context).pullToRetry,
             ),
           ],
           _ => const [GutterRowSkeleton(titleFraction: 0.62)],
         },
-        const SectionRule(label: 'Waiting on you'),
+        SectionRule(label: L.of(context).waitingOnYou),
         _Waiting(unread: data.unread),
       ],
     );
@@ -191,18 +198,23 @@ class _UpcomingRow extends StatelessWidget {
     final at = meeting.date;
 
     return GutterRow(
-      gutter: at == null ? 'nil' : DateFormat('HH:mm').format(at),
+      gutter: at == null
+          ? L.of(context).gutterNil
+          : DateFormat('HH:mm').format(at),
       gutterCaption: at == null
-          ? 'undated'
+          ? L.of(context).gutterUndated
           : (meeting.isToday
-                ? 'today'
-                : DateFormat('EEE d').format(at).toLowerCase()),
+                ? L.of(context).gutterToday
+                : DateFormat(
+                    'EEE d',
+                    Localizations.localeOf(context).toLanguageTag(),
+                  ).format(at).toLowerCase()),
       title: meeting.title,
       subtitle: meeting.location,
       // The only row on this screen that ever turns amber, and only in the
       // half hour where somebody should be walking towards the room.
       severity: meeting.isSoon ? AppColors.warning : null,
-      status: meeting.isSoon ? 'now' : null,
+      status: meeting.isSoon ? L.of(context).gutterNow : null,
       onTap: () {},
     );
   }
@@ -218,6 +230,7 @@ class _Standing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = L.of(context);
     final style = theme.textTheme.headlineSmall!;
     final due = data.unread.actionItemsDue;
     final clear = due == 0;
@@ -232,29 +245,30 @@ class _Standing extends StatelessWidget {
             child: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                const Text('You have '),
+                // Three fragments rather than one sentence with a slot in it:
+                // the highlighter has to wrap the middle piece, and Malay puts
+                // the time expression after it where English puts nothing.
+                Text(clear ? l.standingClearPrefix : l.standingDuePrefix),
                 Marker(
                   child: clear
-                      ? Text('nothing due', style: style)
+                      ? Text(l.standingClearMarked, style: style)
                       : Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             // Rolls when the count changes, so clearing a task
                             // is visible here rather than silently different.
                             RollingCount(value: due, style: style),
-                            Text(' due today', style: style),
+                            Text(l.standingDueMarkedTail, style: style),
                           ],
                         ),
                 ),
-                const Text('.'),
+                Text(clear ? l.standingClearSuffix : l.standingDueSuffix),
               ],
             ),
           ),
           const SizedBox(height: 10),
           Text(
-            clear
-                ? 'Nothing is overdue and nothing is waiting on your approval.'
-                : 'Everything else can wait until these are cleared.',
+            clear ? l.standingClearDetail : l.standingDueDetail,
             style: theme.textTheme.bodySmall,
           ),
         ],
@@ -278,27 +292,27 @@ class _Waiting extends StatelessWidget {
       if (unread.actionItemsDue > 0)
         GutterRow(
           gutter: '${unread.actionItemsDue}',
-          gutterCaption: 'due',
-          title: 'Action items',
-          subtitle: 'Due today or earlier',
+          gutterCaption: L.of(context).gutterDue,
+          title: L.of(context).actionItems,
+          subtitle: L.of(context).actionItemsDetail,
           severity: AppColors.danger,
           onTap: () {},
         ),
       if (unread.pendingApprovals > 0)
         GutterRow(
           gutter: '${unread.pendingApprovals}',
-          gutterCaption: 'open',
-          title: 'Minutes to approve',
-          subtitle: 'Circulated to you, not yet answered',
+          gutterCaption: L.of(context).gutterOpen,
+          title: L.of(context).minutesToApprove,
+          subtitle: L.of(context).minutesToApproveDetail,
           severity: AppColors.warning,
           onTap: () {},
         ),
     ];
 
     if (rows.isEmpty) {
-      return const _Empty(
-        line: 'Nothing waiting',
-        detail: 'Approvals and overdue items land here.',
+      return _Empty(
+        line: L.of(context).nothingWaiting,
+        detail: L.of(context).nothingWaitingDetail,
       );
     }
 
@@ -313,8 +327,8 @@ class _Loading extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      children: const [
-        Padding(
+      children: [
+        const Padding(
           padding: EdgeInsets.fromLTRB(20, 30, 20, 22),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,10 +339,10 @@ class _Loading extends StatelessWidget {
             ],
           ),
         ),
-        SectionRule(label: 'Up next'),
-        GutterRowSkeleton(titleFraction: 0.62),
-        SectionRule(label: 'Waiting on you'),
-        GutterRowSkeleton(titleFraction: 0.44),
+        SectionRule(label: L.of(context).upNext),
+        const GutterRowSkeleton(titleFraction: 0.62),
+        SectionRule(label: L.of(context).waitingOnYou),
+        const GutterRowSkeleton(titleFraction: 0.44),
       ],
     );
   }

@@ -1,0 +1,44 @@
+{
+  "@@locale": "ms",
+
+  "notifications": "Pemberitahuan",
+  "back": "Kembali",
+
+  "goodMorning": "Selamat pagi",
+  "goodAfternoon": "Selamat petang",
+  "goodEvening": "Selamat malam",
+
+  "homeDateLine": "EEEE d MMMM · HH:mm",
+
+  "standingClearPrefix": "Anda ",
+  "standingClearMarked": "tiada tugasan",
+  "standingClearSuffix": " hari ini.",
+
+  "standingDuePrefix": "Anda ada ",
+  "standingDueMarkedTail": " perlu tindakan",
+  "standingDueSuffix": " hari ini.",
+
+  "standingClearDetail": "Tiada yang tertunggak dan tiada yang menunggu kelulusan anda.",
+  "standingDueDetail": "Selebihnya boleh tunggu sehingga ini selesai.",
+
+  "upNext": "Seterusnya",
+  "nothingScheduled": "Tiada dijadualkan",
+  "nothingScheduledDetail": "Mesyuarat yang anda dijemput akan muncul di sini.",
+  "diaryUnavailable": "Diari tidak dapat dimuatkan",
+  "pullToRetry": "Tarik ke bawah untuk cuba lagi.",
+
+  "waitingOnYou": "Menunggu anda",
+  "nothingWaiting": "Tiada yang menunggu",
+  "nothingWaitingDetail": "Kelulusan dan perkara tertunggak akan sampai di sini.",
+  "actionItems": "Tindakan",
+  "actionItemsDetail": "Perlu diselesaikan hari ini atau lebih awal",
+  "minutesToApprove": "Minit untuk diluluskan",
+  "minutesToApproveDetail": "Diedarkan kepada anda, belum dijawab",
+
+  "gutterToday": "hari ini",
+  "gutterUndated": "tiada tarikh",
+  "gutterNil": "nil",
+  "gutterNow": "kini",
+  "gutterDue": "perlu",
+  "gutterOpen": "terbuka"
+}

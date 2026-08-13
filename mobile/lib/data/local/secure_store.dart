@@ -28,6 +28,7 @@ class SecureStore {
   static const _tokenExpiryKey = 'auth_token_expires_at';
   static const _organizationKey = 'current_organization_id';
   static const _deviceIdKey = 'device_id';
+  static const _localeKey = 'locale';
 
   Future<String?> readToken() => _storage.read(key: _tokenKey);
 
@@ -67,6 +68,24 @@ class SecureStore {
       return;
     }
     await _storage.write(key: _organizationKey, value: id.toString());
+  }
+
+  /// The chosen interface language, or null to follow the phone.
+  ///
+  /// Kept beside the session rather than in shared preferences so there is one
+  /// place holding what this install remembers — but deliberately not cleared
+  /// on sign-out: somebody who set the app to Malay wants the login screen in
+  /// Malay too.
+  Future<String?> readLocale() => _storage.read(key: _localeKey);
+
+  Future<void> writeLocale(String? tag) async {
+    if (tag == null) {
+      await _storage.delete(key: _localeKey);
+
+      return;
+    }
+
+    await _storage.write(key: _localeKey, value: tag);
   }
 
   Future<String> deviceId() async {

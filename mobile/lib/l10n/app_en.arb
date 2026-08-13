@@ -1,0 +1,56 @@
+{
+  "@@locale": "en",
+
+  "notifications": "Notifications",
+  "back": "Back",
+
+  "goodMorning": "Good morning",
+  "goodAfternoon": "Good afternoon",
+  "goodEvening": "Good evening",
+
+  "homeDateLine": "EEEE d MMMM · HH:mm",
+  "@homeDateLine": {
+    "description": "A DateFormat skeleton, not prose. Translators may reorder the parts — Malay writes the day before the date too — but every token must stay a valid ICU pattern."
+  },
+
+  "standingClearPrefix": "You have ",
+  "standingClearMarked": "nothing due",
+  "standingClearSuffix": ".",
+  "@standingClearPrefix": {
+    "description": "The sentence on Home when nothing is owed, split so the highlighter can sit on the middle fragment. Languages that put the time expression last should carry it in the suffix."
+  },
+
+  "standingDuePrefix": "You have ",
+  "standingDueMarkedTail": " due today",
+  "standingDueSuffix": ".",
+  "@standingDueMarkedTail": {
+    "description": "Follows the rolling number, inside the highlighter. English reads 'You have [3 due today].'"
+  },
+
+  "standingClearDetail": "Nothing is overdue and nothing is waiting on your approval.",
+  "standingDueDetail": "Everything else can wait until these are cleared.",
+
+  "upNext": "Up next",
+  "nothingScheduled": "Nothing scheduled",
+  "nothingScheduledDetail": "Meetings you are invited to appear here.",
+  "diaryUnavailable": "Could not load the diary",
+  "pullToRetry": "Pull down to try again.",
+
+  "waitingOnYou": "Waiting on you",
+  "nothingWaiting": "Nothing waiting",
+  "nothingWaitingDetail": "Approvals and overdue items land here.",
+  "actionItems": "Action items",
+  "actionItemsDetail": "Due today or earlier",
+  "minutesToApprove": "Minutes to approve",
+  "minutesToApproveDetail": "Circulated to you, not yet answered",
+
+  "gutterToday": "today",
+  "gutterUndated": "undated",
+  "gutterNil": "nil",
+  "gutterNow": "now",
+  "gutterDue": "due",
+  "gutterOpen": "open",
+  "@gutterToday": {
+    "description": "Gutter captions are lowercase and must stay short — the column is 62pt and a wrapped caption breaks the alignment the whole list is built on."
+  }
+}
