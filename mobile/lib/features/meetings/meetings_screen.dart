@@ -153,14 +153,16 @@ class _MeetingsScreenState extends ConsumerState<MeetingsScreen> {
       meta: _meta(all, rows, filter),
       actions: [
         MastheadAction(
-          icon: Icons.add_rounded,
-          tooltip: 'New meeting',
-          onPressed: () => showCreateMeeting(context, ref),
-        ),
-        MastheadAction(
           icon: _searching ? Icons.close_rounded : Icons.search_rounded,
           tooltip: _searching ? 'Close search' : 'Search',
           onPressed: _toggleSearch,
+        ),
+        // Last, so the solid one sits at the edge where the eye stops.
+        MastheadAction(
+          icon: Icons.add_rounded,
+          tooltip: 'New meeting',
+          filled: true,
+          onPressed: () => showCreateMeeting(context, ref),
         ),
       ],
       onRefresh: () async => ref.refresh(meetingsProvider.future),
@@ -528,11 +530,15 @@ class _NoMatches extends StatelessWidget {
   }
 }
 
-class _NoMeetings extends StatelessWidget {
+/// An empty ledger has to offer the pen.
+///
+/// This screen used to describe what would eventually appear here and leave it
+/// at that, which put the only way forward behind an icon in the masthead.
+class _NoMeetings extends ConsumerWidget {
   const _NoMeetings();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
@@ -551,9 +557,15 @@ class _NoMeetings extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Record a meeting and its minutes will be filed here.',
+                  'File a sitting ahead of time, or record one and its minutes '
+                  'will be filed here.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () => showCreateMeeting(context, ref),
+                  child: const Text('New meeting'),
                 ),
               ],
             ),
