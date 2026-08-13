@@ -11,8 +11,10 @@ use App\Domain\API\Resources\Mobile\MeetingDetailResource;
 use App\Domain\API\Resources\Mobile\MeetingListResource;
 use App\Domain\LiveMeeting\Enums\LiveSessionStatus;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Domain\Meeting\Services\MomNumberService;
 use App\Support\Enums\MeetingStatus;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -71,7 +73,7 @@ class MeetingController extends MobileController
         $data['status'] = MeetingStatus::Draft;
         $data['created_by'] = $this->user($request)->id;
 
-        $meeting = MinutesOfMeeting::createForOrganization($this->organizationId($request), $data);
+        $meeting = $this->createNumbered($this->organizationId($request), $data);
 
         if ($attendeeIds !== []) {
             $this->attachAttendees($meeting, $attendeeIds);
@@ -203,6 +205,42 @@ class MeetingController extends MobileController
                     ->orWhere('summary', 'like', $term)
                     ->orWhere('mom_number', 'like', $term));
             });
+    }
+
+    /**
+     * File the sitting under the next number in its organisation's series.
+     *
+     * The web has always done this through MeetingService; this endpoint went
+     * straight to the model and so produced records with an empty MOM NO. —
+     * including every sitting the recorder creates for itself, which is most
+     * of them.
+     *
+     * Retried because the number is chosen by reading the highest one and
+     * adding to it, with a unique index behind it and no lock in between. Two
+     * phones ending a recording in the same second pick the same number and
+     * one loses the insert. On the web that was a rarity; here the recorder
+     * files meetings on its own, so two people in one organisation at once is
+     * an ordinary morning.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function createNumbered(int $organizationId, array $data): MinutesOfMeeting
+    {
+        $numbers = app(MomNumberService::class);
+
+        for ($attempt = 1; ; $attempt++) {
+            $data['mom_number'] = $numbers->generate($organizationId);
+
+            try {
+                return MinutesOfMeeting::createForOrganization($organizationId, $data);
+            } catch (UniqueConstraintViolationException $e) {
+                // Five losses in a row is no longer contention; something else
+                // is wrong and the caller should hear about it.
+                if ($attempt >= 5) {
+                    throw $e;
+                }
+            }
+        }
     }
 
     /** @param  array<int, int>  $userIds */
