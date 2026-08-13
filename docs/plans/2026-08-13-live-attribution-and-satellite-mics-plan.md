@@ -153,7 +153,13 @@ git add -A && git commit -m "feat(live): keep the transcript segments each chunk
 
 ---
 
-## Task 2: Write segments when the session is merged
+## Task 2: Replace the chunk-sized segment with the real ones
+
+> **Corrected during implementation.** This task was written as *create*
+> segments. The merge already creates one per chunk (`LiveMeetingService.php:254`) —
+> the loop sits after the transcription insert, and the original reading of this
+> method stopped short of it. The work is to make those segments per-utterance
+> where a chunk carries its own, and to leave the coarse one as the fallback.
 
 **Files:**
 - Modify: `app/Domain/LiveMeeting/Services/LiveMeetingService.php`
@@ -201,7 +207,9 @@ it('still produces a transcription when no chunk carried segments', function () 
 });
 ```
 
-The second test is the important one. `full_text` is what `ExtractionService` reads (`ExtractionService.php:189`), so segments must be strictly additive — a session with none must behave exactly as it does today.
+The second test is the important one, and it is a regression guard rather than a new behaviour: chunks with no segments of their own must keep producing exactly the one coarse segment they produce today. Every recording made before Task 1, and everything the web recorder sends, is in that case.
+
+`full_text` is what `ExtractionService` reads (`ExtractionService.php:189`) and is unaffected either way.
 
 **Step 2: Run to verify it fails**
 
