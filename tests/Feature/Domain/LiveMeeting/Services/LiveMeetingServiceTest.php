@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Account\Models\Organization;
 use App\Domain\AI\Jobs\ExtractMeetingDataJob;
+use App\Domain\LiveMeeting\Enums\ChunkRole;
 use App\Domain\LiveMeeting\Enums\ChunkStatus;
 use App\Domain\LiveMeeting\Enums\LiveSessionStatus;
 use App\Domain\LiveMeeting\Jobs\LiveTranscriptionJob;
@@ -293,6 +294,11 @@ test('records dropped chunks on the transcription when the merge is incomplete',
     expect($transcription->provider_metadata)->toBe([
         'merged_chunks' => 1,
         'dropped_chunks' => 1,
+        // Which device each surviving moment came from. Recorded so the
+        // question of whether a satellite ever earns its place can be answered
+        // from data rather than from impressions; there is one device here, so
+        // every moment is the primary's.
+        'chunk_sources' => [1 => 'primary'],
     ]);
 
     Log::shouldHaveReceived('warning')
@@ -531,4 +537,217 @@ test('does not ask for names when no chunk ever transcribed', function () {
     $this->service->endSession($session);
 
     Queue::assertNotPushed(DiarizeTranscriptionJob::class);
+});
+
+/**
+ * Stores a satellite chunk for [$number] and returns it.
+ */
+function satelliteChunk(LiveMeetingSession $session, int $number): LiveTranscriptChunk
+{
+    Storage::fake('local');
+
+    return app(LiveMeetingService::class)->processChunk(
+        $session,
+        UploadedFile::fake()->create('chunk.wav', 10),
+        $number,
+        (float) ($number * 15),
+        (float) (($number + 1) * 15),
+        [],
+        'phone-at-the-far-end',
+        ChunkRole::Satellite,
+    );
+}
+
+test('a satellite is not transcribed when the primary heard it well', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'laptop-at-the-head',
+        'role' => ChunkRole::Primary,
+        'chunk_number' => 2,
+        'speech_dbfs' => -28.0,
+    ]);
+
+    expect(satelliteChunk($session, 2)->status)->toBe(ChunkStatus::Skipped);
+
+    Queue::assertNotPushed(LiveTranscriptionJob::class);
+});
+
+test('a satellite is transcribed when the primary barely heard it', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'laptop-at-the-head',
+        'role' => ChunkRole::Primary,
+        'chunk_number' => 2,
+        'speech_dbfs' => -57.0,
+    ]);
+
+    expect(satelliteChunk($session, 2)->status)->toBe(ChunkStatus::Pending);
+
+    Queue::assertPushed(LiveTranscriptionJob::class);
+});
+
+// Not knowing must cost money rather than words: the satellite arrived first,
+// or the primary is on a build too old to measure anything.
+test('a satellite is transcribed when there is nothing to compare against', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    expect(satelliteChunk($session, 2)->status)->toBe(ChunkStatus::Pending);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'laptop-at-the-head',
+        'role' => ChunkRole::Primary,
+        'chunk_number' => 5,
+        'speech_dbfs' => null,
+    ]);
+
+    expect(satelliteChunk($session, 5)->status)->toBe(ChunkStatus::Pending);
+});
+
+test('a primary chunk is always transcribed, however quiet it was', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    Storage::fake('local');
+
+    $chunk = $this->service->processChunk(
+        $session,
+        UploadedFile::fake()->create('chunk.wav', 10),
+        0,
+        0.0,
+        15.0,
+        ['speech_dbfs' => -70.0],
+    );
+
+    expect($chunk->status)->toBe(ChunkStatus::Pending);
+    Queue::assertPushed(LiveTranscriptionJob::class);
+});
+
+// The false alarm this would otherwise cause is the worst kind: it tells
+// somebody their minutes have holes in them, after every meeting that used a
+// second microphone, when nothing at all is missing.
+test('a skipped satellite chunk is not reported as lost audio', function () {
+    Queue::fake();
+    Notification::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'laptop-at-the-head',
+        'role' => ChunkRole::Primary,
+        'chunk_number' => 0,
+        'text' => 'the chair opened the meeting',
+    ]);
+
+    LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'phone-at-the-far-end',
+        'role' => ChunkRole::Satellite,
+        'chunk_number' => 0,
+        'status' => ChunkStatus::Skipped,
+    ]);
+
+    $this->service->endSession($session);
+
+    $transcription = AudioTranscription::query()->latest('id')->first();
+
+    expect($transcription->provider_metadata['dropped_chunks'])->toBe(0);
+});
+
+// Without selection the same fifteen seconds appears twice in the minutes,
+// once from each microphone.
+test('a moment both devices transcribed appears once in the transcript', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'laptop-at-the-head',
+        'role' => ChunkRole::Primary,
+        'chunk_number' => 0,
+        'text' => 'mumbling from the far end',
+        'confidence' => 0.4,
+        'speech_dbfs' => -58.0,
+        'segments' => null,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'phone-at-the-far-end',
+        'role' => ChunkRole::Satellite,
+        'chunk_number' => 0,
+        'text' => 'I move that we approve the budget',
+        'confidence' => 0.93,
+        'speech_dbfs' => -31.0,
+        'segments' => null,
+    ]);
+
+    $this->service->endSession($session);
+
+    $transcription = AudioTranscription::query()->latest('id')->first();
+
+    expect($transcription->full_text)->toBe('I move that we approve the budget')
+        ->and($transcription->provider_metadata['merged_chunks'])->toBe(1)
+        ->and($transcription->provider_metadata['chunk_sources'])->toBe([0 => 'satellite']);
+});
+
+test('a sitting with one device reads exactly as it always did', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    foreach (['first thing said', 'second thing said'] as $number => $text) {
+        LiveTranscriptChunk::factory()->completed()->create([
+            'live_meeting_session_id' => $session->id,
+            'chunk_number' => $number,
+            'text' => $text,
+            'segments' => null,
+        ]);
+    }
+
+    $this->service->endSession($session);
+
+    expect(AudioTranscription::query()->latest('id')->first()->full_text)
+        ->toBe("first thing said\nsecond thing said");
 });

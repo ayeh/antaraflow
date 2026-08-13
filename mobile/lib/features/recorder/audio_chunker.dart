@@ -77,6 +77,10 @@ class AudioChunker {
   /// the outbox in the order they were cut.
   Future<void> _writes = Future<void>.value();
 
+  /// Audio still owed to the gap between this device joining and the next
+  /// chunk boundary of the sitting it is joining.
+  int _discardBytes = 0;
+
   int _samplesWritten = 0;
   int _chunkStartSample = 0;
   int _chunkNumber = 0;
@@ -110,10 +114,13 @@ class AudioChunker {
     Directory scratch, {
     int fromChunk = 0,
     Duration alreadyRecorded = Duration.zero,
+    Duration discardFirst = Duration.zero,
   }) {
     _scratch = scratch;
     _chunkNumber = fromChunk;
     _offset = alreadyRecorded;
+    _discardBytes =
+        discardFirst.inMilliseconds * sampleRate * _bytesPerSample ~/ 1000;
   }
 
   /// Stands in for the microphone stream.
@@ -130,8 +137,14 @@ class AudioChunker {
     Directory scratch, {
     int fromChunk = 0,
     Duration alreadyRecorded = Duration.zero,
+    Duration discardFirst = Duration.zero,
   }) async {
-    prepare(scratch, fromChunk: fromChunk, alreadyRecorded: alreadyRecorded);
+    prepare(
+      scratch,
+      fromChunk: fromChunk,
+      alreadyRecorded: alreadyRecorded,
+      discardFirst: discardFirst,
+    );
 
     final stream = await _recorder.startStream(
       const RecordConfig(
@@ -182,13 +195,50 @@ class AudioChunker {
   void _onData(Uint8List data) {
     if (_stopped) return;
 
-    _buffer.add(data);
-    _samplesWritten += data.lengthInBytes ~/ _bytesPerSample;
+    // Fed before the discard, never after. A satellite waiting for the next
+    // boundary is already in the room with its microphone open, and the
+    // placement check has no reason to sit blind for the first ten seconds of
+    // a meeting it is listening to.
     room.add(data);
+
+    final payload = _keep(data);
+    if (payload == null) return;
+
+    _buffer.add(payload);
+    _samplesWritten += payload.lengthInBytes ~/ _bytesPerSample;
 
     while (_buffer.length >= _bytesPerChunk) {
       _cut(_bytesPerChunk);
     }
+  }
+
+  /// What is left of [data] once any audio owed to the alignment gap is gone.
+  ///
+  /// A device joining a sitting in progress lands mid-window. It throws that
+  /// part away rather than sending a short chunk: a short chunk numbered N
+  /// covers only the tail of the window the primary's chunk N covers, and if
+  /// selection preferred it the opening seconds of that window would vanish
+  /// from the transcript with nothing to show for it. At most fifteen seconds
+  /// of satellite audio is the cheaper mistake.
+  ///
+  /// The discarded bytes must not reach [_samplesWritten] — the clock and
+  /// every chunk boundary after it are counted from there.
+  Uint8List? _keep(Uint8List data) {
+    if (_discardBytes <= 0) return data;
+
+    final dropped = _discardBytes < data.lengthInBytes
+        ? _discardBytes
+        : data.lengthInBytes;
+    _discardBytes -= dropped;
+
+    // The gap has just closed, so the room reading starts fresh here. Left
+    // alone, the first chunk this device sends would be measured partly on
+    // audio nobody is going to hear.
+    if (_discardBytes <= 0) room.takeChunk();
+
+    return dropped == data.lengthInBytes
+        ? null
+        : Uint8List.sublistView(data, dropped);
   }
 
   Future<void> _flush() async {

@@ -2,6 +2,7 @@ import 'package:antaranote/data/api/api_client.dart';
 import 'package:antaranote/data/local/secure_store.dart';
 import 'package:antaranote/data/repositories/live_repository.dart';
 import 'package:antaranote/features/recorder/recorder_controller.dart';
+import 'package:antaranote/features/recorder/recorder_role.dart';
 import 'package:antaranote/features/recorder/recorder_screen.dart';
 import 'package:antaranote/features/recorder/room_level.dart';
 import 'package:antaranote/l10n/app_localizations.dart';
@@ -24,16 +25,23 @@ class _Stub extends RecorderController {
         LiveRepository(
           client: ApiClient(store: SecureStore(), dio: Dio()),
         ),
+        SecureStore(),
       ) {
     state = initial;
   }
+
+  int helped = 0;
 
   @override
   Future<void> begin({
     required int meetingId,
     required String title,
     required RoomNotices notices,
+    RecorderRole role = RecorderRole.primary,
   }) async {}
+
+  @override
+  Future<void> helpRecord() async => helped++;
 }
 
 void main() {
@@ -52,11 +60,15 @@ void main() {
 
   setUp(() => FlutterSecureStorage.setMockInitialValues({}));
 
+  late _Stub controller;
+
   Future<void> pumpRecorder(WidgetTester tester, RecorderState state) async {
+    controller = _Stub(state);
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          recorderControllerProvider.overrideWith((ref) => _Stub(state)),
+          recorderControllerProvider.overrideWith((ref) => controller),
         ],
         child: MaterialApp(
           localizationsDelegates: L.localizationsDelegates,
@@ -162,6 +174,109 @@ void main() {
 
       expect(find.text('TOO QUIET'), findsOneWidget);
       expect(find.text('MIC CHECK'), findsNothing);
+    });
+  });
+
+  group('being asked to help', () {
+    testWidgets('says where the audio goes before anything is recorded', (
+      tester,
+    ) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(phase: RecorderPhase.offered),
+      );
+
+      expect(
+        find.text('Add this phone as an extra microphone?'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('goes to your organisation'),
+        findsOneWidget,
+        reason: 'consent is stated, not footnoted',
+      );
+    });
+
+    testWidgets('taking it up asks the controller to join', (tester) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(phase: RecorderPhase.offered),
+      );
+
+      await tester.tap(find.text('Use as extra microphone'));
+      await tester.pump();
+
+      expect(controller.helped, 1);
+    });
+
+    testWidgets('declining leaves without joining', (tester) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(phase: RecorderPhase.offered),
+      );
+
+      await tester.tap(find.text('Not now'));
+      await tester.pump();
+
+      expect(controller.helped, 0);
+    });
+  });
+
+  // Somebody who cannot tell a satellite from the recording stops the wrong
+  // device, and stopping the wrong one ends the meeting for everybody.
+  group('which device this is', () {
+    testWidgets('the recording says it is recording', (tester) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(phase: RecorderPhase.recording),
+      );
+
+      expect(find.text('RECORDING'), findsOneWidget);
+      expect(find.text('EXTRA MICROPHONE'), findsNothing);
+    });
+
+    testWidgets('a satellite says it is a microphone, not the recording', (
+      tester,
+    ) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(
+          phase: RecorderPhase.recording,
+          role: RecorderRole.satellite,
+        ),
+      );
+
+      expect(find.text('EXTRA MICROPHONE'), findsOneWidget);
+      expect(find.text('RECORDING'), findsNothing);
+    });
+
+    testWidgets('and says stopping it does not stop the meeting', (
+      tester,
+    ) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(
+          phase: RecorderPhase.recording,
+          role: RecorderRole.satellite,
+        ),
+      );
+
+      expect(
+        find.textContaining('does not stop the meeting recording'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the recording is not told any of that', (tester) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(phase: RecorderPhase.recording),
+      );
+
+      expect(
+        find.textContaining('does not stop the meeting recording'),
+        findsNothing,
+      );
     });
   });
 }

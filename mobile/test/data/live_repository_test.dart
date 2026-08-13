@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:antaranote/core/error/api_exception.dart';
 import 'package:antaranote/data/api/api_client.dart';
 import 'package:antaranote/data/local/secure_store.dart';
 import 'package:antaranote/data/repositories/live_repository.dart';
+import 'package:antaranote/features/recorder/recorder_role.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -231,5 +233,104 @@ void main() {
 
     expect(session.id, 7);
     expect(adapter.seen?.path, '/meetings/12/live/start');
+  });
+
+  group('uploading a chunk from more than one device', () {
+    late Directory scratch;
+    late File audio;
+
+    setUp(() {
+      scratch = Directory.systemTemp.createTempSync('live-repo');
+      audio = File('${scratch.path}/chunk-4.wav')
+        ..writeAsBytesSync([0, 1, 2, 3]);
+    });
+
+    tearDown(() {
+      if (scratch.existsSync()) scratch.deleteSync(recursive: true);
+    });
+
+    Map<String, String> fieldsOf(RequestOptions? seen) {
+      final form = seen?.data as FormData?;
+
+      return {
+        for (final field in form?.fields ?? const []) field.key: field.value,
+      };
+    }
+
+    Future<_Canned> upload({
+      String deviceId = '',
+      RecorderRole role = RecorderRole.primary,
+    }) async {
+      final adapter = _Canned(status: 201, body: {'chunk': {}});
+
+      await _repositoryReturning(adapter).uploadChunk(
+        9,
+        file: audio,
+        chunkNumber: 4,
+        startTime: 60,
+        endTime: 75,
+        deviceId: deviceId,
+        role: role,
+      );
+
+      return adapter;
+    }
+
+    // Invisible from the outside, which is why it is pinned here. The server
+    // scopes its idempotency cache by user, so two people are already safe —
+    // but one person recording on both their own phone and their own tablet
+    // would have the satellite's chunk answered from the primary's cached
+    // response. The audio never reaches the server and every response still
+    // reads as a success.
+    test(
+      'two devices in one sitting do not share an idempotency key',
+      () async {
+        final primary = await upload(deviceId: 'laptop-at-the-head');
+        final satellite = await upload(
+          deviceId: 'phone-at-the-far-end',
+          role: RecorderRole.satellite,
+        );
+
+        expect(
+          primary.seen?.headers['Idempotency-Key'],
+          isNot(satellite.seen?.headers['Idempotency-Key']),
+        );
+      },
+    );
+
+    // The other half of that: a retry after a timeout is the same chunk and
+    // must still be recognised as one, or it is stored and billed twice.
+    test('the same chunk retried from one device keeps its key', () async {
+      final first = await upload(deviceId: 'phone-at-the-far-end');
+      final again = await upload(deviceId: 'phone-at-the-far-end');
+
+      expect(
+        first.seen?.headers['Idempotency-Key'],
+        again.seen?.headers['Idempotency-Key'],
+      );
+    });
+
+    test('a satellite says which device it is on every chunk', () async {
+      final adapter = await upload(
+        deviceId: 'phone-at-the-far-end',
+        role: RecorderRole.satellite,
+      );
+
+      expect(fieldsOf(adapter.seen), containsPair('role', 'satellite'));
+      expect(
+        fieldsOf(adapter.seen),
+        containsPair('device_id', 'phone-at-the-far-end'),
+      );
+    });
+
+    // The browser recorder sends no device, and neither does an app build that
+    // predates satellites. The server reads a missing device as the session's
+    // one primary, which is exactly what those recordings are.
+    test('a recorder with no device sends neither field', () async {
+      final adapter = await upload();
+
+      expect(fieldsOf(adapter.seen).keys, isNot(contains('device_id')));
+      expect(fieldsOf(adapter.seen).keys, isNot(contains('role')));
+    });
   });
 }

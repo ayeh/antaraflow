@@ -10,9 +10,11 @@ import '../../core/providers.dart';
 import '../../data/repositories/live_repository.dart';
 import '../../domain/models/live_session.dart';
 import '../../core/haptics.dart';
+import '../../data/local/secure_store.dart';
 import 'audio_chunker.dart';
 import 'chunk_outbox.dart';
 import 'live_activity.dart';
+import 'recorder_role.dart';
 import 'recording_service.dart';
 import 'room_level.dart';
 
@@ -24,7 +26,10 @@ final liveRepositoryProvider = Provider<LiveRepository>((ref) {
 /// machinery down rather than leaving a microphone open behind a list.
 final recorderControllerProvider =
     StateNotifierProvider.autoDispose<RecorderController, RecorderState>((ref) {
-      final controller = RecorderController(ref.watch(liveRepositoryProvider));
+      final controller = RecorderController(
+        ref.watch(liveRepositoryProvider),
+        ref.watch(secureStoreProvider),
+      );
       ref.onDispose(controller.disposeAsync);
 
       return controller;
@@ -39,6 +44,10 @@ enum RecorderPhase {
 
   recording,
   paused,
+
+  /// Somebody else is already recording this sitting, and this phone has
+  /// been asked whether it wants to help.
+  offered,
 
   /// Draining the queue before the session can be closed.
   finishing,
@@ -57,6 +66,7 @@ class RecorderState {
     this.chunksDropped = 0,
     this.check = RoomVerdict.listening,
     this.room = RoomVerdict.listening,
+    this.role = RecorderRole.primary,
     this.error,
   });
 
@@ -73,6 +83,13 @@ class RecorderState {
   /// warning that disappeared during the pause between sentences would be
   /// telling somebody the problem had fixed itself.
   final RoomVerdict room;
+
+  /// Whether this phone is the recording or is helping another device record.
+  ///
+  /// Carried in state because the screen must say so for the whole sitting: a
+  /// satellite is not recording the meeting, and somebody who cannot tell the
+  /// two apart will stop the wrong device.
+  final RecorderRole role;
 
   /// Newest first: the mark someone just made is the one they want to see.
   final List<Bookmark> bookmarks;
@@ -101,6 +118,7 @@ class RecorderState {
     int? chunksDropped,
     RoomVerdict? check,
     RoomVerdict? room,
+    RecorderRole? role,
     String? error,
     bool clearError = false,
   }) {
@@ -113,6 +131,7 @@ class RecorderState {
       chunksDropped: chunksDropped ?? this.chunksDropped,
       check: check ?? this.check,
       room: room ?? this.room,
+      role: role ?? this.role,
       error: clearError ? null : (error ?? this.error),
     );
   }
@@ -145,15 +164,23 @@ class RoomNotices {
 
 /// Runs one recording from the microphone to the server.
 class RecorderController extends StateNotifier<RecorderState> {
-  RecorderController(this._repository) : super(const RecorderState());
+  RecorderController(this._repository, this._store)
+    : super(const RecorderState());
 
   final LiveRepository _repository;
+  final SecureStore _store;
   final _uuid = const Uuid();
 
   final _chunker = AudioChunker();
   final _activity = LiveActivity();
   final _service = RecordingService();
   RoomNotices? _notices;
+  String _deviceId = '';
+
+  /// The running sitting this phone has been asked to help with, held while
+  /// the question is on screen.
+  LiveSession? _offered;
+
   ChunkOutbox? _outbox;
   StreamSubscription<AudioChunk>? _chunkSub;
   Timer? _ticker;
@@ -183,9 +210,10 @@ class RecorderController extends StateNotifier<RecorderState> {
     required int meetingId,
     required String title,
     required RoomNotices notices,
+    RecorderRole role = RecorderRole.primary,
   }) async {
     _notices = notices;
-    state = state.copyWith(meetingTitle: title, clearError: true);
+    state = state.copyWith(meetingTitle: title, role: role, clearError: true);
 
     if (!await _chunker.hasPermission()) {
       state = state.copyWith(phase: RecorderPhase.denied);
@@ -193,54 +221,100 @@ class RecorderController extends StateNotifier<RecorderState> {
     }
 
     try {
+      _deviceId = await _store.deviceId();
+
       final session = await _repository.start(
         meetingId,
         chunkSeconds: _chunker.chunkSeconds,
         clientId: _uuid.v4(),
+        deviceId: _deviceId,
       );
 
-      _outbox = ChunkOutbox(repository: _repository, sessionId: session.id);
-      _chunkSub = _chunker.chunks.listen((chunk) => _outbox?.add(chunk));
+      // Somebody else is recording this sitting. Opening the microphone now
+      // and asking afterwards would be the wrong way round — this phone is
+      // about to record a room on somebody else's behalf, and that is a
+      // question, not a default.
+      if (session.role.isSatellite && role != RecorderRole.satellite) {
+        _offered = session;
+        state = state.copyWith(phase: RecorderPhase.offered);
 
-      // Cache, not documents: these files exist only until they are uploaded,
-      // and the OS is welcome to reclaim them if the app dies holding them.
-      final recorded = session.recordedAt(_chunker.chunkSeconds);
+        return;
+      }
 
-      final scratch = await getTemporaryDirectory();
-      await _chunker.start(
-        scratch,
-        fromChunk: session.nextChunkNumber,
-        alreadyRecorded: recorded,
-      );
-
-      unawaited(_activity.start(title: title, elapsed: recorded));
-      unawaited(_service.start(title, note: notices.recording));
-
-      _chunker.room.check.addListener(_onCheck);
-      _chunker.room.verdict.addListener(_onRoom);
-
-      _ticker = Timer.periodic(const Duration(milliseconds: 500), (_) {
-        if (mounted) state = state.copyWith(elapsed: _chunker.position);
-      });
-
-      // The card runs its own clock, so it only needs telling when something
-      // it cannot work out for itself changes. Once every fifteen seconds is
-      // roughly per chunk, and well inside what the system will budget.
-      _activityTicker = Timer.periodic(
-        const Duration(seconds: 15),
-        (_) => _pushActivity(),
-      );
-
-      state = state.copyWith(
-        phase: RecorderPhase.recording,
-        sessionId: session.id,
-        // A rejoined sitting has been running for a while; starting the clock
-        // at zero would tell the room the meeting just began.
-        elapsed: recorded,
-      );
+      await _open(session, role: session.role);
     } on ApiException catch (e) {
       state = state.copyWith(phase: RecorderPhase.failed, error: e.message);
     }
+  }
+
+  /// Takes up the offer to be a second microphone.
+  Future<void> helpRecord() async {
+    final session = _offered;
+    if (session == null) return;
+
+    _offered = null;
+    state = state.copyWith(phase: RecorderPhase.preparing);
+
+    try {
+      await _open(session, role: RecorderRole.satellite);
+    } on ApiException catch (e) {
+      state = state.copyWith(phase: RecorderPhase.failed, error: e.message);
+    }
+  }
+
+  /// Opens the microphone and starts feeding the session.
+  Future<void> _open(LiveSession session, {required RecorderRole role}) async {
+    _outbox = ChunkOutbox(
+      repository: _repository,
+      sessionId: session.id,
+      deviceId: _deviceId,
+      role: role,
+    );
+    _chunkSub = _chunker.chunks.listen((chunk) => _outbox?.add(chunk));
+
+    // Cache, not documents: these files exist only until they are uploaded,
+    // and the OS is welcome to reclaim them if the app dies holding them.
+    final recorded = session.recordedAt(_chunker.chunkSeconds);
+
+    final scratch = await getTemporaryDirectory();
+    await _chunker.start(
+      scratch,
+      fromChunk: session.nextChunkNumber,
+      alreadyRecorded: recorded,
+      // A device joining mid-sitting waits for the next boundary of the
+      // recording it is joining, rather than cutting on its own clock.
+      discardFirst: role.isSatellite
+          ? session.alignmentGap(_chunker.chunkSeconds)
+          : Duration.zero,
+    );
+
+    final title = state.meetingTitle;
+    unawaited(_activity.start(title: title, elapsed: recorded));
+    unawaited(_service.start(title, note: _notices?.recording ?? ''));
+
+    _chunker.room.check.addListener(_onCheck);
+    _chunker.room.verdict.addListener(_onRoom);
+
+    _ticker = Timer.periodic(const Duration(milliseconds: 500), (_) {
+      if (mounted) state = state.copyWith(elapsed: _chunker.position);
+    });
+
+    // The card runs its own clock, so it only needs telling when something
+    // it cannot work out for itself changes. Once every fifteen seconds is
+    // roughly per chunk, and well inside what the system will budget.
+    _activityTicker = Timer.periodic(
+      const Duration(seconds: 15),
+      (_) => _pushActivity(),
+    );
+
+    state = state.copyWith(
+      phase: RecorderPhase.recording,
+      role: role,
+      sessionId: session.id,
+      // A rejoined sitting has been running for a while; starting the clock
+      // at zero would tell the room the meeting just began.
+      elapsed: recorded,
+    );
   }
 
   /// Marks the moment.
@@ -317,6 +391,19 @@ class RecorderController extends StateNotifier<RecorderState> {
     await _chunker.stop();
 
     final undelivered = await _outbox?.drain() ?? 0;
+
+    // A satellite closes itself and nothing else. The session belongs to the
+    // device that opened it, and ending it from here would stop the meeting
+    // being recorded — and merge the transcript — because somebody put their
+    // own phone down.
+    if (state.role.isSatellite) {
+      state = state.copyWith(
+        phase: RecorderPhase.finished,
+        chunksDropped: undelivered,
+      );
+
+      return;
+    }
 
     try {
       // The server also reports chunks it has not finished with, but at this

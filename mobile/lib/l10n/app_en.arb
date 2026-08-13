@@ -305,6 +305,17 @@
   "@recordingNoteFaint": {
     "description": "Replaces recordingNote on the ongoing notification when the room has become hard to hear. Often the only place this can be said: the phone is face down on the table and nobody is looking at the app."
   },
+  "alreadyRecording": "Already being recorded",
+  "helpRecordTitle": "Add this phone as an extra microphone?",
+  "helpRecordDetail": "Somebody else is recording this sitting. This phone can listen too — put it nearer whoever is hardest to hear, and the better of the two recordings is used for each moment.",
+  "@helpRecordDetail": {
+    "description": "Shown when a second device opens the recorder on a meeting that is already being recorded. It must be clear the audio goes to the organisation exactly as the recording already running does."
+  },
+  "helpRecordConsent": "The audio goes to your organisation, the same as the recording already running.",
+  "helpRecord": "Use as extra microphone",
+  "notNow": "Not now",
+  "extraMicrophone": "EXTRA MICROPHONE",
+  "extraMicrophoneDetail": "This phone is helping. Stopping it does not stop the meeting recording.",
   "marksSection": "MARKS",
   "marksEmpty": "Mark a decision as it is carried and it lands here, timed to the second. The marks become the skeleton of the minutes.",
   "notYetSent": "Not yet sent",

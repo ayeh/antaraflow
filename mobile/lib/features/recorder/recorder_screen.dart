@@ -11,6 +11,7 @@ import '../widgets/brand_mark.dart';
 import '../widgets/ledger_scaffold.dart';
 import 'chunk_outbox.dart';
 import 'recorder_controller.dart';
+import 'recorder_role.dart';
 import 'room_level.dart';
 import 'waveform.dart';
 import '../../l10n/app_localizations.dart';
@@ -125,6 +126,7 @@ class _RecorderScreenState extends ConsumerState<RecorderScreen> {
                   line: L.of(context).openingMicrophone,
                 ),
                 RecorderPhase.denied => const _Denied(),
+                RecorderPhase.offered => const _Offered(),
                 RecorderPhase.failed => _Failed(message: state.error),
                 RecorderPhase.finishing => _Waiting(
                   line: L.of(context).filingLastAudio,
@@ -158,7 +160,7 @@ class _Live extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _StatusPill(live: state.isLive),
+              _StatusPill(live: state.isLive, role: state.role),
               const SizedBox(height: 10),
               Text(
                 state.clock,
@@ -171,6 +173,16 @@ class _Live extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
               _OutboxLine(status: controller.outbox, lost: controller.lost),
+              if (state.role.isSatellite) ...[
+                const SizedBox(height: 8),
+                Text(
+                  L.of(context).extraMicrophoneDetail,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: _Dark.faint,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -182,6 +194,84 @@ class _Live extends ConsumerWidget {
         Expanded(child: _Marks(bookmarks: state.bookmarks)),
         _Actions(state: state),
       ],
+    );
+  }
+}
+
+/// Asks whether this phone should help record a sitting somebody else started.
+///
+/// A separate screen rather than a dialog over a running recorder, because
+/// nothing is recording yet: the microphone is deliberately not opened until
+/// this is answered. Recording a room on somebody else's behalf is a question,
+/// not a default.
+class _Offered extends ConsumerWidget {
+  const _Offered();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            L.of(context).alreadyRecording,
+            style: AppTheme.eyebrow(colour: _Dark.faint),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            L.of(context).helpRecordTitle,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(color: Colors.white),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            L.of(context).helpRecordDetail,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: _Dark.soft, height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          // Said plainly and not in a footnote. This phone is about to record
+          // a room and send it somewhere its owner does not control.
+          Container(
+            padding: const EdgeInsets.fromLTRB(12, 11, 12, 12),
+            decoration: const BoxDecoration(
+              border: Border(
+                left: BorderSide(color: AppColors.lime, width: 2.5),
+              ),
+            ),
+            child: Text(
+              L.of(context).helpRecordConsent,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: _Dark.bright, height: 1.4),
+            ),
+          ),
+          const SizedBox(height: 26),
+          FilledButton(
+            onPressed: () {
+              Haptics.shift();
+              ref.read(recorderControllerProvider.notifier).helpRecord();
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.lime,
+              foregroundColor: AppColors.navyDeep,
+            ),
+            child: Text(L.of(context).helpRecord),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: () => Navigator.of(context).maybePop(),
+            child: Text(
+              L.of(context).notNow,
+              style: const TextStyle(color: _Dark.soft),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -227,22 +317,36 @@ class _Header extends StatelessWidget {
 }
 
 class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.live});
+  const _StatusPill({required this.live, required this.role});
 
   final bool live;
 
+  /// A satellite is not recording the meeting, and somebody who cannot tell
+  /// the two apart will stop the wrong device. So the word here changes rather
+  /// than sitting somewhere else on the screen as a detail.
+  final RecorderRole role;
+
   @override
   Widget build(BuildContext context) {
+    final satellite = role.isSatellite;
+    final colour = !live
+        ? AppColors.warning
+        : satellite
+        ? AppColors.lime
+        : _Dark.live;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _Beacon(live: live),
         const SizedBox(width: 8),
         Text(
-          live ? L.of(context).recording : L.of(context).paused,
-          style: AppTheme.eyebrow(
-            colour: live ? _Dark.live : AppColors.warning,
-          ),
+          !live
+              ? L.of(context).paused
+              : satellite
+              ? L.of(context).extraMicrophone
+              : L.of(context).recording,
+          style: AppTheme.eyebrow(colour: colour),
         ),
       ],
     );
