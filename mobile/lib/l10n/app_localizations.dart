@@ -1530,6 +1530,216 @@ abstract class L {
   /// In en, this message translates to:
   /// **'choose'**
   String get gutterChoose;
+
+  /// No description provided for @markAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get markAllRead;
+
+  /// No description provided for @allRead.
+  ///
+  /// In en, this message translates to:
+  /// **'ALL READ'**
+  String get allRead;
+
+  /// No description provided for @unreadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} UNREAD'**
+  String unreadCount(int count);
+
+  /// No description provided for @upToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You are up to date'**
+  String get upToDate;
+
+  /// No description provided for @nothingWaitingNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes to approve, tasks assigned to you and mentions all arrive here.'**
+  String get nothingWaitingNotifications;
+
+  /// No description provided for @notification.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get notification;
+
+  /// No description provided for @meeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting'**
+  String get meeting;
+
+  /// No description provided for @prefsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Push reaches this phone. Email reaches you wherever you read it.'**
+  String get prefsIntro;
+
+  /// No description provided for @prefsPush.
+  ///
+  /// In en, this message translates to:
+  /// **'Push'**
+  String get prefsPush;
+
+  /// No description provided for @prefsEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get prefsEmail;
+
+  /// No description provided for @readingYourSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'READING YOUR SETTINGS'**
+  String get readingYourSettings;
+
+  /// No description provided for @kindAssignedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'A task lands on you'**
+  String get kindAssignedLabel;
+
+  /// No description provided for @kindAssignedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Somebody assigns you an action item'**
+  String get kindAssignedDetail;
+
+  /// No description provided for @kindFinalizedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes are finalised'**
+  String get kindFinalizedLabel;
+
+  /// No description provided for @kindFinalizedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'A sitting closes for editing and opens for approval'**
+  String get kindFinalizedDetail;
+
+  /// No description provided for @kindApprovedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes are approved'**
+  String get kindApprovedLabel;
+
+  /// No description provided for @kindApprovedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'A record is settled and cannot change'**
+  String get kindApprovedDetail;
+
+  /// No description provided for @kindCirculationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Something waits for your signature'**
+  String get kindCirculationLabel;
+
+  /// No description provided for @kindCirculationDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes circulated to you for confirmation'**
+  String get kindCirculationDetail;
+
+  /// No description provided for @kindMentionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'You are mentioned'**
+  String get kindMentionLabel;
+
+  /// No description provided for @kindMentionDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'In a comment or a note'**
+  String get kindMentionDetail;
+
+  /// No description provided for @kindTranscriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'A recording finishes transcribing'**
+  String get kindTranscriptionLabel;
+
+  /// No description provided for @kindTranscriptionDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The audio has become text'**
+  String get kindTranscriptionDetail;
+
+  /// No description provided for @markTask.
+  ///
+  /// In en, this message translates to:
+  /// **'task'**
+  String get markTask;
+
+  /// No description provided for @markLate.
+  ///
+  /// In en, this message translates to:
+  /// **'late'**
+  String get markLate;
+
+  /// No description provided for @markSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'soon'**
+  String get markSoon;
+
+  /// No description provided for @markDrafted.
+  ///
+  /// In en, this message translates to:
+  /// **'drafted'**
+  String get markDrafted;
+
+  /// No description provided for @markAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'audio'**
+  String get markAudio;
+
+  /// No description provided for @markStale.
+  ///
+  /// In en, this message translates to:
+  /// **'stale'**
+  String get markStale;
+
+  /// No description provided for @markFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'failed'**
+  String get markFailed;
+
+  /// No description provided for @markNote.
+  ///
+  /// In en, this message translates to:
+  /// **'note'**
+  String get markNote;
+
+  /// No description provided for @agoNow.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get agoNow;
+
+  /// No description provided for @agoMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m'**
+  String agoMinutes(int count);
+
+  /// No description provided for @agoHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h'**
+  String agoHours(int count);
+
+  /// No description provided for @agoDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d'**
+  String agoDays(int count);
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

@@ -8,44 +8,45 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../widgets/error_view.dart';
 import '../widgets/ledger_scaffold.dart';
+import '../../l10n/app_localizations.dart';
 
 /// The six things the app can tell you about, and how.
 ///
 /// Named in the app rather than echoed from the server: the server's keys are
 /// `action_item_assigned` and the like, which are correct and unreadable. An
 /// unknown key from a newer server is skipped rather than shown raw.
-const _kinds = <({String key, String label, String detail})>[
-  (
-    key: 'action_item_assigned',
-    label: 'A task lands on you',
-    detail: 'Somebody assigns you an action item',
-  ),
-  (
-    key: 'meeting_finalized',
-    label: 'Minutes are finalised',
-    detail: 'A sitting closes for editing and opens for approval',
-  ),
-  (
-    key: 'meeting_approved',
-    label: 'Minutes are approved',
-    detail: 'A record is settled and cannot change',
-  ),
-  (
-    key: 'circulation_pending',
-    label: 'Something waits for your signature',
-    detail: 'Minutes circulated to you for confirmation',
-  ),
-  (
-    key: 'mention',
-    label: 'You are mentioned',
-    detail: 'In a comment or a note',
-  ),
-  (
-    key: 'transcription_completed',
-    label: 'A recording finishes transcribing',
-    detail: 'The audio has become text',
-  ),
-];
+List<({String key, String label, String detail})> _kinds(BuildContext context) {
+  final l = L.of(context);
+
+  return [
+    (
+      key: 'action_item_assigned',
+      label: l.kindAssignedLabel,
+      detail: l.kindAssignedDetail,
+    ),
+    (
+      key: 'meeting_finalized',
+      label: l.kindFinalizedLabel,
+      detail: l.kindFinalizedDetail,
+    ),
+    (
+      key: 'meeting_approved',
+      label: l.kindApprovedLabel,
+      detail: l.kindApprovedDetail,
+    ),
+    (
+      key: 'circulation_pending',
+      label: l.kindCirculationLabel,
+      detail: l.kindCirculationDetail,
+    ),
+    (key: 'mention', label: l.kindMentionLabel, detail: l.kindMentionDetail),
+    (
+      key: 'transcription_completed',
+      label: l.kindTranscriptionLabel,
+      detail: l.kindTranscriptionDetail,
+    ),
+  ];
+}
 
 final notificationPreferencesProvider =
     FutureProvider.autoDispose<Map<String, ({bool push, bool email})>>((
@@ -86,12 +87,12 @@ class _NotificationSettingsScreenState
     final prefs = _local ?? remote.valueOrNull;
 
     return LedgerScaffold(
-      title: 'Notifications',
+      title: L.of(context).notifications,
       meta: prefs == null ? null : 'PUSH · EMAIL',
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_rounded),
         color: const Color(0xFFC3D0F0),
-        tooltip: 'Back',
+        tooltip: L.of(context).back,
         onPressed: () => Navigator.of(context).maybePop(),
       ),
       child: switch (remote) {
@@ -155,12 +156,12 @@ class _Rows extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
           child: Text(
-            'Push reaches this phone. Email reaches you wherever you read it.',
+            L.of(context).prefsIntro,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
         const SizedBox(height: 18),
-        for (final kind in _kinds)
+        for (final kind in _kinds(context))
           if (prefs.containsKey(kind.key))
             _Kind(
               label: kind.label,
@@ -204,13 +205,13 @@ class _Kind extends StatelessWidget {
           Row(
             children: [
               _Toggle(
-                label: 'Push',
+                label: L.of(context).prefsPush,
                 on: value.push,
                 onTap: () => onChanged((push: !value.push, email: null)),
               ),
               const SizedBox(width: 8),
               _Toggle(
-                label: 'Email',
+                label: L.of(context).prefsEmail,
                 on: value.email,
                 onTap: () => onChanged((push: null, email: !value.email)),
               ),
@@ -283,6 +284,8 @@ class _Loading extends StatelessWidget {
   Widget build(BuildContext context) => ListView(
     physics: const AlwaysScrollableScrollPhysics(),
     padding: const EdgeInsets.fromLTRB(20, 26, 20, 0),
-    children: [Text('READING YOUR SETTINGS', style: AppTheme.eyebrow())],
+    children: [
+      Text(L.of(context).readingYourSettings, style: AppTheme.eyebrow()),
+    ],
   );
 }

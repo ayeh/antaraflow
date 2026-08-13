@@ -392,5 +392,68 @@
   "languageEnglish": "English",
   "languageMalay": "Bahasa Melayu",
   "gutterUsing": "using",
-  "gutterChoose": "choose"
+  "gutterChoose": "choose",
+  "markAllRead": "Mark all read",
+  "allRead": "ALL READ",
+  "unreadCount": "{count} UNREAD",
+  "upToDate": "You are up to date",
+  "nothingWaitingNotifications": "Minutes to approve, tasks assigned to you and mentions all arrive here.",
+  "notification": "Notification",
+  "meeting": "Meeting",
+  "prefsIntro": "Push reaches this phone. Email reaches you wherever you read it.",
+  "prefsPush": "Push",
+  "prefsEmail": "Email",
+  "readingYourSettings": "READING YOUR SETTINGS",
+  "kindAssignedLabel": "A task lands on you",
+  "kindAssignedDetail": "Somebody assigns you an action item",
+  "kindFinalizedLabel": "Minutes are finalised",
+  "kindFinalizedDetail": "A sitting closes for editing and opens for approval",
+  "kindApprovedLabel": "Minutes are approved",
+  "kindApprovedDetail": "A record is settled and cannot change",
+  "kindCirculationLabel": "Something waits for your signature",
+  "kindCirculationDetail": "Minutes circulated to you for confirmation",
+  "kindMentionLabel": "You are mentioned",
+  "kindMentionDetail": "In a comment or a note",
+  "kindTranscriptionLabel": "A recording finishes transcribing",
+  "kindTranscriptionDetail": "The audio has become text",
+  "markTask": "task",
+  "markLate": "late",
+  "markSoon": "soon",
+  "markDrafted": "drafted",
+  "markAudio": "audio",
+  "markStale": "stale",
+  "markFailed": "failed",
+  "markNote": "note",
+  "agoNow": "now",
+  "agoMinutes": "{count}m",
+  "agoHours": "{count}h",
+  "agoDays": "{count}d",
+  "@unreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agoMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agoHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agoDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

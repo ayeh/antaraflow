@@ -25,7 +25,8 @@ enum MeetingStatus {
     MeetingStatus.draft => L.of(context).statusDraft,
     MeetingStatus.inProgress => L.of(context).statusInProgress,
     MeetingStatus.finalized => L.of(context).statusFinalized,
-    MeetingStatus.pendingConfirmation => L.of(context).statusPendingConfirmation,
+    MeetingStatus.pendingConfirmation =>
+      L.of(context).statusPendingConfirmation,
     MeetingStatus.approved => L.of(context).statusApproved,
   };
 

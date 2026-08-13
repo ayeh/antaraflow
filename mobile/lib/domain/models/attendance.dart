@@ -19,8 +19,7 @@ class AttendanceToken {
         token: json['token'] as String,
         lobbyUrl: json['lobby_url'] as String? ?? '',
         registrationUrl: json['qr_payload'] as String? ?? '',
-        registrationsCount:
-            (json['registrations_count'] as num?)?.toInt() ?? 0,
+        registrationsCount: (json['registrations_count'] as num?)?.toInt() ?? 0,
         joinCode: json['join_code'] as String?,
         expiresAt: DateTime.tryParse(json['expires_at'] as String? ?? ''),
         maxAttendees: (json['max_attendees'] as num?)?.toInt(),
@@ -92,7 +91,8 @@ class AttendanceDesk {
 
     return AttendanceDesk(
       token: AttendanceToken.fromJson(json),
-      registered: (json['registered'] as List?)
+      registered:
+          (json['registered'] as List?)
               ?.cast<Map<String, dynamic>>()
               .map(RegisteredAttendee.fromJson)
               .toList() ??

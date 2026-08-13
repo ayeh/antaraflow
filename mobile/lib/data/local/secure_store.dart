@@ -37,7 +37,10 @@ class SecureStore {
     return raw == null ? null : DateTime.tryParse(raw);
   }
 
-  Future<void> writeSession({required String token, DateTime? expiresAt}) async {
+  Future<void> writeSession({
+    required String token,
+    DateTime? expiresAt,
+  }) async {
     await _storage.write(key: _tokenKey, value: token);
     if (expiresAt == null) {
       await _storage.delete(key: _tokenExpiryKey);

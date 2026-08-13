@@ -793,4 +793,121 @@ class LEn extends L {
 
   @override
   String get gutterChoose => 'choose';
+
+  @override
+  String get markAllRead => 'Mark all read';
+
+  @override
+  String get allRead => 'ALL READ';
+
+  @override
+  String unreadCount(int count) {
+    return '$count UNREAD';
+  }
+
+  @override
+  String get upToDate => 'You are up to date';
+
+  @override
+  String get nothingWaitingNotifications =>
+      'Minutes to approve, tasks assigned to you and mentions all arrive here.';
+
+  @override
+  String get notification => 'Notification';
+
+  @override
+  String get meeting => 'Meeting';
+
+  @override
+  String get prefsIntro =>
+      'Push reaches this phone. Email reaches you wherever you read it.';
+
+  @override
+  String get prefsPush => 'Push';
+
+  @override
+  String get prefsEmail => 'Email';
+
+  @override
+  String get readingYourSettings => 'READING YOUR SETTINGS';
+
+  @override
+  String get kindAssignedLabel => 'A task lands on you';
+
+  @override
+  String get kindAssignedDetail => 'Somebody assigns you an action item';
+
+  @override
+  String get kindFinalizedLabel => 'Minutes are finalised';
+
+  @override
+  String get kindFinalizedDetail =>
+      'A sitting closes for editing and opens for approval';
+
+  @override
+  String get kindApprovedLabel => 'Minutes are approved';
+
+  @override
+  String get kindApprovedDetail => 'A record is settled and cannot change';
+
+  @override
+  String get kindCirculationLabel => 'Something waits for your signature';
+
+  @override
+  String get kindCirculationDetail =>
+      'Minutes circulated to you for confirmation';
+
+  @override
+  String get kindMentionLabel => 'You are mentioned';
+
+  @override
+  String get kindMentionDetail => 'In a comment or a note';
+
+  @override
+  String get kindTranscriptionLabel => 'A recording finishes transcribing';
+
+  @override
+  String get kindTranscriptionDetail => 'The audio has become text';
+
+  @override
+  String get markTask => 'task';
+
+  @override
+  String get markLate => 'late';
+
+  @override
+  String get markSoon => 'soon';
+
+  @override
+  String get markDrafted => 'drafted';
+
+  @override
+  String get markAudio => 'audio';
+
+  @override
+  String get markStale => 'stale';
+
+  @override
+  String get markFailed => 'failed';
+
+  @override
+  String get markNote => 'note';
+
+  @override
+  String get agoNow => 'now';
+
+  @override
+  String agoMinutes(int count) {
+    return '${count}m';
+  }
+
+  @override
+  String agoHours(int count) {
+    return '${count}h';
+  }
+
+  @override
+  String agoDays(int count) {
+    return '${count}d';
+  }
 }

@@ -9,7 +9,7 @@ class LMs extends L {
   LMs([String locale = 'ms']) : super(locale);
 
   @override
-  String get notifications => 'Pemberitahuan';
+  String get notifications => 'Notifikasi';
 
   @override
   String get back => 'Kembali';
@@ -797,4 +797,122 @@ class LMs extends L {
 
   @override
   String get gutterChoose => 'pilih';
+
+  @override
+  String get markAllRead => 'Tanda semua dibaca';
+
+  @override
+  String get allRead => 'SEMUA DIBACA';
+
+  @override
+  String unreadCount(int count) {
+    return '$count BELUM DIBACA';
+  }
+
+  @override
+  String get upToDate => 'Anda sudah terkini';
+
+  @override
+  String get nothingWaitingNotifications =>
+      'Minit untuk diluluskan, tugasan yang diberikan kepada anda dan sebutan semuanya sampai di sini.';
+
+  @override
+  String get notification => 'Pemberitahuan';
+
+  @override
+  String get meeting => 'Mesyuarat';
+
+  @override
+  String get prefsIntro =>
+      'Push sampai ke telefon ini. E-mel sampai kepada anda di mana sahaja anda membacanya.';
+
+  @override
+  String get prefsPush => 'Push';
+
+  @override
+  String get prefsEmail => 'E-mel';
+
+  @override
+  String get readingYourSettings => 'MEMBACA TETAPAN ANDA';
+
+  @override
+  String get kindAssignedLabel => 'Tugasan diberikan kepada anda';
+
+  @override
+  String get kindAssignedDetail => 'Seseorang menugaskan tindakan kepada anda';
+
+  @override
+  String get kindFinalizedLabel => 'Minit dimuktamadkan';
+
+  @override
+  String get kindFinalizedDetail =>
+      'Mesyuarat ditutup daripada suntingan dan dibuka untuk kelulusan';
+
+  @override
+  String get kindApprovedLabel => 'Minit diluluskan';
+
+  @override
+  String get kindApprovedDetail =>
+      'Rekod telah dimuktamadkan dan tidak boleh diubah';
+
+  @override
+  String get kindCirculationLabel => 'Ada yang menunggu tandatangan anda';
+
+  @override
+  String get kindCirculationDetail =>
+      'Minit diedarkan kepada anda untuk pengesahan';
+
+  @override
+  String get kindMentionLabel => 'Anda disebut';
+
+  @override
+  String get kindMentionDetail => 'Dalam komen atau nota';
+
+  @override
+  String get kindTranscriptionLabel => 'Rakaman selesai ditranskripsi';
+
+  @override
+  String get kindTranscriptionDetail => 'Audio telah menjadi teks';
+
+  @override
+  String get markTask => 'tugas';
+
+  @override
+  String get markLate => 'lewat';
+
+  @override
+  String get markSoon => 'akan';
+
+  @override
+  String get markDrafted => 'draf';
+
+  @override
+  String get markAudio => 'audio';
+
+  @override
+  String get markStale => 'basi';
+
+  @override
+  String get markFailed => 'gagal';
+
+  @override
+  String get markNote => 'nota';
+
+  @override
+  String get agoNow => 'kini';
+
+  @override
+  String agoMinutes(int count) {
+    return '${count}m';
+  }
+
+  @override
+  String agoHours(int count) {
+    return '${count}j';
+  }
+
+  @override
+  String agoDays(int count) {
+    return '${count}h';
+  }
 }

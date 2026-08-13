@@ -51,7 +51,6 @@ abstract final class Tabs {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-
   /// The widget, the Action button and Siri all land here.
   final _entry = RecordEntry();
 
