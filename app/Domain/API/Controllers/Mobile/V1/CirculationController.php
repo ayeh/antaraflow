@@ -39,7 +39,7 @@ class CirculationController extends MobileController
 
         return response()->json([
             'data' => $recipients
-                ->filter(fn (MomCirculationRecipient $recipient) => $recipient->circulation !== null)
+                ->filter(fn (MomCirculationRecipient $recipient) => $recipient->circulation?->isOpen() === true)
                 ->map(fn (MomCirculationRecipient $recipient) => $this->payload($recipient))
                 ->values(),
         ]);
@@ -61,6 +61,10 @@ class CirculationController extends MobileController
 
         if ($circulation === null) {
             return $this->failure(__('Not found.'), 'NOT_FOUND', 404);
+        }
+
+        if (! $circulation->isOpen()) {
+            return $this->failure(__('mom.circulation_closed'), 'CIRCULATION_CLOSED', 409);
         }
 
         if ($circulation->deadline_at?->isPast()) {

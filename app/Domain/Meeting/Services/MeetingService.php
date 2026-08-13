@@ -178,18 +178,40 @@ class MeetingService
 
     public function revertToDraft(MinutesOfMeeting $mom, User $user): MinutesOfMeeting
     {
-        if (! in_array($mom->status, [MeetingStatus::Finalized, MeetingStatus::Approved])) {
-            throw new \DomainException(__('Only finalized or approved meetings can be reverted to draft.'));
+        if (! $mom->status->isRevertable()) {
+            throw new \DomainException(__('Only finalized, circulating or approved meetings can be reverted to draft.'));
         }
 
-        $this->versionService->createVersion($mom, $user, 'Reverted to draft');
+        return DB::transaction(function () use ($mom, $user): MinutesOfMeeting {
+            $wasCirculating = $mom->status === MeetingStatus::PendingConfirmation;
 
-        $mom->update(['status' => MeetingStatus::Draft]);
-        $this->auditService->log('reverted_to_draft', $mom);
+            $this->versionService->createVersion($mom, $user, 'Reverted to draft');
 
-        MeetingStatusChanged::dispatch($mom, MeetingStatus::Draft, $user->name);
+            if ($wasCirculating) {
+                $this->cancelLiveCirculations($mom);
+            }
 
-        return $mom->fresh();
+            $mom->update(['status' => MeetingStatus::Draft]);
+            $this->auditService->log($wasCirculating ? 'circulation_cancelled' : 'reverted_to_draft', $mom);
+
+            MeetingStatusChanged::dispatch($mom, MeetingStatus::Draft, $user->name);
+
+            return $mom->fresh();
+        });
+    }
+
+    /**
+     * Close any circulation still accepting responses, so recipients holding a
+     * live token cannot keep confirming a MOM that is back in the secretary's hands.
+     */
+    private function cancelLiveCirculations(MinutesOfMeeting $mom): void
+    {
+        $mom->circulations()
+            ->whereIn('status', ['open', 'awaiting_secretary'])
+            ->update([
+                'status' => 'cancelled',
+                'closed_at' => now(),
+            ]);
     }
 
     public function delete(MinutesOfMeeting $mom): void

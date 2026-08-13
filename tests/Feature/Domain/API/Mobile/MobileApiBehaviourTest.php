@@ -442,3 +442,57 @@ describe('mom numbering', function () {
         expect($first)->not->toBe($second);
     });
 });
+
+describe('circulations', function () {
+    /*
+     * A circulation the secretary pulled back (by reverting the MOM to draft)
+     * must disappear from the phone and refuse a late response — otherwise the
+     * app keeps collecting confirmations for minutes that are being rewritten.
+     */
+    beforeEach(function () {
+        $this->circulation = \App\Domain\Meeting\Models\MomCirculation::createForOrganization($this->org->id, [
+            'minutes_of_meeting_id' => $this->meeting->id,
+            'sent_by' => $this->user->id,
+            'round' => 1,
+            'subject' => 'Board minutes',
+            'deadline_at' => now()->addDays(3),
+            'status' => 'open',
+        ]);
+
+        $this->recipient = \App\Domain\Meeting\Models\MomCirculationRecipient::create([
+            'mom_circulation_id' => $this->circulation->id,
+            'name' => $this->user->name,
+            'email' => $this->user->email,
+            'token' => Str::random(64),
+        ]);
+    });
+
+    test('an open circulation is listed as pending', function () {
+        $this->actingAs($this->user, 'sanctum')
+            ->getJson('/api/mobile/v1/circulations/pending')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    });
+
+    test('a cancelled circulation drops off the pending list', function () {
+        $this->circulation->update(['status' => 'cancelled', 'closed_at' => now()]);
+
+        $this->actingAs($this->user, 'sanctum')
+            ->getJson('/api/mobile/v1/circulations/pending')
+            ->assertOk()
+            ->assertJsonCount(0, 'data');
+    });
+
+    test('responding to a cancelled circulation is refused', function () {
+        $this->circulation->update(['status' => 'cancelled', 'closed_at' => now()]);
+
+        $this->actingAs($this->user, 'sanctum')
+            ->postJson("/api/mobile/v1/circulations/{$this->recipient->id}/respond", [
+                'decision' => 'confirmed',
+            ])
+            ->assertStatus(409)
+            ->assertJsonPath('code', 'CIRCULATION_CLOSED');
+
+        expect($this->recipient->fresh()->response)->toBeNull();
+    });
+});

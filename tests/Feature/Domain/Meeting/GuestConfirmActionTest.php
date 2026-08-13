@@ -70,3 +70,35 @@ test('cannot confirm past deadline', function () {
 
     expect($recipient->fresh()->response)->toBeNull();
 });
+
+test('guest cannot confirm once the circulation is cancelled', function () {
+    $recipient = makeRecipient();
+    $recipient->circulation()->update(['status' => 'cancelled', 'closed_at' => now()]);
+
+    $this->post(route('mom.confirm.store', $recipient->token))
+        ->assertRedirect(route('mom.confirm', $recipient->token))
+        ->assertSessionHas('error', __('mom.circulation_closed'));
+
+    expect($recipient->fresh()->response)->toBeNull();
+});
+
+test('guest cannot withdraw once the circulation is cancelled', function () {
+    $recipient = makeRecipient();
+    $recipient->update(['response' => 'confirmed', 'responded_at' => now()]);
+    $recipient->circulation()->update(['status' => 'cancelled', 'closed_at' => now()]);
+
+    $this->delete(route('mom.confirm.destroy', $recipient->token))
+        ->assertSessionHas('error', __('mom.circulation_closed'));
+
+    expect($recipient->fresh()->response)->toBe('confirmed');
+});
+
+test('guest cannot request amendments once the circulation is cancelled', function () {
+    $recipient = makeRecipient();
+    $recipient->circulation()->update(['status' => 'cancelled', 'closed_at' => now()]);
+
+    $this->post(route('mom.amendments.store', $recipient->token))
+        ->assertSessionHas('error', __('mom.circulation_closed'));
+
+    expect($recipient->fresh()->response)->toBeNull();
+});

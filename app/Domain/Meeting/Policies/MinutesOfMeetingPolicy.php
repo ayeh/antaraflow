@@ -113,7 +113,7 @@ class MinutesOfMeetingPolicy
             return false;
         }
 
-        if (! in_array($meeting->status, [MeetingStatus::Finalized, MeetingStatus::Approved])) {
+        if (! in_array($meeting->status, MeetingStatus::revertable())) {
             return false;
         }
 

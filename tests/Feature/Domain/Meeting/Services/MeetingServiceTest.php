@@ -172,3 +172,86 @@ test('deleting a meeting soft-deletes its action items', function () {
     expect(\App\Domain\ActionItem\Models\ActionItem::find($item->id))->toBeNull()
         ->and(\App\Domain\ActionItem\Models\ActionItem::withTrashed()->find($item->id)->trashed())->toBeTrue();
 });
+
+test('a circulating meeting can revert to draft', function () {
+    $mom = MinutesOfMeeting::factory()->pendingConfirmation()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $reverted = $this->service->revertToDraft($mom, $this->user);
+
+    expect($reverted->status)->toBe(MeetingStatus::Draft);
+});
+
+test('reverting a circulating meeting closes its live circulations', function () {
+    $mom = MinutesOfMeeting::factory()->pendingConfirmation()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $open = \App\Domain\Meeting\Models\MomCirculation::createForOrganization($this->org->id, [
+        'minutes_of_meeting_id' => $mom->id,
+        'sent_by' => $this->user->id,
+        'round' => 1,
+        'subject' => 'Round 1',
+        'deadline_at' => now()->addDays(3),
+        'status' => 'open',
+    ]);
+
+    $held = \App\Domain\Meeting\Models\MomCirculation::createForOrganization($this->org->id, [
+        'minutes_of_meeting_id' => $mom->id,
+        'sent_by' => $this->user->id,
+        'round' => 2,
+        'subject' => 'Held for secretary',
+        'deadline_at' => now()->subDay(),
+        'status' => 'awaiting_secretary',
+    ]);
+
+    $this->service->revertToDraft($mom, $this->user);
+
+    expect($open->fresh()->status)->toBe('cancelled')
+        ->and($open->fresh()->closed_at)->not->toBeNull()
+        ->and($held->fresh()->status)->toBe('cancelled');
+});
+
+test('reverting does not reopen circulations already closed', function () {
+    $mom = MinutesOfMeeting::factory()->pendingConfirmation()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $settled = \App\Domain\Meeting\Models\MomCirculation::createForOrganization($this->org->id, [
+        'minutes_of_meeting_id' => $mom->id,
+        'sent_by' => $this->user->id,
+        'round' => 1,
+        'subject' => 'Superseded',
+        'deadline_at' => now()->subWeek(),
+        'status' => 'closed_amended',
+    ]);
+
+    $this->service->revertToDraft($mom, $this->user);
+
+    expect($settled->fresh()->status)->toBe('closed_amended');
+});
+
+test('a draft meeting cannot be reverted', function () {
+    $mom = MinutesOfMeeting::factory()->draft()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    expect(fn () => $this->service->revertToDraft($mom, $this->user))
+        ->toThrow(DomainException::class);
+});
+
+test('an in-progress meeting cannot be reverted', function () {
+    $mom = MinutesOfMeeting::factory()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'status' => MeetingStatus::InProgress,
+    ]);
+
+    expect(fn () => $this->service->revertToDraft($mom, $this->user))
+        ->toThrow(DomainException::class);
+});

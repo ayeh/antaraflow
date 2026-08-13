@@ -185,7 +185,7 @@ it('revertToDraft() throws DomainException on a draft meeting', function () {
     ]);
 
     expect(fn () => $this->service->revertToDraft($meeting, $this->user))
-        ->toThrow(\DomainException::class, 'Only finalized or approved meetings can be reverted to draft.');
+        ->toThrow(\DomainException::class, 'Only finalized, circulating or approved meetings can be reverted to draft.');
 });
 
 /*

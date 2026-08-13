@@ -92,3 +92,28 @@ it('can revert a finalized meeting back to draft', function () {
     $response->assertRedirect(route('meetings.show', $meeting));
     expect($meeting->fresh()->status)->toBe(MeetingStatus::Draft);
 });
+
+it('can revert a circulating meeting back to draft', function () {
+    $meeting = MinutesOfMeeting::factory()->pendingConfirmation()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->post(route('meetings.revert', $meeting));
+
+    $response->assertRedirect(route('meetings.show', $meeting));
+    expect($meeting->fresh()->status)->toBe(MeetingStatus::Draft);
+});
+
+it('does not offer revert on a draft meeting', function () {
+    $meeting = MinutesOfMeeting::factory()->draft()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+    ]);
+
+    $this->actingAs($this->user)->post(route('meetings.revert', $meeting))
+        ->assertForbidden();
+
+    $this->actingAs($this->user)->get(route('meetings.show', $meeting))
+        ->assertDontSee(route('meetings.revert', $meeting));
+});

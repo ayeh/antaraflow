@@ -88,14 +88,22 @@
     </div>
 
     {{-- Sticky deadline banner --}}
-    <div class="sticky top-0 z-20 bg-amber-50 border-b border-amber-200 px-4 py-3">
-        <p class="text-sm font-medium text-amber-800 max-w-2xl mx-auto">
-            ⏳ {{ __('mom.deadline_banner', ['deadline' => $circulation->deadline_at->format('d M Y, g:i A')]) }}
-        </p>
-        <p class="text-xs text-amber-600 mt-0.5 max-w-2xl mx-auto">
-            {{ __('mom.deadline_warning') }}
-        </p>
-    </div>
+    @if($circulation->isOpen())
+        <div class="sticky top-0 z-20 bg-amber-50 border-b border-amber-200 px-4 py-3">
+            <p class="text-sm font-medium text-amber-800 max-w-2xl mx-auto">
+                ⏳ {{ __('mom.deadline_banner', ['deadline' => $circulation->deadline_at->format('d M Y, g:i A')]) }}
+            </p>
+            <p class="text-xs text-amber-600 mt-0.5 max-w-2xl mx-auto">
+                {{ __('mom.deadline_warning') }}
+            </p>
+        </div>
+    @else
+        <div class="sticky top-0 z-20 bg-gray-100 border-b border-gray-300 px-4 py-3">
+            <p class="text-sm font-medium text-gray-700 max-w-2xl mx-auto">
+                🔒 {{ __('mom.circulation_closed') }}
+            </p>
+        </div>
+    @endif
 
     {{-- Identity strip --}}
     <div class="bg-white border-b border-gray-100 px-4 py-2">
@@ -279,7 +287,13 @@
     </div>
 
     {{-- Sticky bottom action bar --}}
-    @if($recipient->isConfirmed())
+    @if(! $circulation->isOpen())
+        <div class="fixed bottom-0 inset-x-0 bg-gray-100 border-t border-gray-300 px-4 py-4">
+            <p class="text-center text-sm font-medium text-gray-600 max-w-2xl mx-auto">
+                {{ __('mom.circulation_closed') }}
+            </p>
+        </div>
+    @elseif($recipient->isConfirmed())
         <div class="fixed bottom-0 inset-x-0 bg-green-50 border-t border-green-200 px-4 py-4">
             <div class="max-w-2xl mx-auto">
                 <p class="text-center text-sm font-medium text-green-700">

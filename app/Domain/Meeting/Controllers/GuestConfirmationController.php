@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Meeting\Controllers;
 
+use App\Domain\Meeting\Models\MomCirculation;
 use App\Domain\Meeting\Models\MomCirculationRecipient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -53,9 +54,9 @@ class GuestConfirmationController extends Controller
 
         $circulation = $recipient->circulation()->withoutGlobalScopes()->firstOrFail();
 
-        if ($circulation->deadline_at->isPast()) {
+        if ($locked = $this->lockedReason($circulation)) {
             return redirect()->route('mom.confirm', $token)
-                ->with('error', __('mom.deadline_passed'));
+                ->with('error', $locked);
         }
 
         $recipient->update([
@@ -78,9 +79,9 @@ class GuestConfirmationController extends Controller
 
         $circulation = $recipient->circulation()->withoutGlobalScopes()->firstOrFail();
 
-        if ($circulation->deadline_at->isPast()) {
+        if ($locked = $this->lockedReason($circulation)) {
             return redirect()->route('mom.confirm', $token)
-                ->with('error', __('mom.deadline_passed'));
+                ->with('error', $locked);
         }
 
         $validated = $request->validate([
@@ -126,9 +127,9 @@ class GuestConfirmationController extends Controller
 
         $circulation = $recipient->circulation()->withoutGlobalScopes()->firstOrFail();
 
-        if ($circulation->deadline_at->isPast()) {
+        if ($locked = $this->lockedReason($circulation)) {
             return redirect()->route('mom.confirm', $token)
-                ->with('error', __('mom.deadline_passed'));
+                ->with('error', $locked);
         }
 
         $recipient->update([
@@ -151,9 +152,9 @@ class GuestConfirmationController extends Controller
 
         $circulation = $recipient->circulation()->withoutGlobalScopes()->firstOrFail();
 
-        if ($circulation->deadline_at->isPast()) {
+        if ($locked = $this->lockedReason($circulation)) {
             return redirect()->route('mom.confirm', $token)
-                ->with('error', __('mom.deadline_passed'));
+                ->with('error', $locked);
         }
 
         $recipient->update([
@@ -165,5 +166,23 @@ class GuestConfirmationController extends Controller
 
         return redirect()->route('mom.confirm', $token)
             ->with('info', __('mom.withdraw_success'));
+    }
+
+    /**
+     * Guests may only act while the circulation is genuinely still collecting
+     * responses — not past its deadline, and not closed early by the secretary
+     * (a MOM pulled back to draft must stop accruing confirmations).
+     */
+    private function lockedReason(MomCirculation $circulation): ?string
+    {
+        if (! $circulation->isOpen()) {
+            return __('mom.circulation_closed');
+        }
+
+        if ($circulation->deadline_at->isPast()) {
+            return __('mom.deadline_passed');
+        }
+
+        return null;
     }
 }

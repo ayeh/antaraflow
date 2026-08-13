@@ -17,6 +17,7 @@ return [
     'confirm_success' => 'Minutes confirmed. Thank you.',
     'withdraw_success' => 'Confirmation withdrawn.',
     'deadline_passed' => 'The confirmation deadline has passed.',
+    'circulation_closed' => 'This circulation is closed and no longer accepts responses. The secretary is revising the minutes — you will be notified when a new version is circulated.',
     'verification_title' => 'Document Verification',
     'verification_subtitle' => 'This page verifies document integrity only. Meeting content is not disclosed.',
     'minutes_confirmed' => 'Minutes Confirmed',

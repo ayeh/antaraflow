@@ -17,6 +17,7 @@ return [
     'confirm_success' => 'Minit telah disahkan. Terima kasih.',
     'withdraw_success' => 'Pengesahan telah ditarik balik.',
     'deadline_passed' => 'Tempoh pengesahan telah tamat.',
+    'circulation_closed' => 'Edaran ini telah ditutup dan tidak lagi menerima maklum balas. Setiausaha sedang menyemak semula minit — anda akan dimaklumkan apabila versi baharu diedarkan.',
     'verification_title' => 'Pengesahan Dokumen',
     'verification_subtitle' => 'Halaman ini mengesahkan integriti dokumen sahaja. Kandungan mesyuarat tidak didedahkan.',
     'minutes_confirmed' => 'Minit Disahkan',
