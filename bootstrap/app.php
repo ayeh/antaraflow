@@ -52,4 +52,30 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         \App\Domain\API\Exceptions\MobileExceptionRenderer::register($exceptions);
+
+        // A guest whose form went stale should be asked to send it again, not
+        // shown Laravel's 419 page. These are people scanning a QR code at the
+        // door of a meeting; "PAGE EXPIRED" is the end of the road for them,
+        // and the sitting has no record of their attendance.
+        // Typed against the HttpException, not TokenMismatchException: the
+        // handler runs prepareException() before the render callbacks, which
+        // has already turned the token failure into a bare 419 by the time
+        // this is reached.
+        $exceptions->render(function (
+            \Symfony\Component\HttpKernel\Exception\HttpException $e,
+            \Illuminate\Http\Request $request,
+        ) {
+            if ($e->getStatusCode() !== 419) {
+                return null;
+            }
+
+            if (! $request->routeIs('qr-registration.*', 'mom.*', 'invitations.*')) {
+                return null;
+            }
+
+            return redirect()
+                ->back()
+                ->withInput($request->except('_token'))
+                ->with('warning', __('That took a little too long. Please send it once more.'));
+        });
     })->create();
