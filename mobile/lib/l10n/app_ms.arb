@@ -284,5 +284,7 @@
   "kindStaleLabel": "Keputusan menjadi basi",
   "kindStaleDetail": "Sesuatu yang dipersetujui terbiar terlalu lama",
   "kindFailedLabel": "Pemprosesan gagal",
-  "kindFailedDetail": "Rakaman tidak dapat ditranskripsi atau dibaca"
+  "kindFailedDetail": "Rakaman tidak dapat ditranskripsi atau dibaca",
+  "circulationRound": "Pusingan {round}",
+  "approvalsEmptyDetail": "Minit yang diedarkan kepada anda untuk pengesahan muncul di sini sehingga anda menjawabnya."
 }
