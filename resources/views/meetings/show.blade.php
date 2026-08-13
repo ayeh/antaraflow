@@ -1,9 +1,24 @@
 @extends('layouts.app')
 
 @php
-    $revertConfirmMessage = $meeting->status === \App\Support\Enums\MeetingStatus::PendingConfirmation
+    $isCirculating = $meeting->status === \App\Support\Enums\MeetingStatus::PendingConfirmation;
+
+    $revertConfirmMessage = $isCirculating
         ? __('This MOM is out for confirmation. Reverting cancels the circulation and voids the confirmation links already sent. Continue?')
         : __('Revert this MOM back to draft?');
+
+    /* Reverting is not a delete — say "Revert", not the component's default "Delete". */
+    $revertConfirmOptions = [
+        'title' => __('Revert to Draft'),
+        'confirmLabel' => __('Revert'),
+        'type' => $isCirculating ? 'danger' : 'warning',
+    ];
+
+    $approveConfirmOptions = [
+        'title' => __('Approve Directly'),
+        'confirmLabel' => __('Approve'),
+        'type' => 'warning',
+    ];
 @endphp
 
 @section('content')
@@ -145,7 +160,7 @@
                     @can('revert', $meeting)
                         <div class="my-1 border-t border-gray-100 dark:border-slate-700"></div>
                         <form method="POST" action="{{ route('meetings.revert', $meeting) }}"
-                              onsubmit="confirmThenSubmit(event, @js($revertConfirmMessage))">
+                              onsubmit="confirmThenSubmit(event, @js($revertConfirmMessage), @js($revertConfirmOptions))">
                             @csrf
                             <button type="submit"
                                     class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-left">
@@ -299,8 +314,7 @@
                 </div>
 
                 <form method="POST" action="{{ route('meetings.approve', $meeting) }}" class="inline"
-                      x-data
-                      @submit.prevent="if (confirm('{{ __('Approve this MOM directly without circulation? This cannot be undone.') }}')) $el.submit()">
+                      onsubmit="confirmThenSubmit(event, @js(__('Approve this MOM directly without circulation? This cannot be undone.')), @js($approveConfirmOptions))">
                     @csrf
                     <button type="submit" class="h-9 px-4 border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center whitespace-nowrap">{{ __('Approve Directly') }}</button>
                 </form>
@@ -309,8 +323,7 @@
             {{-- Revert to Draft: status gating lives in the policy --}}
             @can('revert', $meeting)
                 <form method="POST" action="{{ route('meetings.revert', $meeting) }}" class="inline"
-                      x-data
-                      @submit.prevent="if (confirm(@js($revertConfirmMessage))) $el.submit()">
+                      onsubmit="confirmThenSubmit(event, @js($revertConfirmMessage), @js($revertConfirmOptions))">
                     @csrf
                     <button type="submit" class="h-9 px-4 border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center whitespace-nowrap">{{ __('Revert to Draft') }}</button>
                 </form>
