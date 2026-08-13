@@ -6,6 +6,7 @@ import '../../core/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/bootstrap.dart';
+import '../notifications/notifications_screen.dart';
 import '../shell/app_shell.dart';
 import '../widgets/error_view.dart';
 import '../widgets/gutter_row.dart';
@@ -35,7 +36,17 @@ class HomeScreen extends ConsumerWidget {
           icon: Icons.notifications_none_rounded,
           tooltip: 'Notifications',
           badge: bootstrap.valueOrNull?.unread.notifications ?? 0,
-          onPressed: () {},
+          onPressed: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const NotificationsScreen(),
+              ),
+            );
+
+            // The badge is bootstrap's count, and reading anything on that
+            // screen has just made it wrong.
+            ref.invalidate(bootstrapProvider);
+          },
         ),
       ],
       onRefresh: () async {
