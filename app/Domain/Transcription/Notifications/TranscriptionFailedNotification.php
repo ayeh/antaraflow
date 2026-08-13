@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Transcription\Notifications;
 
 use App\Domain\Transcription\Models\AudioTranscription;
+use App\Support\Traits\RespectsNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +13,12 @@ use Illuminate\Notifications\Notification;
 
 class TranscriptionFailedNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, RespectsNotificationPreferences;
+
+    protected function preferenceKey(): string
+    {
+        return 'processing_failed';
+    }
 
     public function __construct(
         public AudioTranscription $transcription,
@@ -21,7 +27,7 @@ class TranscriptionFailedNotification extends Notification implements ShouldQueu
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return $this->preferred($notifiable, ['database', 'mail']);
     }
 
     public function toMail(object $notifiable): MailMessage

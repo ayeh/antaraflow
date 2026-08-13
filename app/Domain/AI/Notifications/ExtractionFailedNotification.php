@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\AI\Notifications;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Support\Traits\RespectsNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +13,12 @@ use Illuminate\Notifications\Notification;
 
 class ExtractionFailedNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, RespectsNotificationPreferences;
+
+    protected function preferenceKey(): string
+    {
+        return 'processing_failed';
+    }
 
     public function __construct(
         public MinutesOfMeeting $meeting,
@@ -22,7 +28,7 @@ class ExtractionFailedNotification extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return $this->preferred($notifiable, ['database', 'mail']);
     }
 
     public function toMail(object $notifiable): MailMessage

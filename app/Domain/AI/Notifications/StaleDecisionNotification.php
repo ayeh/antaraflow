@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\AI\Notifications;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Support\Traits\RespectsNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +13,12 @@ use Illuminate\Notifications\Notification;
 
 class StaleDecisionNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, RespectsNotificationPreferences;
+
+    protected function preferenceKey(): string
+    {
+        return 'stale_decision';
+    }
 
     /**
      * @param  array<int, array{decision: string, days_since: int}>  $staleDecisions
@@ -25,7 +31,7 @@ class StaleDecisionNotification extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return $this->preferred($notifiable, ['mail', 'database']);
     }
 
     public function toMail(object $notifiable): MailMessage

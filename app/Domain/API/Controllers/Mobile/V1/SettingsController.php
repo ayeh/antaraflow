@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\API\Controllers\Mobile\V1;
 
+use App\Domain\Account\Support\NotificationPreferences;
 use App\Domain\API\Controllers\Mobile\MobileController;
 use App\Domain\API\Resources\Mobile\UserResource;
 use Illuminate\Http\JsonResponse;
@@ -53,10 +54,8 @@ class SettingsController extends MobileController
 
     public function notificationPreferences(Request $request): JsonResponse
     {
-        $settings = $this->user($request)->settings;
-
         return response()->json([
-            'data' => $settings?->notification_preferences ?? $this->defaultPreferences(),
+            'data' => NotificationPreferences::for($this->user($request)),
         ]);
     }
 
@@ -71,27 +70,15 @@ class SettingsController extends MobileController
             'preferences.*.email' => ['sometimes', 'boolean'],
         ]);
 
-        $settings = $user->settings()->firstOrCreate([]);
-        $settings->update([
-            'notification_preferences' => array_merge(
-                $settings->notification_preferences ?? $this->defaultPreferences(),
-                $validated['preferences'],
-            ),
+        // Merged per channel, not per key. array_merge replaced whole entries,
+        // so a client that only knows about push blanked out email — and the
+        // web screen, which only knows about email, blanked out push.
+        $merged = NotificationPreferences::merge($user, $validated['preferences']);
+
+        $user->settings()->firstOrCreate([])->update([
+            'notification_preferences' => $merged,
         ]);
 
-        return response()->json(['data' => $settings->fresh()->notification_preferences]);
-    }
-
-    /** @return array<string, array<string, bool>> */
-    private function defaultPreferences(): array
-    {
-        return [
-            'action_item_assigned' => ['push' => true, 'email' => true],
-            'meeting_finalized' => ['push' => true, 'email' => true],
-            'meeting_approved' => ['push' => true, 'email' => true],
-            'transcription_completed' => ['push' => true, 'email' => false],
-            'mention' => ['push' => true, 'email' => true],
-            'circulation_pending' => ['push' => true, 'email' => true],
-        ];
+        return response()->json(['data' => $merged]);
     }
 }

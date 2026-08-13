@@ -274,5 +274,15 @@
   "agoMinutes": "{count}m",
   "agoHours": "{count}j",
   "agoDays": "{count}h",
-  "organisationSwitchFailed": "Tidak dapat menukar organisasi"
+  "organisationSwitchFailed": "Tidak dapat menukar organisasi",
+  "kindOverdueLabel": "Tugasan anda tertunggak",
+  "kindOverdueDetail": "Tarikh akhirnya berlalu dan ia masih terbuka",
+  "kindStartingLabel": "Mesyuarat hampir bermula",
+  "kindStartingDetail": "Sebentar sebelum mesyuarat yang anda dijemput",
+  "kindExtractionLabel": "Minit dirangka daripada rakaman",
+  "kindExtractionDetail": "AI selesai membaca transkrip",
+  "kindStaleLabel": "Keputusan menjadi basi",
+  "kindStaleDetail": "Sesuatu yang dipersetujui terbiar terlalu lama",
+  "kindFailedLabel": "Pemprosesan gagal",
+  "kindFailedDetail": "Rakaman tidak dapat ditranskripsi atau dibaca"
 }

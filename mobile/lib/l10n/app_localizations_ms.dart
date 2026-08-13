@@ -918,4 +918,38 @@ class LMs extends L {
 
   @override
   String get organisationSwitchFailed => 'Tidak dapat menukar organisasi';
+
+  @override
+  String get kindOverdueLabel => 'Tugasan anda tertunggak';
+
+  @override
+  String get kindOverdueDetail =>
+      'Tarikh akhirnya berlalu dan ia masih terbuka';
+
+  @override
+  String get kindStartingLabel => 'Mesyuarat hampir bermula';
+
+  @override
+  String get kindStartingDetail =>
+      'Sebentar sebelum mesyuarat yang anda dijemput';
+
+  @override
+  String get kindExtractionLabel => 'Minit dirangka daripada rakaman';
+
+  @override
+  String get kindExtractionDetail => 'AI selesai membaca transkrip';
+
+  @override
+  String get kindStaleLabel => 'Keputusan menjadi basi';
+
+  @override
+  String get kindStaleDetail =>
+      'Sesuatu yang dipersetujui terbiar terlalu lama';
+
+  @override
+  String get kindFailedLabel => 'Pemprosesan gagal';
+
+  @override
+  String get kindFailedDetail =>
+      'Rakaman tidak dapat ditranskripsi atau dibaca';
 }

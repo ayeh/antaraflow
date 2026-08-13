@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Calendar\Notifications;
 
+use App\Support\Traits\RespectsNotificationPreferences;
 use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,7 +13,12 @@ use Illuminate\Notifications\Notification;
 
 class CalendarMeetingStartingNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, RespectsNotificationPreferences;
+
+    protected function preferenceKey(): string
+    {
+        return 'meeting_starting';
+    }
 
     public function __construct(
         public string $title,
@@ -23,7 +29,7 @@ class CalendarMeetingStartingNotification extends Notification implements Should
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return $this->preferred($notifiable, ['mail', 'database']);
     }
 
     public function toMail(object $notifiable): MailMessage

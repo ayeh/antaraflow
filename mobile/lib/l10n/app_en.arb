@@ -456,5 +456,15 @@
       }
     }
   },
-  "organisationSwitchFailed": "Could not switch organisation"
+  "organisationSwitchFailed": "Could not switch organisation",
+  "kindOverdueLabel": "A task of yours goes overdue",
+  "kindOverdueDetail": "Its due date passes and it is still open",
+  "kindStartingLabel": "A meeting is about to start",
+  "kindStartingDetail": "Shortly before a sitting you are invited to",
+  "kindExtractionLabel": "Minutes are drafted from a recording",
+  "kindExtractionDetail": "The AI has finished reading a transcript",
+  "kindStaleLabel": "A decision goes stale",
+  "kindStaleDetail": "Something agreed has sat untouched too long",
+  "kindFailedLabel": "Processing fails",
+  "kindFailedDetail": "A recording could not be transcribed or read"
 }

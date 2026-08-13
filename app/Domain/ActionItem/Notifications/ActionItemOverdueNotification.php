@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\ActionItem\Notifications;
 
 use App\Domain\ActionItem\Models\ActionItem;
+use App\Support\Traits\RespectsNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +13,12 @@ use Illuminate\Notifications\Notification;
 
 class ActionItemOverdueNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, RespectsNotificationPreferences;
+
+    protected function preferenceKey(): string
+    {
+        return 'action_item_overdue';
+    }
 
     public function __construct(
         public ActionItem $actionItem,
@@ -21,7 +27,7 @@ class ActionItemOverdueNotification extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return $this->preferred($notifiable, ['mail', 'database']);
     }
 
     public function toMail(object $notifiable): MailMessage
