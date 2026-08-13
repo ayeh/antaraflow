@@ -163,4 +163,82 @@ void main() {
       expect(cut.single.end, const Duration(seconds: 75));
     },
   );
+
+  // A device joining a sitting already in progress lands mid-window. It waits
+  // for the primary's next boundary rather than sending a short chunk, because a
+  // short chunk numbered N covers only the tail of the window the primary's
+  // chunk N covers — and if selection preferred it, the opening of that window
+  // would vanish from the transcript.
+  test('a satellite throws away the part of a window it missed', () async {
+    final chunker = AudioChunker();
+    final cut = <AudioChunk>[];
+    chunker.chunks.listen(cut.add);
+
+    // The sitting is seven seconds into the window that becomes chunk 2, so the
+    // next clean boundary is eight seconds away and belongs to chunk 3.
+    chunker.prepare(
+      scratch,
+      fromChunk: 3,
+      alreadyRecorded: const Duration(seconds: 45),
+      discardFirst: const Duration(seconds: 8),
+    );
+
+    chunker.receive(seconds(8));
+    await chunker.settled;
+    await pumpEventQueue();
+
+    expect(
+      cut,
+      isEmpty,
+      reason: 'this audio belongs to a window already half gone',
+    );
+    expect(
+      chunker.position,
+      Duration.zero + const Duration(seconds: 45),
+      reason: 'discarded audio must not move the clock',
+    );
+
+    chunker.receive(seconds(15));
+    await chunker.settled;
+    await pumpEventQueue();
+
+    expect(cut.single.number, 3);
+    expect(cut.single.start, const Duration(seconds: 45));
+    expect(cut.single.end, const Duration(seconds: 60));
+  });
+
+  test('the gap can span more buffers than it takes to fill one', () async {
+    final chunker = AudioChunker();
+    final cut = <AudioChunk>[];
+    chunker.chunks.listen(cut.add);
+    chunker.prepare(scratch, discardFirst: const Duration(seconds: 5));
+
+    for (var i = 0; i < 5; i++) {
+      chunker.receive(seconds(1));
+    }
+    await chunker.settled;
+    await pumpEventQueue();
+
+    expect(chunker.position, Duration.zero);
+
+    chunker.receive(seconds(15));
+    await chunker.settled;
+    await pumpEventQueue();
+
+    expect(cut.single.start, Duration.zero);
+  });
+
+  test('a primary discards nothing at all', () async {
+    final chunker = AudioChunker();
+    final cut = <AudioChunk>[];
+    chunker.chunks.listen(cut.add);
+    chunker.prepare(scratch);
+
+    chunker.receive(seconds(15));
+    await chunker.settled;
+    await pumpEventQueue();
+
+    expect(cut.single.start, Duration.zero);
+    expect(cut.single.end, const Duration(seconds: 15));
+  });
 }
