@@ -73,8 +73,16 @@ Route::view('/terms', 'legal.terms')->name('terms');
 // Language switcher (public — works for guests and logged-in users)
 Route::get('locale/{locale}', [LocaleController::class, 'update'])->name('locale.switch');
 
+// Every guest group below passes a third `throttle` argument. It is the cache
+// key prefix, and without it these groups are not separate limits at all:
+// ThrottleRequests signs a guest request as `domain|ip` with no route in it, so
+// one shared counter serves every un-prefixed group on the host and whichever
+// route has the lowest ceiling starts rejecting first. That is not theoretical
+// — the lobby polls itself 20 times a minute, which locked walk-ins out of
+// registration within thirty seconds of a screen being put up.
+
 // Guest meeting view (no auth required)
-Route::middleware('throttle:10,1')->group(function () {
+Route::middleware('throttle:10,1,guest-mom')->group(function () {
     Route::get('share/{token}', [\App\Domain\Collaboration\Controllers\GuestAccessController::class, 'show'])->name('guest.meeting');
     Route::get('guest/{token}', [GuestAccessController::class, 'show'])->name('guest.mom');
     Route::get('mom/confirm/{token}', [\App\Domain\Meeting\Controllers\GuestConfirmationController::class, 'show'])->name('mom.confirm');
@@ -85,8 +93,13 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::get('mom/verify/{meeting}', \App\Domain\Meeting\Controllers\MomVerificationController::class)->name('mom.verify');
 });
 
-// QR Registration (public)
-Route::middleware('throttle:10,1')->group(function () {
+// QR Registration (public).
+//
+// 60, not 10: a boardroom scans from one wifi, so the whole room arrives as a
+// single IP, and each person costs two requests — the form and the submit. Ten
+// turned a five-person meeting away. The ceiling is only DoS protection; the
+// token is 64 random characters and is not guessable at any rate.
+Route::middleware('throttle:60,1,qr-register')->group(function () {
     Route::get('register/{token}', [QrRegistrationController::class, 'showForm'])->name('qr-registration.form');
     Route::post('register/{token}', [QrRegistrationController::class, 'register'])->name('qr-registration.submit');
     Route::get('register/{token}/success', [QrRegistrationController::class, 'success'])->name('qr-registration.success');
@@ -96,13 +109,13 @@ Route::middleware('throttle:10,1')->group(function () {
 // the projector page polls the attendees endpoint every 3s (~20 req/min) and
 // stays open for the whole event, so it needs generous headroom for several
 // viewers behind one NAT IP.
-Route::middleware('throttle:120,1')->group(function () {
+Route::middleware('throttle:120,1,qr-lobby')->group(function () {
     Route::get('lobby/{token}', [QrRegistrationController::class, 'showLobby'])->name('qr-registration.lobby');
     Route::get('lobby/{token}/attendees', [QrRegistrationController::class, 'lobbyAttendees'])->name('qr-registration.lobby.attendees');
 });
 
 // Organization invitation acceptance (public - works for guests and logged-in users)
-Route::middleware('throttle:10,1')->group(function () {
+Route::middleware('throttle:10,1,invitations')->group(function () {
     Route::get('invitations/{token}', [InvitationAcceptController::class, 'show'])->name('invitations.accept.show');
     Route::post('invitations/{token}', [InvitationAcceptController::class, 'accept'])->name('invitations.accept');
 });
