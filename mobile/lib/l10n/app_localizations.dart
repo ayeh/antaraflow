@@ -1806,6 +1806,18 @@ abstract class L {
   /// In en, this message translates to:
   /// **'A recording could not be transcribed or read'**
   String get kindFailedDetail;
+
+  /// No description provided for @circulationRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String circulationRound(int round);
+
+  /// No description provided for @approvalsEmptyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes circulated to you for confirmation appear here until you answer them.'**
+  String get approvalsEmptyDetail;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

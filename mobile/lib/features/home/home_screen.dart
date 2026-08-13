@@ -7,10 +7,8 @@ import '../../core/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/bootstrap.dart';
-import '../../domain/models/meeting_detail.dart';
 import '../../l10n/app_localizations.dart';
 import '../meetings/meeting_detail_screen.dart';
-import '../meetings/meetings_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../shell/app_shell.dart';
 import '../widgets/error_view.dart';
@@ -18,6 +16,7 @@ import '../widgets/gutter_row.dart';
 import '../widgets/ledger_scaffold.dart';
 import '../widgets/marker.dart';
 import '../widgets/rolling_count.dart';
+import '../approvals/approvals_screen.dart';
 
 /// What needs deciding, not a dashboard of charts.
 ///
@@ -319,14 +318,20 @@ class _Waiting extends ConsumerWidget {
           title: L.of(context).minutesToApprove,
           subtitle: L.of(context).minutesToApproveDetail,
           severity: AppColors.warning,
-          // The meetings list, already narrowed to the ones asking for an
-          // answer — arriving at forty rows and hunting for three is not an
-          // answer to "3 waiting".
-          onTap: () {
+          // The circulations waiting on this person, which is what the count
+          // beside it measures. It used to filter the meetings list by
+          // pending_confirmation — a different set entirely. A sitting can be
+          // awaiting somebody else's answer, and a circulation can be waiting
+          // on you while the record sits in another state. So the row said
+          // three and the list it opened said none.
+          onTap: () async {
             Haptics.select();
-            ref.read(meetingFilterProvider.notifier).state =
-                const MeetingFilter(status: MeetingStatus.pendingConfirmation);
-            ref.read(selectedTabProvider.notifier).state = Tabs.meetings;
+
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const ApprovalsScreen()),
+            );
+
+            ref.invalidate(bootstrapProvider);
           },
         ),
     ];

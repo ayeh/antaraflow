@@ -952,4 +952,13 @@ class LMs extends L {
   @override
   String get kindFailedDetail =>
       'Rakaman tidak dapat ditranskripsi atau dibaca';
+
+  @override
+  String circulationRound(int round) {
+    return 'Pusingan $round';
+  }
+
+  @override
+  String get approvalsEmptyDetail =>
+      'Minit yang diedarkan kepada anda untuk pengesahan muncul di sini sehingga anda menjawabnya.';
 }

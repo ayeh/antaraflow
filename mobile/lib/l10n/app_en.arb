@@ -466,5 +466,14 @@
   "kindStaleLabel": "A decision goes stale",
   "kindStaleDetail": "Something agreed has sat untouched too long",
   "kindFailedLabel": "Processing fails",
-  "kindFailedDetail": "A recording could not be transcribed or read"
+  "kindFailedDetail": "A recording could not be transcribed or read",
+  "circulationRound": "Round {round}",
+  "approvalsEmptyDetail": "Minutes circulated to you for confirmation appear here until you answer them.",
+  "@circulationRound": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  }
 }

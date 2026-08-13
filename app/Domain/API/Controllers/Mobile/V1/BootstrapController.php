@@ -125,9 +125,14 @@ class BootstrapController extends MobileController
             return 0;
         }
 
+        // Only circulations still open, which is what `circulations/pending`
+        // returns. Counting every unanswered recipient row put a badge on Home
+        // that the list behind it could not account for — a closed circulation
+        // is not waiting on anybody.
         return MomCirculationRecipient::query()
             ->where('email', $email)
             ->whereNull('response')
+            ->whereHas('circulation', fn ($query) => $query->where('status', 'open'))
             ->count();
     }
 

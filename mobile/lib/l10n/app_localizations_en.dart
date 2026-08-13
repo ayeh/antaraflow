@@ -944,4 +944,13 @@ class LEn extends L {
 
   @override
   String get kindFailedDetail => 'A recording could not be transcribed or read';
+
+  @override
+  String circulationRound(int round) {
+    return 'Round $round';
+  }
+
+  @override
+  String get approvalsEmptyDetail =>
+      'Minutes circulated to you for confirmation appear here until you answer them.';
 }
