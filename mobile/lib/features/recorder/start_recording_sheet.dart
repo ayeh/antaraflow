@@ -7,6 +7,7 @@ import '../../core/error/api_exception.dart';
 import '../../core/haptics.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../meetings/create_meeting_sheet.dart';
 import '../meetings/meeting_detail_controller.dart';
 import '../meetings/meetings_screen.dart';
 import 'recorder_controller.dart';
@@ -34,6 +35,15 @@ Future<void> startRecording(BuildContext context, WidgetRef ref) async {
   );
 
   if (choice == null || !context.mounted) return;
+
+  // Hands off to the full form — title, type, date, place — rather than
+  // filing something named after the clock. Somebody planning ahead has more
+  // to say than somebody who just walked into a room.
+  if (choice.scheduleOnly) {
+    await showCreateMeeting(context, ref);
+
+    return;
+  }
 
   final target = choice.meetingId != null
       ? (id: choice.meetingId!, title: choice.title)
@@ -97,10 +107,14 @@ Future<({int id, String title})?> _createMeeting(
 }
 
 class _Choice {
-  const _Choice({required this.title, this.meetingId});
+  const _Choice({required this.title, this.meetingId}) : scheduleOnly = false;
+
+  /// File a sitting and stop there — no recorder, no session.
+  const _Choice.schedule() : title = '', meetingId = null, scheduleOnly = true;
 
   final String title;
   final int? meetingId;
+  final bool scheduleOnly;
 }
 
 class _Sheet extends ConsumerWidget {
@@ -140,6 +154,29 @@ class _Sheet extends ConsumerWidget {
             onTap: () =>
                 Navigator.of(context).pop(_Choice(title: _defaultTitle(now))),
           ),
+          // Below the rule because it is the one row here that does not start
+          // a recording. Somebody reaching for this button is usually in the
+          // room already — but this is the button their thumb knows, and the
+          // alternative was the far corner of another screen.
+          Container(
+            margin: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
+            decoration: const BoxDecoration(
+              border: Border(top: BorderSide(color: AppColors.ruleStrong)),
+            ),
+            child: Text('OR PLAN AHEAD', style: AppTheme.eyebrow()),
+          ),
+          // Named for what it does, not for what it withholds. "Without
+          // recording" read as *this one can never be recorded*, when all it
+          // means is not now — the sitting's own screen carries Record from
+          // the moment it exists.
+          _Row(
+            reference: '',
+            caption: '',
+            icon: Icons.add_rounded,
+            title: 'Set up a meeting',
+            onTap: () => Navigator.of(context).pop(const _Choice.schedule()),
+          ),
           const SizedBox(height: 12),
         ],
       ),
@@ -174,6 +211,7 @@ class _Row extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.accent = false,
+    this.icon,
   });
 
   final String reference;
@@ -181,6 +219,13 @@ class _Row extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final bool accent;
+
+  /// Fills the gutter with a brand slab instead of a date.
+  ///
+  /// The rows above are dated because they are sittings that exist. This one
+  /// has no date to show — it is the act of making one — so the column carries
+  /// the same green mark as the masthead rather than a placeholder dash.
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -194,30 +239,49 @@ class _Row extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: AppTheme.gutter,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    reference,
-                    style: AppTheme.mono(
-                      size: 12,
-                      weight: FontWeight.w700,
-                      colour: accent ? AppColors.primaryInk : AppColors.inkSoft,
+            if (icon != null)
+              SizedBox(
+                width: AppTheme.gutter,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusM),
                     ),
+                    child: Icon(icon, size: 20, color: AppColors.navy),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    caption,
-                    style: AppTheme.mono(
-                      size: 10.5,
-                      colour: AppColors.inkFaint,
+                ),
+              )
+            else
+              SizedBox(
+                width: AppTheme.gutter,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      reference,
+                      style: AppTheme.mono(
+                        size: 12,
+                        weight: FontWeight.w700,
+                        colour: accent
+                            ? AppColors.primaryInk
+                            : AppColors.inkSoft,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 3),
+                    Text(
+                      caption,
+                      style: AppTheme.mono(
+                        size: 10.5,
+                        colour: AppColors.inkFaint,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
             const SizedBox(width: 14),
             Expanded(
               child: Text(

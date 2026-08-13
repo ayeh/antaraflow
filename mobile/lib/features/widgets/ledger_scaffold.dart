@@ -228,6 +228,7 @@ class MastheadAction extends StatelessWidget {
     required this.tooltip,
     this.onPressed,
     this.badge = 0,
+    this.filled = false,
   });
 
   final IconData icon;
@@ -235,15 +236,17 @@ class MastheadAction extends StatelessWidget {
   final VoidCallback? onPressed;
   final int badge;
 
+  /// Draws the action as a solid brand slab instead of a bare glyph.
+  ///
+  /// At most one per masthead. A pale outline glyph on navy is the right
+  /// weight for a secondary action like search, and the wrong weight for the
+  /// one thing a screen exists to let somebody start — testers did not see the
+  /// plain `+` on the meetings list at all.
+  final bool filled;
+
   @override
   Widget build(BuildContext context) {
-    final button = IconButton(
-      onPressed: onPressed,
-      tooltip: tooltip,
-      icon: Icon(icon, size: 22),
-      color: const Color(0xFFC3D0F0),
-      constraints: const BoxConstraints.tightFor(width: 44, height: 44),
-    );
+    final button = filled ? _slab() : _glyph();
 
     if (badge <= 0) return button;
 
@@ -274,6 +277,43 @@ class MastheadAction extends StatelessWidget {
       ],
     );
   }
+
+  Widget _glyph() => IconButton(
+    onPressed: onPressed,
+    tooltip: tooltip,
+    icon: Icon(icon, size: 22),
+    color: const Color(0xFFC3D0F0),
+    constraints: const BoxConstraints.tightFor(width: 44, height: 44),
+  );
+
+  /// Square, not a pill, and the same saturated green as the primary button
+  /// further down every screen — so it reads as the same kind of act, stamped
+  /// rather than floated. Navy on brand green is 4.75:1; white would be 2.94:1
+  /// and fail.
+  Widget _slab() => Tooltip(
+    message: tooltip,
+    child: SizedBox(
+      // 44 of tappable area around a 38pt slab: big enough to hit while
+      // walking, small enough that it does not outweigh the title beside it.
+      width: 44,
+      height: 44,
+      child: Center(
+        child: Material(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
+            child: SizedBox(
+              width: 38,
+              height: 38,
+              child: Icon(icon, size: 23, color: AppColors.navy),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 /// Names a region of the page. A rule runs from the label to the right edge, so
