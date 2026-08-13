@@ -12,6 +12,14 @@
         </div>
     </div>
 
+    @if(! $meeting->status->isEditable() && $versions->isNotEmpty())
+        <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+            <p class="text-sm text-amber-800">
+                {{ __('These minutes are locked, so earlier versions cannot be restored. Revert the meeting to draft first.') }}
+            </p>
+        </div>
+    @endif
+
     @if($versions->isEmpty())
         <div class="bg-white rounded-xl border border-gray-200 px-6 py-16 text-center">
             <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -44,15 +52,16 @@
                             {{ __('View') }}
                         </a>
                         @if(!$loop->first)
-                            <form method="POST" action="{{ route('meetings.revert', $meeting) }}"
-                                  onsubmit="confirmThenSubmit(event, '{{ __('Are you sure you want to revert this meeting to draft?') }}')">
-                                @csrf
-                                <input type="hidden" name="version_id" value="{{ $version->id }}">
-                                <button type="submit"
-                                        class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-violet-600 text-white hover:bg-violet-700 transition-colors">
-                                    {{ __('Restore') }}
-                                </button>
-                            </form>
+                            @can('restoreVersion', $meeting)
+                                <form method="POST" action="{{ route('meetings.versions.restore', [$meeting, $version]) }}"
+                                      onsubmit="confirmThenSubmit(event, @js(__('Replace the current minutes with version :number? The current text is kept in the history.', ['number' => $version->version_number])))">
+                                    @csrf
+                                    <button type="submit"
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-violet-600 text-white hover:bg-violet-700 transition-colors">
+                                        {{ __('Restore') }}
+                                    </button>
+                                </form>
+                            @endcan
                         @else
                             <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-400">
                                 {{ __('Current') }}

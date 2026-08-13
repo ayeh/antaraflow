@@ -124,6 +124,28 @@ class MinutesOfMeetingPolicy
         );
     }
 
+    /**
+     * Restoring an old version rewrites the minutes, so it is gated on the
+     * meeting still being editable — not on `revert`, which is a status change.
+     * A locked MOM must be reverted to draft first.
+     */
+    public function restoreVersion(User $user, MinutesOfMeeting $meeting): bool
+    {
+        if ($meeting->organization_id !== $user->current_organization_id) {
+            return false;
+        }
+
+        if (! $meeting->status->isEditable()) {
+            return false;
+        }
+
+        return $this->authorizationService->hasPermission(
+            $user,
+            $user->currentOrganization,
+            'edit_meeting',
+        );
+    }
+
     public function startLive(User $user, MinutesOfMeeting $meeting): bool
     {
         if ($meeting->organization_id !== $user->current_organization_id) {

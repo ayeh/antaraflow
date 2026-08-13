@@ -8,6 +8,7 @@ use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Meeting\Models\MomVersion;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class VersionService
 {
@@ -35,17 +36,26 @@ class VersionService
         return $mom->versions()->with('createdBy')->orderByDesc('version_number')->get();
     }
 
+    /**
+     * Roll the minutes back to an earlier snapshot, keeping the current text as
+     * a new version first so a restore is itself undoable.
+     *
+     * The snapshot's own status is deliberately not restored — reviving a stale
+     * 'finalized' or 'pending_confirmation' would desync the circulation state.
+     */
     public function restoreVersion(MinutesOfMeeting $mom, MomVersion $version, User $user): MinutesOfMeeting
     {
-        $this->createVersion($mom, $user, "Restored from version {$version->version_number}");
+        return DB::transaction(function () use ($mom, $version, $user): MinutesOfMeeting {
+            $this->createVersion($mom, $user, "Restored from version {$version->version_number}");
 
-        $snapshot = $version->snapshot;
-        $mom->update([
-            'title' => $snapshot['title'] ?? $mom->title,
-            'summary' => $snapshot['summary'] ?? $mom->summary,
-            'content' => $snapshot['content'] ?? $mom->content,
-        ]);
+            $snapshot = $version->snapshot;
+            $mom->update([
+                'title' => $snapshot['title'] ?? $mom->title,
+                'summary' => $snapshot['summary'] ?? $mom->summary,
+                'content' => $snapshot['content'] ?? $mom->content,
+            ]);
 
-        return $mom->fresh();
+            return $mom->fresh();
+        });
     }
 }

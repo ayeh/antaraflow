@@ -217,6 +217,7 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
     Route::post('meetings/{meeting}/amendments/{comment}/decide', \App\Domain\Meeting\Controllers\AmendmentDecisionController::class)->name('meetings.amendment.decide');
     Route::get('meetings/{meeting}/versions', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'index'])->name('meetings.versions.index');
     Route::get('meetings/{meeting}/versions/{version}', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'show'])->name('meetings.versions.show');
+    Route::post('meetings/{meeting}/versions/{version}/restore', [\App\Domain\Meeting\Controllers\MomVersionController::class, 'restore'])->name('meetings.versions.restore');
 
     // Analytics
     Route::get('analytics', [\App\Domain\Analytics\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');

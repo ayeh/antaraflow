@@ -195,7 +195,7 @@ class MeetingController extends Controller
         $meeting->load(['exports' => fn ($q) => $q->with('user')->latest()->take(10)]);
         $meeting->load('guestAccesses');
 
-        $isEditable = in_array($meeting->status, [MeetingStatus::Draft, MeetingStatus::InProgress]);
+        $isEditable = $meeting->status->isEditable();
 
         $user = $request->user()->loadMissing('currentOrganization');
         $orgMembers = User::where('current_organization_id', $user->current_organization_id)

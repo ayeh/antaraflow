@@ -30,4 +30,21 @@ enum MeetingStatus: string
         return in_array($this, self::revertable(), true);
     }
 
+    /**
+     * Statuses whose content may still be rewritten in place.
+     *
+     * Anything further along is locked: finalized minutes are a fixed record,
+     * and circulated or approved ones are what recipients are acting on.
+     *
+     * @return array<int, self>
+     */
+    public static function editable(): array
+    {
+        return [self::Draft, self::InProgress];
+    }
+
+    public function isEditable(): bool
+    {
+        return in_array($this, self::editable(), true);
+    }
 }

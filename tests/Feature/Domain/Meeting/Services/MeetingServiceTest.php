@@ -255,3 +255,71 @@ test('an in-progress meeting cannot be reverted', function () {
     expect(fn () => $this->service->revertToDraft($mom, $this->user))
         ->toThrow(DomainException::class);
 });
+
+/*
+ * Restoring an old version used to POST at the revert endpoint, which ignored
+ * the version entirely — the button read "Restore" but only flipped the status
+ * to draft and dropped the version you picked.
+ */
+test('restoring a version brings back its content', function () {
+    $mom = MinutesOfMeeting::factory()->draft()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'title' => 'Original title',
+        'summary' => 'Original summary',
+        'content' => 'Original content',
+    ]);
+
+    $versionService = app(\App\Domain\Meeting\Services\VersionService::class);
+    $version = $versionService->createVersion($mom, $this->user, 'Before the rewrite');
+
+    $mom->update([
+        'title' => 'Rewritten title',
+        'summary' => 'Rewritten summary',
+        'content' => 'Rewritten content',
+    ]);
+
+    $restored = $versionService->restoreVersion($mom->fresh(), $version, $this->user);
+
+    expect($restored->title)->toBe('Original title')
+        ->and($restored->summary)->toBe('Original summary')
+        ->and($restored->content)->toBe('Original content');
+});
+
+test('restoring keeps the superseded text as a new version', function () {
+    $mom = MinutesOfMeeting::factory()->draft()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'content' => 'First draft',
+    ]);
+
+    $versionService = app(\App\Domain\Meeting\Services\VersionService::class);
+    $version = $versionService->createVersion($mom, $this->user, 'First draft');
+
+    $mom->update(['content' => 'Second draft']);
+    $versionService->restoreVersion($mom->fresh(), $version, $this->user);
+
+    $versions = $mom->versions()->orderBy('version_number')->get();
+
+    expect($versions)->toHaveCount(2)
+        ->and($versions[1]->change_summary)->toBe("Restored from version {$version->version_number}")
+        ->and($versions[1]->snapshot['content'])->toBe('Second draft');
+});
+
+test('restoring does not resurrect the snapshot status', function () {
+    $mom = MinutesOfMeeting::factory()->finalized()->create([
+        'organization_id' => $this->org->id,
+        'created_by' => $this->user->id,
+        'content' => 'Finalized text',
+    ]);
+
+    $versionService = app(\App\Domain\Meeting\Services\VersionService::class);
+    $version = $versionService->createVersion($mom, $this->user, 'While finalized');
+
+    $this->service->revertToDraft($mom, $this->user);
+
+    $restored = $versionService->restoreVersion($mom->fresh(), $version, $this->user);
+
+    expect($restored->status)->toBe(MeetingStatus::Draft)
+        ->and($restored->content)->toBe('Finalized text');
+});
