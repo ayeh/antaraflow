@@ -12,6 +12,7 @@ use App\Domain\LiveMeeting\Jobs\LiveTranscriptionJob;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Domain\Transcription\Jobs\DiarizeTranscriptionJob;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Domain\Transcription\Models\TranscriptionSegment;
 use App\Models\User;
@@ -69,7 +70,14 @@ class LiveMeetingService
             'total_duration_seconds' => $totalDuration,
         ]);
 
-        $this->mergeChunksIntoTranscription($session);
+        $transcription = $this->mergeChunksIntoTranscription($session);
+
+        // Dispatched alongside extraction rather than before it. Extraction
+        // reads `full_text`, which the names never touch, so making the
+        // minutes wait on a language model would be delay for nothing.
+        if ($transcription !== null) {
+            DiarizeTranscriptionJob::dispatch($transcription);
+        }
 
         ExtractMeetingDataJob::dispatch($session->meeting);
     }

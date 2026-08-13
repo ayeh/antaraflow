@@ -12,6 +12,7 @@ use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
 use App\Domain\LiveMeeting\Notifications\LiveTranscriptIncompleteNotification;
 use App\Domain\LiveMeeting\Services\LiveMeetingService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Domain\Transcription\Jobs\DiarizeTranscriptionJob;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Domain\Transcription\Models\TranscriptionSegment;
 use App\Models\User;
@@ -493,4 +494,41 @@ test('mixes fine and coarse chunks in one sitting without losing the order', fun
 
     expect($segments->pluck('text')->all())->toBe(['opening remarks', 'first item', 'second item'])
         ->and($segments->pluck('start_time')->all())->toBe([0.0, 15.0, 20.0]);
+});
+
+test('asks for the speakers to be named once the sitting is merged', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 0,
+        'text' => 'the chair opened the meeting',
+    ]);
+
+    $this->service->endSession($session);
+
+    Queue::assertPushed(DiarizeTranscriptionJob::class);
+    Queue::assertPushed(ExtractMeetingDataJob::class);
+});
+
+// Naming the speakers in a transcript that does not exist would fail on a
+// null, in a job nobody is watching, for every sitting that recorded nothing.
+test('does not ask for names when no chunk ever transcribed', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $this->service->endSession($session);
+
+    Queue::assertNotPushed(DiarizeTranscriptionJob::class);
 });
