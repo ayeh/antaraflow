@@ -53,3 +53,19 @@ test('carries the caller context into the warning so a bad chunk is findable', f
     Log::shouldHaveReceived('warning')
         ->withArgs(fn (string $_, array $context) => ($context['chunk_id'] ?? null) === 4242);
 });
+
+// An uploaded .mp4 carries pictures. Without -vn ffmpeg tries to re-encode them
+// into the Ogg output, the conversion fails, and the caller's fallback ships the
+// whole video to the transcriber — the opposite of extracting the audio.
+test('drops the video track so an mp4 is treated as audio', function () {
+    Process::fake();
+
+    app(AudioConditioner::class)->condition('/tmp/meeting.mp4');
+
+    Process::assertRan(function ($process) {
+        $command = (array) $process->command;
+
+        return in_array('-vn', $command, true)
+            && array_search('-vn', $command, true) > array_search('-i', $command, true);
+    });
+});

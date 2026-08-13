@@ -853,10 +853,10 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                                 </svg>
                                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Drop audio file here or click to browse') }}</p>
-                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('MP3, WAV, M4A, OGG, WebM (max 500MB)') }}</p>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('MP3, WAV, M4A, OGG, WebM, MP4 (max 500MB)') }}</p>
                                 <input
                                     type="file"
-                                    accept=".mp3,.wav,.m4a,.ogg,.webm,audio/*"
+                                    accept=".mp3,.wav,.m4a,.ogg,.webm,.mp4,audio/*,video/mp4"
                                     @change="uploadAudio($event)"
                                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                     :disabled="loading"

@@ -280,6 +280,18 @@ class ProcessTranscriptionJob implements ShouldQueue
         ]);
 
         if ($outputPath === null) {
+            /*
+             * Falling back to the original is right for audio — untreated audio
+             * transcribes worse, no audio not at all. It is wrong for video: the
+             * fallback would send the pictures too, at the organisation's cost and
+             * past the transcriber's size limit. Fail loudly instead.
+             */
+            if (str_starts_with((string) $this->transcription->mime_type, 'video/')) {
+                throw new \RuntimeException(
+                    __('Could not extract the audio track from this video. Please upload an audio file instead.')
+                );
+            }
+
             return $filePath;
         }
 

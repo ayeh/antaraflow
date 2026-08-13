@@ -124,3 +124,53 @@ it('transcription tab contains language selector', function (): void {
         ->assertSee('value="en"', false)
         ->assertSee('value="ms"', false);
 });
+
+/*
+ * The picker offered .mp4 all along — macOS maps it to the same UTI as .m4a
+ * under accept="audio/*" — while validation rejected it, so choosing a screen
+ * or Zoom recording failed at the server for no reason the user could see.
+ */
+test('user can upload an mp4 recording', function () {
+    Storage::fake('local');
+    Queue::fake();
+
+    $file = UploadedFile::fake()->create('meeting sistem emas.mp4', 1024, 'video/mp4');
+
+    $this->actingAs($this->user)
+        ->post(route('meetings.transcriptions.store', $this->meeting), [
+            'audio' => $file,
+            'language' => 'en',
+        ])
+        ->assertRedirect(route('meetings.show', $this->meeting))
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('audio_transcriptions', [
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'original_filename' => 'meeting sistem emas.mp4',
+        'mime_type' => 'video/mp4',
+    ]);
+});
+
+test('a member may upload, not just an owner', function () {
+    Storage::fake('local');
+    Queue::fake();
+
+    $member = User::factory()->create(['current_organization_id' => $this->org->id]);
+    $this->org->members()->attach($member, ['role' => UserRole::Member->value]);
+
+    $this->actingAs($member)
+        ->post(route('meetings.transcriptions.store', $this->meeting), [
+            'audio' => UploadedFile::fake()->create('rakaman.mp4', 512, 'video/mp4'),
+        ])
+        ->assertSessionHasNoErrors();
+});
+
+test('a genuine non-media file is still rejected', function () {
+    Storage::fake('local');
+
+    $this->actingAs($this->user)
+        ->post(route('meetings.transcriptions.store', $this->meeting), [
+            'audio' => UploadedFile::fake()->create('slides.pptx', 1024, 'application/vnd.openxmlformats-officedocument.presentationml.presentation'),
+        ])
+        ->assertSessionHasErrors('audio');
+});

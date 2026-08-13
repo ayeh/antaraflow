@@ -48,6 +48,13 @@ class AudioConditioner
         $result = Process::timeout($timeoutSeconds)->run([
             'ffmpeg', '-hide_banner', '-loglevel', 'error',
             '-i', $filePath,
+            // Drop the video track. Without this ffmpeg does not fail on an mp4 —
+            // it quietly re-encodes the pictures to Theora alongside the Opus and
+            // hands the transcriber a file carrying both: measured 6.3x larger on
+            // a three-second clip, and far worse on a screen recording, where the
+            // video is nearly all of it. This is what makes an mp4 upload an
+            // audio upload.
+            '-vn',
             '-af', self::FILTER_CHAIN,
             '-ar', (string) self::SAMPLE_RATE,
             '-ac', '1',

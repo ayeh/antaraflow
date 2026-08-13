@@ -262,3 +262,27 @@ it('sends attendee and meeting names as recognition keywords', function (): void
 
     expect($captured)->toContain('Ahmad Faiz', 'Antara Digital', 'CR ePengambilan');
 });
+
+/*
+ * preprocessAudio() falls back to the untouched file when ffmpeg fails, which is
+ * right for audio and wrong for video: the fallback would send the pictures too,
+ * at the organisation's cost and past the transcriber's size limit.
+ */
+test('a video whose audio cannot be extracted fails instead of sending the video', function () {
+    Process::fake(['*' => Process::result(output: '', errorOutput: 'boom', exitCode: 1)]);
+
+    $transcription = AudioTranscription::factory()->create(['mime_type' => 'video/mp4']);
+    $job = new ProcessTranscriptionJob($transcription);
+
+    expect(fn () => $job->preprocessAudio('/tmp/meeting.mp4'))
+        ->toThrow(RuntimeException::class);
+});
+
+test('audio still falls back to the original when ffmpeg fails', function () {
+    Process::fake(['*' => Process::result(output: '', errorOutput: 'boom', exitCode: 1)]);
+
+    $transcription = AudioTranscription::factory()->create(['mime_type' => 'audio/mpeg']);
+    $job = new ProcessTranscriptionJob($transcription);
+
+    expect($job->preprocessAudio('/tmp/meeting.mp3'))->toBe('/tmp/meeting.mp3');
+});

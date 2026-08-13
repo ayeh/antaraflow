@@ -9,7 +9,7 @@
             <div class="flex items-end gap-4">
                 <div class="flex-1">
                     <label for="audio_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Upload Audio File') }}</label>
-                    <input type="file" name="audio" id="audio_file" accept="audio/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <input type="file" name="audio" id="audio_file" accept="audio/*,.mp4,video/mp4" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                 </div>
                 <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap">{{ __('Upload') }}</button>
             </div>
