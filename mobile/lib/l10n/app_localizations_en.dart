@@ -910,4 +910,7 @@ class LEn extends L {
   String agoDays(int count) {
     return '${count}d';
   }
+
+  @override
+  String get organisationSwitchFailed => 'Could not switch organisation';
 }

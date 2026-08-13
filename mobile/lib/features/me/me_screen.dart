@@ -122,15 +122,40 @@ class MeScreen extends ConsumerWidget {
     if (!confirmed) return;
 
     Haptics.shift();
-    await ref
+
+    final switched = await ref
         .read(authControllerProvider.notifier)
         .switchOrganization(organization.id);
+
+    // The return value used to be discarded. A failed switch still invalidated
+    // every list, which refetched them under the tenant the person had just
+    // tried to leave — so the app appeared to change organisation, showed the
+    // wrong data, and said nothing. Whatever went wrong is on the auth state;
+    // it had nowhere to be seen.
+    if (!switched) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ref.read(authControllerProvider).errorMessage ??
+                L.of(context).organisationSwitchFailed,
+          ),
+        ),
+      );
+
+      return;
+    }
 
     // Every list on every other tab belongs to the old tenant now.
     ref
       ..invalidate(bootstrapProvider)
       ..invalidate(meetingsProvider)
-      ..invalidate(tasksProvider);
+      ..invalidate(tasksProvider)
+      // A status filter chosen in the old tenant means nothing in the new one,
+      // and survives a tab change by design — so it would have quietly hidden
+      // rows that are perfectly fine.
+      ..read(meetingFilterProvider.notifier).state = const MeetingFilter();
   }
 
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {

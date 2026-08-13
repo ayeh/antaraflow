@@ -1740,6 +1740,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'{count}d'**
   String agoDays(int count);
+
+  /// No description provided for @organisationSwitchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not switch organisation'**
+  String get organisationSwitchFailed;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {
