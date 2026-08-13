@@ -455,5 +455,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "organisationSwitchFailed": "Could not switch organisation"
 }

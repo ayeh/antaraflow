@@ -915,4 +915,7 @@ class LMs extends L {
   String agoDays(int count) {
     return '${count}h';
   }
+
+  @override
+  String get organisationSwitchFailed => 'Tidak dapat menukar organisasi';
 }

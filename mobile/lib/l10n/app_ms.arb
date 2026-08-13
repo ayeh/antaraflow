@@ -273,5 +273,6 @@
   "agoNow": "kini",
   "agoMinutes": "{count}m",
   "agoHours": "{count}j",
-  "agoDays": "{count}h"
+  "agoDays": "{count}h",
+  "organisationSwitchFailed": "Tidak dapat menukar organisasi"
 }
