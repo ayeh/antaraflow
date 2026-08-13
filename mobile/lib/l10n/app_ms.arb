@@ -290,5 +290,7 @@
   "unassigned": "Belum ditugaskan",
   "unassignedDetail": "Diekstrak daripada mesyuarat anda tanpa nama padanya",
   "gutterUnassigned": "belum",
-  "showingOf": "Memaparkan {shown} daripada {total}. Selebihnya di web."
+  "showingOf": "Memaparkan {shown} daripada {total}. Selebihnya di web.",
+  "ownedElsewhere": "Milik pihak lain",
+  "ownedElsewhereDetail": "Daripada mesyuarat anda, ditugaskan kepada pihak yang tiada akaun di sini"
 }

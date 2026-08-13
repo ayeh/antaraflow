@@ -209,6 +209,7 @@ class MeetingAction {
     required this.status,
     required this.isOverdue,
     this.assignee,
+    this.assigneeName,
     this.dueDate,
   });
 
@@ -219,6 +220,7 @@ class MeetingAction {
     isOverdue: json['is_overdue'] as bool? ?? false,
     assignee:
         (json['assigned_to'] as Map<String, dynamic>?)?['name'] as String?,
+    assigneeName: json['assignee_name'] as String?,
     dueDate: DateTime.tryParse(json['due_date'] as String? ?? ''),
   );
 
@@ -227,6 +229,16 @@ class MeetingAction {
   final String status;
   final bool isOverdue;
   final String? assignee;
+
+  /// Whoever the minutes named, when that is not somebody with an account.
+  final String? assigneeName;
+
+  /// The account holder if there is one, otherwise the name from the minutes.
+  ///
+  /// A record that says the work belongs to MBPJ is more useful than one that
+  /// says it belongs to nobody, which is what this showed before the name was
+  /// kept.
+  String? get owner => assignee ?? assigneeName;
   final DateTime? dueDate;
 
   bool get isDone => status == 'completed' || status == 'cancelled';

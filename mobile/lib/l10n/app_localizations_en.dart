@@ -968,4 +968,11 @@ class LEn extends L {
   String showingOf(int shown, int total) {
     return 'Showing $shown of $total. The rest are on the web.';
   }
+
+  @override
+  String get ownedElsewhere => 'Owned elsewhere';
+
+  @override
+  String get ownedElsewhereDetail =>
+      'From your sittings, assigned to somebody without an account here';
 }

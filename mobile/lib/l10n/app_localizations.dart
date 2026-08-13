@@ -1842,6 +1842,18 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Showing {shown} of {total}. The rest are on the web.'**
   String showingOf(int shown, int total);
+
+  /// No description provided for @ownedElsewhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned elsewhere'**
+  String get ownedElsewhere;
+
+  /// No description provided for @ownedElsewhereDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'From your sittings, assigned to somebody without an account here'**
+  String get ownedElsewhereDetail;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

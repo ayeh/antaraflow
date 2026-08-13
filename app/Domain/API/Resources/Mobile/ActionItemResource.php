@@ -25,6 +25,10 @@ class ActionItemResource extends JsonResource
             'is_overdue' => $this->isOverdue(),
             'completed_at' => $this->completed_at?->toIso8601String(),
             'carried_from_id' => $this->carried_from_id,
+            // Whoever the minutes named, account or not. The app shows this
+            // when there is no linked user, which on real minutes is most of
+            // the time.
+            'assignee_name' => $this->assignee_name,
             'assigned_to' => $this->whenLoaded('assignedTo', fn () => $this->assignedTo ? [
                 'id' => $this->assignedTo->id,
                 'name' => $this->assignedTo->name,

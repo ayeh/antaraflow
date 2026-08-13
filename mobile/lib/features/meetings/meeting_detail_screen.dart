@@ -430,7 +430,7 @@ class _ActionRow extends StatelessWidget {
               Localizations.localeOf(context).toLanguageTag(),
             ).format(action.dueDate!).toLowerCase(),
       title: action.title,
-      subtitle: action.assignee,
+      subtitle: action.owner,
       struck: action.isDone,
       dimmed: action.isDone,
       severity: action.isOverdue && !action.isDone ? AppColors.danger : null,
