@@ -12,6 +12,7 @@ import '../widgets/ledger_scaffold.dart';
 import 'chunk_outbox.dart';
 import 'recorder_controller.dart';
 import 'waveform.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Ink for the recorder, which is the one screen that lives on navy.
 abstract final class _Dark {
@@ -106,13 +107,13 @@ class _RecorderScreenState extends ConsumerState<RecorderScreen> {
             backgroundColor: _Dark.ground,
             body: SafeArea(
               child: switch (state.phase) {
-                RecorderPhase.preparing => const _Waiting(
-                  line: 'Opening the microphone',
+                RecorderPhase.preparing => _Waiting(
+                  line: L.of(context).openingMicrophone,
                 ),
                 RecorderPhase.denied => const _Denied(),
                 RecorderPhase.failed => _Failed(message: state.error),
-                RecorderPhase.finishing => const _Waiting(
-                  line: 'Filing the last of the audio',
+                RecorderPhase.finishing => _Waiting(
+                  line: L.of(context).filingLastAudio,
                 ),
                 RecorderPhase.finished => _Finished(state: state),
                 _ => _Live(state: state),
@@ -186,7 +187,7 @@ class _Header extends StatelessWidget {
             // arrow would promise otherwise.
             icon: const Icon(Icons.keyboard_arrow_down_rounded),
             color: _Dark.soft,
-            tooltip: 'Minimise',
+            tooltip: L.of(context).minimise,
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           Expanded(
@@ -223,7 +224,7 @@ class _StatusPill extends StatelessWidget {
         _Beacon(live: live),
         const SizedBox(width: 8),
         Text(
-          live ? 'RECORDING' : 'PAUSED',
+          live ? L.of(context).recording : L.of(context).paused,
           style: AppTheme.eyebrow(
             colour: live ? _Dark.live : AppColors.warning,
           ),
@@ -315,7 +316,7 @@ class _OutboxLine extends StatelessWidget {
 
     if (listenable == null) {
       return Text(
-        'STARTING',
+        L.of(context).starting,
         style: AppTheme.mono(size: 11, colour: _Dark.faint, tracking: 0.6),
       );
     }
@@ -331,7 +332,10 @@ class _OutboxLine extends StatelessWidget {
               '${value.sent} SENT',
               if (value.queued > 0) '${value.queued} QUEUED',
               if (dropped > 0) '$dropped LOST',
-              if (stalled) 'RETRYING' else if (dropped == 0) 'AUTOSAVING',
+              if (stalled)
+                L.of(context).retrying
+              else if (dropped == 0)
+                L.of(context).autosaving,
             ];
 
             return Text(
@@ -367,7 +371,10 @@ class _Marks extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
           child: Row(
             children: [
-              Text('MARKS', style: AppTheme.eyebrow(colour: _Dark.faint)),
+              Text(
+                L.of(context).marksSection,
+                style: AppTheme.eyebrow(colour: _Dark.faint),
+              ),
               const SizedBox(width: 12),
               const Expanded(child: Divider(color: _Dark.rule)),
               if (bookmarks.isNotEmpty) ...[
@@ -409,8 +416,7 @@ class _NoMarks extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
       child: Text(
-        'Mark a decision as it is carried and it lands here, timed to the '
-        'second. The marks become the skeleton of the minutes.',
+        L.of(context).marksEmpty,
         style: Theme.of(
           context,
         ).textTheme.bodySmall?.copyWith(color: _Dark.faint, height: 1.5),
@@ -510,7 +516,7 @@ class _MarkRowState extends State<_MarkRow>
                 Icons.cloud_queue_rounded,
                 size: 15,
                 color: _Dark.faint,
-                semanticLabel: 'Not yet sent',
+                semanticLabel: L.of(context).notYetSent,
               ),
             ),
         ],
@@ -553,7 +559,9 @@ class _Actions extends ConsumerWidget {
             children: [
               Expanded(
                 child: _GhostButton(
-                  label: state.isLive ? 'Pause' : 'Resume',
+                  label: state.isLive
+                      ? L.of(context).pause
+                      : L.of(context).resume,
                   icon: state.isLive
                       ? Icons.pause_rounded
                       : Icons.play_arrow_rounded,
@@ -566,7 +574,7 @@ class _Actions extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _GhostButton(
-                  label: 'End',
+                  label: L.of(context).end,
                   icon: Icons.stop_rounded,
                   onPressed: () => _confirmEnd(context, controller),
                 ),
@@ -609,26 +617,28 @@ class _Actions extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: _Dark.ground,
-        title: const Text(
-          'End the recording?',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          L.of(context).endRecording,
+          style: const TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'The audio still in the queue is sent first, then the minutes are '
-          'drafted from the transcript.',
-          style: TextStyle(color: _Dark.soft),
+        content: Text(
+          L.of(context).endRecordingDetail,
+          style: const TextStyle(color: _Dark.soft),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              'Keep recording',
-              style: TextStyle(color: _Dark.soft),
+            child: Text(
+              L.of(context).keepRecording,
+              style: const TextStyle(color: _Dark.soft),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('End', style: TextStyle(color: AppColors.lime)),
+            child: Text(
+              L.of(context).end,
+              style: const TextStyle(color: AppColors.lime),
+            ),
           ),
         ],
       ),
@@ -672,7 +682,7 @@ class _MarkButtonState extends State<_MarkButton> {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Mark this moment. Hold to choose a kind.',
+      label: L.of(context).markHint,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _fire,
@@ -694,7 +704,7 @@ class _MarkButtonState extends State<_MarkButton> {
             ),
             alignment: Alignment.center,
             child: Text(
-              'Mark this',
+              L.of(context).markThis,
               style: TextStyle(
                 color: AppColors.navyDeep,
                 fontSize: 16.5,
@@ -749,7 +759,7 @@ class _KindSheet extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
             child: Text(
-              'WHAT WAS IT',
+              L.of(context).whatWasIt,
               style: AppTheme.eyebrow(colour: _Dark.faint),
             ),
           ),
@@ -804,12 +814,10 @@ class _Denied extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _Notice(
-      eyebrow: 'MICROPHONE REFUSED',
-      title: 'antaraNote cannot hear the room',
-      detail:
-          'Recording needs the microphone. Grant it in Settings and come back '
-          'to this screen.',
-      action: 'Open settings',
+      eyebrow: L.of(context).microphoneRefused,
+      title: L.of(context).cannotHearTheRoom,
+      detail: L.of(context).microphoneDetail,
+      action: L.of(context).openSettings,
       onAction: openAppSettings,
     );
   }
@@ -823,10 +831,10 @@ class _Failed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _Notice(
-      eyebrow: 'NOT STARTED',
-      title: 'The session did not open',
-      detail: message ?? 'Something went wrong reaching the server.',
-      action: 'Close',
+      eyebrow: L.of(context).notStarted,
+      title: L.of(context).sessionDidNotOpen,
+      detail: message ?? L.of(context).sessionDidNotOpenDetail,
+      action: L.of(context).close,
       onAction: () => Navigator.of(context).maybePop(),
     );
   }
@@ -842,18 +850,18 @@ class _Finished extends StatelessWidget {
     final marks = state.bookmarks.length;
 
     return _Notice(
-      eyebrow: 'FILED',
+      eyebrow: L.of(context).filed,
       title: state.chunksDropped > 0
-          ? 'Recorded, with gaps'
-          : 'Recorded and filed',
+          ? L.of(context).recordedWithGaps
+          : L.of(context).recordedAndFiled,
       detail: [
-        '${state.clock} of audio',
-        if (marks > 0) '$marks ${marks == 1 ? 'mark' : 'marks'}',
+        L.of(context).audioOf(state.clock),
+        if (marks > 0) L.of(context).markCount(marks),
         if (state.chunksDropped > 0)
-          '${state.chunksDropped} pieces never reached the server, so the '
-              'transcript will be short in places',
+          L.of(context).piecesLost(state.chunksDropped) +
+              L.of(context).transcriptShort,
       ].join(' · '),
-      action: 'Done',
+      action: L.of(context).done,
       onAction: () => Navigator.of(context).maybePop(),
     );
   }

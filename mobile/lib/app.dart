@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/locale_controller.dart';
 import 'core/providers.dart';
 import 'core/theme/app_colors.dart';
+import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/auth_controller.dart';
 import 'features/auth/auth_state.dart';
@@ -39,6 +41,9 @@ class _AntaraNoteAppState extends ConsumerState<AntaraNoteApp> {
     return MaterialApp(
       title: 'antaraNote',
       debugShowCheckedModeBanner: false,
+      locale: ref.watch(localeProvider),
+      supportedLocales: supportedLocales,
+      localizationsDelegates: L.localizationsDelegates,
       theme: AppTheme.light,
       // Locked to light, and the reason is physical: this is a document read
       // across a boardroom table under ceiling light, often by people with

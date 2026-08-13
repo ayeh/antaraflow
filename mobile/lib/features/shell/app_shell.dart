@@ -15,6 +15,7 @@ import 'glass_tab_bar.dart';
 import 'tab_bar_styles.dart';
 import '../recorder/start_recording_sheet.dart';
 import '../tasks/tasks_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Loaded once when the shell mounts; every tab reads from it rather than
 /// asking the server again.
@@ -33,9 +34,23 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends ConsumerState<AppShell> {
-  int _index = 0;
+/// Which tab the shell is on.
+///
+/// A provider rather than State because Home's rows are shortcuts into the
+/// other tabs — "3 minutes to approve" has to be able to send somebody to the
+/// meetings list, and a callback threaded down four widgets to do it would be
+/// worse than one piece of shared state.
+final selectedTabProvider = StateProvider<int>((ref) => 0);
 
+/// Tab positions, named so a jump reads as a destination rather than an index.
+abstract final class Tabs {
+  static const home = 0;
+  static const meetings = 1;
+  static const tasks = 2;
+  static const me = 3;
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
   /// The widget, the Action button and Siri all land here.
   final _entry = RecordEntry();
 
@@ -84,6 +99,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   Widget build(BuildContext context) {
     final unread = ref.watch(bootstrapProvider).valueOrNull?.unread;
+    final index = ref.watch(selectedTabProvider);
 
     return Scaffold(
       backgroundColor: AppColors.paper,
@@ -96,45 +112,49 @@ class _AppShellState extends ConsumerState<AppShell> {
           _visibility.onScroll(notification);
           return false;
         },
-        child: IndexedStack(index: _index, children: _tabs),
+        child: IndexedStack(index: index, children: _tabs),
       ),
-      bottomNavigationBar: _bar(unread?.actionItemsDue ?? 0),
+      bottomNavigationBar: _bar(index, unread?.actionItemsDue ?? 0),
     );
   }
 
-  static const _destinations = <GlassDestination>[
-    GlassDestination(label: 'Home', icon: Icons.subject_rounded),
-    GlassDestination(label: 'Meetings', icon: Icons.article_outlined),
-    GlassDestination(
-      label: 'Tasks',
-      icon: Icons.task_alt_rounded,
-      badged: true,
-    ),
-    GlassDestination(label: 'Me', icon: Icons.person_outline_rounded),
-  ];
+  List<GlassDestination> _destinations(BuildContext context) {
+    final l = L.of(context);
 
-  Widget _bar(int dueCount) {
+    return [
+      GlassDestination(label: l.tabHome, icon: Icons.subject_rounded),
+      GlassDestination(label: l.tabMeetings, icon: Icons.article_outlined),
+      GlassDestination(
+        label: l.tabTasks,
+        icon: Icons.task_alt_rounded,
+        badged: true,
+      ),
+      GlassDestination(label: l.tabMe, icon: Icons.person_outline_rounded),
+    ];
+  }
+
+  Widget _bar(int index, int dueCount) {
     final bottom = MediaQuery.paddingOf(context).bottom;
 
     return CollapsingBar(
       visibility: _visibility,
       height: GlassTabBar.height + (bottom > 0 ? bottom + 6 : 12),
       child: GlassTabBar(
-        index: _index,
+        index: index,
         dueCount: dueCount,
         onSelect: _select,
         onRecord: () => startRecording(context, ref),
-        destinations: _destinations,
+        destinations: _destinations(context),
       ),
     );
   }
 
   void _select(int index) {
-    if (index == _index) return;
+    if (index == ref.read(selectedTabProvider)) return;
 
     Haptics.select();
     _visibility.reset();
-    setState(() => _index = index);
+    ref.read(selectedTabProvider.notifier).state = index;
   }
 }
 

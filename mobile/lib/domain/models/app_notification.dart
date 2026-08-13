@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 /// One entry in the notification list.
 ///
@@ -57,19 +58,19 @@ class AppNotification {
   /// title the server wrote. The keys are the eight the server actually sends,
   /// read off the notifications table rather than guessed from the class
   /// names — an earlier guess put every row under "note".
-  String get mark => switch (type) {
-    'action.item.assigned' => 'task',
-    'action.item.overdue' => 'late',
-    'calendar.meeting.starting' => 'soon',
+  String mark(BuildContext context) => switch (type) {
+    'action.item.assigned' => L.of(context).markTask,
+    'action.item.overdue' => L.of(context).markLate,
+    'calendar.meeting.starting' => L.of(context).markSoon,
     // Not "minutes": the cell above it holds 2m, 16h, 1d, and a kind that
     // reads as a duration in a column of durations is a kind nobody reads.
-    'extraction.completed' => 'drafted',
-    'transcription.completed' => 'audio',
-    'stale.decision' => 'stale',
-    _ when type.endsWith('.failed') => 'failed',
+    'extraction.completed' => L.of(context).markDrafted,
+    'transcription.completed' => L.of(context).markAudio,
+    'stale.decision' => L.of(context).markStale,
+    _ when type.endsWith('.failed') => L.of(context).markFailed,
     // Not a fallback for the eight above — a shape for the ninth, whenever the
     // server grows one.
-    _ => 'note',
+    _ => L.of(context).markNote,
   };
 
   /// Colour is spent only where the entry asks something of the reader, or

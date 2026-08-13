@@ -10,6 +10,7 @@ import '../widgets/error_view.dart';
 import '../widgets/gutter_row.dart';
 import '../widgets/ledger_scaffold.dart';
 import 'notifications_controller.dart';
+import '../../l10n/app_localizations.dart';
 
 /// What the app has been trying to tell you.
 ///
@@ -25,19 +26,19 @@ class NotificationsScreen extends ConsumerWidget {
     final controller = ref.read(notificationsProvider.notifier);
 
     return LedgerScaffold(
-      title: 'Notifications',
-      meta: _meta(state),
+      title: L.of(context).notifications,
+      meta: _meta(context, state),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_rounded),
         color: const Color(0xFFC3D0F0),
-        tooltip: 'Back',
+        tooltip: L.of(context).back,
         onPressed: () => Navigator.of(context).maybePop(),
       ),
       actions: [
         if (state.unread > 0)
           MastheadAction(
             icon: Icons.done_all_rounded,
-            tooltip: 'Mark all read',
+            tooltip: L.of(context).markAllRead,
             onPressed: () {
               Haptics.tick();
               controller.markAllRead();
@@ -57,11 +58,12 @@ class NotificationsScreen extends ConsumerWidget {
     );
   }
 
-  String? _meta(NotificationsState state) {
+  String? _meta(BuildContext context, NotificationsState state) {
     if (state.loading && state.items.isEmpty) return null;
-    if (state.items.isEmpty) return 'NOTHING WAITING';
+    final l = L.of(context);
+    if (state.items.isEmpty) return l.nothingWaiting;
 
-    return state.unread == 0 ? 'ALL READ' : '${state.unread} UNREAD';
+    return state.unread == 0 ? l.allRead : l.unreadCount(state.unread);
   }
 }
 
@@ -131,7 +133,7 @@ class _ListState extends State<_List> {
       MaterialPageRoute<void>(
         builder: (_) => MeetingDetailScreen(
           id: meetingId,
-          title: notification.title ?? 'Meeting',
+          title: notification.title ?? L.of(context).meeting,
         ),
       ),
     );
@@ -153,9 +155,9 @@ class _Row extends StatelessWidget {
       // lose the only record of what was already said.
       opacity: notification.isUnread ? 1 : 0.55,
       child: GutterRow(
-        gutter: when == null ? 'nil' : _ago(when),
-        gutterCaption: notification.mark,
-        title: notification.title ?? 'Notification',
+        gutter: when == null ? L.of(context).gutterNil : _ago(context, when),
+        gutterCaption: notification.mark(context),
+        title: notification.title ?? L.of(context).notification,
         subtitle: notification.body,
         severity: notification.severity,
         onTap: onTap,
@@ -164,15 +166,19 @@ class _Row extends StatelessWidget {
   }
 
   /// Short enough for the gutter: minutes, then hours, then the date.
-  String _ago(DateTime at) {
+  String _ago(BuildContext context, DateTime at) {
+    final l = L.of(context);
     final gap = DateTime.now().difference(at);
 
-    if (gap.inMinutes < 1) return 'now';
-    if (gap.inMinutes < 60) return '${gap.inMinutes}m';
-    if (gap.inHours < 24) return '${gap.inHours}h';
-    if (gap.inDays < 7) return '${gap.inDays}d';
+    if (gap.inMinutes < 1) return l.agoNow;
+    if (gap.inMinutes < 60) return l.agoMinutes(gap.inMinutes);
+    if (gap.inHours < 24) return l.agoHours(gap.inHours);
+    if (gap.inDays < 7) return l.agoDays(gap.inDays);
 
-    return DateFormat('d MMM').format(at);
+    return DateFormat(
+      'd MMM',
+      Localizations.localeOf(context).toLanguageTag(),
+    ).format(at);
   }
 }
 
@@ -214,17 +220,16 @@ class _Empty extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
               children: [
-                Text('NOTHING WAITING', style: AppTheme.eyebrow()),
+                Text(L.of(context).nothingWaiting, style: AppTheme.eyebrow()),
                 const SizedBox(height: 14),
                 Text(
-                  'You are up to date',
+                  L.of(context).upToDate,
                   style: Theme.of(context).textTheme.headlineSmall,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Minutes to approve, tasks assigned to you and mentions all '
-                  'arrive here.',
+                  L.of(context).nothingWaitingNotifications,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),

@@ -10,20 +10,31 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import 'meeting_detail_screen.dart';
 import 'meetings_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 enum _MeetingType {
-  general('general', 'General'),
-  boardMeeting('board_meeting', 'Board'),
-  standUp('standup', 'Stand-up'),
-  clientCall('client_call', 'Client Call'),
-  oneOnOne('one_on_one', '1-on-1'),
-  workshop('workshop', 'Workshop'),
-  retrospective('retrospective', 'Retrospective');
+  general('general'),
+  boardMeeting('board_meeting'),
+  standUp('standup'),
+  clientCall('client_call'),
+  oneOnOne('one_on_one'),
+  workshop('workshop'),
+  retrospective('retrospective');
 
-  const _MeetingType(this.wire, this.label);
+  const _MeetingType(this.wire);
 
+  /// What the API expects. Protocol, so never translated.
   final String wire;
-  final String label;
+
+  String label(BuildContext context) => switch (this) {
+    _MeetingType.general => L.of(context).typeGeneral,
+    _MeetingType.boardMeeting => L.of(context).typeBoard,
+    _MeetingType.standUp => L.of(context).typeStandUp,
+    _MeetingType.clientCall => L.of(context).typeClientCall,
+    _MeetingType.oneOnOne => L.of(context).typeOneOnOne,
+    _MeetingType.workshop => L.of(context).typeWorkshop,
+    _MeetingType.retrospective => L.of(context).typeRetrospective,
+  };
 }
 
 /// Opens the create-meeting sheet and, on success, pushes to the detail screen.
@@ -93,7 +104,10 @@ class _SheetState extends ConsumerState<_Sheet> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: Text('NEW MEETING', style: AppTheme.eyebrow()),
+                child: Text(
+                  L.of(context).newMeetingEyebrow,
+                  style: AppTheme.eyebrow(),
+                ),
               ),
               const SizedBox(height: 14),
               Container(
@@ -110,8 +124,8 @@ class _SheetState extends ConsumerState<_Sheet> {
                   textCapitalization: TextCapitalization.sentences,
                   textInputAction: TextInputAction.done,
                   style: Theme.of(context).textTheme.titleMedium,
-                  decoration: const InputDecoration(
-                    hintText: 'Meeting title',
+                  decoration: InputDecoration(
+                    hintText: L.of(context).meetingTitle,
                     isDense: true,
                     filled: false,
                     border: InputBorder.none,
@@ -119,8 +133,9 @@ class _SheetState extends ConsumerState<_Sheet> {
                     focusedBorder: InputBorder.none,
                     contentPadding: EdgeInsets.zero,
                   ),
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Title is required' : null,
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? L.of(context).titleRequired
+                      : null,
                 ),
               ),
               SingleChildScrollView(
@@ -132,7 +147,7 @@ class _SheetState extends ConsumerState<_Sheet> {
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: _TypeChip(
-                          label: type.label,
+                          label: type.label(context),
                           selected: _type == type,
                           onTap: () => setState(() {
                             _type = _type == type ? null : type;
@@ -161,7 +176,7 @@ class _SheetState extends ConsumerState<_Sheet> {
                           children: [
                             Text(
                               _date == null
-                                  ? 'date'
+                                  ? L.of(context).gutterDate
                                   : DateFormat('d MMM').format(_date!),
                               style: AppTheme.mono(
                                 size: 12,
@@ -177,7 +192,7 @@ class _SheetState extends ConsumerState<_Sheet> {
                       const SizedBox(width: 14),
                       Text(
                         _date == null
-                            ? 'No date set'
+                            ? L.of(context).noDateSet
                             : DateFormat('EEEE, d MMMM yyyy').format(_date!),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: _date == null
@@ -204,7 +219,7 @@ class _SheetState extends ConsumerState<_Sheet> {
                     SizedBox(
                       width: AppTheme.gutter,
                       child: Text(
-                        'place',
+                        L.of(context).gutterPlace,
                         style: AppTheme.mono(
                           size: 12,
                           colour: AppColors.inkFaint,
@@ -218,8 +233,8 @@ class _SheetState extends ConsumerState<_Sheet> {
                         textCapitalization: TextCapitalization.words,
                         textInputAction: TextInputAction.done,
                         style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: const InputDecoration(
-                          hintText: 'Location (optional)',
+                        decoration: InputDecoration(
+                          hintText: L.of(context).locationOptional,
                           isDense: true,
                           filled: false,
                           border: InputBorder.none,
@@ -243,11 +258,12 @@ class _SheetState extends ConsumerState<_Sheet> {
                           width: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.navy),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.navy,
+                            ),
                           ),
                         )
-                      : const Text('Create meeting'),
+                      : Text(L.of(context).createMeeting),
                 ),
               ),
               const SizedBox(height: 8),
@@ -280,18 +296,20 @@ class _SheetState extends ConsumerState<_Sheet> {
     try {
       final clientId = const Uuid().v4();
 
-      final body = await ref.read(apiClientProvider).post(
-        '/meetings',
-        body: {
-          'title': _titleController.text.trim(),
-          if (_type != null) 'meeting_type': _type!.wire,
-          if (_date != null) 'meeting_date': _date!.toIso8601String(),
-          if (_locationController.text.trim().isNotEmpty)
-            'location': _locationController.text.trim(),
-          'client_id': clientId,
-        },
-        idempotencyKey: 'meeting-$clientId',
-      );
+      final body = await ref
+          .read(apiClientProvider)
+          .post(
+            '/meetings',
+            body: {
+              'title': _titleController.text.trim(),
+              if (_type != null) 'meeting_type': _type!.wire,
+              if (_date != null) 'meeting_date': _date!.toIso8601String(),
+              if (_locationController.text.trim().isNotEmpty)
+                'location': _locationController.text.trim(),
+              'client_id': clientId,
+            },
+            idempotencyKey: 'meeting-$clientId',
+          );
 
       if (!mounted) return;
 
