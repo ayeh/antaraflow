@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\LiveMeeting\Models;
 
+use App\Domain\LiveMeeting\Enums\ChunkRole;
 use App\Domain\LiveMeeting\Enums\ChunkStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,8 @@ class LiveTranscriptChunk extends Model
 
     protected $fillable = [
         'live_meeting_session_id',
+        'device_id',
+        'role',
         'chunk_number',
         'audio_file_path',
         'text',
@@ -35,6 +38,7 @@ class LiveTranscriptChunk extends Model
     {
         return [
             'status' => ChunkStatus::class,
+            'role' => ChunkRole::class,
             'segments' => 'array',
             'start_time' => 'double',
             'end_time' => 'double',
