@@ -1818,6 +1818,24 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Minutes circulated to you for confirmation appear here until you answer them.'**
   String get approvalsEmptyDetail;
+
+  /// No description provided for @unassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get unassigned;
+
+  /// No description provided for @unassignedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracted from your sittings with no name on them'**
+  String get unassignedDetail;
+
+  /// No description provided for @gutterUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'nobody'**
+  String get gutterUnassigned;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

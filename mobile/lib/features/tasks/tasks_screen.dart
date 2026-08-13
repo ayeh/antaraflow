@@ -136,6 +136,80 @@ class TasksScreen extends ConsumerWidget {
   }
 }
 
+/// The unassigned block: its own request, its own empty behaviour — it shows
+/// nothing at all when there is nothing, rather than an empty heading.
+class _Unassigned extends ConsumerWidget {
+  const _Unassigned();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(unassignedTasksProvider).valueOrNull ?? const [];
+
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionRule(
+          label: L.of(context).unassigned,
+          trailing: '${items.length}',
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+          child: Text(
+            L.of(context).unassignedDetail,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+        for (final task in items)
+          GutterRow(
+            key: ValueKey('unassigned-${task.id}'),
+            gutter: task.dueDate == null
+                ? L.of(context).gutterNil
+                : DateFormat(
+                    'd MMM',
+                    Localizations.localeOf(context).toLanguageTag(),
+                  ).format(task.dueDate!),
+            // Its own short key, not the section heading lowercased:
+            // "unassigned" wrapped to two lines in a 62pt column and broke the
+            // alignment the whole list is built on.
+            gutterCaption: L.of(context).gutterUnassigned,
+            title: task.title,
+            subtitle: task.meetingTitle,
+            onTap: task.meetingId == null
+                ? null
+                : () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => MeetingDetailScreen(
+                        id: task.meetingId!,
+                        title: task.meetingTitle ?? task.title,
+                      ),
+                    ),
+                  ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Action items from sittings you kept or attended that the AI could not put
+/// a name to.
+///
+/// A separate request rather than a flag on the personal list: they are not
+/// yours, and folding them in would make the count at the top of the screen a
+/// lie. Government minutes assign work to an agency — MBPJ, a department — and
+/// matchAssignee correctly finds no user, so these would otherwise exist only
+/// on the web.
+final unassignedTasksProvider = FutureProvider.autoDispose<List<TaskItem>>((
+  ref,
+) async {
+  final rows = await ref
+      .read(apiClientProvider)
+      .getList('/action-items', query: {'unassigned': 1, 'per_page': 50});
+
+  return rows.cast<Map<String, dynamic>>().map(TaskItem.fromJson).toList();
+});
+
 enum _Group { overdue, today, later, closed }
 
 class _Grouped extends ConsumerStatefulWidget {
@@ -199,7 +273,13 @@ class _GroupedState extends ConsumerState<_Grouped> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.tasks.isEmpty) return const _NoTasks();
+    if (widget.tasks.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 110),
+        children: const [_NoTasksBlock(), _Unassigned()],
+      );
+    }
 
     List<TaskItem> inGroup(_Group group) =>
         widget.tasks.where((task) => _groupOf(task) == group).toList();
@@ -231,6 +311,8 @@ class _GroupedState extends ConsumerState<_Grouped> {
           SectionRule(label: L.of(context).later, trailing: '${later.length}'),
           ..._rows(context, ref, later, null),
         ],
+        // Below the personal groups, because they are not yours yet.
+        const _Unassigned(),
         // Folded away. Closed items are the largest group on any list that has
         // been used for a while, and none of them need an answer.
         if (done.isNotEmpty)
@@ -479,13 +561,14 @@ class _Loading extends StatelessWidget {
   }
 }
 
-class _NoTasks extends StatelessWidget {
-  const _NoTasks();
+/// The empty state as a block rather than its own scroll view, so the
+/// unassigned section can sit under it.
+class _NoTasksBlock extends StatelessWidget {
+  const _NoTasksBlock();
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
+    return Column(
       children: [
         const SizedBox(height: 60),
         Center(
