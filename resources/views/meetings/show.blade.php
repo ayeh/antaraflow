@@ -7,11 +7,15 @@
         ? __('This MOM is out for confirmation. Reverting cancels the circulation and voids the confirmation links already sent. Continue?')
         : __('Revert this MOM back to draft?');
 
-    /* Reverting is not a delete — say "Revert", not the component's default "Delete". */
+    /*
+     * Reverting is not a delete — say "Revert", not the component's default
+     * "Delete", and stay off type "danger", whose icon is a trash can. The
+     * heavier case is carried by the button label instead of a wrong icon.
+     */
     $revertConfirmOptions = [
         'title' => __('Revert to Draft'),
-        'confirmLabel' => __('Revert'),
-        'type' => $isCirculating ? 'danger' : 'warning',
+        'confirmLabel' => $isCirculating ? __('Revert & cancel circulation') : __('Revert'),
+        'type' => 'warning',
     ];
 
     $approveConfirmOptions = [
