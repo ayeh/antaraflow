@@ -105,9 +105,7 @@ class ExtractionService
                 // not. The minutes are clearer about who owns the work than
                 // anything else in them, and discarding the name because it is
                 // not an account threw that away.
-                'assignee_name' => is_string($assignee) && trim($assignee) !== ''
-                    ? mb_substr(strip_tags(trim($assignee)), 0, 255)
-                    : null,
+                'assignee_name' => $this->assigneeName($assignee),
                 'title' => strip_tags($item['title'] ?? $item['description'] ?? 'Untitled'),
                 'description' => strip_tags($item['description'] ?? ''),
                 'priority' => $priority,
@@ -121,6 +119,40 @@ class ExtractionService
     /**
      * Try to match an assignee name to an attendee's user.
      */
+    /**
+     * The extracted assignee, or null when the model was telling us it did not
+     * find one.
+     *
+     * It says so in words rather than by leaving the field out — "Tidak
+     * dinyatakan", "Not specified", a dash. Stored as-is those read like the
+     * name of the person responsible, which is worse than an empty column:
+     * a reader can tell that nobody was named, but not that "Tidak dinyatakan"
+     * means nobody was named.
+     */
+    private function assigneeName(mixed $assignee): ?string
+    {
+        if (! is_string($assignee)) {
+            return null;
+        }
+
+        $name = trim(strip_tags($assignee));
+
+        if ($name === '') {
+            return null;
+        }
+
+        $placeholders = [
+            'tidak dinyatakan', 'tiada', 'tiada penerima', 'belum ditentukan',
+            'tidak ditetapkan', 'tidak berkenaan',
+            'not specified', 'not stated', 'unspecified', 'unassigned',
+            'none', 'n/a', 'na', 'tbd', 'tba', 'unknown', '-', '—',
+        ];
+
+        return in_array(mb_strtolower(rtrim($name, '.')), $placeholders, true)
+            ? null
+            : mb_substr($name, 0, 255);
+    }
+
     private function matchAssignee(?string $assigneeName, $attendees): ?int
     {
         if (! $assigneeName) {
