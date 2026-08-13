@@ -1,41 +1,33 @@
 {
   "@@locale": "en",
-
   "notifications": "Notifications",
   "back": "Back",
-
   "goodMorning": "Good morning",
   "goodAfternoon": "Good afternoon",
   "goodEvening": "Good evening",
-
   "homeDateLine": "EEEE d MMMM · HH:mm",
   "@homeDateLine": {
     "description": "A DateFormat skeleton, not prose. Translators may reorder the parts — Malay writes the day before the date too — but every token must stay a valid ICU pattern."
   },
-
   "standingClearPrefix": "You have ",
   "standingClearMarked": "nothing due",
   "standingClearSuffix": ".",
   "@standingClearPrefix": {
     "description": "The sentence on Home when nothing is owed, split so the highlighter can sit on the middle fragment. Languages that put the time expression last should carry it in the suffix."
   },
-
   "standingDuePrefix": "You have ",
   "standingDueMarkedTail": " due today",
   "standingDueSuffix": ".",
   "@standingDueMarkedTail": {
     "description": "Follows the rolling number, inside the highlighter. English reads 'You have [3 due today].'"
   },
-
   "standingClearDetail": "Nothing is overdue and nothing is waiting on your approval.",
   "standingDueDetail": "Everything else can wait until these are cleared.",
-
   "upNext": "Up next",
   "nothingScheduled": "Nothing scheduled",
   "nothingScheduledDetail": "Meetings you are invited to appear here.",
   "diaryUnavailable": "Could not load the diary",
   "pullToRetry": "Pull down to try again.",
-
   "waitingOnYou": "Waiting on you",
   "nothingWaiting": "Nothing waiting",
   "nothingWaitingDetail": "Approvals and overdue items land here.",
@@ -43,7 +35,6 @@
   "actionItemsDetail": "Due today or earlier",
   "minutesToApprove": "Minutes to approve",
   "minutesToApproveDetail": "Circulated to you, not yet answered",
-
   "gutterToday": "today",
   "gutterUndated": "undated",
   "gutterNil": "nil",
@@ -52,5 +43,354 @@
   "gutterOpen": "open",
   "@gutterToday": {
     "description": "Gutter captions are lowercase and must stay short — the column is 62pt and a wrapped caption breaks the alignment the whole list is built on."
-  }
+  },
+  "appTagline": "Minutes,\nsigned and settled.",
+  "signIn": "SIGN IN",
+  "email": "Email",
+  "emailHint": "Enter your email address",
+  "password": "Password",
+  "passwordHint": "Enter your password",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "signInAction": "Sign in",
+  "forgotPassword": "Forgot your password?",
+  "updateRequired": "Update required",
+  "updateGeneric": "Please update antaraNote to continue.",
+  "updateVersioned": "antaraNote {version} or later is needed to continue.",
+  "openTheStore": "Open the store",
+  "notBuiltYet": "Not built yet",
+  "firstRunOneEyebrow": "The red button",
+  "firstRunOneLine": "It records the room, not a call.",
+  "firstRunOneBody": "Put the phone face up on the table and press record. antaraNote listens through the microphone — there is no bot to invite and nothing for anyone else to install.",
+  "firstRunTwoEyebrow": "While it runs",
+  "firstRunTwoLine": "Mark a decision the moment it is carried.",
+  "firstRunTwoBody": "One tap on “Mark this” stamps the second you heard it. Those marks become the skeleton of the minutes, so you are not reconstructing an hour from memory afterwards.",
+  "firstRunThreeEyebrow": "Afterwards",
+  "firstRunThreeLine": "Minutes, numbered and circulated.",
+  "firstRunThreeBody": "The recording becomes a transcript, the transcript becomes a draft, and the draft goes out for confirmation. Everyone present should be told they are being recorded — that part is still yours.",
+  "start": "Start",
+  "somethingWentWrong": "Something went wrong.",
+  "tryAgain": "Try again",
+  "offline": "No connection. This will be retried automatically.",
+  "tabHome": "Home",
+  "tabMeetings": "Meetings",
+  "tabTasks": "Tasks",
+  "tabMe": "Me",
+  "record": "Record",
+  "@updateVersioned": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "next": "Next",
+  "skip": "Skip",
+  "startRecording": "Start recording",
+  "meetings": "Meetings",
+  "searchMeetings": "Search",
+  "closeSearch": "Close search",
+  "newMeeting": "New meeting",
+  "searchHint": "Title, number or place",
+  "filterAll": "All",
+  "countOf": "{shown} OF {total}",
+  "meetingCount": "{count, plural, =1{1 MEETING} other{{count} MEETINGS}}",
+  "loading": "LOADING",
+  "nothingMatches": "NOTHING MATCHES",
+  "noMeetingsInState": "No meetings in that state",
+  "noMatchFor": "No “{term}”",
+  "searchCovers": "Search covers the title, the reference number and the place.",
+  "clearTheFilter": "Clear the filter",
+  "nothingRecorded": "NOTHING RECORDED",
+  "noMeetingsYet": "No meetings yet",
+  "noMeetingsYetDetail": "File a sitting ahead of time, or record one and its minutes will be filed here.",
+  "present": "{count} present",
+  "statusDraft": "Draft",
+  "statusInProgress": "In progress",
+  "statusFinalized": "Finalised",
+  "statusPendingConfirmation": "Awaiting confirmation",
+  "statusApproved": "Approved",
+  "@countOf": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@meetingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@noMatchFor": {
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
+  "@present": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stepFinalizeLabel": "Finalise the minutes",
+  "stepFinalizeDetail": "Closes them for editing and opens them for approval.",
+  "stepFinalizeConfirm": "Finalise",
+  "stepApproveLabel": "Approve the minutes",
+  "stepApproveDetail": "Puts them on the record. This cannot be undone.",
+  "stepApproveConfirm": "Approve",
+  "notYet": "Not yet",
+  "summary": "Summary",
+  "minutes": "Minutes",
+  "resolutions": "Resolutions",
+  "attendance": "Attendance",
+  "signInDesk": "Sign-in desk",
+  "recordSection": "Record",
+  "recordThisSitting": "Record this sitting",
+  "factDate": "Date",
+  "factAt": "At",
+  "factRan": "Ran",
+  "factRanMinutes": "{count} minutes",
+  "factPresent": "Present",
+  "factPresentOf": "{present} of {total}",
+  "factKeptBy": "Kept by",
+  "factAudio": "Audio",
+  "factTranscribed": "Transcribed",
+  "factPapers": "Papers",
+  "factPapersCount": "{count} attached",
+  "approvedStamp": "Approved",
+  "onTheRecord": "On the record",
+  "movedBy": "Moved by {name}",
+  "secondedBy": "seconded by {name}",
+  "noVote": "no vote",
+  "noDate": "no date",
+  "apologies": "Apologies",
+  "@factRanMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@factPresentOf": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@factPapersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@movedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@secondedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tasks": "Tasks",
+  "tasksMeta": "{count} OPEN · ASSIGNED TO YOU",
+  "overdue": "Overdue",
+  "dueToday": "Due today",
+  "later": "Later",
+  "closed": "CLOSED",
+  "markComplete": "Mark complete",
+  "loadingSection": "Loading",
+  "nothingAssigned": "NOTHING ASSIGNED",
+  "youAreClear": "You are clear",
+  "nothingAssignedDetail": "Action items assigned to you in a meeting will appear here.",
+  "newMeetingEyebrow": "NEW MEETING",
+  "meetingTitle": "Meeting title",
+  "titleRequired": "Title is required",
+  "gutterDate": "date",
+  "noDateSet": "No date set",
+  "gutterPlace": "place",
+  "locationOptional": "Location (optional)",
+  "createMeeting": "Create meeting",
+  "typeGeneral": "General",
+  "typeBoard": "Board",
+  "typeStandUp": "Stand-up",
+  "typeClientCall": "Client Call",
+  "typeOneOnOne": "1-on-1",
+  "typeWorkshop": "Workshop",
+  "typeRetrospective": "Retrospective",
+  "recordInto": "RECORD INTO",
+  "sittingNotOnTheList": "A sitting not on the list",
+  "orPlanAhead": "OR PLAN AHEAD",
+  "setUpAMeeting": "Set up a meeting",
+  "gutterNew": "new",
+  "gutterPlan": "plan",
+  "defaultRecordingTitle": "Recording, {date} at {time}",
+  "@tasksMeta": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@defaultRecordingTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "organisation": "Organisation",
+  "settings": "Settings",
+  "settingsNotificationsDetail": "What reaches this phone, and when",
+  "language": "Language",
+  "languageDetail": "Bahasa Melayu · English",
+  "session": "Session",
+  "signOut": "Sign out",
+  "signOutDetail": "Recordings already sent stay on the record",
+  "switchToOrg": "Switch to {name}?",
+  "switchToOrgDetail": "Meetings, tasks and recordings will all be that organisation’s from here on.",
+  "switchAction": "Switch",
+  "signOutConfirm": "Sign out?",
+  "signOutConfirmDetail": "You will need your password again to reach the minute book.",
+  "cancel": "Cancel",
+  "gutterCurrent": "current",
+  "gutterSwitch": "switch",
+  "openingMicrophone": "Opening the microphone",
+  "filingLastAudio": "Filing the last of the audio",
+  "minimise": "Minimise",
+  "recording": "RECORDING",
+  "paused": "PAUSED",
+  "starting": "STARTING",
+  "retrying": "RETRYING",
+  "autosaving": "AUTOSAVING",
+  "marksSection": "MARKS",
+  "marksEmpty": "Mark a decision as it is carried and it lands here, timed to the second. The marks become the skeleton of the minutes.",
+  "notYetSent": "Not yet sent",
+  "pause": "Pause",
+  "resume": "Resume",
+  "endRecording": "End the recording?",
+  "endRecordingDetail": "The audio still in the queue is sent first, then the minutes are drafted from the transcript.",
+  "keepRecording": "Keep recording",
+  "end": "End",
+  "markHint": "Mark this moment. Hold to choose a kind.",
+  "markThis": "Mark this",
+  "whatWasIt": "WHAT WAS IT",
+  "microphoneRefused": "MICROPHONE REFUSED",
+  "cannotHearTheRoom": "antaraNote cannot hear the room",
+  "microphoneDetail": "Recording needs the microphone. Grant it in Settings and come back to this screen.",
+  "openSettings": "Open settings",
+  "notStarted": "NOT STARTED",
+  "sessionDidNotOpen": "The session did not open",
+  "sessionDidNotOpenDetail": "Something went wrong reaching the server.",
+  "close": "Close",
+  "filed": "FILED",
+  "recordedWithGaps": "Recorded, with gaps",
+  "recordedAndFiled": "Recorded and filed",
+  "marksCount": "marks",
+  "transcriptShort": "transcript will be short in places",
+  "noDeskOpen": "NO DESK OPEN",
+  "nobodyCanSignIn": "Nobody can sign themselves in yet",
+  "deskExplain": "Opening the desk creates a link. Put it on a screen the room can see: it shows a code to scan, and every name lands on it as they sign in. The link closes at the end of the sitting.",
+  "openTheDesk": "Open the desk",
+  "closeTheDesk": "Close the desk",
+  "closeTheDeskConfirm": "Close the desk?",
+  "closeTheDeskDetail": "The link stops working immediately. Anybody who has not signed in yet will have to be added by hand.",
+  "keepItOpen": "Keep it open",
+  "deskOpen": "OPEN · {code}",
+  "deskClosed": "CLOSED",
+  "signedInCount": "signed in",
+  "linkCloses": "Link closes {when}",
+  "theScreenToShare": "THE SCREEN TO SHARE",
+  "share": "Share",
+  "copy": "Copy",
+  "gutterCode": "code",
+  "signInTo": "Sign in — {title}",
+  "linkCopied": "Link copied",
+  "nobodyYet": "NOBODY YET",
+  "nobodyYetDetail": "Names appear here the moment somebody scans.",
+  "signedInSection": "SIGNED IN",
+  "guest": "guest",
+  "member": "member",
+  "readingTheDesk": "READING THE DESK",
+  "@switchToOrg": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@deskOpen": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@linkCloses": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "@signInTo": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "audioOf": "{clock} of audio",
+  "markCount": "{count, plural, =1{1 mark} other{{count} marks}}",
+  "piecesLost": "{count} pieces never reached the server, so the ",
+  "@audioOf": {
+    "placeholders": {
+      "clock": {
+        "type": "String"
+      }
+    }
+  },
+  "@markCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@piecesLost": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "done": "Done",
+  "languageFollowPhone": "Follow the phone",
+  "languageFollowPhoneDetail": "Whatever your device is set to",
+  "languageEnglish": "English",
+  "languageMalay": "Bahasa Melayu",
+  "gutterUsing": "using",
+  "gutterChoose": "choose"
 }

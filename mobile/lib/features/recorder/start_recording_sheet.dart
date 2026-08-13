@@ -12,6 +12,7 @@ import '../meetings/meeting_detail_controller.dart';
 import '../meetings/meetings_screen.dart';
 import 'recorder_controller.dart';
 import 'recorder_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Asks the one question that has to be answered before recording: which
 /// meeting is this?
@@ -132,13 +133,16 @@ class _Sheet extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-            child: Text('RECORD INTO', style: AppTheme.eyebrow()),
+            child: Text(L.of(context).recordInto, style: AppTheme.eyebrow()),
           ),
           ..._candidates(meetings.valueOrNull ?? const [], now).map(
             (meeting) => _Row(
               reference: meeting.date == null
-                  ? 'nil'
-                  : DateFormat('d MMM').format(meeting.date!),
+                  ? L.of(context).gutterNil
+                  : DateFormat(
+                      'd MMM',
+                      Localizations.localeOf(context).toLanguageTag(),
+                    ).format(meeting.date!),
               caption: meeting.reference,
               title: meeting.title,
               onTap: () => Navigator.of(
@@ -147,12 +151,16 @@ class _Sheet extends ConsumerWidget {
             ),
           ),
           _Row(
-            reference: DateFormat('d MMM').format(now),
-            caption: 'new',
-            title: 'A sitting not on the list',
+            reference: DateFormat(
+              'd MMM',
+              Localizations.localeOf(context).toLanguageTag(),
+            ).format(now),
+            caption: L.of(context).gutterNew,
+            title: L.of(context).sittingNotOnTheList,
             accent: true,
-            onTap: () =>
-                Navigator.of(context).pop(_Choice(title: _defaultTitle(now))),
+            onTap: () => Navigator.of(
+              context,
+            ).pop(_Choice(title: _defaultTitle(context, now))),
           ),
           // Below the rule because it is the one row here that does not start
           // a recording. Somebody reaching for this button is usually in the
@@ -164,7 +172,7 @@ class _Sheet extends ConsumerWidget {
             decoration: const BoxDecoration(
               border: Border(top: BorderSide(color: AppColors.ruleStrong)),
             ),
-            child: Text('OR PLAN AHEAD', style: AppTheme.eyebrow()),
+            child: Text(L.of(context).orPlanAhead, style: AppTheme.eyebrow()),
           ),
           // Named for what it does, not for what it withholds. "Without
           // recording" read as *this one can never be recorded*, when all it
@@ -174,7 +182,7 @@ class _Sheet extends ConsumerWidget {
             reference: '',
             caption: '',
             icon: Icons.add_rounded,
-            title: 'Set up a meeting',
+            title: L.of(context).setUpAMeeting,
             onTap: () => Navigator.of(context).pop(const _Choice.schedule()),
           ),
           const SizedBox(height: 12),
@@ -198,9 +206,15 @@ class _Sheet extends ConsumerWidget {
     return window.take(4).toList();
   }
 
-  String _defaultTitle(DateTime now) {
-    return 'Recording, ${DateFormat('d MMMM').format(now)} at '
-        '${DateFormat('HH:mm').format(now)}';
+  String _defaultTitle(BuildContext context, DateTime now) {
+    final tag = Localizations.localeOf(context).toLanguageTag();
+
+    return L
+        .of(context)
+        .defaultRecordingTitle(
+          DateFormat('d MMMM', tag).format(now),
+          DateFormat('HH:mm', tag).format(now),
+        );
   }
 }
 

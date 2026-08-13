@@ -1,22 +1,33 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Where a sitting is in its life.
 ///
 /// The order matters — it is the order the record moves through, and the
 /// detail screen shows the next step rather than a menu of every state.
 enum MeetingStatus {
-  draft('draft', 'Draft'),
-  inProgress('in_progress', 'In progress'),
-  finalized('finalized', 'Finalised'),
-  pendingConfirmation('pending_confirmation', 'Awaiting confirmation'),
-  approved('approved', 'Approved');
+  draft('draft'),
+  inProgress('in_progress'),
+  finalized('finalized'),
+  pendingConfirmation('pending_confirmation'),
+  approved('approved');
 
-  const MeetingStatus(this.wire, this.label);
+  const MeetingStatus(this.wire);
 
+  /// What the server calls it. Never shown, never translated.
   final String wire;
-  final String label;
+
+  /// A method rather than a field: the label is prose, and prose needs a
+  /// locale. The wire value stays const because it is protocol, not language.
+  String label(BuildContext context) => switch (this) {
+    MeetingStatus.draft => L.of(context).statusDraft,
+    MeetingStatus.inProgress => L.of(context).statusInProgress,
+    MeetingStatus.finalized => L.of(context).statusFinalized,
+    MeetingStatus.pendingConfirmation => L.of(context).statusPendingConfirmation,
+    MeetingStatus.approved => L.of(context).statusApproved,
+  };
 
   static MeetingStatus fromWire(String? value) => MeetingStatus.values
       .firstWhere((s) => s.wire == value, orElse: () => MeetingStatus.draft);
@@ -107,39 +118,44 @@ class MeetingDetail {
     if (status == MeetingStatus.approved) return null;
 
     if (status == MeetingStatus.draft && permissions.canFinalize) {
-      return const MeetingStep(
-        label: 'Finalise the minutes',
-        detail: 'Closes them for editing and opens them for approval.',
-        path: 'finalize',
-        confirm: 'Finalise',
-      );
+      return MeetingStep.finalize;
     }
 
     if (status != MeetingStatus.draft && permissions.canApprove) {
-      return const MeetingStep(
-        label: 'Approve the minutes',
-        detail: 'Puts them on the record. This cannot be undone.',
-        path: 'approve',
-        confirm: 'Approve',
-      );
+      return MeetingStep.approve;
     }
 
     return null;
   }
 }
 
-class MeetingStep {
-  const MeetingStep({
-    required this.label,
-    required this.detail,
-    required this.path,
-    required this.confirm,
-  });
+/// The one action a record is waiting for.
+///
+/// An enum rather than a bag of strings: `path` is the endpoint and belongs to
+/// the protocol, while the label, the explanation and the button are prose and
+/// belong to whoever is reading the screen.
+enum MeetingStep {
+  finalize('finalize'),
+  approve('approve');
 
-  final String label;
-  final String detail;
+  const MeetingStep(this.path);
+
   final String path;
-  final String confirm;
+
+  String label(BuildContext context) => switch (this) {
+    MeetingStep.finalize => L.of(context).stepFinalizeLabel,
+    MeetingStep.approve => L.of(context).stepApproveLabel,
+  };
+
+  String detail(BuildContext context) => switch (this) {
+    MeetingStep.finalize => L.of(context).stepFinalizeDetail,
+    MeetingStep.approve => L.of(context).stepApproveDetail,
+  };
+
+  String confirm(BuildContext context) => switch (this) {
+    MeetingStep.finalize => L.of(context).stepFinalizeConfirm,
+    MeetingStep.approve => L.of(context).stepApproveConfirm,
+  };
 }
 
 class MeetingPermissions {

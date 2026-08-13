@@ -15,6 +15,7 @@ import '../widgets/ledger_scaffold.dart';
 import '../widgets/prose.dart';
 import '../widgets/stamp.dart';
 import 'meeting_detail_controller.dart';
+import '../../l10n/app_localizations.dart';
 
 /// The minute itself.
 ///
@@ -57,7 +58,7 @@ class _MeetingDetailScreenState extends ConsumerState<MeetingDetailScreen> {
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_rounded),
         color: const Color(0xFFC3D0F0),
-        tooltip: 'Back',
+        tooltip: L.of(context).back,
         onPressed: () => Navigator.of(context).maybePop(),
       ),
       reference: widget.reference ?? loaded?.momNumber,
@@ -88,7 +89,7 @@ class _MeetingDetailScreenState extends ConsumerState<MeetingDetailScreen> {
       // The number is set above the title as the reference, not repeated here.
       if (meeting.date != null)
         DateFormat('d MMM yyyy').format(meeting.date!).toUpperCase(),
-      meeting.status.label.toUpperCase(),
+      meeting.status.label(context).toUpperCase(),
     ];
 
     return parts.join(' · ');
@@ -102,23 +103,26 @@ class _MeetingDetailScreenState extends ConsumerState<MeetingDetailScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusM),
         ),
-        title: Text(step.label, style: Theme.of(context).textTheme.titleMedium),
+        title: Text(
+          step.label(context),
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         content: Text(
-          step.detail,
+          step.detail(context),
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              'Not yet',
+            child: Text(
+              L.of(context).notYet,
               style: TextStyle(color: AppColors.inkSoft),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(
-              step.confirm,
+              step.confirm(context),
               style: const TextStyle(
                 color: AppColors.primaryInk,
                 fontWeight: FontWeight.w700,
@@ -175,7 +179,7 @@ class _Body extends ConsumerWidget {
         _Facts(meeting: meeting),
         if (meeting.status.isClosed) _Settled(animate: justSettled),
         if (meeting.summary?.trim().isNotEmpty ?? false) ...[
-          const SectionRule(label: 'Summary'),
+          SectionRule(label: L.of(context).summary),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
             child: Text(
@@ -187,7 +191,7 @@ class _Body extends ConsumerWidget {
           ),
         ],
         if (meeting.content?.trim().isNotEmpty ?? false) ...[
-          const SectionRule(label: 'Minutes'),
+          SectionRule(label: L.of(context).minutes),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
             child: Prose(source: meeting.content!),
@@ -195,7 +199,7 @@ class _Body extends ConsumerWidget {
         ],
         if (meeting.resolutions.isNotEmpty) ...[
           SectionRule(
-            label: 'Resolutions',
+            label: L.of(context).resolutions,
             trailing: '${meeting.resolutions.length}',
           ),
           for (final resolution in meeting.resolutions)
@@ -203,14 +207,14 @@ class _Body extends ConsumerWidget {
         ],
         if (meeting.actionItems.isNotEmpty) ...[
           SectionRule(
-            label: 'Action items',
+            label: L.of(context).actionItems,
             trailing: '${meeting.actionItems.where((a) => !a.isDone).length}',
           ),
           for (final action in meeting.actionItems) _ActionRow(action: action),
         ],
         if (meeting.attendees.isNotEmpty || _canRunDesk(meeting)) ...[
           SectionRule(
-            label: 'Attendance',
+            label: L.of(context).attendance,
             trailing: meeting.attendees.isEmpty
                 ? null
                 : '${meeting.presentCount}/${meeting.attendees.length}',
@@ -235,29 +239,32 @@ class _Body extends ConsumerWidget {
                   ),
                 ),
                 icon: const Icon(Icons.qr_code_rounded, size: 17),
-                label: const Text('Sign-in desk'),
+                label: Text(L.of(context).signInDesk),
               ),
             ),
         ],
         if (step != null) ...[
-          const SectionRule(label: 'Waiting on you'),
+          SectionRule(label: L.of(context).waitingOnYou),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(step.detail, style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  step.detail(context),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () => onStep(step),
-                  child: Text(step.label),
+                  child: Text(step.label(context)),
                 ),
               ],
             ),
           ),
         ],
         if (meeting.permissions.canStartLive && !meeting.status.isClosed) ...[
-          const SectionRule(label: 'Record'),
+          SectionRule(label: L.of(context).recordSection),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
             child: OutlinedButton.icon(
@@ -268,7 +275,7 @@ class _Body extends ConsumerWidget {
                 title: meeting.title,
               ),
               icon: const Icon(Icons.fiber_manual_record, size: 15),
-              label: const Text('Record this sitting'),
+              label: Text(L.of(context).recordThisSitting),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.danger,
                 side: const BorderSide(color: AppColors.ruleStrong),
@@ -289,20 +296,30 @@ class _Facts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     final rows = <(String, String)>[
       if (meeting.date != null)
         // 'Sat' would have been the verb, but in a lowercase mono column
         // beside 'Thursday' it reads as an abbreviation of Saturday.
-        ('Date', DateFormat('EEEE d MMMM yyyy, HH:mm').format(meeting.date!)),
-      if (meeting.location?.isNotEmpty ?? false) ('At', meeting.location!),
+        (
+          l.factDate,
+          DateFormat(
+            'EEEE d MMMM yyyy, HH:mm',
+            Localizations.localeOf(context).toLanguageTag(),
+          ).format(meeting.date!),
+        ),
+      if (meeting.location?.isNotEmpty ?? false) (l.factAt, meeting.location!),
       if (meeting.durationMinutes != null)
-        ('Ran', '${meeting.durationMinutes} minutes'),
+        (l.factRan, l.factRanMinutes(meeting.durationMinutes!)),
       if (meeting.attendees.isNotEmpty)
-        ('Present', '${meeting.presentCount} of ${meeting.attendees.length}'),
-      if (meeting.createdBy != null) ('Kept by', meeting.createdBy!),
-      if (meeting.hasTranscript) ('Audio', 'Transcribed'),
+        (
+          l.factPresent,
+          l.factPresentOf(meeting.presentCount, meeting.attendees.length),
+        ),
+      if (meeting.createdBy != null) (l.factKeptBy, meeting.createdBy!),
+      if (meeting.hasTranscript) (l.factAudio, l.factTranscribed),
       if (meeting.documentCount > 0)
-        ('Papers', '${meeting.documentCount} attached'),
+        (l.factPapers, l.factPapersCount(meeting.documentCount)),
     ];
 
     if (rows.isEmpty) return const SizedBox(height: 8);
@@ -356,8 +373,8 @@ class _Settled extends StatelessWidget {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Stamp(
-          label: 'Approved',
-          caption: 'On the record',
+          label: L.of(context).approvedStamp,
+          caption: L.of(context).onTheRecord,
           animate: animate,
         ),
       ),
@@ -373,17 +390,20 @@ class _ResolutionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final parts = <String>[
-      if (resolution.mover != null) 'Moved by ${resolution.mover}',
-      if (resolution.seconder != null) 'seconded by ${resolution.seconder}',
+      if (resolution.mover != null) L.of(context).movedBy(resolution.mover!),
+      if (resolution.seconder != null)
+        L.of(context).secondedBy(resolution.seconder!),
     ];
 
     return GutterRow(
       gutter: resolution.number ?? '${resolution.id}',
-      gutterCaption: resolution.wasVoted ? resolution.tally : 'no vote',
+      gutterCaption: resolution.wasVoted
+          ? resolution.tally
+          : L.of(context).noVote,
       title: resolution.title,
       subtitle: parts.isEmpty ? null : parts.join(', '),
       status: resolution.open
-          ? 'open'
+          ? L.of(context).gutterOpen
           : (resolution.carried ? null : resolution.status),
       severity: resolution.carried
           ? AppColors.primaryInk
@@ -401,11 +421,14 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return GutterRow(
       gutter: action.dueDate == null
-          ? 'nil'
+          ? L.of(context).gutterNil
           : DateFormat('d MMM').format(action.dueDate!),
       gutterCaption: action.dueDate == null
-          ? 'no date'
-          : DateFormat('EEE').format(action.dueDate!).toLowerCase(),
+          ? L.of(context).noDate
+          : DateFormat(
+              'EEE',
+              Localizations.localeOf(context).toLanguageTag(),
+            ).format(action.dueDate!).toLowerCase(),
       title: action.title,
       subtitle: action.assignee,
       struck: action.isDone,
@@ -435,10 +458,16 @@ class _Attendance extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (present.isNotEmpty)
-            _Names(label: 'Present', names: present.map((a) => a.name)),
+            _Names(
+              label: L.of(context).factPresent,
+              names: present.map((a) => a.name),
+            ),
           if (absent.isNotEmpty) ...[
             if (present.isNotEmpty) const SizedBox(height: 12),
-            _Names(label: 'Apologies', names: absent.map((a) => a.name)),
+            _Names(
+              label: L.of(context).apologies,
+              names: absent.map((a) => a.name),
+            ),
           ],
         ],
       ),
@@ -475,16 +504,16 @@ class _Loading extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      children: const [
-        SizedBox(height: 22),
-        _Line(width: 240),
-        _Line(width: 180),
-        _Line(width: 210),
-        SectionRule(label: 'Minutes'),
-        SizedBox(height: 10),
-        _Line(width: double.infinity),
-        _Line(width: double.infinity),
-        _Line(width: 220),
+      children: [
+        const SizedBox(height: 22),
+        const _Line(width: 240),
+        const _Line(width: 180),
+        const _Line(width: 210),
+        SectionRule(label: L.of(context).minutes),
+        const SizedBox(height: 10),
+        const _Line(width: double.infinity),
+        const _Line(width: double.infinity),
+        const _Line(width: 220),
       ],
     );
   }

@@ -12,6 +12,7 @@ import '../widgets/gutter_row.dart';
 import '../widgets/ledger_scaffold.dart';
 import 'create_meeting_sheet.dart';
 import 'meeting_detail_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// The list of recorded meetings.
 ///
@@ -113,7 +114,11 @@ class MeetingSummary {
     _ => null,
   };
 
-  String? get statusLabel => isExceptional ? status.replaceAll('_', ' ') : null;
+  /// The enum's own label, not the wire value with its underscores swapped
+  /// for spaces. That trick produced "pending confirmation" — English, and
+  /// English is not what the row is written in.
+  String? statusLabel(BuildContext context) =>
+      isExceptional ? MeetingStatus.fromWire(status).label(context) : null;
 
   /// The sequence number alone.
   ///
@@ -149,18 +154,20 @@ class _MeetingsScreenState extends ConsumerState<MeetingsScreen> {
     final rows = all?.where(filter.matches).toList();
 
     return LedgerScaffold(
-      title: 'Meetings',
+      title: L.of(context).meetings,
       meta: _meta(all, rows, filter),
       actions: [
         MastheadAction(
           icon: _searching ? Icons.close_rounded : Icons.search_rounded,
-          tooltip: _searching ? 'Close search' : 'Search',
+          tooltip: _searching
+              ? L.of(context).closeSearch
+              : L.of(context).searchMeetings,
           onPressed: _toggleSearch,
         ),
         // Last, so the solid one sits at the edge where the eye stops.
         MastheadAction(
           icon: Icons.add_rounded,
-          tooltip: 'New meeting',
+          tooltip: L.of(context).newMeeting,
           filled: true,
           onPressed: () => showCreateMeeting(context, ref),
         ),
@@ -200,11 +207,11 @@ class _MeetingsScreenState extends ConsumerState<MeetingsScreen> {
   ) {
     if (all == null || rows == null) return null;
 
-    if (filter.isNarrowed) {
-      return '${rows.length} OF ${all.length}';
-    }
+    final l = L.of(context);
 
-    return all.length == 1 ? '1 MEETING' : '${all.length} MEETINGS';
+    return filter.isNarrowed
+        ? l.countOf(rows.length, all.length)
+        : l.meetingCount(all.length);
   }
 
   void _toggleSearch() {
@@ -256,10 +263,10 @@ class _SearchBarState extends State<_SearchBar> {
             autofocus: true,
             textInputAction: TextInputAction.search,
             style: Theme.of(context).textTheme.bodyLarge,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               isDense: true,
-              hintText: 'Title, number or place',
-              prefixIcon: Icon(Icons.search_rounded, size: 20),
+              hintText: L.of(context).searchHint,
+              prefixIcon: const Icon(Icons.search_rounded, size: 20),
             ),
             onChanged: (value) =>
                 widget.onChanged(widget.filter.copyWith(query: value)),
@@ -270,7 +277,7 @@ class _SearchBarState extends State<_SearchBar> {
             child: Row(
               children: [
                 _Chip(
-                  label: 'All',
+                  label: L.of(context).filterAll,
                   selected: widget.filter.status == null,
                   onTap: () => widget.onChanged(
                     widget.filter.copyWith(clearStatus: true),
@@ -278,7 +285,7 @@ class _SearchBarState extends State<_SearchBar> {
                 ),
                 for (final status in MeetingStatus.values)
                   _Chip(
-                    label: status.label,
+                    label: status.label(context),
                     selected: widget.filter.status == status,
                     onTap: () => widget.onChanged(
                       widget.filter.copyWith(status: status),
@@ -348,10 +355,16 @@ class _Ledger extends StatelessWidget {
   Widget build(BuildContext context) {
     final months = <String, List<MeetingSummary>>{};
 
+    // Grouped by the formatted label, so the key has to be built in the
+    // reader's language too — otherwise the headings say OGOS and the groups
+    // are still keyed on August.
     for (final meeting in rows) {
       final month = meeting.date == null
           ? 'Undated'
-          : DateFormat('MMMM yyyy').format(meeting.date!);
+          : DateFormat(
+              'MMMM yyyy',
+              Localizations.localeOf(context).toLanguageTag(),
+            ).format(meeting.date!);
 
       months.putIfAbsent(month, () => []).add(meeting);
     }
@@ -390,14 +403,17 @@ class _MeetingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final gutter = meeting.date == null
         ? 'nil'
-        : DateFormat('d MMM').format(meeting.date!);
+        : DateFormat(
+            'd MMM',
+            Localizations.localeOf(context).toLanguageTag(),
+          ).format(meeting.date!);
 
     return GutterRow(
       gutter: gutter,
       gutterCaption: meeting.reference,
       title: meeting.title,
-      subtitle: _detail(meeting),
-      status: meeting.statusLabel,
+      subtitle: _detail(context, meeting),
+      status: meeting.statusLabel(context),
       severity: meeting.severity,
       heroTag: 'meeting-${meeting.id}-$gutter',
       onTap: () => Navigator.of(context).push(
@@ -412,9 +428,10 @@ class _MeetingRow extends StatelessWidget {
     );
   }
 
-  String? _detail(MeetingSummary meeting) {
+  String? _detail(BuildContext context, MeetingSummary meeting) {
     final parts = <String>[
-      if (meeting.attendeeCount != null) '${meeting.attendeeCount} present',
+      if (meeting.attendeeCount != null)
+        L.of(context).present(meeting.attendeeCount!),
       // Only the first line of an address. A wrapped second line pushes every
       // row past the fold.
       if (meeting.location != null && meeting.location!.isNotEmpty)
@@ -476,7 +493,7 @@ class _Loading extends StatelessWidget {
             border: Border(bottom: BorderSide(color: AppColors.ruleStrong)),
           ),
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 9),
-          child: Text('LOADING', style: AppTheme.eyebrow()),
+          child: Text(L.of(context).loading, style: AppTheme.eyebrow()),
         ),
         for (final width in widths) GutterRowSkeleton(titleFraction: width),
       ],
@@ -503,23 +520,25 @@ class _NoMatches extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
               children: [
-                Text('NOTHING MATCHES', style: AppTheme.eyebrow()),
+                Text(L.of(context).nothingMatches, style: AppTheme.eyebrow()),
                 const SizedBox(height: 14),
                 Text(
-                  term.isEmpty ? 'No meetings in that state' : 'No “$term”',
+                  term.isEmpty
+                      ? L.of(context).noMeetingsInState
+                      : L.of(context).noMatchFor(term),
                   style: Theme.of(context).textTheme.headlineSmall,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Search covers the title, the reference number and the place.',
+                  L.of(context).searchCovers,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 20),
                 OutlinedButton(
                   onPressed: onClear,
-                  child: const Text('Clear the filter'),
+                  child: Text(L.of(context).clearTheFilter),
                 ),
               ],
             ),
@@ -548,24 +567,23 @@ class _NoMeetings extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
               children: [
-                Text('NOTHING RECORDED', style: AppTheme.eyebrow()),
+                Text(L.of(context).nothingRecorded, style: AppTheme.eyebrow()),
                 const SizedBox(height: 14),
                 Text(
-                  'No meetings yet',
+                  L.of(context).noMeetingsYet,
                   style: Theme.of(context).textTheme.headlineSmall,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'File a sitting ahead of time, or record one and its minutes '
-                  'will be filed here.',
+                  L.of(context).noMeetingsYetDetail,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: () => showCreateMeeting(context, ref),
-                  child: const Text('New meeting'),
+                  child: Text(L.of(context).newMeeting),
                 ),
               ],
             ),

@@ -10,11 +10,7 @@ import '../../core/theme/app_theme.dart';
 /// phrase on a screen, the way somebody would run a highlighter across a
 /// printed minute. Used more than once per screen it stops meaning anything.
 class Marker extends StatelessWidget {
-  const Marker({
-    super.key,
-    required this.child,
-    this.animate = true,
-  });
+  const Marker({super.key, required this.child, this.animate = true});
 
   final Widget child;
   final bool animate;
@@ -23,10 +19,7 @@ class Marker extends StatelessWidget {
   Widget build(BuildContext context) {
     final reduced = MediaQuery.disableAnimationsOf(context);
 
-    return _Swipe(
-      animate: animate && !reduced,
-      child: child,
-    );
+    return _Swipe(animate: animate && !reduced, child: child);
   }
 }
 

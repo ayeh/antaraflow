@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/providers.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Shown when the API answers 426.
 ///
@@ -30,19 +31,20 @@ class UpgradeGate extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Update required',
+                  L.of(context).updateRequired,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   requirement.minimumVersion == null
-                      ? 'Please update antaraNote to continue.'
-                      : 'antaraNote ${requirement.minimumVersion} or later is '
-                            'needed to continue.',
+                      ? L.of(context).updateGeneric
+                      : L
+                            .of(context)
+                            .updateVersioned(requirement.minimumVersion!),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.n500,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: AppColors.n500),
                 ),
                 if (requirement.storeUrl != null) ...[
                   const SizedBox(height: 28),
@@ -51,7 +53,7 @@ class UpgradeGate extends StatelessWidget {
                       backgroundColor: AppColors.primary,
                     ),
                     onPressed: () {},
-                    child: const Text('Open the store'),
+                    child: Text(L.of(context).openTheStore),
                   ),
                 ],
               ],

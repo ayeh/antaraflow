@@ -14,6 +14,7 @@ import '../widgets/error_view.dart';
 import '../widgets/ledger_scaffold.dart';
 import '../widgets/rolling_count.dart';
 import 'attendance_controller.dart';
+import '../../l10n/app_localizations.dart';
 
 /// The attendance desk.
 ///
@@ -37,12 +38,12 @@ class AttendanceScreen extends ConsumerWidget {
     final loaded = desk.valueOrNull;
 
     return LedgerScaffold(
-      title: 'Attendance',
-      meta: _meta(loaded),
+      title: L.of(context).attendance,
+      meta: _meta(context, loaded),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_rounded),
         color: const Color(0xFFC3D0F0),
-        tooltip: 'Back',
+        tooltip: L.of(context).back,
         onPressed: () => Navigator.of(context).maybePop(),
       ),
       child: switch (desk) {
@@ -59,13 +60,15 @@ class AttendanceScreen extends ConsumerWidget {
     );
   }
 
-  String? _meta(AttendanceDesk? desk) {
+  String? _meta(BuildContext context, AttendanceDesk? desk) {
     if (desk == null) return null;
-    if (!desk.isOpen) return 'CLOSED';
+
+    final l = L.of(context);
+    if (!desk.isOpen) return l.deskClosed;
 
     final code = desk.token!.joinCode;
 
-    return code == null ? 'OPEN' : 'OPEN · $code';
+    return code == null ? l.deskOpen('') : l.deskOpen(code);
   }
 }
 
@@ -88,17 +91,15 @@ class _ClosedState extends ConsumerState<_Closed> {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
       children: [
-        Text('NO DESK OPEN', style: AppTheme.eyebrow()),
+        Text(L.of(context).noDeskOpen, style: AppTheme.eyebrow()),
         const SizedBox(height: 14),
         Text(
-          'Nobody can sign themselves in yet',
+          L.of(context).nobodyCanSignIn,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 10),
         Text(
-          'Opening the desk creates a link. Put it on a screen the room can '
-          'see: it shows a code to scan, and every name lands on it as they '
-          'sign in. The link closes at the end of the sitting.',
+          L.of(context).deskExplain,
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 26),
@@ -113,7 +114,7 @@ class _ClosedState extends ConsumerState<_Closed> {
                     valueColor: AlwaysStoppedAnimation<Color>(AppColors.navy),
                   ),
                 )
-              : const Text('Open the desk'),
+              : Text(L.of(context).openTheDesk),
         ),
       ],
     );
@@ -165,7 +166,7 @@ class _Open extends ConsumerWidget {
               foregroundColor: AppColors.danger,
               side: const BorderSide(color: AppColors.ruleStrong),
             ),
-            child: const Text('Close the desk'),
+            child: Text(L.of(context).closeTheDesk),
           ),
         ),
       ],
@@ -178,20 +179,17 @@ class _Open extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Close the desk?'),
-        content: const Text(
-          'The link stops working immediately. Anybody who has not signed in '
-          'yet will have to be added by hand.',
-        ),
+        title: Text(L.of(context).closeTheDeskConfirm),
+        content: Text(L.of(context).closeTheDeskDetail),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep it open'),
+            child: Text(L.of(context).keepItOpen),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            child: const Text('Close'),
+            child: Text(L.of(context).close),
           ),
         ],
       ),
@@ -237,7 +235,7 @@ class _Tally extends StatelessWidget {
               RollingCount(value: count, style: style),
               const SizedBox(width: 10),
               Text(
-                'signed in',
+                L.of(context).signedInCount,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
             ],
@@ -245,7 +243,14 @@ class _Tally extends StatelessWidget {
           if (token.expiresAt != null) ...[
             const SizedBox(height: 8),
             Text(
-              'Link closes ${DateFormat('EEEE, HH:mm').format(token.expiresAt!.toLocal())}',
+              L
+                  .of(context)
+                  .linkCloses(
+                    DateFormat(
+                      'EEEE, HH:mm',
+                      Localizations.localeOf(context).toLanguageTag(),
+                    ).format(token.expiresAt!.toLocal()),
+                  ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -269,7 +274,7 @@ class _Share extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('THE SCREEN TO SHARE', style: AppTheme.eyebrow()),
+          Text(L.of(context).theScreenToShare, style: AppTheme.eyebrow()),
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
@@ -292,7 +297,7 @@ class _Share extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: () => _share(context),
                   icon: const Icon(Icons.ios_share_rounded, size: 18),
-                  label: const Text('Share'),
+                  label: Text(L.of(context).share),
                 ),
               ),
               const SizedBox(width: 10),
@@ -300,7 +305,7 @@ class _Share extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => _copy(context),
                   icon: const Icon(Icons.copy_rounded, size: 17),
-                  label: const Text('Copy'),
+                  label: Text(L.of(context).copy),
                 ),
               ),
             ],
@@ -312,7 +317,7 @@ class _Share extends StatelessWidget {
                 SizedBox(
                   width: AppTheme.gutter,
                   child: Text(
-                    'code',
+                    L.of(context).gutterCode,
                     style: AppTheme.mono(size: 11, colour: AppColors.inkFaint),
                   ),
                 ),
@@ -341,7 +346,7 @@ class _Share extends StatelessWidget {
     await SharePlus.instance.share(
       ShareParams(
         uri: Uri.parse(token.lobbyUrl),
-        subject: 'Sign in — $title',
+        subject: L.of(context).signInTo(title),
         // iPad anchors the share sheet to whatever was tapped; without an
         // origin it throws rather than guessing.
         sharePositionOrigin: box == null
@@ -359,7 +364,7 @@ class _Share extends StatelessWidget {
     Haptics.tick();
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Link copied')));
+    ).showSnackBar(SnackBar(content: Text(L.of(context).linkCopied)));
   }
 }
 
@@ -402,10 +407,10 @@ class _ArrivalsState extends State<_Arrivals> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('NOBODY YET', style: AppTheme.eyebrow()),
+            Text(L.of(context).nobodyYet, style: AppTheme.eyebrow()),
             const SizedBox(height: 10),
             Text(
-              'Names appear here the moment somebody scans.',
+              L.of(context).nobodyYetDetail,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -428,7 +433,7 @@ class _ArrivalsState extends State<_Arrivals> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 32, 20, 10),
-          child: Text('SIGNED IN', style: AppTheme.eyebrow()),
+          child: Text(L.of(context).signedInSection, style: AppTheme.eyebrow()),
         ),
         ...rows,
       ],
@@ -455,7 +460,7 @@ class _Arrival extends StatelessWidget {
           SizedBox(
             width: AppTheme.gutter,
             child: Text(
-              attendee.isExternal ? 'guest' : 'member',
+              attendee.isExternal ? L.of(context).guest : L.of(context).member,
               style: AppTheme.mono(
                 size: 10.5,
                 colour: attendee.isExternal
@@ -553,7 +558,7 @@ class _Waiting extends StatelessWidget {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 26, 20, 0),
-      children: [Text('READING THE DESK', style: AppTheme.eyebrow())],
+      children: [Text(L.of(context).readingTheDesk, style: AppTheme.eyebrow())],
     );
   }
 }

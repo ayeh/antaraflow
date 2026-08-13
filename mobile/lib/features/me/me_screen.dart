@@ -10,7 +10,9 @@ import '../meetings/meetings_screen.dart';
 import '../shell/app_shell.dart';
 import '../tasks/tasks_screen.dart';
 import '../widgets/ledger_scaffold.dart';
+import '../../l10n/app_localizations.dart';
 import '../notifications/notification_settings_screen.dart';
+import 'language_screen.dart';
 
 /// Who you are signed in as, and the three switches that belong to a phone.
 ///
@@ -31,7 +33,7 @@ class MeScreen extends ConsumerWidget {
     final current = currentMatches.isEmpty ? null : currentMatches.first;
 
     return LedgerScaffold(
-      title: 'Me',
+      title: L.of(context).tabMe,
       meta: current?.name.toUpperCase(),
       child: ListView(
         padding: const EdgeInsets.only(bottom: 110),
@@ -67,17 +69,17 @@ class MeScreen extends ConsumerWidget {
               ),
             ),
           if (organizations.length > 1) ...[
-            const SectionRule(label: 'Organisation'),
+            SectionRule(label: L.of(context).organisation),
             for (final organization in organizations)
               _OrganizationRow(
                 organization: organization,
                 onSwitch: () => _switch(context, ref, organization),
               ),
           ],
-          const SectionRule(label: 'Settings'),
+          SectionRule(label: L.of(context).settings),
           _SettingRow(
-            label: 'Notifications',
-            detail: 'What reaches this phone, and when',
+            label: L.of(context).notifications,
+            detail: L.of(context).settingsNotificationsDetail,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const NotificationSettingsScreen(),
@@ -85,14 +87,16 @@ class MeScreen extends ConsumerWidget {
             ),
           ),
           _SettingRow(
-            label: 'Language',
-            detail: 'Bahasa Melayu · English',
-            onTap: () {},
+            label: L.of(context).language,
+            detail: L.of(context).languageDetail,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const LanguageScreen()),
+            ),
           ),
-          const SectionRule(label: 'Session'),
+          SectionRule(label: L.of(context).session),
           _SettingRow(
-            label: 'Sign out',
-            detail: 'Recordings already sent stay on the record',
+            label: L.of(context).signOut,
+            detail: L.of(context).signOutDetail,
             danger: true,
             onTap: () => _signOut(context, ref),
           ),
@@ -110,11 +114,9 @@ class MeScreen extends ConsumerWidget {
   ) async {
     final confirmed = await _confirm(
       context,
-      title: 'Switch to ${organization.name}?',
-      detail:
-          'Meetings, tasks and recordings will all be that organisation’s '
-          'from here on.',
-      action: 'Switch',
+      title: L.of(context).switchToOrg(organization.name),
+      detail: L.of(context).switchToOrgDetail,
+      action: L.of(context).switchAction,
     );
 
     if (!confirmed) return;
@@ -134,9 +136,9 @@ class MeScreen extends ConsumerWidget {
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
     final confirmed = await _confirm(
       context,
-      title: 'Sign out?',
-      detail: 'You will need your password again to reach the minute book.',
-      action: 'Sign out',
+      title: L.of(context).signOutConfirm,
+      detail: L.of(context).signOutConfirmDetail,
+      action: L.of(context).signOut,
       destructive: true,
     );
 
@@ -164,8 +166,8 @@ class MeScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              'Cancel',
+            child: Text(
+              L.of(context).cancel,
               style: TextStyle(color: AppColors.inkSoft),
             ),
           ),
@@ -237,7 +239,9 @@ class _OrganizationRow extends StatelessWidget {
 
     return _Row(
       onTap: current ? null : onSwitch,
-      gutter: current ? 'current' : 'switch',
+      gutter: current
+          ? L.of(context).gutterCurrent
+          : L.of(context).gutterSwitch,
       accent: current,
       title: organization.name,
       detail: organization.role,

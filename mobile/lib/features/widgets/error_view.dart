@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/error/api_exception.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Failure state that says what happened and offers the way out.
 ///
@@ -12,6 +13,17 @@ class ErrorView extends StatelessWidget {
 
   final Object error;
   final VoidCallback? onRetry;
+
+  /// Server messages arrive already translated, so they win. The two the app
+  /// writes itself never reached a translator — they are minted in the network
+  /// layer, which has no BuildContext — so they are resolved from the code
+  /// here instead.
+  String _message(BuildContext context, ApiException? api) =>
+      switch (api?.code) {
+        ApiErrorCode.networkUnavailable => L.of(context).offline,
+        ApiErrorCode.serverError => L.of(context).somethingWentWrong,
+        _ => api?.message ?? L.of(context).somethingWentWrong,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +43,7 @@ class ErrorView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              api?.message ?? 'Something went wrong.',
+              _message(context, api),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
@@ -40,7 +52,7 @@ class ErrorView extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Try again'),
+                label: Text(L.of(context).tryAgain),
               ),
             ],
           ],

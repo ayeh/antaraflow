@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import 'tab_bar_styles.dart';
+import '../../l10n/app_localizations.dart';
 
 /// The iOS 26 arrangement: a glass pill of destinations, and the one action
 /// that is not a destination sitting beside it in its own button.
@@ -205,7 +206,7 @@ class _RecordAccessoryState extends State<_RecordAccessory> {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Start recording',
+      label: L.of(context).startRecording,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,

@@ -14,6 +14,7 @@ import '../widgets/gutter_row.dart';
 import '../widgets/ledger_scaffold.dart';
 import 'tasks_controller.dart';
 import '../meetings/meeting_detail_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Action items assigned to the person holding the phone.
 ///
@@ -114,10 +115,12 @@ class TasksScreen extends ConsumerWidget {
     final tasks = ref.watch(tasksProvider);
 
     return LedgerScaffold(
-      title: 'Tasks',
+      title: L.of(context).tasks,
       meta: tasks.valueOrNull == null
           ? null
-          : '${tasks.value!.where((t) => !t.isDone).length} OPEN · ASSIGNED TO YOU',
+          : L
+                .of(context)
+                .tasksMeta(tasks.value!.where((t) => !t.isDone).length),
       onRefresh: () async => ref.refresh(tasksProvider.future),
       child: tasks.when(
         // The list holds its shape while it loads rather than throwing the
@@ -211,15 +214,21 @@ class _GroupedState extends ConsumerState<_Grouped> {
       padding: const EdgeInsets.only(bottom: 110),
       children: [
         if (overdue.isNotEmpty) ...[
-          SectionRule(label: 'Overdue', trailing: '${overdue.length}'),
+          SectionRule(
+            label: L.of(context).overdue,
+            trailing: '${overdue.length}',
+          ),
           ..._rows(context, ref, overdue, AppColors.danger),
         ],
         if (today.isNotEmpty) ...[
-          SectionRule(label: 'Due today', trailing: '${today.length}'),
+          SectionRule(
+            label: L.of(context).dueToday,
+            trailing: '${today.length}',
+          ),
           ..._rows(context, ref, today, AppColors.warning),
         ],
         if (later.isNotEmpty) ...[
-          SectionRule(label: 'Later', trailing: '${later.length}'),
+          SectionRule(label: L.of(context).later, trailing: '${later.length}'),
           ..._rows(context, ref, later, null),
         ],
         // Folded away. Closed items are the largest group on any list that has
@@ -242,11 +251,17 @@ class _GroupedState extends ConsumerState<_Grouped> {
         GutterRow(
           key: ValueKey(task.id),
           gutter: task.dueDate == null
-              ? 'nil'
-              : DateFormat('d MMM').format(task.dueDate!),
+              ? L.of(context).gutterNil
+              : DateFormat(
+                  'd MMM',
+                  Localizations.localeOf(context).toLanguageTag(),
+                ).format(task.dueDate!),
           gutterCaption: task.dueDate == null
-              ? 'no date'
-              : DateFormat('EEE').format(task.dueDate!).toLowerCase(),
+              ? L.of(context).noDate
+              : DateFormat(
+                  'EEE',
+                  Localizations.localeOf(context).toLanguageTag(),
+                ).format(task.dueDate!).toLowerCase(),
           title: task.title,
           subtitle: task.meetingTitle,
           severity: severity,
@@ -316,7 +331,7 @@ class _ClosedState extends State<_Closed> {
             padding: const EdgeInsets.fromLTRB(20, 26, 20, 10),
             child: Row(
               children: [
-                Text('CLOSED', style: AppTheme.eyebrow()),
+                Text(L.of(context).closed, style: AppTheme.eyebrow()),
                 const SizedBox(width: 12),
                 const Expanded(child: Divider(color: AppColors.rule)),
                 const SizedBox(width: 12),
@@ -367,7 +382,7 @@ class _Check extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       checked: done,
-      label: 'Mark complete',
+      label: L.of(context).markComplete,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => onChanged(!done),
@@ -457,7 +472,7 @@ class _Loading extends StatelessWidget {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
-        const SectionRule(label: 'Loading'),
+        SectionRule(label: L.of(context).loadingSection),
         for (final width in widths) GutterRowSkeleton(titleFraction: width),
       ],
     );
@@ -478,15 +493,15 @@ class _NoTasks extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
               children: [
-                Text('NOTHING ASSIGNED', style: AppTheme.eyebrow()),
+                Text(L.of(context).nothingAssigned, style: AppTheme.eyebrow()),
                 const SizedBox(height: 14),
                 Text(
-                  'You are clear',
+                  L.of(context).youAreClear,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Action items assigned to you in a meeting will appear here.',
+                  L.of(context).nothingAssignedDetail,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),

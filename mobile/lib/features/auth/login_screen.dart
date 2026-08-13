@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/ledger_scaffold.dart';
 import 'auth_controller.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Sign in.
 ///
@@ -71,7 +72,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const BrandMark(size: 40, onDark: true),
                   const SizedBox(height: 26),
                   Text(
-                    'Minutes,\nsigned and settled.',
+                    L.of(context).appTagline,
                     style: theme.textTheme.displaySmall?.copyWith(
                       color: Colors.white,
                       height: 1.12,
@@ -90,10 +91,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text('SIGN IN', style: AppTheme.eyebrow()),
+                        Text(L.of(context).signIn, style: AppTheme.eyebrow()),
                         const SizedBox(height: 22),
                         _Field(
-                          label: 'Email',
+                          label: L.of(context).email,
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
@@ -101,12 +102,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           enabled: !state.isSubmitting,
                           error: state.fieldErrors['email']?.first,
                           validate: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Enter your email address'
+                              ? L.of(context).emailHint
                               : null,
                         ),
                         const SizedBox(height: 20),
                         _Field(
-                          label: 'Password',
+                          label: L.of(context).password,
                           controller: _passwordController,
                           obscure: _obscurePassword,
                           textInputAction: TextInputAction.done,
@@ -115,7 +116,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           error: state.fieldErrors['password']?.first,
                           onSubmitted: (_) => _submit(),
                           validate: (v) => (v == null || v.isEmpty)
-                              ? 'Enter your password'
+                              ? L.of(context).passwordHint
                               : null,
                           suffix: IconButton(
                             icon: Icon(
@@ -126,8 +127,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             color: AppColors.inkFaint,
                             tooltip: _obscurePassword
-                                ? 'Show password'
-                                : 'Hide password',
+                                ? L.of(context).showPassword
+                                : L.of(context).hidePassword,
                             onPressed: () => setState(
                               () => _obscurePassword = !_obscurePassword,
                             ),
@@ -148,7 +149,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     color: AppColors.navy,
                                   ),
                                 )
-                              : const Text('Sign in'),
+                              : Text(L.of(context).signInAction),
                         ),
                         const SizedBox(height: 18),
                         Center(
@@ -162,7 +163,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 fontSize: 14,
                               ),
                             ),
-                            child: const Text('Forgot your password?'),
+                            child: Text(L.of(context).forgotPassword),
                           ),
                         ),
                       ],

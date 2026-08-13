@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/ledger_scaffold.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Whether the three cards have been seen on this device.
 ///
@@ -46,33 +47,30 @@ class _FirstRunState extends ConsumerState<FirstRun> {
   final _pages = PageController();
   int _index = 0;
 
-  static const _cards = <_Card>[
-    _Card(
-      eyebrow: 'The red button',
-      title: 'It records the room, not a call.',
-      body:
-          'Put the phone face up on the table and press record. antaraNote '
-          'listens through the microphone — there is no bot to invite and '
-          'nothing for anyone else to install.',
-    ),
-    _Card(
-      eyebrow: 'While it runs',
-      title: 'Mark a decision the moment it is carried.',
-      body:
-          'One tap on “Mark this” stamps the second you heard it. Those marks '
-          'become the skeleton of the minutes, so you are not reconstructing '
-          'an hour from memory afterwards.',
-      accent: true,
-    ),
-    _Card(
-      eyebrow: 'Afterwards',
-      title: 'Minutes, numbered and circulated.',
-      body:
-          'The recording becomes a transcript, the transcript becomes a draft, '
-          'and the draft goes out for confirmation. Everyone present should be '
-          'told they are being recorded — that part is still yours.',
-    ),
-  ];
+  /// Built per-frame rather than held as a const list: these are three
+  /// paragraphs of prose and prose has to come from the translator.
+  List<_Card> _cards(BuildContext context) {
+    final l = L.of(context);
+
+    return [
+      _Card(
+        eyebrow: l.firstRunOneEyebrow,
+        title: l.firstRunOneLine,
+        body: l.firstRunOneBody,
+      ),
+      _Card(
+        eyebrow: l.firstRunTwoEyebrow,
+        title: l.firstRunTwoLine,
+        body: l.firstRunTwoBody,
+        accent: true,
+      ),
+      _Card(
+        eyebrow: l.firstRunThreeEyebrow,
+        title: l.firstRunThreeLine,
+        body: l.firstRunThreeBody,
+      ),
+    ];
+  }
 
   @override
   void dispose() {
@@ -80,7 +78,11 @@ class _FirstRunState extends ConsumerState<FirstRun> {
     super.dispose();
   }
 
-  bool get _isLast => _index == _cards.length - 1;
+  /// Three, and the count is structural rather than derived: _cards needs a
+  /// context and this is asked for outside build.
+  static const _cardCount = 3;
+
+  bool get _isLast => _index == _cardCount - 1;
 
   void _next() {
     Haptics.select();
@@ -121,7 +123,7 @@ class _FirstRunState extends ConsumerState<FirstRun> {
                       style: TextButton.styleFrom(
                         foregroundColor: const Color(0xFF8FA2D6),
                       ),
-                      child: const Text('Skip'),
+                      child: Text(L.of(context).skip),
                     ),
                   ],
                 ),
@@ -129,16 +131,16 @@ class _FirstRunState extends ConsumerState<FirstRun> {
               Expanded(
                 child: PageView.builder(
                   controller: _pages,
-                  itemCount: _cards.length,
+                  itemCount: _cardCount,
                   onPageChanged: (i) => setState(() => _index = i),
-                  itemBuilder: (context, i) => _cards[i],
+                  itemBuilder: (context, i) => _cards(context)[i],
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 22),
                 child: Column(
                   children: [
-                    _Progress(count: _cards.length, index: _index),
+                    _Progress(count: _cardCount, index: _index),
                     const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
@@ -148,7 +150,9 @@ class _FirstRunState extends ConsumerState<FirstRun> {
                           backgroundColor: AppColors.lime,
                           foregroundColor: AppColors.navyDeep,
                         ),
-                        child: Text(_isLast ? 'Start' : 'Next'),
+                        child: Text(
+                          _isLast ? L.of(context).start : L.of(context).next,
+                        ),
                       ),
                     ),
                   ],

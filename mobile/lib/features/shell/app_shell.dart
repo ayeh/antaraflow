@@ -15,6 +15,7 @@ import 'glass_tab_bar.dart';
 import 'tab_bar_styles.dart';
 import '../recorder/start_recording_sheet.dart';
 import '../tasks/tasks_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Loaded once when the shell mounts; every tab reads from it rather than
 /// asking the server again.
@@ -118,16 +119,20 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
-  static const _destinations = <GlassDestination>[
-    GlassDestination(label: 'Home', icon: Icons.subject_rounded),
-    GlassDestination(label: 'Meetings', icon: Icons.article_outlined),
-    GlassDestination(
-      label: 'Tasks',
-      icon: Icons.task_alt_rounded,
-      badged: true,
-    ),
-    GlassDestination(label: 'Me', icon: Icons.person_outline_rounded),
-  ];
+  List<GlassDestination> _destinations(BuildContext context) {
+    final l = L.of(context);
+
+    return [
+      GlassDestination(label: l.tabHome, icon: Icons.subject_rounded),
+      GlassDestination(label: l.tabMeetings, icon: Icons.article_outlined),
+      GlassDestination(
+        label: l.tabTasks,
+        icon: Icons.task_alt_rounded,
+        badged: true,
+      ),
+      GlassDestination(label: l.tabMe, icon: Icons.person_outline_rounded),
+    ];
+  }
 
   Widget _bar(int index, int dueCount) {
     final bottom = MediaQuery.paddingOf(context).bottom;
@@ -140,7 +145,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         dueCount: dueCount,
         onSelect: _select,
         onRecord: () => startRecording(context, ref),
-        destinations: _destinations,
+        destinations: _destinations(context),
       ),
     );
   }

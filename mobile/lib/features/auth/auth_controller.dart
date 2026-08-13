@@ -7,10 +7,11 @@ import '../../core/providers.dart';
 import '../../data/local/secure_store.dart';
 import 'auth_state.dart';
 
-final authControllerProvider =
-    StateNotifierProvider<AuthController, AuthState>((ref) {
-      return AuthController(ref);
-    });
+final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
+  (ref) {
+    return AuthController(ref);
+  },
+);
 
 class AuthController extends StateNotifier<AuthState> {
   AuthController(this._ref) : super(const AuthState());
