@@ -4,6 +4,7 @@ import 'package:antaranote/domain/models/live_session.dart';
 import 'package:antaranote/features/recorder/audio_chunker.dart';
 import 'package:antaranote/features/recorder/chunk_outbox.dart';
 import 'package:antaranote/features/recorder/recorder_controller.dart';
+import 'package:antaranote/features/recorder/recorder_role.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -115,6 +116,50 @@ void main() {
         const RecorderState(phase: RecorderPhase.finished).canMark,
         isFalse,
       );
+    });
+  });
+  group('RecorderState role', () {
+    test('a satellite knows it is not the recording', () {
+      const state = RecorderState(role: RecorderRole.satellite);
+
+      expect(state.role.isSatellite, isTrue);
+    });
+
+    test('a recorder is the recording unless told otherwise', () {
+      expect(const RecorderState().role, RecorderRole.primary);
+    });
+  });
+
+  group('RecorderRole.fromWire', () {
+    test('reads what the server said', () {
+      expect(RecorderRole.fromWire('satellite'), RecorderRole.satellite);
+      expect(RecorderRole.fromWire('primary'), RecorderRole.primary);
+    });
+
+    // A server too old to answer this is one where satellites do not exist,
+    // and every rejoin there is a recorder coming back to its own sitting.
+    test('falls back to the recording rather than to helping', () {
+      expect(RecorderRole.fromWire(null), RecorderRole.primary);
+      expect(RecorderRole.fromWire('nonsense'), RecorderRole.primary);
+    });
+  });
+
+  group('LiveSession.alignmentGap', () {
+    test('waits out the rest of the window it joined halfway through', () {
+      const session = LiveSession(
+        id: 1,
+        meetingId: 2,
+        status: 'active',
+        secondsIntoChunk: 7,
+      );
+
+      expect(session.alignmentGap(15), const Duration(seconds: 8));
+    });
+
+    test('waits for nothing when the sitting is on a boundary', () {
+      const session = LiveSession(id: 1, meetingId: 2, status: 'active');
+
+      expect(session.alignmentGap(15), Duration.zero);
     });
   });
 }

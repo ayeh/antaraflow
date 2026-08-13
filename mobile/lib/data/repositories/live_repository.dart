@@ -27,6 +27,7 @@ class LiveRepository {
     int meetingId, {
     required int chunkSeconds,
     required String clientId,
+    String deviceId = '',
   }) async {
     try {
       final body = await _client.post(
@@ -35,6 +36,7 @@ class LiveRepository {
           'chunk_interval': chunkSeconds,
           'live_extraction': true,
           'client_id': clientId,
+          if (deviceId.isNotEmpty) 'device_id': deviceId,
         },
       );
 
@@ -51,10 +53,17 @@ class LiveRepository {
 
       final resume = e.extra['resume'];
       final next = resume is Map ? resume['next_chunk_number'] : null;
+      final role = resume is Map ? resume['role'] : null;
+      final into = resume is Map ? resume['seconds_into_chunk'] : null;
 
       return LiveSession.fromJson(
         Map<String, dynamic>.from(session),
         nextChunkNumber: (next as num?)?.toInt() ?? 0,
+        // Defaulting to primary is the safe way round: a server too old to
+        // answer this is one where satellites do not exist, and every rejoin
+        // there is a recorder coming back to its own sitting.
+        role: RecorderRole.fromWire(role as String?),
+        secondsIntoChunk: (into as num?)?.toDouble() ?? 0,
       );
     }
   }

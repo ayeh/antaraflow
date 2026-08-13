@@ -1,3 +1,5 @@
+import '../../features/recorder/recorder_role.dart';
+
 /// What the server calls a bookmark: a moment somebody marked while the
 /// meeting was still running.
 enum BookmarkKind {
@@ -27,11 +29,15 @@ class LiveSession {
     this.startedAt,
     this.totalDurationSeconds,
     this.nextChunkNumber = 0,
+    this.role = RecorderRole.primary,
+    this.secondsIntoChunk = 0,
   });
 
   factory LiveSession.fromJson(
     Map<String, dynamic> json, {
     int nextChunkNumber = 0,
+    RecorderRole role = RecorderRole.primary,
+    double secondsIntoChunk = 0,
   }) => LiveSession(
     id: json['id'] as int,
     meetingId: json['meeting_id'] as int,
@@ -39,6 +45,8 @@ class LiveSession {
     startedAt: DateTime.tryParse(json['started_at'] as String? ?? ''),
     totalDurationSeconds: (json['total_duration_seconds'] as num?)?.toInt(),
     nextChunkNumber: nextChunkNumber,
+    role: role,
+    secondsIntoChunk: secondsIntoChunk,
   );
 
   final int id;
@@ -46,6 +54,21 @@ class LiveSession {
   final String status;
   final DateTime? startedAt;
   final int? totalDurationSeconds;
+
+  /// What this device should be in this sitting.
+  ///
+  /// Decided by the server, not guessed here: it is the only side that can see
+  /// whether the device already has audio in this sitting — an app coming back
+  /// from being killed — or whether somebody else is already recording and
+  /// this is a second phone arriving to help.
+  final RecorderRole role;
+
+  /// How far past the last chunk boundary the sitting already is.
+  ///
+  /// A device joining in the middle waits this long before it starts cutting,
+  /// so its chunks line up with the ones already being recorded rather than
+  /// straddling two of them.
+  final double secondsIntoChunk;
 
   /// Where a resumed recording has to pick up numbering.
   ///
@@ -70,6 +93,20 @@ class LiveSession {
     if (total != null && total > 0) return Duration(seconds: total);
 
     return Duration(seconds: nextChunkNumber * chunkSeconds);
+  }
+
+  /// What a joining device has to throw away before it is in step.
+  ///
+  /// The server says how far past the boundary the sitting is; the remainder
+  /// of that window is audio this device missed the start of, and sending a
+  /// short chunk for it would cover only its tail while claiming the whole
+  /// number. Zero for a device that is not joining anything.
+  Duration alignmentGap(int chunkSeconds) {
+    final into = Duration(milliseconds: (secondsIntoChunk * 1000).round());
+
+    if (into <= Duration.zero) return Duration.zero;
+
+    return Duration(seconds: chunkSeconds) - into;
   }
 
   bool get isActive => status == 'active';

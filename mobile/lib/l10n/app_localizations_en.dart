@@ -629,6 +629,33 @@ class LEn extends L {
   String get recordingNoteSilent => 'No sound is reaching the microphone';
 
   @override
+  String get alreadyRecording => 'Already being recorded';
+
+  @override
+  String get helpRecordTitle => 'Add this phone as an extra microphone?';
+
+  @override
+  String get helpRecordDetail =>
+      'Somebody else is recording this sitting. This phone can listen too — put it nearer whoever is hardest to hear, and the better of the two recordings is used for each moment.';
+
+  @override
+  String get helpRecordConsent =>
+      'The audio goes to your organisation, the same as the recording already running.';
+
+  @override
+  String get helpRecord => 'Use as extra microphone';
+
+  @override
+  String get notNow => 'Not now';
+
+  @override
+  String get extraMicrophone => 'EXTRA MICROPHONE';
+
+  @override
+  String get extraMicrophoneDetail =>
+      'This phone is helping. Stopping it does not stop the meeting recording.';
+
+  @override
   String get marksSection => 'MARKS';
 
   @override

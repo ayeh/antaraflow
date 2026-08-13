@@ -632,6 +632,33 @@ class LMs extends L {
   String get recordingNoteSilent => 'Tiada bunyi sampai ke mikrofon';
 
   @override
+  String get alreadyRecording => 'Sedang dirakam';
+
+  @override
+  String get helpRecordTitle => 'Jadikan telefon ini mikrofon tambahan?';
+
+  @override
+  String get helpRecordDetail =>
+      'Orang lain sedang merakam mesyuarat ini. Telefon ini boleh turut mendengar — letakkan ia lebih dekat dengan orang yang paling sukar didengar, dan rakaman yang lebih baik antara dua itu akan digunakan bagi setiap detik.';
+
+  @override
+  String get helpRecordConsent =>
+      'Audio itu pergi ke organisasi anda, sama seperti rakaman yang sedang berjalan.';
+
+  @override
+  String get helpRecord => 'Guna sebagai mikrofon tambahan';
+
+  @override
+  String get notNow => 'Bukan sekarang';
+
+  @override
+  String get extraMicrophone => 'MIKROFON TAMBAHAN';
+
+  @override
+  String get extraMicrophoneDetail =>
+      'Telefon ini sedang membantu. Menghentikannya tidak menghentikan rakaman mesyuarat.';
+
+  @override
   String get marksSection => 'TANDA';
 
   @override
