@@ -597,6 +597,41 @@ class LMs extends L {
   String get autosaving => 'SIMPAN AUTO';
 
   @override
+  String get micCheck => 'SEMAK MIKROFON';
+
+  @override
+  String get micCheckPrompt =>
+      'Minta orang yang duduk paling jauh bercakap sepatah dua.';
+
+  @override
+  String get roomClear => 'JELAS';
+
+  @override
+  String get roomClearDetail => 'Suara sampai pada aras yang baik.';
+
+  @override
+  String get roomFaint => 'TERLALU PERLAHAN';
+
+  @override
+  String get roomFaintDetail => 'Alihkan telefon ke tengah meja.';
+
+  @override
+  String get roomSilent => 'TIADA BUNYI';
+
+  @override
+  String get roomSilentDetail =>
+      'Tiada apa-apa sampai ke mikrofon. Pastikan ia tidak tertutup.';
+
+  @override
+  String get recordingNote => 'Sedang merakam mesyuarat';
+
+  @override
+  String get recordingNoteFaint => 'Terlalu perlahan — dekatkan telefon';
+
+  @override
+  String get recordingNoteSilent => 'Tiada bunyi sampai ke mikrofon';
+
+  @override
   String get marksSection => 'TANDA';
 
   @override

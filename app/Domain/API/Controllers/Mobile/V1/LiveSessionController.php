@@ -77,6 +77,13 @@ class LiveSessionController extends MobileController
             'start_time' => ['required', 'numeric', 'min:0'],
             'end_time' => ['required', 'numeric', 'gt:start_time'],
             'checksum' => ['sometimes', 'nullable', 'string', 'max:128'],
+            // dBFS, so never above zero and never usefully below the floor the
+            // device reports for digital silence. Bounded rather than trusted:
+            // a client sending nonsense here would poison the only evidence we
+            // have about capture quality.
+            'peak_dbfs' => ['sometimes', 'numeric', 'between:-100,0'],
+            'speech_dbfs' => ['sometimes', 'numeric', 'between:-100,0'],
+            'noise_dbfs' => ['sometimes', 'numeric', 'between:-100,0'],
         ]);
 
         $existing = $this->liveMeetingService->findExistingChunk($session, (int) $validated['chunk_number']);
@@ -97,6 +104,10 @@ class LiveSessionController extends MobileController
             (int) $validated['chunk_number'],
             (float) $validated['start_time'],
             (float) $validated['end_time'],
+            array_map(
+                static fn ($level): float => (float) $level,
+                array_intersect_key($validated, array_flip(['peak_dbfs', 'speech_dbfs', 'noise_dbfs'])),
+            ),
         );
 
         return response()->json([

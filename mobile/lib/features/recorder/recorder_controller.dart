@@ -9,10 +9,12 @@ import '../../core/error/api_exception.dart';
 import '../../core/providers.dart';
 import '../../data/repositories/live_repository.dart';
 import '../../domain/models/live_session.dart';
+import '../../core/haptics.dart';
 import 'audio_chunker.dart';
 import 'chunk_outbox.dart';
 import 'live_activity.dart';
 import 'recording_service.dart';
+import 'room_level.dart';
 
 final liveRepositoryProvider = Provider<LiveRepository>((ref) {
   return LiveRepository(client: ref.watch(apiClientProvider));
@@ -53,6 +55,8 @@ class RecorderState {
     this.elapsed = Duration.zero,
     this.bookmarks = const [],
     this.chunksDropped = 0,
+    this.check = RoomVerdict.listening,
+    this.room = RoomVerdict.listening,
     this.error,
   });
 
@@ -60,6 +64,15 @@ class RecorderState {
   final String meetingTitle;
   final int? sessionId;
   final Duration elapsed;
+
+  /// How the phone was placed, settled once near the start of the sitting.
+  final RoomVerdict check;
+
+  /// How the room has sounded lately. Holds the last firm answer rather than
+  /// falling back to `listening` every time the room goes quiet, because a
+  /// warning that disappeared during the pause between sentences would be
+  /// telling somebody the problem had fixed itself.
+  final RoomVerdict room;
 
   /// Newest first: the mark someone just made is the one they want to see.
   final List<Bookmark> bookmarks;
@@ -86,6 +99,8 @@ class RecorderState {
     Duration? elapsed,
     List<Bookmark>? bookmarks,
     int? chunksDropped,
+    RoomVerdict? check,
+    RoomVerdict? room,
     String? error,
     bool clearError = false,
   }) {
@@ -96,9 +111,36 @@ class RecorderState {
       elapsed: elapsed ?? this.elapsed,
       bookmarks: bookmarks ?? this.bookmarks,
       chunksDropped: chunksDropped ?? this.chunksDropped,
+      check: check ?? this.check,
+      room: room ?? this.room,
       error: clearError ? null : (error ?? this.error),
     );
   }
+}
+
+/// The lines the recorder shows outside its own screen.
+///
+/// Localised where there is a BuildContext and handed down, because the
+/// notification and the lock-screen card outlive the screen that started them
+/// — the whole point of both is that they are what somebody sees when the app
+/// is not in front of them.
+@immutable
+class RoomNotices {
+  const RoomNotices({
+    required this.recording,
+    required this.faint,
+    required this.silent,
+  });
+
+  final String recording;
+  final String faint;
+  final String silent;
+
+  String? of(RoomVerdict verdict) => switch (verdict) {
+    RoomVerdict.faint => faint,
+    RoomVerdict.silent => silent,
+    _ => null,
+  };
 }
 
 /// Runs one recording from the microphone to the server.
@@ -111,6 +153,7 @@ class RecorderController extends StateNotifier<RecorderState> {
   final _chunker = AudioChunker();
   final _activity = LiveActivity();
   final _service = RecordingService();
+  RoomNotices? _notices;
   ChunkOutbox? _outbox;
   StreamSubscription<AudioChunk>? _chunkSub;
   Timer? _ticker;
@@ -118,6 +161,14 @@ class RecorderController extends StateNotifier<RecorderState> {
 
   /// Repaints the meter without rebuilding the screen.
   ValueListenable<double> get level => _chunker.level;
+
+  /// The last time the room was reported as hard to hear. Kept so a sitting in
+  /// a genuinely difficult room buzzes once and then leaves people alone,
+  /// rather than interrupting the meeting it is supposed to be recording.
+  Duration? _lastComplaint;
+
+  /// How long the warning holds its tongue after speaking up.
+  static const _quietFor = Duration(minutes: 5);
 
   ValueListenable<OutboxStatus>? get outbox => _outbox?.status;
 
@@ -128,7 +179,12 @@ class RecorderController extends StateNotifier<RecorderState> {
   ///
   /// The order matters: the microphone comes first, so somebody who refuses
   /// permission has not silently created an empty session on the record.
-  Future<void> begin({required int meetingId, required String title}) async {
+  Future<void> begin({
+    required int meetingId,
+    required String title,
+    required RoomNotices notices,
+  }) async {
+    _notices = notices;
     state = state.copyWith(meetingTitle: title, clearError: true);
 
     if (!await _chunker.hasPermission()) {
@@ -158,7 +214,10 @@ class RecorderController extends StateNotifier<RecorderState> {
       );
 
       unawaited(_activity.start(title: title, elapsed: recorded));
-      unawaited(_service.start(title));
+      unawaited(_service.start(title, note: notices.recording));
+
+      _chunker.room.check.addListener(_onCheck);
+      _chunker.room.verdict.addListener(_onRoom);
 
       _ticker = Timer.periodic(const Duration(milliseconds: 500), (_) {
         if (mounted) state = state.copyWith(elapsed: _chunker.position);
@@ -276,6 +335,48 @@ class RecorderController extends StateNotifier<RecorderState> {
     }
   }
 
+  void _onCheck() {
+    if (!mounted) return;
+
+    state = state.copyWith(check: _chunker.room.check.value);
+  }
+
+  /// Acts on the rolling verdict, once it changes to something firm.
+  ///
+  /// `listening` is skipped rather than stored: it means nobody has spoken
+  /// lately, which is the normal state of a meeting and says nothing about
+  /// whether the phone can hear.
+  void _onRoom() {
+    final verdict = _chunker.room.verdict.value;
+
+    if (!mounted ||
+        verdict == RoomVerdict.listening ||
+        verdict == state.room ||
+        state.phase != RecorderPhase.recording) {
+      return;
+    }
+
+    state = state.copyWith(room: verdict);
+
+    // Always kept true, and not rate-limited: a notification still saying the
+    // room is hard to hear ten minutes after it stopped being hard to hear is
+    // how somebody learns to ignore it.
+    unawaited(_service.note(_notices?.of(verdict) ?? _notices?.recording));
+    _pushActivity();
+
+    if (verdict == RoomVerdict.clear) return;
+
+    final now = _chunker.position;
+    final last = _lastComplaint;
+    if (last != null && now - last < _quietFor) return;
+
+    _lastComplaint = now;
+
+    // The one part somebody feels without looking, which is the point: the
+    // phone is face down on the table and nobody is watching the screen.
+    Haptics.commit();
+  }
+
   void _pushActivity() {
     unawaited(
       _activity.update(
@@ -283,6 +384,8 @@ class RecorderController extends StateNotifier<RecorderState> {
         marks: state.bookmarks.length,
         queued: _outbox?.status.value.queued ?? 0,
         paused: state.phase == RecorderPhase.paused,
+        quiet:
+            state.room == RoomVerdict.faint || state.room == RoomVerdict.silent,
       ),
     );
   }
@@ -301,6 +404,10 @@ class RecorderController extends StateNotifier<RecorderState> {
   Future<void> disposeAsync() async {
     _ticker?.cancel();
     _activityTicker?.cancel();
+    // Before the chunker goes: these hang off notifiers it owns and is about
+    // to dispose.
+    _chunker.room.check.removeListener(_onCheck);
+    _chunker.room.verdict.removeListener(_onRoom);
     // Leaving the screen while a session runs must not leave a card on the
     // lock screen, or a notification, with nothing behind it.
     unawaited(_activity.end());

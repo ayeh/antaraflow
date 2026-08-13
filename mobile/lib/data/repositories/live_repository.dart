@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/error/api_exception.dart';
 import '../../domain/models/live_session.dart';
+import '../../features/recorder/room_level.dart';
 import '../api/api_client.dart';
 
 /// The live recording endpoints.
@@ -67,6 +68,7 @@ class LiveRepository {
     required int chunkNumber,
     required double startTime,
     required double endTime,
+    LevelReading? reading,
   }) async {
     final form = FormData.fromMap({
       // No explicit content type: Laravel's `mimetypes` rule guesses from the
@@ -80,6 +82,10 @@ class LiveRepository {
       'chunk_number': chunkNumber,
       'start_time': startTime,
       'end_time': endTime,
+      // Omitted rather than sent as nulls when a chunk was too short to
+      // measure, so a reading on the server always means a measurement was
+      // actually taken.
+      if (reading != null && reading.frames > 0) ...reading.toJson(),
     });
 
     final body = await _client.upload(

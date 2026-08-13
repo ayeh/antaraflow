@@ -90,6 +90,74 @@ test('an m4a chunk recorded on a phone is accepted', function () {
         ->assertJsonPath('next_chunk_number', 1);
 });
 
+test('the level the phone measured is kept alongside the chunk', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->post("/api/mobile/v1/live/{$session->id}/chunks", [
+            'audio' => m4aChunk(),
+            'chunk_number' => 0,
+            'start_time' => 0,
+            'end_time' => 15,
+            'peak_dbfs' => -12.4,
+            'speech_dbfs' => -38.2,
+            'noise_dbfs' => -61.7,
+        ])
+        ->assertCreated();
+
+    $chunk = LiveTranscriptChunk::query()->firstOrFail();
+
+    expect($chunk->peak_dbfs)->toBe(-12.4)
+        ->and($chunk->speech_dbfs)->toBe(-38.2)
+        ->and($chunk->noise_dbfs)->toBe(-61.7);
+});
+
+// Every client that predates the measurement, which is all of them, plus a
+// chunk too short for the phone to have measured anything from.
+test('a chunk that carries no measurement is stored without one', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->post("/api/mobile/v1/live/{$session->id}/chunks", [
+            'audio' => m4aChunk(),
+            'chunk_number' => 0,
+            'start_time' => 0,
+            'end_time' => 15,
+        ])
+        ->assertCreated();
+
+    expect(LiveTranscriptChunk::query()->firstOrFail()->peak_dbfs)->toBeNull();
+});
+
+// The readings are the only evidence there will be about capture quality, so
+// a client sending nonsense has to be turned away rather than averaged in.
+test('a level outside the decibel scale is rejected', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/live/{$session->id}/chunks", [
+            'audio' => m4aChunk(),
+            'chunk_number' => 0,
+            'start_time' => 0,
+            'end_time' => 15,
+            'speech_dbfs' => 14.0,
+        ])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('speech_dbfs');
+});
+
 test('a repeated chunk is acknowledged rather than stored twice', function () {
     $session = LiveMeetingSession::factory()->create([
         'minutes_of_meeting_id' => $this->meeting->id,

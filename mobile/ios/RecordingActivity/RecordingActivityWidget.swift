@@ -66,7 +66,7 @@ struct LockScreenView: View {
 
         Text(subtitle)
           .font(.system(size: 11, design: .monospaced))
-          .foregroundStyle(Brand.faint)
+          .foregroundStyle(context.state.quiet ? Brand.amber : Brand.faint)
       }
 
       Spacer(minLength: 0)
@@ -77,7 +77,17 @@ struct LockScreenView: View {
     .padding(.vertical, 14)
   }
 
+  /// A room nobody can be heard in takes the line outright.
+  ///
+  /// It displaces the mark count and the queue, which is the right trade: those
+  /// two report on a recording that is going fine, and this one is the whole
+  /// reason somebody would want to be told before the meeting is over rather
+  /// than after.
   private var subtitle: String {
+    if context.state.quiet {
+      return "TOO QUIET · MOVE THE PHONE CLOSER"
+    }
+
     let marks = context.state.marks
     var parts = [marks == 1 ? "1 MARK" : "\(marks) MARKS"]
 

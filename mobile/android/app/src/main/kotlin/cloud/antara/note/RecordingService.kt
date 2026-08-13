@@ -27,11 +27,20 @@ import android.os.IBinder
 class RecordingService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
+    private var title = "Recording"
+    private var note = "Recording the sitting"
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val title = intent?.getStringExtra(EXTRA_TITLE) ?: "Recording"
+        intent?.getStringExtra(EXTRA_TITLE)?.let { title = it }
+        intent?.getStringExtra(EXTRA_NOTE)?.let { note = it }
 
         createChannel()
-        startForeground(NOTIFICATION_ID, buildNotification(title))
+
+        // startForeground every time rather than notify() for the first: a
+        // service that has already been promoted treats a repeat as an update,
+        // and one that has not must be promoted within a few seconds of being
+        // started or Android kills the process outright.
+        startForeground(NOTIFICATION_ID, buildNotification())
 
         // Not sticky: if the process dies the session is over as far as this
         // service is concerned, and a restarted service with no recorder
@@ -54,7 +63,7 @@ class RecordingService : Service() {
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
-    private fun buildNotification(title: String): Notification {
+    private fun buildNotification(): Notification {
         val open = PendingIntent.getActivity(
             this,
             0,
@@ -66,7 +75,7 @@ class RecordingService : Service() {
 
         return Notification.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
-            .setContentText("Recording the sitting")
+            .setContentText(note)
             .setSmallIcon(android.R.drawable.presence_audio_online)
             .setContentIntent(open)
             .setOngoing(true)
@@ -79,15 +88,43 @@ class RecordingService : Service() {
         private const val NOTIFICATION_ID = 1
 
         const val EXTRA_TITLE = "title"
+        const val EXTRA_NOTE = "note"
 
-        fun start(context: Context, title: String) {
+        @Volatile
+        private var running = false
+
+        fun start(context: Context, title: String, note: String?) {
             val intent = Intent(context, RecordingService::class.java)
                 .putExtra(EXTRA_TITLE, title)
+                .putExtra(EXTRA_NOTE, note)
+
+            running = true
+            context.startForegroundService(intent)
+        }
+
+        /**
+         * Rewrites the line under the title.
+         *
+         * Delivered as another start rather than through a binding, because
+         * the only thing that has to change is the notification and the
+         * service already rebuilds it on every start.
+         *
+         * Dropped outright when nothing is recording. Without that guard a note
+         * arriving late — the room went quiet at the same moment somebody
+         * pressed End — would start the service again and leave a notification
+         * saying a recording is running when none is.
+         */
+        fun note(context: Context, note: String?) {
+            if (note == null || !running) return
+
+            val intent = Intent(context, RecordingService::class.java)
+                .putExtra(EXTRA_NOTE, note)
 
             context.startForegroundService(intent)
         }
 
         fun stop(context: Context) {
+            running = false
             context.stopService(Intent(context, RecordingService::class.java))
         }
     }

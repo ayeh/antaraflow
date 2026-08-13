@@ -22,6 +22,9 @@ class LiveTranscriptChunk extends Model
         'start_time',
         'end_time',
         'confidence',
+        'peak_dbfs',
+        'speech_dbfs',
+        'noise_dbfs',
         'status',
         'error_message',
     ];
@@ -34,6 +37,9 @@ class LiveTranscriptChunk extends Model
             'start_time' => 'double',
             'end_time' => 'double',
             'confidence' => 'double',
+            'peak_dbfs' => 'double',
+            'speech_dbfs' => 'double',
+            'noise_dbfs' => 'double',
             'chunk_number' => 'integer',
         ];
     }

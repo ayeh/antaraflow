@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:record/record.dart';
+
+import 'room_level.dart';
 
 /// One slice of audio, already on disk and ready to post.
 class AudioChunk {
@@ -14,12 +15,18 @@ class AudioChunk {
     required this.file,
     required this.start,
     required this.end,
+    required this.reading,
   });
 
   final int number;
   final File file;
   final Duration start;
   final Duration end;
+
+  /// How loud this slice was, measured before it was written. Travels with the
+  /// upload so the server can tell a badly-placed phone from a badly-processed
+  /// recording without opening the audio again.
+  final LevelReading reading;
 }
 
 /// Turns the microphone into a sequence of fixed-length WAV files.
@@ -48,9 +55,12 @@ class AudioChunker {
   final _recorder = AudioRecorder();
   final _chunks = StreamController<AudioChunk>.broadcast();
 
+  /// Everything the recorder knows about how the room sounds.
+  final room = RoomLevel(sampleRate: sampleRate);
+
   /// Exposed as a listenable rather than through state so the waveform can
   /// repaint at audio rate without rebuilding the screen around it.
-  final level = ValueNotifier<double>(0);
+  ValueListenable<double> get level => room.level;
 
   /// Chunks that were cut but could not be written to disk.
   ///
@@ -143,7 +153,7 @@ class AudioChunker {
 
   Future<void> pause() async {
     await _recorder.pause();
-    level.value = 0;
+    room.mute();
   }
 
   Future<void> resume() => _recorder.resume();
@@ -158,14 +168,14 @@ class AudioChunker {
     await _subscription?.cancel();
     await _flush();
 
-    level.value = 0;
+    room.mute();
   }
 
   Future<void> dispose() async {
     await stop();
     await _chunks.close();
     await _recorder.dispose();
-    level.dispose();
+    room.dispose();
     writeFailures.dispose();
   }
 
@@ -174,7 +184,7 @@ class AudioChunker {
 
     _buffer.add(data);
     _samplesWritten += data.lengthInBytes ~/ _bytesPerSample;
-    level.value = _levelOf(data);
+    room.add(data);
 
     while (_buffer.length >= _bytesPerChunk) {
       _cut(_bytesPerChunk);
@@ -206,6 +216,14 @@ class AudioChunker {
     _chunkStartSample += bytes ~/ _bytesPerSample;
     final end = _samplesAt(_chunkStartSample);
 
+    // Measured against the buffers that arrived rather than against the bytes
+    // being cut here, so a buffer straddling the boundary lands a few
+    // milliseconds of the next chunk in this one's reading. Left that way on
+    // purpose: at a fiftieth of a percent it changes no decision, and the
+    // alternative is a second clock running alongside the sample arithmetic
+    // that decides where chunks begin.
+    final reading = room.takeChunk();
+
     final file = File(p.join(scratch.path, 'chunk-$number.wav'));
     final wav = wrapAsWav(payload);
 
@@ -228,7 +246,13 @@ class AudioChunker {
 
       if (!_chunks.isClosed) {
         _chunks.add(
-          AudioChunk(number: number, file: file, start: start, end: end),
+          AudioChunk(
+            number: number,
+            file: file,
+            start: start,
+            end: end,
+            reading: reading,
+          ),
         );
       }
     });
@@ -247,30 +271,6 @@ class AudioChunker {
 
   Duration _samplesAt(int samples) {
     return _offset + Duration(milliseconds: (samples * 1000) ~/ sampleRate);
-  }
-
-  /// Peak, not RMS. A meter driven by RMS barely moves for speech across a
-  /// table, which is exactly the case somebody is checking when they glance at
-  /// the phone to see whether it is still hearing the room.
-  double _levelOf(Uint8List data) {
-    // Read through ByteData rather than an Int16List view: the platform hands
-    // back buffers at arbitrary offsets, and a typed-list view over an odd
-    // offset throws.
-    final view = ByteData.sublistView(data);
-    final samples = view.lengthInBytes ~/ 2;
-    if (samples == 0) return 0;
-
-    var peak = 0;
-    // Every fourth sample: at 16 kHz that is still 4,000 readings a second,
-    // and the meter cannot show more than the screen refreshes anyway.
-    for (var i = 0; i < samples; i += 4) {
-      final value = view.getInt16(i * 2, Endian.little).abs();
-      if (value > peak) peak = value;
-    }
-
-    // Compressed, because linear amplitude spends most of its range on volumes
-    // nobody in a meeting produces.
-    return math.pow(peak / 32768, 0.55).toDouble().clamp(0, 1);
   }
 
   /// Wraps raw PCM in the 44-byte canonical WAV header.

@@ -594,6 +594,41 @@ class LEn extends L {
   String get autosaving => 'AUTOSAVING';
 
   @override
+  String get micCheck => 'MIC CHECK';
+
+  @override
+  String get micCheckPrompt =>
+      'Ask whoever is sitting furthest away to say something.';
+
+  @override
+  String get roomClear => 'CLEAR';
+
+  @override
+  String get roomClearDetail => 'Voices are arriving at a good level.';
+
+  @override
+  String get roomFaint => 'TOO QUIET';
+
+  @override
+  String get roomFaintDetail => 'Move the phone to the middle of the table.';
+
+  @override
+  String get roomSilent => 'NO SOUND';
+
+  @override
+  String get roomSilentDetail =>
+      'Nothing is reaching the microphone. Check that nothing is covering it.';
+
+  @override
+  String get recordingNote => 'Recording the sitting';
+
+  @override
+  String get recordingNoteFaint => 'Too quiet — move the phone closer';
+
+  @override
+  String get recordingNoteSilent => 'No sound is reaching the microphone';
+
+  @override
   String get marksSection => 'MARKS';
 
   @override
