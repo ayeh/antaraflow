@@ -22,6 +22,7 @@ class ActionItem extends Model
     protected $fillable = [
         'minutes_of_meeting_id',
         'assigned_to',
+        'assignee_name',
         'created_by',
         'carried_from_id',
         'title',

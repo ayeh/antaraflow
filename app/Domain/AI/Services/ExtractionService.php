@@ -91,7 +91,8 @@ class ExtractionService
         $attendees = $mom->attendees()->with('user')->get();
 
         foreach ($extraction->structured_data as $item) {
-            $assignedTo = $this->matchAssignee($item['assignee'] ?? null, $attendees);
+            $assignee = $item['assignee'] ?? null;
+            $assignedTo = $this->matchAssignee($assignee, $attendees);
 
             $priorityValue = strtolower($item['priority'] ?? 'medium');
             $priority = ActionItemPriority::tryFrom($priorityValue) ?? ActionItemPriority::Medium;
@@ -100,6 +101,13 @@ class ExtractionService
                 'minutes_of_meeting_id' => $mom->id,
                 'created_by' => $user->id,
                 'assigned_to' => $assignedTo,
+                // Kept even when it matched a user, and especially when it did
+                // not. The minutes are clearer about who owns the work than
+                // anything else in them, and discarding the name because it is
+                // not an account threw that away.
+                'assignee_name' => is_string($assignee) && trim($assignee) !== ''
+                    ? mb_substr(strip_tags(trim($assignee)), 0, 255)
+                    : null,
                 'title' => strip_tags($item['title'] ?? $item['description'] ?? 'Untitled'),
                 'description' => strip_tags($item['description'] ?? ''),
                 'priority' => $priority,

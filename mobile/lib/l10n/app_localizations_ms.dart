@@ -976,4 +976,11 @@ class LMs extends L {
   String showingOf(int shown, int total) {
     return 'Memaparkan $shown daripada $total. Selebihnya di web.';
   }
+
+  @override
+  String get ownedElsewhere => 'Milik pihak lain';
+
+  @override
+  String get ownedElsewhereDetail =>
+      'Daripada mesyuarat anda, ditugaskan kepada pihak yang tiada akaun di sini';
 }

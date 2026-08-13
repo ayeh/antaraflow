@@ -62,6 +62,7 @@ class TaskItem {
     this.dueDate,
     this.meetingTitle,
     this.meetingId,
+    this.assigneeName,
   });
 
   factory TaskItem.fromJson(Map<String, dynamic> json) => TaskItem(
@@ -76,6 +77,10 @@ class TaskItem {
     // way back to the sitting that produced it.
     meetingId: ((json['meeting'] as Map<String, dynamic>?)?['id'] as num?)
         ?.toInt(),
+    // Whoever the minutes named. Usually not a user of this app — the AI
+    // extracts agencies and departments, because that is who the work was
+    // given to.
+    assigneeName: json['assignee_name'] as String?,
   );
 
   final int id;
@@ -85,6 +90,7 @@ class TaskItem {
   final DateTime? dueDate;
   final String? meetingTitle;
   final int? meetingId;
+  final String? assigneeName;
 
   TaskItem copyWith({String? status}) => TaskItem(
     id: id,
@@ -94,6 +100,7 @@ class TaskItem {
     dueDate: dueDate,
     meetingTitle: meetingTitle,
     meetingId: meetingId,
+    assigneeName: assigneeName,
   );
 
   bool get isDone => status == 'completed' || status == 'cancelled';
@@ -176,7 +183,7 @@ class _UnassignedState extends ConsumerState<_Unassigned> {
                 // CLOSED is capitalised in the ARB; this one is a heading and
                 // a row caption, so the string stays sentence case.
                 Text(
-                  L.of(context).unassigned.toUpperCase(),
+                  L.of(context).ownedElsewhere.toUpperCase(),
                   style: AppTheme.eyebrow(),
                 ),
                 const SizedBox(width: 12),
@@ -204,7 +211,7 @@ class _UnassignedState extends ConsumerState<_Unassigned> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
             child: Text(
-              L.of(context).unassignedDetail,
+              L.of(context).ownedElsewhereDetail,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
@@ -217,12 +224,21 @@ class _UnassignedState extends ConsumerState<_Unassigned> {
                       'd MMM',
                       Localizations.localeOf(context).toLanguageTag(),
                     ).format(task.dueDate!),
-              // Its own short key, not the section heading lowercased:
-              // "unassigned" wrapped to two lines in a 62pt column and broke the
-              // alignment the whole list is built on.
-              gutterCaption: L.of(context).gutterUnassigned,
+              // The weekday, like every other task row. It used to read
+              // "nobody", which stopped being true the moment the extracted
+              // name was kept — most of these have an owner, just not one
+              // holding an account here.
+              gutterCaption: task.dueDate == null
+                  ? L.of(context).noDate
+                  : DateFormat(
+                      'EEE',
+                      Localizations.localeOf(context).toLanguageTag(),
+                    ).format(task.dueDate!).toLowerCase(),
               title: task.title,
-              subtitle: task.meetingTitle,
+              subtitle: [
+                if (task.assigneeName != null) task.assigneeName!,
+                if (task.meetingTitle != null) task.meetingTitle!,
+              ].join(' · '),
               onTap: task.meetingId == null
                   ? null
                   : () => Navigator.of(context).push(

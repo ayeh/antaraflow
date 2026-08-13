@@ -489,5 +489,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "ownedElsewhere": "Owned elsewhere",
+  "ownedElsewhereDetail": "From your sittings, assigned to somebody without an account here"
 }
