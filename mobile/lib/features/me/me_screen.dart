@@ -10,6 +10,7 @@ import '../meetings/meetings_screen.dart';
 import '../shell/app_shell.dart';
 import '../tasks/tasks_screen.dart';
 import '../widgets/ledger_scaffold.dart';
+import '../notifications/notification_settings_screen.dart';
 
 /// Who you are signed in as, and the three switches that belong to a phone.
 ///
@@ -77,7 +78,11 @@ class MeScreen extends ConsumerWidget {
           _SettingRow(
             label: 'Notifications',
             detail: 'What reaches this phone, and when',
-            onTap: () {},
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const NotificationSettingsScreen(),
+              ),
+            ),
           ),
           _SettingRow(
             label: 'Language',
