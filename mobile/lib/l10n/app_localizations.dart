@@ -1177,6 +1177,72 @@ abstract class L {
   /// **'AUTOSAVING'**
   String get autosaving;
 
+  /// No description provided for @micCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'MIC CHECK'**
+  String get micCheck;
+
+  /// Shown over the opening of a recording, until the phone has heard enough speech to judge how well it was placed. It asks for the hardest case in the room on purpose — a phone that hears the far end of the table hears everyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask whoever is sitting furthest away to say something.'**
+  String get micCheckPrompt;
+
+  /// No description provided for @roomClear.
+  ///
+  /// In en, this message translates to:
+  /// **'CLEAR'**
+  String get roomClear;
+
+  /// No description provided for @roomClearDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Voices are arriving at a good level.'**
+  String get roomClearDetail;
+
+  /// No description provided for @roomFaint.
+  ///
+  /// In en, this message translates to:
+  /// **'TOO QUIET'**
+  String get roomFaint;
+
+  /// No description provided for @roomFaintDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the phone to the middle of the table.'**
+  String get roomFaintDetail;
+
+  /// No description provided for @roomSilent.
+  ///
+  /// In en, this message translates to:
+  /// **'NO SOUND'**
+  String get roomSilent;
+
+  /// No description provided for @roomSilentDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is reaching the microphone. Check that nothing is covering it.'**
+  String get roomSilentDetail;
+
+  /// The line under the title on the Android notification that runs for the length of a recording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording the sitting'**
+  String get recordingNote;
+
+  /// Replaces recordingNote on the ongoing notification when the room has become hard to hear. Often the only place this can be said: the phone is face down on the table and nobody is looking at the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Too quiet — move the phone closer'**
+  String get recordingNoteFaint;
+
+  /// No description provided for @recordingNoteSilent.
+  ///
+  /// In en, this message translates to:
+  /// **'No sound is reaching the microphone'**
+  String get recordingNoteSilent;
+
   /// No description provided for @marksSection.
   ///
   /// In en, this message translates to:

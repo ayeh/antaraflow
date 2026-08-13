@@ -95,6 +95,7 @@ class ChunkOutbox {
             chunkNumber: chunk.number,
             startTime: chunk.start.inMilliseconds / 1000,
             endTime: chunk.end.inMilliseconds / 1000,
+            reading: chunk.reading,
           );
 
           _pending.removeFirst();

@@ -14,7 +14,15 @@ class MainActivity : FlutterActivity() {
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "start" -> {
-                    RecordingService.start(this, call.argument<String>("title") ?: "Recording")
+                    RecordingService.start(
+                        this,
+                        call.argument<String>("title") ?: "Recording",
+                        call.argument<String>("note"),
+                    )
+                    result.success(true)
+                }
+                "note" -> {
+                    RecordingService.note(this, call.argument<String>("note"))
                     result.success(true)
                 }
                 "stop" -> {

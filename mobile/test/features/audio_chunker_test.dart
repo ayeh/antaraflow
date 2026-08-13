@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
+import '../support/pcm.dart';
+
 /// One second of 16 kHz mono 16-bit audio.
 Uint8List seconds(int n) =>
     Uint8List(AudioChunker.sampleRate * 2 * n)..fillRange(0, 8, 7);
@@ -120,6 +122,24 @@ void main() {
 
     scratch.createSync(recursive: true);
     expect(File(p.join(scratch.path, 'chunk-0.wav')).existsSync(), isFalse);
+  });
+
+  test('each chunk carries how loud it was, measured as it was cut', () async {
+    final chunker = AudioChunker();
+    final cut = <AudioChunk>[];
+    chunker.chunks.listen(cut.add);
+    chunker.prepare(scratch);
+
+    chunker.receive(talking(15, dbfs: -30));
+    chunker.receive(talking(15, dbfs: -50));
+    await chunker.settled;
+    await pumpEventQueue();
+
+    expect(
+      cut.map((c) => c.reading.speech),
+      [closeTo(-30, 1), closeTo(-50, 1)],
+      reason: 'each chunk is measured on its own audio, not the sitting so far',
+    );
   });
 
   test(

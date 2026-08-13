@@ -11,6 +11,7 @@ import '../widgets/brand_mark.dart';
 import '../widgets/ledger_scaffold.dart';
 import 'chunk_outbox.dart';
 import 'recorder_controller.dart';
+import 'room_level.dart';
 import 'waveform.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -74,10 +75,23 @@ class _RecorderScreenState extends ConsumerState<RecorderScreen> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       Haptics.shift();
       ref
           .read(recorderControllerProvider.notifier)
-          .begin(meetingId: widget.meetingId, title: widget.title);
+          .begin(
+            meetingId: widget.meetingId,
+            title: widget.title,
+            // Read here because this is the last place with a BuildContext:
+            // the notification and the lock-screen card carry these long after
+            // this screen has been swiped away.
+            notices: RoomNotices(
+              recording: L.of(context).recordingNote,
+              faint: L.of(context).recordingNoteFaint,
+              silent: L.of(context).recordingNoteSilent,
+            ),
+          );
     });
   }
 
@@ -164,6 +178,7 @@ class _Live extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(20, 6, 20, 2),
           child: Waveform(level: controller.level, live: state.isLive),
         ),
+        _RoomLine(state: state),
         Expanded(child: _Marks(bookmarks: state.bookmarks)),
         _Actions(state: state),
       ],
@@ -354,6 +369,101 @@ class _OutboxLine extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+/// Says whether the phone can actually hear the room.
+///
+/// Sits directly under the waveform because it is the sentence the waveform
+/// cannot say: a needle moving proves the microphone is open, not that the
+/// person at the far end of the table is being captured well enough to be
+/// transcribed. That difference is the whole reason a meeting comes back as
+/// half a transcript.
+///
+/// Deliberately not a dialog and not a blocker. Recording never waits for this
+/// — audio missed while somebody reads a prompt is audio nobody gets back.
+class _RoomLine extends StatelessWidget {
+  const _RoomLine({required this.state});
+
+  final RecorderState state;
+
+  /// How long the opening check stays on screen before it stops asking.
+  static const _asking = Duration(seconds: 60);
+
+  /// How long a good result is worth showing. It is reassurance, and
+  /// reassurance that stays becomes furniture.
+  static const _reassuring = Duration(seconds: 25);
+
+  @override
+  Widget build(BuildContext context) {
+    final notice = _notice(context);
+
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 260),
+      curve: AppTheme.easeOut,
+      alignment: Alignment.topCenter,
+      child: notice == null
+          ? const SizedBox(width: double.infinity)
+          : Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(11, 9, 12, 10),
+                decoration: BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: notice.colour, width: 2.5),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      notice.eyebrow,
+                      style: AppTheme.eyebrow(colour: notice.colour),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      notice.detail,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: _Dark.soft,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+
+  /// The room being hard to hear outranks everything else here, including the
+  /// opening check — it is the same finding, arrived at later and with more
+  /// evidence behind it.
+  ({String eyebrow, String detail, Color colour})? _notice(
+    BuildContext context,
+  ) {
+    final l = L.of(context);
+
+    return switch (state.room) {
+      RoomVerdict.faint => (
+        eyebrow: l.roomFaint,
+        detail: l.roomFaintDetail,
+        colour: AppColors.warning,
+      ),
+      RoomVerdict.silent => (
+        eyebrow: l.roomSilent,
+        detail: l.roomSilentDetail,
+        colour: AppColors.danger,
+      ),
+      _ when state.check == RoomVerdict.listening && state.elapsed < _asking =>
+        (eyebrow: l.micCheck, detail: l.micCheckPrompt, colour: _Dark.faint),
+      _ when state.check == RoomVerdict.clear && state.elapsed < _reassuring =>
+        (
+          eyebrow: l.roomClear,
+          detail: l.roomClearDetail,
+          colour: AppColors.lime,
+        ),
+      _ => null,
+    };
   }
 }
 

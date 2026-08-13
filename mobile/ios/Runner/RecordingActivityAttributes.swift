@@ -21,6 +21,16 @@ struct RecordingActivityAttributes: ActivityAttributes {
     var marks: Int
     var queued: Int
     var paused: Bool
+
+    /// The room has gone hard to hear — too far from the phone, or nothing
+    /// reaching the microphone at all.
+    ///
+    /// The default is for constructing a state, not for decoding one: Swift's
+    /// synthesised `init(from:)` does not fall back to it for a missing key.
+    /// That costs nothing here because an activity does not survive the app
+    /// being replaced anyway — the bridge holds its handle in memory and never
+    /// re-adopts one it did not start.
+    var quiet: Bool = false
   }
 
   var meetingTitle: String

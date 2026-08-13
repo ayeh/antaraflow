@@ -116,7 +116,8 @@ final class LiveActivityBridge {
       elapsedSeconds: elapsed,
       marks: arguments["marks"] as? Int ?? 0,
       queued: arguments["queued"] as? Int ?? 0,
-      paused: arguments["paused"] as? Bool ?? false
+      paused: arguments["paused"] as? Bool ?? false,
+      quiet: arguments["quiet"] as? Bool ?? false
     )
   }
   #endif

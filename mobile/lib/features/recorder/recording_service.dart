@@ -24,7 +24,7 @@ class RecordingService {
 
   static bool get isRequired => !kIsWeb && Platform.isAndroid;
 
-  Future<void> start(String title) async {
+  Future<void> start(String title, {required String note}) async {
     if (!isRequired) return;
 
     // Android 13 and up suppress the service's notification unless this has
@@ -36,7 +36,17 @@ class RecordingService {
       await Permission.notification.request();
     }
 
-    await _invoke('start', {'title': title});
+    await _invoke('start', {'title': title, 'note': note});
+  }
+
+  /// Rewrites the line under the title on the ongoing notification.
+  ///
+  /// This is the only surface the recorder has once the phone is face down on
+  /// the table, so it is where a room nobody can be heard in has to be said.
+  Future<void> note(String? note) async {
+    if (!isRequired || note == null) return;
+
+    await _invoke('note', {'note': note});
   }
 
   Future<void> stop() => _invoke('stop', const {});

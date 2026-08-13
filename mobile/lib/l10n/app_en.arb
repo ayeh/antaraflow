@@ -285,6 +285,26 @@
   "starting": "STARTING",
   "retrying": "RETRYING",
   "autosaving": "AUTOSAVING",
+  "micCheck": "MIC CHECK",
+  "micCheckPrompt": "Ask whoever is sitting furthest away to say something.",
+  "@micCheckPrompt": {
+    "description": "Shown over the opening of a recording, until the phone has heard enough speech to judge how well it was placed. It asks for the hardest case in the room on purpose — a phone that hears the far end of the table hears everyone."
+  },
+  "roomClear": "CLEAR",
+  "roomClearDetail": "Voices are arriving at a good level.",
+  "roomFaint": "TOO QUIET",
+  "roomFaintDetail": "Move the phone to the middle of the table.",
+  "roomSilent": "NO SOUND",
+  "roomSilentDetail": "Nothing is reaching the microphone. Check that nothing is covering it.",
+  "recordingNote": "Recording the sitting",
+  "@recordingNote": {
+    "description": "The line under the title on the Android notification that runs for the length of a recording."
+  },
+  "recordingNoteFaint": "Too quiet — move the phone closer",
+  "recordingNoteSilent": "No sound is reaching the microphone",
+  "@recordingNoteFaint": {
+    "description": "Replaces recordingNote on the ongoing notification when the room has become hard to hear. Often the only place this can be said: the phone is face down on the table and nobody is looking at the app."
+  },
   "marksSection": "MARKS",
   "marksEmpty": "Mark a decision as it is carried and it lands here, timed to the second. The marks become the skeleton of the minutes.",
   "notYetSent": "Not yet sent",

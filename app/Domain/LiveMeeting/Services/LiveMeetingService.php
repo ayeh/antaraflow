@@ -102,12 +102,19 @@ class LiveMeetingService
         return $session->chunks()->where('chunk_number', $chunkNumber)->first();
     }
 
+    /**
+     * @param  array{peak_dbfs?: float, speech_dbfs?: float, noise_dbfs?: float}  $levels
+     *                                                                                     How loud the device measured this chunk to be. Empty from any client
+     *                                                                                     that does not measure, which is every one of them before the app
+     *                                                                                     learned to.
+     */
     public function processChunk(
         LiveMeetingSession $session,
         UploadedFile $file,
         int $chunkNumber,
         float $startTime,
         float $endTime,
+        array $levels = [],
     ): LiveTranscriptChunk {
         $orgId = $session->meeting->organization_id;
         $path = "organizations/{$orgId}/audio/live/{$session->id}";
@@ -124,6 +131,7 @@ class LiveMeetingService
             'start_time' => $startTime,
             'end_time' => $endTime,
             'status' => ChunkStatus::Pending,
+            ...array_intersect_key($levels, array_flip(['peak_dbfs', 'speech_dbfs', 'noise_dbfs'])),
         ]);
 
         LiveTranscriptionJob::dispatch($chunk);

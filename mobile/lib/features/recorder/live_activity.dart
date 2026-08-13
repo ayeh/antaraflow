@@ -34,6 +34,7 @@ class LiveActivity {
       'marks': 0,
       'queued': 0,
       'paused': false,
+      'quiet': false,
     });
   }
 
@@ -42,6 +43,7 @@ class LiveActivity {
     required int marks,
     required int queued,
     required bool paused,
+    required bool quiet,
   }) async {
     if (!_running) return;
 
@@ -50,6 +52,7 @@ class LiveActivity {
       'marks': marks,
       'queued': queued,
       'paused': paused,
+      'quiet': quiet,
     });
   }
 
