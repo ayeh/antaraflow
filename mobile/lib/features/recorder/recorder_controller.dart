@@ -10,9 +10,11 @@ import '../../core/providers.dart';
 import '../../data/repositories/live_repository.dart';
 import '../../domain/models/live_session.dart';
 import '../../core/haptics.dart';
+import '../../data/local/secure_store.dart';
 import 'audio_chunker.dart';
 import 'chunk_outbox.dart';
 import 'live_activity.dart';
+import 'recorder_role.dart';
 import 'recording_service.dart';
 import 'room_level.dart';
 
@@ -24,7 +26,10 @@ final liveRepositoryProvider = Provider<LiveRepository>((ref) {
 /// machinery down rather than leaving a microphone open behind a list.
 final recorderControllerProvider =
     StateNotifierProvider.autoDispose<RecorderController, RecorderState>((ref) {
-      final controller = RecorderController(ref.watch(liveRepositoryProvider));
+      final controller = RecorderController(
+        ref.watch(liveRepositoryProvider),
+        ref.watch(secureStoreProvider),
+      );
       ref.onDispose(controller.disposeAsync);
 
       return controller;
@@ -57,6 +62,7 @@ class RecorderState {
     this.chunksDropped = 0,
     this.check = RoomVerdict.listening,
     this.room = RoomVerdict.listening,
+    this.role = RecorderRole.primary,
     this.error,
   });
 
@@ -73,6 +79,13 @@ class RecorderState {
   /// warning that disappeared during the pause between sentences would be
   /// telling somebody the problem had fixed itself.
   final RoomVerdict room;
+
+  /// Whether this phone is the recording or is helping another device record.
+  ///
+  /// Carried in state because the screen must say so for the whole sitting: a
+  /// satellite is not recording the meeting, and somebody who cannot tell the
+  /// two apart will stop the wrong device.
+  final RecorderRole role;
 
   /// Newest first: the mark someone just made is the one they want to see.
   final List<Bookmark> bookmarks;
@@ -101,6 +114,7 @@ class RecorderState {
     int? chunksDropped,
     RoomVerdict? check,
     RoomVerdict? room,
+    RecorderRole? role,
     String? error,
     bool clearError = false,
   }) {
@@ -113,6 +127,7 @@ class RecorderState {
       chunksDropped: chunksDropped ?? this.chunksDropped,
       check: check ?? this.check,
       room: room ?? this.room,
+      role: role ?? this.role,
       error: clearError ? null : (error ?? this.error),
     );
   }
@@ -145,9 +160,11 @@ class RoomNotices {
 
 /// Runs one recording from the microphone to the server.
 class RecorderController extends StateNotifier<RecorderState> {
-  RecorderController(this._repository) : super(const RecorderState());
+  RecorderController(this._repository, this._store)
+    : super(const RecorderState());
 
   final LiveRepository _repository;
+  final SecureStore _store;
   final _uuid = const Uuid();
 
   final _chunker = AudioChunker();
@@ -183,9 +200,10 @@ class RecorderController extends StateNotifier<RecorderState> {
     required int meetingId,
     required String title,
     required RoomNotices notices,
+    RecorderRole role = RecorderRole.primary,
   }) async {
     _notices = notices;
-    state = state.copyWith(meetingTitle: title, clearError: true);
+    state = state.copyWith(meetingTitle: title, role: role, clearError: true);
 
     if (!await _chunker.hasPermission()) {
       state = state.copyWith(phase: RecorderPhase.denied);
@@ -199,7 +217,12 @@ class RecorderController extends StateNotifier<RecorderState> {
         clientId: _uuid.v4(),
       );
 
-      _outbox = ChunkOutbox(repository: _repository, sessionId: session.id);
+      _outbox = ChunkOutbox(
+        repository: _repository,
+        sessionId: session.id,
+        deviceId: await _store.deviceId(),
+        role: role,
+      );
       _chunkSub = _chunker.chunks.listen((chunk) => _outbox?.add(chunk));
 
       // Cache, not documents: these files exist only until they are uploaded,

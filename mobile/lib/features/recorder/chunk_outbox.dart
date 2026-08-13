@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../data/repositories/live_repository.dart';
 import 'audio_chunker.dart';
+import 'recorder_role.dart';
 
 /// How the queue is doing, in the terms the recorder screen reports it.
 @immutable
@@ -31,11 +32,22 @@ class OutboxStatus {
 /// it, because a transcript with a hole in the middle is worse than a
 /// transcript that arrives late.
 class ChunkOutbox {
-  ChunkOutbox({required LiveRepository repository, required this.sessionId})
-    : _repository = repository;
+  ChunkOutbox({
+    required LiveRepository repository,
+    required this.sessionId,
+    this.deviceId = '',
+    this.role = RecorderRole.primary,
+  }) : _repository = repository;
 
   final LiveRepository _repository;
   final int sessionId;
+
+  /// Read once when the session opens rather than per chunk: this comes from
+  /// the keychain, and reaching for it every fifteen seconds for the length of
+  /// a meeting is work for nothing.
+  final String deviceId;
+
+  final RecorderRole role;
 
   final _pending = Queue<AudioChunk>();
   final status = ValueNotifier(const OutboxStatus());
@@ -96,6 +108,8 @@ class ChunkOutbox {
             startTime: chunk.start.inMilliseconds / 1000,
             endTime: chunk.end.inMilliseconds / 1000,
             reading: chunk.reading,
+            deviceId: deviceId,
+            role: role,
           );
 
           _pending.removeFirst();
