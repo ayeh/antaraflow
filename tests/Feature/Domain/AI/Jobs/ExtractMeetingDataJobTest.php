@@ -29,6 +29,16 @@ test('job calls extraction service and dispatches completed event', function () 
         ->once()
         ->with(Mockery::on(fn ($m) => $m->id === $mom->id));
 
+    // The job turns the extraction into ActionItem rows as well. Without this
+    // half a sitting recorded on a phone produced action items that lived in
+    // the extraction and never reached the Tasks tab.
+    $mockService->shouldReceive('createActionItemRecords')
+        ->once()
+        ->with(
+            Mockery::on(fn ($m) => $m->id === $mom->id),
+            Mockery::on(fn ($u) => $u->id === $user->id),
+        );
+
     $job = new ExtractMeetingDataJob($mom);
     $job->handle($mockService);
 

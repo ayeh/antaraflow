@@ -58,6 +58,15 @@
                 </div>
             @endif
 
+            {{-- A form left open past the session lifetime lands here rather
+                 than on Laravel's 419 page. Everything typed is still in old()
+                 so the second attempt is one tap. --}}
+            @if(session('warning'))
+                <div class="mb-6 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                    <p class="text-sm text-amber-900">{{ session('warning') }}</p>
+                </div>
+            @endif
+
             @php $requiredFields = $qrToken->required_fields ?? ['name']; @endphp
 
             <form method="POST" action="{{ route('qr-registration.submit', $qrToken->token) }}" class="space-y-4">
