@@ -10,12 +10,14 @@ use App\Domain\LiveMeeting\Events\TranscriptionChunkProcessed;
 use App\Domain\LiveMeeting\Jobs\LiveTranscriptionJob;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
+use App\Domain\Transcription\Services\AudioConditioner;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use App\Infrastructure\AI\DTOs\TranscriptionResult;
 use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
 use App\Infrastructure\AI\Exceptions\AiQuotaExceededException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
@@ -370,4 +372,68 @@ test('sends no context for the first chunk of a session', function () {
     (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
 
     expect($captured['prompt'])->toBeNull();
+});
+
+// The upload path has always run audio through a highpass and EBU R128
+// normalisation before sending it. Live never did, so a phone on a boardroom
+// table sent the room exactly as it heard it — a hall recording measured -29
+// dBFS mean and came back with a quarter of the words a close recording gave.
+test('conditions the chunk before sending it to the transcriber', function () {
+    Event::fake();
+    Storage::fake('local');
+    Process::fake();
+
+    $session = LiveMeetingSession::factory()->create();
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'audio_file_path' => 'live-chunks/quiet.webm',
+        'status' => ChunkStatus::Pending,
+    ]);
+
+    Storage::disk('local')->put('live-chunks/quiet.webm', 'fake-audio-data');
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('transcribe')->once()->andReturn(
+        new TranscriptionResult(fullText: 'ok', confidence: null, segments: []),
+    );
+
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    Process::assertRan(function ($process) {
+        $command = implode(' ', (array) $process->command);
+
+        return str_contains($command, AudioConditioner::FILTER_CHAIN);
+    });
+});
+
+// ffmpeg being absent or wedged must cost the sitting a little quality, not
+// the chunk. The job still has to transcribe something.
+test('still transcribes when conditioning fails', function () {
+    Event::fake();
+    Storage::fake('local');
+    Process::fake(['*' => Process::result(output: '', errorOutput: 'not found', exitCode: 127)]);
+
+    $session = LiveMeetingSession::factory()->create();
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'audio_file_path' => 'live-chunks/quiet.webm',
+        'status' => ChunkStatus::Pending,
+    ]);
+
+    Storage::disk('local')->put('live-chunks/quiet.webm', 'fake-audio-data');
+
+    $sentPath = null;
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('transcribe')->once()
+        ->andReturnUsing(function (string $path) use (&$sentPath) {
+            $sentPath = $path;
+
+            return new TranscriptionResult(fullText: 'heard it anyway', confidence: null, segments: []);
+        });
+
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    expect($sentPath)->toEndWith('quiet.webm')
+        ->and($chunk->fresh()->status)->toBe(ChunkStatus::Completed)
+        ->and($chunk->fresh()->text)->toBe('heard it anyway');
 });

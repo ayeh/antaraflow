@@ -9,6 +9,7 @@ use App\Domain\AI\Services\OrgBudgetService;
 use App\Domain\Transcription\Events\TranscriptionCompleted;
 use App\Domain\Transcription\Events\TranscriptionFailed;
 use App\Domain\Transcription\Models\AudioTranscription;
+use App\Domain\Transcription\Services\AudioConditioner;
 use App\Domain\Transcription\Services\TranscriptionHintBuilder;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use App\Infrastructure\AI\DTOs\TranscriptionResult;
@@ -274,27 +275,11 @@ class ProcessTranscriptionJob implements ShouldQueue
      */
     public function preprocessAudio(string $filePath): string
     {
-        $outputPath = sys_get_temp_dir().'/whisper_pre_'.uniqid().'.ogg';
-
-        $result = Process::timeout(300)->run([
-            'ffmpeg', '-hide_banner', '-loglevel', 'error',
-            '-i', $filePath,
-            '-af', 'highpass=f=80,loudnorm=I=-16:TP=-1.5:LRA=11',
-            '-ar', '16000',
-            '-ac', '1',
-            '-c:a', 'libopus',
-            '-b:a', (string) self::DEFAULT_BITRATE,
-            '-y',
-            $outputPath,
+        $outputPath = app(AudioConditioner::class)->condition($filePath, logContext: [
+            'transcription_id' => $this->transcription->id,
         ]);
 
-        if ($result->failed() || ! file_exists($outputPath) || filesize($outputPath) === 0) {
-            Log::warning('Audio preprocessing failed; using original file.', [
-                'transcription_id' => $this->transcription->id,
-                'error' => $result->errorOutput(),
-            ]);
-            @unlink($outputPath);
-
+        if ($outputPath === null) {
             return $filePath;
         }
 
