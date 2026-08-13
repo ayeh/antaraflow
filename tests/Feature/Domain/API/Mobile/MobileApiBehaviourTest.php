@@ -394,3 +394,51 @@ describe('device registration', function () {
         expect($devices->first()->push_token)->toBe('token-b');
     });
 });
+
+describe('mom numbering', function () {
+    test('a sitting filed from the phone gets a number, like one filed on the web', function () {
+        $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/mobile/v1/meetings', ['title' => 'Board meeting'])
+            ->assertCreated()
+            ->assertJsonPath('mom_number', 'MOM-'.date('Y').'-000001');
+    });
+
+    test('numbers continue the organisation series rather than restarting', function () {
+        MinutesOfMeeting::createForOrganization($this->org->id, [
+            'title' => 'Filed on the web',
+            'created_by' => $this->user->id,
+            'mom_number' => 'MOM-'.date('Y').'-000007',
+        ]);
+
+        $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/mobile/v1/meetings', ['title' => 'Filed on the phone'])
+            ->assertCreated()
+            ->assertJsonPath('mom_number', 'MOM-'.date('Y').'-000008');
+    });
+
+    test('each organisation counts on its own', function () {
+        $other = Organization::factory()->create();
+        MinutesOfMeeting::createForOrganization($other->id, [
+            'title' => 'Somebody else',
+            'created_by' => $this->user->id,
+            'mom_number' => 'MOM-'.date('Y').'-000042',
+        ]);
+
+        $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/mobile/v1/meetings', ['title' => 'Ours'])
+            ->assertCreated()
+            ->assertJsonPath('mom_number', 'MOM-'.date('Y').'-000001');
+    });
+
+    test('two sittings filed back to back do not collide on the unique index', function () {
+        $acting = $this->actingAs($this->user, 'sanctum');
+
+        $first = $acting->postJson('/api/mobile/v1/meetings', ['title' => 'One'])
+            ->assertCreated()->json('mom_number');
+
+        $second = $acting->postJson('/api/mobile/v1/meetings', ['title' => 'Two'])
+            ->assertCreated()->json('mom_number');
+
+        expect($first)->not->toBe($second);
+    });
+});
