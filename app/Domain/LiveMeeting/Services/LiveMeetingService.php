@@ -28,6 +28,17 @@ use Illuminate\Support\Facades\Log;
 class LiveMeetingService
 {
     /**
+     * Below this, in dBFS, the primary did not hear that moment well enough to
+     * be trusted on its own and a satellite covering it earns its transcription.
+     *
+     * The same figure the recorder warns the room on (`RoomLevel.faintBelow`),
+     * and provisional for the same reason: it was set from where distant
+     * speech tends to land rather than from measurement. The readings stored
+     * on every chunk are how it gets replaced with a number from real rooms.
+     */
+    private const FAINT_DBFS = -45.0;
+
+    /**
      * @param  array<string, mixed>  $config
      */
     public function startSession(MinutesOfMeeting $meeting, User $user, array $config = []): LiveMeetingSession
@@ -184,9 +195,53 @@ class LiveMeetingService
             throw new \RuntimeException('A chunk collided with itself and then vanished.');
         }
 
+        if ($role === ChunkRole::Satellite && ! $this->satelliteIsNeeded($session, $chunkNumber)) {
+            $chunk->update(['status' => ChunkStatus::Skipped]);
+
+            return $chunk;
+        }
+
         LiveTranscriptionJob::dispatch($chunk);
 
         return $chunk;
+    }
+
+    /**
+     * Whether a satellite chunk is worth transcribing.
+     *
+     * A satellite doubles the transcription bill for every moment it covers,
+     * and most of those moments the primary heard perfectly well. The level
+     * the primary measured for the same window is the cheap way to tell, and
+     * it is available the instant the primary's chunk is stored — no waiting
+     * on a transcriber.
+     *
+     * Confidence would be a better signal and is deliberately not used: it
+     * only exists after transcription, and waiting for it would mean holding
+     * every satellite chunk pending behind a job, then releasing it from an
+     * event. That machinery is worth building only if the levels turn out not
+     * to separate these cases well, which is one of the things B1 is meant to
+     * find out.
+     *
+     * Errs towards spending. Not knowing — the primary has not arrived yet, or
+     * came from a client too old to measure — transcribes, because a wasted
+     * upload is cheaper than a sentence nobody has.
+     */
+    private function satelliteIsNeeded(LiveMeetingSession $session, int $chunkNumber): bool
+    {
+        $primary = $session->chunks()
+            ->where('chunk_number', $chunkNumber)
+            ->where('role', ChunkRole::Primary)
+            ->first();
+
+        if ($primary === null || $primary->speech_dbfs === null) {
+            return true;
+        }
+
+        if ($primary->status === ChunkStatus::Failed) {
+            return true;
+        }
+
+        return $primary->speech_dbfs < self::FAINT_DBFS;
     }
 
     /**
@@ -309,8 +364,14 @@ class LiveMeetingService
 
         $fullText = $completedChunks->pluck('text')->join("\n");
 
+        // Skipped chunks are excluded on purpose. They are satellite audio we
+        // chose not to transcribe because the primary heard that moment
+        // perfectly well — nothing is missing from the transcript because of
+        // them. Counting them here would fire LiveTranscriptIncomplete and
+        // tell somebody their minutes have holes in them after every single
+        // meeting that used a second microphone.
         $droppedChunks = $session->chunks()
-            ->where('status', '!=', ChunkStatus::Completed)
+            ->whereIn('status', [ChunkStatus::Pending, ChunkStatus::Processing, ChunkStatus::Failed])
             ->count();
 
         if ($droppedChunks > 0) {
