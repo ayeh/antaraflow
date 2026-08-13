@@ -12,6 +12,7 @@ use App\Domain\LiveMeeting\Events\LiveTranscriptIncomplete;
 use App\Domain\LiveMeeting\Jobs\LiveTranscriptionJob;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
+use App\Domain\LiveMeeting\Support\ChunkSelector;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Transcription\Jobs\DiarizeTranscriptionJob;
 use App\Domain\Transcription\Models\AudioTranscription;
@@ -352,11 +353,16 @@ class LiveMeetingService
 
     private function mergeChunksIntoTranscription(LiveMeetingSession $session): ?AudioTranscription
     {
-        $completedChunks = $session->chunks()
-            ->where('status', ChunkStatus::Completed)
-            ->whereNotNull('text')
-            ->orderBy('chunk_number')
-            ->get();
+        // One transcript per moment, not one per upload. With a satellite in
+        // the room the same fifteen seconds arrives twice, and merging both
+        // would put every sentence in the minutes twice over.
+        $completedChunks = (new ChunkSelector)->bestOfEach(
+            $session->chunks()
+                ->where('status', ChunkStatus::Completed)
+                ->whereNotNull('text')
+                ->orderBy('chunk_number')
+                ->get(),
+        );
 
         if ($completedChunks->isEmpty()) {
             return null;
@@ -397,6 +403,15 @@ class LiveMeetingService
             'provider_metadata' => [
                 'merged_chunks' => $completedChunks->count(),
                 'dropped_chunks' => $droppedChunks,
+                // Which device won each moment. Recorded because Task 14 of
+                // the plan cannot be answered afterwards from anything else:
+                // how often the satellite beat the primary is what decides
+                // whether per-second mixing is ever worth building.
+                'chunk_sources' => $completedChunks
+                    ->mapWithKeys(fn (LiveTranscriptChunk $chunk): array => [
+                        $chunk->chunk_number => $chunk->role->value,
+                    ])
+                    ->all(),
             ],
             'completed_at' => now(),
         ]);
