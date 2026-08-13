@@ -14,7 +14,7 @@
      */
     $revertConfirmOptions = [
         'title' => __('Revert to Draft'),
-        'confirmLabel' => $isCirculating ? __('Revert & cancel circulation') : __('Revert'),
+        'confirmLabel' => $isCirculating ? __('Revert anyway') : __('Revert'),
         'type' => 'warning',
     ];
 
