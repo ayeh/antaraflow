@@ -247,6 +247,7 @@ class LiveMeetingService
         return [
             'next_chunk_number' => $highest + 1,
             'missing_chunks' => $missing,
+            'seconds_into_chunk' => $this->secondsIntoChunk($session),
             'stats' => [
                 'chunks_total' => $chunks->count(),
                 'chunks_completed' => $chunks->where('status', ChunkStatus::Completed)->count(),
@@ -255,6 +256,43 @@ class LiveMeetingService
                 'chunks_failed' => $chunks->where('status', ChunkStatus::Failed)->count(),
             ],
         ];
+    }
+
+    /**
+     * How far past the last chunk boundary the sitting currently is.
+     *
+     * A device joining as a satellite is told the next chunk number, which
+     * says where the boundary is but not how long ago it passed. Without this
+     * it would start cutting on its own clock and every one of its chunks
+     * would straddle two of the primary's.
+     *
+     * Measured from when the last chunk was received rather than from the
+     * session's start, so a sitting that was paused for ten minutes does not
+     * report itself as ten minutes into a fifteen-second window. Accurate to
+     * roughly the upload latency, a few hundred milliseconds — which is ample,
+     * because this only has to agree on *which* window a chunk belongs to.
+     * B1 never mixes samples, so nothing here needs sample accuracy.
+     */
+    private function secondsIntoChunk(LiveMeetingSession $session): float
+    {
+        $chunkSeconds = (float) ($session->config['chunk_interval'] ?? 30);
+
+        $since = $session->chunks()->max('created_at');
+        $from = $since === null
+            ? $session->started_at
+            : \Illuminate\Support\Carbon::parse($since);
+
+        if ($from === null) {
+            return 0.0;
+        }
+
+        $elapsed = (float) $from->diffInMilliseconds(now(), absolute: true) / 1000;
+
+        // Longer than a whole chunk means the primary has stopped uploading —
+        // it died, or the network went. Reported as nothing rather than as a
+        // wrapped-around figure, so a satellite joining then simply starts at
+        // the next boundary instead of aiming at a window that never came.
+        return $elapsed >= $chunkSeconds ? 0.0 : round($elapsed, 3);
     }
 
     private function mergeChunksIntoTranscription(LiveMeetingSession $session): ?AudioTranscription
