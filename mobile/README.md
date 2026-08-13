@@ -18,6 +18,31 @@ The Android emulator cannot reach `localhost` — the host machine is `10.0.2.2`
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
 ```
 
+## Shipping to TestFlight
+
+`API_BASE_URL` defaults to the Herd host, so **a release built without the
+define points a tester's phone at `antaraflow.test` and shows nothing but "No
+connection"**. It builds, signs, uploads and installs perfectly; it just cannot
+reach anything. Build 5 went out that way.
+
+```bash
+flutter build ipa --release --dart-define=API_BASE_URL=https://note.antara.cloud
+```
+
+Then upload. The App Store Connect API key lives in
+`~/.appstoreconnect/private_keys/`; the issuer is on the Users and Access →
+Integrations page:
+
+```bash
+xcrun altool --upload-app --type ios \
+  -f build/ios/ipa/antaranote.ipa \
+  --apiKey PVLV32P899 \
+  --apiIssuer 69a6de8c-eb5b-47e3-e053-5b8c7c11a4d1
+```
+
+Bump `version:` in `pubspec.yaml` first — App Store Connect rejects a build
+number it has already seen, and it counts a rejected upload as seen.
+
 ## Layout
 
 ```
