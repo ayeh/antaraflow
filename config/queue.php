@@ -40,7 +40,16 @@ return [
             'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            /*
+             * Must exceed the longest a job can run, or the queue hands a job
+             * that is merely slow to a second worker while the first is still
+             * on it. Transcription uploads run for minutes and pay OpenAI per
+             * call, so at 90s every long recording was transcribed — and billed
+             * — twice: 58% of the Whisper spend to date was duplicate charges.
+             * Keep this above both ProcessTranscriptionJob::$timeout and the
+             * worker's own --timeout.
+             */
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 1800),
             'after_commit' => false,
         ],
 

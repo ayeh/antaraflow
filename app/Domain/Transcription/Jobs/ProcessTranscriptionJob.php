@@ -30,9 +30,22 @@ class ProcessTranscriptionJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 3;
+    /*
+     * One attempt. Every attempt is a paid Whisper call, so a retry doubles the
+     * bill for a recording that may well fail again for the same reason. A
+     * failure is recorded on the transcription with its error, and the user can
+     * upload again deliberately.
+     */
+    public int $tries = 1;
 
-    public int $backoff = 60;
+    /*
+     * Long enough for a multi-hour recording to finish conditioning, chunking
+     * and uploading, and deliberately below the queue's retry_after so the job
+     * is killed by its own timeout rather than quietly re-run by another worker.
+     */
+    public int $timeout = 1500;
+
+    public bool $failOnTimeout = true;
 
     /** Maximum file size in bytes for the Whisper API (25 MB). */
     private const MAX_FILE_SIZE = 25 * 1024 * 1024;

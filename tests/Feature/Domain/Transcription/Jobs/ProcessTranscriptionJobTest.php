@@ -286,3 +286,22 @@ test('audio still falls back to the original when ffmpeg fails', function () {
 
     expect($job->preprocessAudio('/tmp/meeting.mp3'))->toBe('/tmp/meeting.mp3');
 });
+
+/*
+ * With retry_after below the job's runtime, a second worker reclaims a job that
+ * is merely slow and transcribes the same recording again — paying OpenAI twice.
+ * That was 58% of the Whisper bill before it was caught, so the relationship
+ * between the two numbers is asserted rather than left to a comment.
+ */
+test('the queue cannot reclaim a transcription while it is still running', function () {
+    $job = new ProcessTranscriptionJob(AudioTranscription::factory()->make());
+
+    expect(config('queue.connections.database.retry_after'))->toBeGreaterThan($job->timeout);
+});
+
+test('a failed transcription is not retried, because every attempt is billed', function () {
+    $job = new ProcessTranscriptionJob(AudioTranscription::factory()->make());
+
+    expect($job->tries)->toBe(1)
+        ->and($job->failOnTimeout)->toBeTrue();
+});
