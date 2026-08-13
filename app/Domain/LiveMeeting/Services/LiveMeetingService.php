@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\LiveMeeting\Services;
 
 use App\Domain\AI\Jobs\ExtractMeetingDataJob;
+use App\Domain\LiveMeeting\Enums\ChunkRole;
 use App\Domain\LiveMeeting\Enums\ChunkStatus;
 use App\Domain\LiveMeeting\Enums\LiveSessionStatus;
 use App\Domain\LiveMeeting\Events\LiveTranscriptIncomplete;
@@ -18,6 +19,7 @@ use App\Domain\Transcription\Models\TranscriptionSegment;
 use App\Models\User;
 use App\Support\Enums\InputType;
 use App\Support\Enums\TranscriptionStatus;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -106,9 +108,15 @@ class LiveMeetingService
      * the caller answer "already have it" instead of storing the audio twice
      * and transcribing — and billing — it again.
      */
-    public function findExistingChunk(LiveMeetingSession $session, int $chunkNumber): ?LiveTranscriptChunk
-    {
-        return $session->chunks()->where('chunk_number', $chunkNumber)->first();
+    public function findExistingChunk(
+        LiveMeetingSession $session,
+        int $chunkNumber,
+        string $deviceId = '',
+    ): ?LiveTranscriptChunk {
+        return $session->chunks()
+            ->where('device_id', $deviceId)
+            ->where('chunk_number', $chunkNumber)
+            ->first();
     }
 
     /**
@@ -124,24 +132,57 @@ class LiveMeetingService
         float $startTime,
         float $endTime,
         array $levels = [],
+        string $deviceId = '',
+        ChunkRole $role = ChunkRole::Primary,
     ): LiveTranscriptChunk {
         $orgId = $session->meeting->organization_id;
         $path = "organizations/{$orgId}/audio/live/{$session->id}";
+
+        // The device belongs in the filename now that two of them write here.
+        // Without it the satellite's chunk 4 overwrites the primary's on disk
+        // while both rows survive, and the row that lost points at audio that
+        // is not its own.
         $storedPath = $file->storeAs(
             $path,
-            sprintf('chunk_%05d.%s', $chunkNumber, $file->getClientOriginalExtension()),
+            sprintf(
+                'chunk_%05d%s.%s',
+                $chunkNumber,
+                $deviceId === '' ? '' : '_'.substr(sha1($deviceId), 0, 8),
+                $file->getClientOriginalExtension(),
+            ),
             'local',
         );
 
-        $chunk = LiveTranscriptChunk::query()->create([
-            'live_meeting_session_id' => $session->id,
-            'chunk_number' => $chunkNumber,
-            'audio_file_path' => $storedPath,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'status' => ChunkStatus::Pending,
-            ...array_intersect_key($levels, array_flip(['peak_dbfs', 'speech_dbfs', 'noise_dbfs'])),
-        ]);
+        try {
+            $chunk = LiveTranscriptChunk::query()->create([
+                'live_meeting_session_id' => $session->id,
+                'device_id' => $deviceId,
+                'role' => $role,
+                'chunk_number' => $chunkNumber,
+                'audio_file_path' => $storedPath,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'status' => ChunkStatus::Pending,
+                ...array_intersect_key($levels, array_flip(['peak_dbfs', 'speech_dbfs', 'noise_dbfs'])),
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            // Two retries of the same chunk racing. The caller's earlier
+            // duplicate check passed for both, which it always could — it just
+            // used to produce a second row and a second transcription bill
+            // instead of landing here.
+            //
+            // Answered as the duplicate it is. A failure would be far worse
+            // than a wasted upload: the mobile outbox retries anything that is
+            // not a 2xx forever, and would hold every later chunk of the
+            // meeting behind this one.
+            $existing = $this->findExistingChunk($session, $chunkNumber, $deviceId);
+
+            if ($existing !== null) {
+                return $existing;
+            }
+
+            throw new \RuntimeException('A chunk collided with itself and then vanished.');
+        }
 
         LiveTranscriptionJob::dispatch($chunk);
 
@@ -179,11 +220,21 @@ class LiveMeetingService
      *
      * @return array{next_chunk_number: int, missing_chunks: array<int, int>, stats: array<string, int>}
      */
-    public function getResumeState(LiveMeetingSession $session): array
+    public function getResumeState(LiveMeetingSession $session, ?string $deviceId = null): array
     {
-        $chunks = $session->chunks()->get(['chunk_number', 'status']);
+        $chunks = $session->chunks()->get(['chunk_number', 'status', 'device_id']);
 
-        $received = $chunks->pluck('chunk_number')->all();
+        // Numbering is per device: a satellite that joined at minute ten is on
+        // its own sequence, and answering it with the primary's next number
+        // would have it upload over chunks it never recorded.
+        //
+        // A null device means "the whole sitting", which is what the browser
+        // recorder asks and must keep being told.
+        $mine = $deviceId === null
+            ? $chunks
+            : $chunks->where('device_id', $deviceId);
+
+        $received = $mine->pluck('chunk_number')->all();
         $highest = $received === [] ? -1 : max($received);
 
         $missing = [];

@@ -6,6 +6,7 @@ namespace App\Domain\API\Controllers\Mobile\V1;
 
 use App\Domain\API\Controllers\Mobile\MobileController;
 use App\Domain\API\Resources\Mobile\ExtractionResource;
+use App\Domain\LiveMeeting\Enums\ChunkRole;
 use App\Domain\LiveMeeting\Enums\LiveSessionStatus;
 use App\Domain\LiveMeeting\Models\LiveBookmark;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
@@ -84,9 +85,18 @@ class LiveSessionController extends MobileController
             'peak_dbfs' => ['sometimes', 'numeric', 'between:-100,0'],
             'speech_dbfs' => ['sometimes', 'numeric', 'between:-100,0'],
             'noise_dbfs' => ['sometimes', 'numeric', 'between:-100,0'],
+            'device_id' => ['sometimes', 'string', 'max:64'],
+            'role' => ['sometimes', Rule::enum(ChunkRole::class)],
         ]);
 
-        $existing = $this->liveMeetingService->findExistingChunk($session, (int) $validated['chunk_number']);
+        $deviceId = (string) ($validated['device_id'] ?? '');
+        $role = ChunkRole::tryFrom((string) ($validated['role'] ?? '')) ?? ChunkRole::Primary;
+
+        $existing = $this->liveMeetingService->findExistingChunk(
+            $session,
+            (int) $validated['chunk_number'],
+            $deviceId,
+        );
 
         if ($existing !== null) {
             // Not an error: the client should drop this from its queue and move
@@ -94,7 +104,8 @@ class LiveSessionController extends MobileController
             return response()->json([
                 'code' => 'CHUNK_DUPLICATE',
                 'chunk' => $this->chunkPayload($existing),
-                'next_chunk_number' => $this->liveMeetingService->getResumeState($session)['next_chunk_number'],
+                'next_chunk_number' => $this->liveMeetingService
+                    ->getResumeState($session, $deviceId)['next_chunk_number'],
             ]);
         }
 
@@ -108,6 +119,8 @@ class LiveSessionController extends MobileController
                 static fn ($level): float => (float) $level,
                 array_intersect_key($validated, array_flip(['peak_dbfs', 'speech_dbfs', 'noise_dbfs'])),
             ),
+            $deviceId,
+            $role,
         );
 
         return response()->json([
