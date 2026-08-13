@@ -8,6 +8,7 @@ use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Infrastructure\Notifications\Messages\TeamsMessage;
 use App\Infrastructure\Notifications\Push\PushMessage;
 use App\Models\User;
+use App\Support\Traits\RespectsNotificationPreferences;
 use App\Support\Traits\SendsMobilePush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,7 +17,12 @@ use Illuminate\Notifications\Notification;
 
 class MeetingFinalizedNotification extends Notification implements ShouldQueue
 {
-    use Queueable, SendsMobilePush;
+    use Queueable, RespectsNotificationPreferences, SendsMobilePush;
+
+    protected function preferenceKey(): string
+    {
+        return 'meeting_finalized';
+    }
 
     public function __construct(
         public MinutesOfMeeting $meeting,
@@ -32,7 +38,7 @@ class MeetingFinalizedNotification extends Notification implements ShouldQueue
             $channels[] = 'teams';
         }
 
-        return $this->withPush($notifiable, $channels);
+        return $this->preferred($notifiable, $this->withPush($notifiable, $channels));
     }
 
     public function toPush(object $notifiable): PushMessage

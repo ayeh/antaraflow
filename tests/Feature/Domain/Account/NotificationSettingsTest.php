@@ -24,6 +24,9 @@ it('can update notification preferences', function (): void {
         ->assertRedirect();
 
     $prefs = UserSettings::where('user_id', $user->id)->value('notification_preferences');
-    expect($prefs['mention_in_comment']['email'])->toBeTrue();
+    // Stored canonically now. The form still posts `mention_in_comment`; the
+    // controller maps it, so one spelling reaches the database and the mobile
+    // screen sees the same preference the web screen set.
+    expect($prefs['mention']['email'])->toBeTrue();
     expect($prefs['action_item_assigned']['email'])->toBeFalse();
 });

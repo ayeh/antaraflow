@@ -6,6 +6,7 @@ namespace App\Domain\Collaboration\Notifications;
 
 use App\Domain\Collaboration\Models\Comment;
 use App\Infrastructure\Notifications\Push\PushMessage;
+use App\Support\Traits\RespectsNotificationPreferences;
 use App\Support\Traits\SendsMobilePush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -13,7 +14,12 @@ use Illuminate\Notifications\Notification;
 
 class MentionedInCommentNotification extends Notification
 {
-    use Queueable, SendsMobilePush;
+    use Queueable, RespectsNotificationPreferences, SendsMobilePush;
+
+    protected function preferenceKey(): string
+    {
+        return 'mention';
+    }
 
     public function __construct(
         public Comment $comment,
@@ -25,7 +31,7 @@ class MentionedInCommentNotification extends Notification
     {
         $channels = $this->sendEmail ? ['database', 'mail'] : ['database'];
 
-        return $this->withPush($notifiable, $channels);
+        return $this->preferred($notifiable, $this->withPush($notifiable, $channels));
     }
 
     public function toPush(object $notifiable): PushMessage

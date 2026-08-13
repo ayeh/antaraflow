@@ -1746,6 +1746,66 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Could not switch organisation'**
   String get organisationSwitchFailed;
+
+  /// No description provided for @kindOverdueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'A task of yours goes overdue'**
+  String get kindOverdueLabel;
+
+  /// No description provided for @kindOverdueDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Its due date passes and it is still open'**
+  String get kindOverdueDetail;
+
+  /// No description provided for @kindStartingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'A meeting is about to start'**
+  String get kindStartingLabel;
+
+  /// No description provided for @kindStartingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortly before a sitting you are invited to'**
+  String get kindStartingDetail;
+
+  /// No description provided for @kindExtractionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes are drafted from a recording'**
+  String get kindExtractionLabel;
+
+  /// No description provided for @kindExtractionDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI has finished reading a transcript'**
+  String get kindExtractionDetail;
+
+  /// No description provided for @kindStaleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'A decision goes stale'**
+  String get kindStaleLabel;
+
+  /// No description provided for @kindStaleDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Something agreed has sat untouched too long'**
+  String get kindStaleDetail;
+
+  /// No description provided for @kindFailedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing fails'**
+  String get kindFailedLabel;
+
+  /// No description provided for @kindFailedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'A recording could not be transcribed or read'**
+  String get kindFailedDetail;
 }
 
 class _LDelegate extends LocalizationsDelegate<L> {

@@ -6,6 +6,7 @@ namespace App\Domain\ActionItem\Notifications;
 
 use App\Domain\ActionItem\Models\ActionItem;
 use App\Infrastructure\Notifications\Push\PushMessage;
+use App\Support\Traits\RespectsNotificationPreferences;
 use App\Support\Traits\SendsMobilePush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,7 +15,12 @@ use Illuminate\Notifications\Notification;
 
 class ActionItemAssignedNotification extends Notification implements ShouldQueue
 {
-    use Queueable, SendsMobilePush;
+    use Queueable, RespectsNotificationPreferences, SendsMobilePush;
+
+    protected function preferenceKey(): string
+    {
+        return 'action_item_assigned';
+    }
 
     public function __construct(
         public ActionItem $actionItem,
@@ -23,7 +29,7 @@ class ActionItemAssignedNotification extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return $this->withPush($notifiable, ['mail', 'database']);
+        return $this->preferred($notifiable, $this->withPush($notifiable, ['mail', 'database']));
     }
 
     public function toPush(object $notifiable): PushMessage

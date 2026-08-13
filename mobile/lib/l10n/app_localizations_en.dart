@@ -913,4 +913,35 @@ class LEn extends L {
 
   @override
   String get organisationSwitchFailed => 'Could not switch organisation';
+
+  @override
+  String get kindOverdueLabel => 'A task of yours goes overdue';
+
+  @override
+  String get kindOverdueDetail => 'Its due date passes and it is still open';
+
+  @override
+  String get kindStartingLabel => 'A meeting is about to start';
+
+  @override
+  String get kindStartingDetail =>
+      'Shortly before a sitting you are invited to';
+
+  @override
+  String get kindExtractionLabel => 'Minutes are drafted from a recording';
+
+  @override
+  String get kindExtractionDetail => 'The AI has finished reading a transcript';
+
+  @override
+  String get kindStaleLabel => 'A decision goes stale';
+
+  @override
+  String get kindStaleDetail => 'Something agreed has sat untouched too long';
+
+  @override
+  String get kindFailedLabel => 'Processing fails';
+
+  @override
+  String get kindFailedDetail => 'A recording could not be transcribed or read';
 }

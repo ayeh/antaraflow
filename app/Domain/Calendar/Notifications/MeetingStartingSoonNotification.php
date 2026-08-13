@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Calendar\Notifications;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Support\Traits\RespectsNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +13,12 @@ use Illuminate\Notifications\Notification;
 
 class MeetingStartingSoonNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, RespectsNotificationPreferences;
+
+    protected function preferenceKey(): string
+    {
+        return 'meeting_starting';
+    }
 
     public function __construct(
         public MinutesOfMeeting $meeting,
@@ -21,7 +27,7 @@ class MeetingStartingSoonNotification extends Notification implements ShouldQueu
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return $this->preferred($notifiable, ['mail', 'database']);
     }
 
     public function toMail(object $notifiable): MailMessage

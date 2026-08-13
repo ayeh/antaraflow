@@ -6,13 +6,19 @@ namespace App\Domain\AI\Notifications;
 
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Infrastructure\Notifications\Messages\TeamsMessage;
+use App\Support\Traits\RespectsNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 class ExtractionCompletedNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, RespectsNotificationPreferences;
+
+    protected function preferenceKey(): string
+    {
+        return 'extraction_completed';
+    }
 
     public function __construct(
         public MinutesOfMeeting $meeting,
@@ -27,7 +33,7 @@ class ExtractionCompletedNotification extends Notification implements ShouldQueu
             $channels[] = 'teams';
         }
 
-        return $channels;
+        return $this->preferred($notifiable, $channels);
     }
 
     public function toTeams(object $notifiable): TeamsMessage

@@ -7,6 +7,7 @@ namespace App\Domain\Transcription\Notifications;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Infrastructure\Notifications\Messages\TeamsMessage;
 use App\Infrastructure\Notifications\Push\PushMessage;
+use App\Support\Traits\RespectsNotificationPreferences;
 use App\Support\Traits\SendsMobilePush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,7 +15,12 @@ use Illuminate\Notifications\Notification;
 
 class TranscriptionCompletedNotification extends Notification implements ShouldQueue
 {
-    use Queueable, SendsMobilePush;
+    use Queueable, RespectsNotificationPreferences, SendsMobilePush;
+
+    protected function preferenceKey(): string
+    {
+        return 'transcription_completed';
+    }
 
     public function __construct(
         public AudioTranscription $transcription,
@@ -29,7 +35,7 @@ class TranscriptionCompletedNotification extends Notification implements ShouldQ
             $channels[] = 'teams';
         }
 
-        return $this->withPush($notifiable, $channels);
+        return $this->preferred($notifiable, $this->withPush($notifiable, $channels));
     }
 
     public function toPush(object $notifiable): PushMessage

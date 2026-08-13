@@ -45,6 +45,29 @@ List<({String key, String label, String detail})> _kinds(BuildContext context) {
       label: l.kindTranscriptionLabel,
       detail: l.kindTranscriptionDetail,
     ),
+    // The five that had no key at all until the server grew one. Extraction is
+    // first of them because it is the one that arrives most.
+    (
+      key: 'extraction_completed',
+      label: l.kindExtractionLabel,
+      detail: l.kindExtractionDetail,
+    ),
+    (
+      key: 'action_item_overdue',
+      label: l.kindOverdueLabel,
+      detail: l.kindOverdueDetail,
+    ),
+    (
+      key: 'meeting_starting',
+      label: l.kindStartingLabel,
+      detail: l.kindStartingDetail,
+    ),
+    (key: 'stale_decision', label: l.kindStaleLabel, detail: l.kindStaleDetail),
+    (
+      key: 'processing_failed',
+      label: l.kindFailedLabel,
+      detail: l.kindFailedDetail,
+    ),
   ];
 }
 
