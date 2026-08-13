@@ -13,6 +13,7 @@ import '../widgets/error_view.dart';
 import '../widgets/gutter_row.dart';
 import '../widgets/ledger_scaffold.dart';
 import 'tasks_controller.dart';
+import '../meetings/meeting_detail_screen.dart';
 
 /// Action items assigned to the person holding the phone.
 ///
@@ -59,6 +60,7 @@ class TaskItem {
     required this.isOverdue,
     this.dueDate,
     this.meetingTitle,
+    this.meetingId,
   });
 
   factory TaskItem.fromJson(Map<String, dynamic> json) => TaskItem(
@@ -69,6 +71,10 @@ class TaskItem {
     dueDate: DateTime.tryParse(json['due_date'] as String? ?? ''),
     meetingTitle:
         (json['meeting'] as Map<String, dynamic>?)?['title'] as String?,
+    // The server has always sent it; nothing here read it, so a task had no
+    // way back to the sitting that produced it.
+    meetingId: ((json['meeting'] as Map<String, dynamic>?)?['id'] as num?)
+        ?.toInt(),
   );
 
   final int id;
@@ -77,6 +83,7 @@ class TaskItem {
   final bool isOverdue;
   final DateTime? dueDate;
   final String? meetingTitle;
+  final int? meetingId;
 
   TaskItem copyWith({String? status}) => TaskItem(
     id: id,
@@ -85,6 +92,7 @@ class TaskItem {
     isOverdue: isOverdue,
     dueDate: dueDate,
     meetingTitle: meetingTitle,
+    meetingId: meetingId,
   );
 
   bool get isDone => status == 'completed' || status == 'cancelled';
@@ -244,7 +252,16 @@ class _GroupedState extends ConsumerState<_Grouped> {
           severity: severity,
           dimmed: dimmed,
           struck: task.isDone,
-          onTap: () {},
+          onTap: task.meetingId == null
+              ? null
+              : () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => MeetingDetailScreen(
+                      id: task.meetingId!,
+                      title: task.meetingTitle ?? task.title,
+                    ),
+                  ),
+                ),
           trailing: _Check(
             done: task.isDone,
             onChanged: (value) => _tick(context, ref, task, value),

@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/haptics.dart';
 import '../../core/providers.dart';
-import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/bootstrap.dart';
+import '../../domain/models/meeting_detail.dart';
+import '../../l10n/app_localizations.dart';
+import '../meetings/meeting_detail_screen.dart';
+import '../meetings/meetings_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../shell/app_shell.dart';
 import '../widgets/error_view.dart';
@@ -215,7 +219,12 @@ class _UpcomingRow extends StatelessWidget {
       // half hour where somebody should be walking towards the room.
       severity: meeting.isSoon ? AppColors.warning : null,
       status: meeting.isSoon ? L.of(context).gutterNow : null,
-      onTap: () {},
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) =>
+              MeetingDetailScreen(id: meeting.id, title: meeting.title),
+        ),
+      ),
     );
   }
 }
@@ -277,13 +286,13 @@ class _Standing extends StatelessWidget {
   }
 }
 
-class _Waiting extends StatelessWidget {
+class _Waiting extends ConsumerWidget {
   const _Waiting({required this.unread});
 
   final UnreadCounts unread;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Only what is actually waiting. Listing a zero next to "nothing is due"
     // under a heading that already says "waiting on you" tells someone the same
     // thing three times, and buries the one row that matters on the days when
@@ -296,7 +305,12 @@ class _Waiting extends StatelessWidget {
           title: L.of(context).actionItems,
           subtitle: L.of(context).actionItemsDetail,
           severity: AppColors.danger,
-          onTap: () {},
+          // Straight to the tab that lists them, rather than a fourth screen
+          // showing the same rows a third time.
+          onTap: () {
+            Haptics.select();
+            ref.read(selectedTabProvider.notifier).state = Tabs.tasks;
+          },
         ),
       if (unread.pendingApprovals > 0)
         GutterRow(
@@ -305,7 +319,15 @@ class _Waiting extends StatelessWidget {
           title: L.of(context).minutesToApprove,
           subtitle: L.of(context).minutesToApproveDetail,
           severity: AppColors.warning,
-          onTap: () {},
+          // The meetings list, already narrowed to the ones asking for an
+          // answer — arriving at forty rows and hunting for three is not an
+          // answer to "3 waiting".
+          onTap: () {
+            Haptics.select();
+            ref.read(meetingFilterProvider.notifier).state =
+                const MeetingFilter(status: MeetingStatus.pendingConfirmation);
+            ref.read(selectedTabProvider.notifier).state = Tabs.meetings;
+          },
         ),
     ];
 
