@@ -134,6 +134,74 @@ describe('client version gate', function () {
     });
 });
 
+describe('sign-in desk', function () {
+    test('opening the desk hands back both the lobby screen and the scan target', function () {
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/qr-registration");
+
+        $response->assertCreated();
+
+        $token = $this->meeting->qrRegistrationTokens()->sole();
+
+        expect($response->json('lobby_url'))->toBe(route('qr-registration.lobby', $token->token))
+            ->and($response->json('qr_payload'))->toBe(route('qr-registration.form', $token->token))
+            ->and($response->json('join_code'))->toHaveLength(6);
+    });
+
+    test('a link made without a date dies at the end of the sitting day', function () {
+        $meeting = MinutesOfMeeting::createForOrganization($this->org->id, [
+            'title' => 'Audit committee',
+            'created_by' => $this->user->id,
+            'meeting_date' => now()->addDays(3)->setTime(14, 0),
+        ]);
+
+        $this->actingAs($this->user, 'sanctum')
+            ->postJson("/api/mobile/v1/meetings/{$meeting->id}/qr-registration")
+            ->assertCreated()
+            ->assertJsonPath(
+                'expires_at',
+                now()->addDays(3)->endOfDay()->toIso8601String(),
+            );
+    });
+
+    test('a sitting already in the past still gets a link that works today', function () {
+        $meeting = MinutesOfMeeting::createForOrganization($this->org->id, [
+            'title' => 'Ran late',
+            'created_by' => $this->user->id,
+            'meeting_date' => now()->subWeek(),
+        ]);
+
+        $this->actingAs($this->user, 'sanctum')
+            ->postJson("/api/mobile/v1/meetings/{$meeting->id}/qr-registration")
+            ->assertCreated()
+            ->assertJsonPath('expires_at', now()->endOfDay()->toIso8601String());
+    });
+
+    test('an explicit expiry is honoured over the default', function () {
+        $chosen = now()->addHours(2)->startOfMinute();
+
+        $this->actingAs($this->user, 'sanctum')
+            ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/qr-registration", [
+                'expires_at' => $chosen->toIso8601String(),
+            ])
+            ->assertCreated()
+            ->assertJsonPath('expires_at', $chosen->toIso8601String());
+    });
+
+    test('opening a second desk closes the first', function () {
+        $acting = $this->actingAs($this->user, 'sanctum');
+
+        $first = $acting->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/qr-registration")
+            ->json('token');
+
+        $acting->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/qr-registration")
+            ->assertCreated();
+
+        expect($this->meeting->qrRegistrationTokens()->where('token', $first)->sole()->is_active)
+            ->toBeFalse();
+    });
+});
+
 describe('attendance scan', function () {
     test('scanning a valid code checks the person in', function () {
         $token = $this->meeting->qrRegistrationTokens()->create([

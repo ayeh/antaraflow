@@ -138,7 +138,10 @@ class AttendanceScanController extends MobileController
             'token' => Str::random(64),
             'join_code' => strtoupper(Str::random(6)),
             'is_active' => true,
-            'expires_at' => $validated['expires_at'] ?? null,
+            // A registration link that never expires is a standing invitation
+            // to a meeting that ended months ago. Absent an explicit date, the
+            // link dies with the day it was made for.
+            'expires_at' => $validated['expires_at'] ?? $this->defaultExpiry($meeting),
             'max_attendees' => $validated['max_attendees'] ?? null,
             'required_fields' => ['name'],
             'welcome_message' => $validated['welcome_message'] ?? null,
@@ -157,6 +160,21 @@ class AttendanceScanController extends MobileController
         return response()->json(null, 204);
     }
 
+    /**
+     * End of the sitting's own day, or of today when the sitting is undated.
+     *
+     * Deliberately generous: a meeting that starts at 21:00 and runs late must
+     * not lock out a latecomer, and the host can always pass an explicit date.
+     */
+    private function defaultExpiry(MinutesOfMeeting $meeting): \Illuminate\Support\Carbon
+    {
+        $day = $meeting->meeting_date ?? now();
+
+        return $day->copy()->endOfDay()->isPast()
+            ? now()->endOfDay()
+            : $day->copy()->endOfDay();
+    }
+
     /** @return array<string, mixed> */
     private function tokenPayload(QrRegistrationToken $token): array
     {
@@ -165,6 +183,11 @@ class AttendanceScanController extends MobileController
             'join_code' => $token->join_code,
             // What the host's phone renders as a QR code.
             'qr_payload' => route('qr-registration.form', $token->token),
+            // The shareable display: a projector or a second screen shows this,
+            // it renders the same QR, and names land on it as people register.
+            // Built here rather than in the client so the app never has to
+            // concatenate a URL out of a base and a raw token.
+            'lobby_url' => route('qr-registration.lobby', $token->token),
             'expires_at' => $token->expires_at?->toIso8601String(),
             'max_attendees' => $token->max_attendees,
             'registrations_count' => $token->registrations_count,
