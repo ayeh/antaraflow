@@ -12,6 +12,7 @@ use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
 use App\Domain\LiveMeeting\Notifications\LiveTranscriptIncompleteNotification;
 use App\Domain\LiveMeeting\Services\LiveMeetingService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Domain\Transcription\Jobs\DiarizeTranscriptionJob;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Domain\Transcription\Models\TranscriptionSegment;
 use App\Models\User;
@@ -370,4 +371,164 @@ test('sends no incomplete notice when every chunk transcribed', function () {
     $this->service->endSession($session);
 
     Notification::assertNothingSent();
+});
+
+test('lands each chunk segment at its true position on the meeting timeline', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 0,
+        'text' => 'good morning everyone',
+        'start_time' => 0.0,
+        'end_time' => 15.0,
+        'segments' => [
+            ['text' => 'good morning', 'start_time' => 1.0, 'end_time' => 2.5, 'speaker' => null, 'confidence' => 0.9],
+            ['text' => 'everyone', 'start_time' => 2.5, 'end_time' => 4.0, 'speaker' => null, 'confidence' => 0.9],
+        ],
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 3,
+        'text' => 'we agree',
+        'start_time' => 45.0,
+        'end_time' => 60.0,
+        'segments' => [
+            ['text' => 'we agree', 'start_time' => 2.0, 'end_time' => 4.0, 'speaker' => null, 'confidence' => 0.8],
+        ],
+    ]);
+
+    $this->service->endSession($session);
+
+    $segments = TranscriptionSegment::query()
+        ->where('audio_transcription_id', AudioTranscription::query()->latest('id')->first()->id)
+        ->orderBy('sequence_order')
+        ->get();
+
+    expect($segments)->toHaveCount(3)
+        ->and($segments->pluck('text')->all())->toBe(['good morning', 'everyone', 'we agree'])
+        // The third segment sits two seconds into a chunk that starts at 45.
+        ->and($segments->pluck('start_time')->all())->toBe([1.0, 2.5, 47.0])
+        ->and($segments->pluck('sequence_order')->all())->toBe([0, 1, 2]);
+});
+
+// Every sitting recorded before chunks carried their own segments, and
+// everything the browser recorder sends. These must keep behaving exactly as
+// they do today: one coarse segment spanning the whole chunk.
+test('falls back to one segment per chunk when a chunk carried none', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 0,
+        'text' => 'minutes of the meeting',
+        'speaker' => 'Speaker A',
+        'start_time' => 0.0,
+        'end_time' => 15.0,
+        'confidence' => 0.91,
+        'segments' => null,
+    ]);
+
+    $this->service->endSession($session);
+
+    $segments = TranscriptionSegment::query()
+        ->where('audio_transcription_id', AudioTranscription::query()->latest('id')->first()->id)
+        ->get();
+
+    expect($segments)->toHaveCount(1)
+        ->and($segments->first()->text)->toBe('minutes of the meeting')
+        ->and($segments->first()->speaker)->toBe('Speaker A')
+        ->and($segments->first()->start_time)->toBe(0.0)
+        ->and($segments->first()->end_time)->toBe(15.0);
+});
+
+test('mixes fine and coarse chunks in one sitting without losing the order', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 0,
+        'text' => 'opening remarks',
+        'start_time' => 0.0,
+        'end_time' => 15.0,
+        'segments' => null,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 1,
+        'text' => 'first item second item',
+        'start_time' => 15.0,
+        'end_time' => 30.0,
+        'segments' => [
+            ['text' => 'first item', 'start_time' => 0.0, 'end_time' => 5.0, 'speaker' => null, 'confidence' => 0.9],
+            ['text' => 'second item', 'start_time' => 5.0, 'end_time' => 10.0, 'speaker' => null, 'confidence' => 0.9],
+        ],
+    ]);
+
+    $this->service->endSession($session);
+
+    $segments = TranscriptionSegment::query()
+        ->where('audio_transcription_id', AudioTranscription::query()->latest('id')->first()->id)
+        ->orderBy('sequence_order')
+        ->get();
+
+    expect($segments->pluck('text')->all())->toBe(['opening remarks', 'first item', 'second item'])
+        ->and($segments->pluck('start_time')->all())->toBe([0.0, 15.0, 20.0]);
+});
+
+test('asks for the speakers to be named once the sitting is merged', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 0,
+        'text' => 'the chair opened the meeting',
+    ]);
+
+    $this->service->endSession($session);
+
+    Queue::assertPushed(DiarizeTranscriptionJob::class);
+    Queue::assertPushed(ExtractMeetingDataJob::class);
+});
+
+// Naming the speakers in a transcript that does not exist would fail on a
+// null, in a job nobody is watching, for every sitting that recorded nothing.
+test('does not ask for names when no chunk ever transcribed', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $this->service->endSession($session);
+
+    Queue::assertNotPushed(DiarizeTranscriptionJob::class);
 });

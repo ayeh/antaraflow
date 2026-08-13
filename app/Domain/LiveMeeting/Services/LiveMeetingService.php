@@ -12,12 +12,14 @@ use App\Domain\LiveMeeting\Jobs\LiveTranscriptionJob;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Domain\Transcription\Jobs\DiarizeTranscriptionJob;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Domain\Transcription\Models\TranscriptionSegment;
 use App\Models\User;
 use App\Support\Enums\InputType;
 use App\Support\Enums\TranscriptionStatus;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -68,7 +70,14 @@ class LiveMeetingService
             'total_duration_seconds' => $totalDuration,
         ]);
 
-        $this->mergeChunksIntoTranscription($session);
+        $transcription = $this->mergeChunksIntoTranscription($session);
+
+        // Dispatched alongside extraction rather than before it. Extraction
+        // reads `full_text`, which the names never touch, so making the
+        // minutes wait on a language model would be delay for nothing.
+        if ($transcription !== null) {
+            DiarizeTranscriptionJob::dispatch($transcription);
+        }
 
         ExtractMeetingDataJob::dispatch($session->meeting);
     }
@@ -251,18 +260,7 @@ class LiveMeetingService
             ));
         }
 
-        foreach ($completedChunks as $index => $chunk) {
-            TranscriptionSegment::query()->create([
-                'audio_transcription_id' => $transcription->id,
-                'text' => $chunk->text,
-                'speaker' => $chunk->speaker,
-                'start_time' => $chunk->start_time,
-                'end_time' => $chunk->end_time,
-                'confidence' => $chunk->confidence,
-                'sequence_order' => $index,
-                'is_edited' => false,
-            ]);
-        }
+        $this->writeSegments($transcription, $completedChunks);
 
         $session->meeting->inputs()->create([
             'type' => InputType::BrowserRecording,
@@ -271,5 +269,87 @@ class LiveMeetingService
         ]);
 
         return $transcription;
+    }
+
+    /**
+     * Turns the merged chunks into transcript segments.
+     *
+     * A chunk that carried its own segments contributes one per utterance,
+     * shifted onto the meeting's timeline by the chunk's own start. A chunk
+     * that carried none contributes a single segment spanning the whole
+     * fifteen seconds, which is what every sitting produced before chunks
+     * began keeping them and is what the browser recorder still produces.
+     *
+     * The coarse form is not merely a fallback for old data — it is the shape
+     * that makes speaker attribution impossible, because one segment covering
+     * fifteen seconds of a meeting cannot belong to one person. Both forms are
+     * supported so a single sitting can mix them, which happens the moment
+     * this ships and a session resumes across the deploy.
+     *
+     * @param  \Illuminate\Support\Collection<int, LiveTranscriptChunk>  $chunks
+     */
+    private function writeSegments(AudioTranscription $transcription, Collection $chunks): void
+    {
+        $rows = [];
+        $now = now();
+
+        foreach ($chunks as $chunk) {
+            foreach ($this->segmentsOf($chunk) as $segment) {
+                $rows[] = [
+                    'audio_transcription_id' => $transcription->id,
+                    'text' => $segment['text'],
+                    'speaker' => $segment['speaker'],
+                    'start_time' => $segment['start_time'],
+                    'end_time' => $segment['end_time'],
+                    'confidence' => $segment['confidence'],
+                    'sequence_order' => count($rows),
+                    'is_edited' => false,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        if ($rows === []) {
+            return;
+        }
+
+        // One statement rather than a create() each: an hour-long sitting is
+        // several hundred segments, and this runs inside the request that ends
+        // the session while somebody waits on the Stop button.
+        TranscriptionSegment::query()->insert($rows);
+    }
+
+    /**
+     * One chunk's segments, on the meeting's timeline.
+     *
+     * Times come back from JSON as ints whenever they were whole numbers, so
+     * they are cast rather than trusted — a segment at "0" that stays an int
+     * reaches a float column and a float comparison as the wrong type.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function segmentsOf(LiveTranscriptChunk $chunk): array
+    {
+        $offset = (float) $chunk->start_time;
+        $segments = $chunk->segments ?? [];
+
+        if ($segments === []) {
+            return [[
+                'text' => $chunk->text,
+                'speaker' => $chunk->speaker,
+                'start_time' => $offset,
+                'end_time' => (float) $chunk->end_time,
+                'confidence' => $chunk->confidence,
+            ]];
+        }
+
+        return array_map(static fn (array $segment): array => [
+            'text' => $segment['text'],
+            'speaker' => $segment['speaker'] ?? null,
+            'start_time' => $offset + (float) $segment['start_time'],
+            'end_time' => $offset + (float) $segment['end_time'],
+            'confidence' => isset($segment['confidence']) ? (float) $segment['confidence'] : null,
+        ], $segments);
     }
 }
