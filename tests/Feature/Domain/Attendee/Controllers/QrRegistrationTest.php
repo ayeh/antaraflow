@@ -303,3 +303,44 @@ test('shareable lobby aborts 410 when the meeting is soft-deleted', function () 
 test('shareable lobby returns 404 for an unknown token', function () {
     $this->get(route('qr-registration.lobby', 'does-not-exist'))->assertNotFound();
 });
+
+describe('guest rate limits', function () {
+    beforeEach(function () {
+        $this->token = $this->meeting->qrRegistrationTokens()->create([
+            'token' => 'throttle-token-9001',
+            'join_code' => 'THR001',
+            'is_active' => true,
+            'required_fields' => ['name'],
+            'registrations_count' => 0,
+        ]);
+    });
+
+    test('a lobby left polling does not lock walk-ins out of registration', function () {
+        // What a projector does in the first minute of an event.
+        for ($i = 0; $i < 25; $i++) {
+            $this->get(route('qr-registration.lobby.attendees', $this->token->token))
+                ->assertOk();
+        }
+
+        // Somebody then walks in and scans. Before the groups were given
+        // separate prefixes this was a 429: one shared domain|ip counter meant
+        // the lobby had already spent the registration allowance.
+        $this->get(route('qr-registration.form', $this->token->token))
+            ->assertOk();
+    });
+
+    test('a room registering from one wifi is not turned away', function () {
+        // Ten people, two requests each, all behind the same NAT address.
+        for ($i = 0; $i < 10; $i++) {
+            $this->get(route('qr-registration.form', $this->token->token))
+                ->assertOk();
+
+            $this->post(route('qr-registration.submit', $this->token->token), [
+                'name' => "Guest $i",
+                'email' => "guest$i@example.com",
+            ])->assertRedirect();
+        }
+
+        expect($this->meeting->attendees()->count())->toBe(10);
+    });
+});
