@@ -20,22 +20,28 @@ Constraints carried forward unchanged: software only, no hardware purchase, ffmp
 
 ### The two transcription paths look alike and are not
 
+> **Corrected 2026-08-13, during implementation.** An earlier revision of this
+> section claimed the live path creates no segments at all. That was wrong —
+> `mergeChunksIntoTranscription()` has a `TranscriptionSegment` loop after the
+> transcription insert. The table and the two sections below are the verified
+> position. C1 remains worth doing; its shape changed from *create segments* to
+> *make the existing segments fine-grained, and actually run diarization*.
+
 | | Upload path | Live path |
 |---|---|---|
 | Entry | `ProcessTranscriptionJob` | `LiveTranscriptionJob` |
 | Unit | whole file, split at 10 min | one 15 s chunk, independently |
-| `transcription_segments` | created (`ProcessTranscriptionJob.php:134`) | **never created** |
-| Speaker labels | `assignSpeakers()` gap heuristic (`ProcessTranscriptionJob.php:253`) | **none** |
+| `transcription_segments` | one per utterance (`ProcessTranscriptionJob.php:134`) | **one per 15 s chunk** (`LiveMeetingService.php:254`) |
+| Speaker labels | `assignSpeakers()` gap heuristic (`ProcessTranscriptionJob.php:253`) | copied from `live_transcript_chunks.speaker`, **always null** |
+| Diarization | never dispatched automatically | never dispatched automatically |
 
-`LiveMeetingService::mergeChunksIntoTranscription()` (`LiveMeetingService.php:200`) joins `live_transcript_chunks.text` with newlines into `AudioTranscription.full_text` and stops. Nothing downstream of a live recording has ever had segment structure.
+So a live meeting does have segment structure — it is just far too coarse to attribute. One segment covers a whole fifteen-second chunk regardless of who spoke in it or how many sentences it contains, and its `speaker` comes from `$result->segments[0]->speaker` (`LiveTranscriptionJob.php:103`), which Whisper leaves null.
 
-The `speaker` column on `live_transcript_chunks` is filled from `$result->segments[0]->speaker` (`LiveTranscriptionJob.php:103`), which Whisper leaves null. It is dead weight today.
+### The diarization feature is built and never runs
 
-### A built diarization feature has never run on the flagship path
+`SpeakerDiarizationService` sends segments plus the meeting's `is_present` attendees to an LLM and maps segments to real names. It is invoked from exactly one place — `SpeakerDiarizationController`, a manual endpoint. **Nothing dispatches it automatically, on either path.**
 
-`SpeakerDiarizationService` (`app/Domain/Transcription/Services/SpeakerDiarizationService.php`) already sends segments plus the meeting's `is_present` attendees to an LLM and maps segments to real names. It reads `$transcription->segments()` (`SpeakerDiarizationService.php:26`), so on a live meeting it receives an empty collection and returns an empty map.
-
-A feature that is built, tested and paid for is dark on the path the product is built around. That is the cheapest available win and it is why C1 is sequenced first.
+That is the cheapest available win, and it is why C1 is sequenced first. Feeding it per-utterance segments instead of fifteen-second blocks is what makes its output worth having.
 
 ### Extraction reads `full_text`, not segments
 
@@ -128,9 +134,11 @@ Authenticated members of the organisation only. Guest phones joining by QR token
 
 ## C1 — Segments and names on the live path
 
-### What is missing is one line, and one pass
+### What is missing is granularity, and a dispatch
 
-`LiveTranscriptionJob` receives `$result->segments` and discards them. C1 keeps them.
+`LiveTranscriptionJob` receives `$result->segments` and discards them, keeping only `segments[0]->speaker`. C1 keeps them all, so a segment becomes an utterance rather than a fifteen-second block — and then runs the diarization that has never been wired up.
+
+The coarse per-chunk segment the merge writes today is the fallback, not the target: it stays for chunks that carry no segments of their own, which is every recording made before this change and everything the web recorder produces.
 
 Each live chunk is transcribed with its own clock starting at zero, so segment times must be shifted by the chunk's `start_time` before they mean anything on the meeting's timeline — the same offset arithmetic `ProcessTranscriptionJob::transcribeChunked()` already does for its 10-minute pieces.
 
