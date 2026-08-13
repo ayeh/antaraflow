@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/error/api_exception.dart';
 import '../../domain/models/live_session.dart';
+import '../../features/recorder/recorder_role.dart';
 import '../../features/recorder/room_level.dart';
 import '../api/api_client.dart';
 
@@ -69,6 +70,8 @@ class LiveRepository {
     required double startTime,
     required double endTime,
     LevelReading? reading,
+    String deviceId = '',
+    RecorderRole role = RecorderRole.primary,
   }) async {
     final form = FormData.fromMap({
       // No explicit content type: Laravel's `mimetypes` rule guesses from the
@@ -86,13 +89,22 @@ class LiveRepository {
       // measure, so a reading on the server always means a measurement was
       // actually taken.
       if (reading != null && reading.frames > 0) ...reading.toJson(),
+      if (deviceId.isNotEmpty) ...{'device_id': deviceId, 'role': role.wire},
     });
 
     final body = await _client.upload(
       '/live/$sessionId/chunks',
       form: form,
       // The same chunk retried after a timeout must not be counted twice.
-      idempotencyKey: 'chunk-$sessionId-$chunkNumber',
+      //
+      // The device is part of the key because two devices record the same
+      // chunk numbers for the same sitting. The server scopes its idempotency
+      // cache by user, so two people are already safe — but one person
+      // recording on both their phone and their tablet is not, and their
+      // satellite's chunk would be answered from the primary's cached response
+      // without the audio ever reaching the server. Every response would still
+      // look like a success.
+      idempotencyKey: 'chunk-$sessionId-$deviceId-$chunkNumber',
     );
 
     return body['code'] != 'CHUNK_DUPLICATE';
