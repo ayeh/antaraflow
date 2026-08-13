@@ -18,6 +18,7 @@ class LiveTranscriptChunk extends Model
         'chunk_number',
         'audio_file_path',
         'text',
+        'segments',
         'speaker',
         'start_time',
         'end_time',
@@ -34,6 +35,7 @@ class LiveTranscriptChunk extends Model
     {
         return [
             'status' => ChunkStatus::class,
+            'segments' => 'array',
             'start_time' => 'double',
             'end_time' => 'double',
             'confidence' => 'double',

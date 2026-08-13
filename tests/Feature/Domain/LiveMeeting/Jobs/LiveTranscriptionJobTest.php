@@ -437,3 +437,94 @@ test('still transcribes when conditioning fails', function () {
         ->and($chunk->fresh()->status)->toBe(ChunkStatus::Completed)
         ->and($chunk->fresh()->text)->toBe('heard it anyway');
 });
+
+test('keeps every segment the transcriber returned, on the chunk own clock', function () {
+    Event::fake();
+    Storage::fake('local');
+
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'audio_file_path' => 'live-chunks/three.webm',
+        'status' => ChunkStatus::Pending,
+        'start_time' => 45.0,
+        'end_time' => 60.0,
+    ]);
+
+    Storage::disk('local')->put('live-chunks/three.webm', 'fake-audio-data');
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('transcribe')->once()->andReturn(new TranscriptionResult(
+        fullText: 'we agree on the budget',
+        confidence: 0.9,
+        // Every chunk is transcribed alone, so its segments always start near
+        // zero regardless of where the chunk sits in the meeting.
+        segments: [
+            new TranscriptionSegmentData(text: 'we agree', startTime: 0.0, endTime: 2.5, confidence: 0.9),
+            new TranscriptionSegmentData(text: 'on the budget', startTime: 2.5, endTime: 5.0, confidence: 0.88),
+        ],
+    ));
+
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    $segments = $chunk->fresh()->segments;
+
+    // Compared loosely on purpose. A whole number survives the JSON round trip
+    // as an int — 0.0 goes in and 0 comes back — so anything reading these has
+    // to cast rather than trust the type, and the merge does exactly that.
+    expect($segments)->toHaveCount(2)
+        ->and($segments[0]['text'])->toBe('we agree')
+        ->and($segments[0]['start_time'])->toEqual(0.0)
+        ->and($segments[1]['text'])->toBe('on the budget')
+        ->and($segments[1]['end_time'])->toEqual(5.0);
+});
+
+test('replaces the segments on a retry rather than accumulating them', function () {
+    Event::fake();
+    Storage::fake('local');
+
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'audio_file_path' => 'live-chunks/again.webm',
+        'status' => ChunkStatus::Pending,
+        'segments' => [
+            ['text' => 'stale', 'start_time' => 0.0, 'end_time' => 1.0, 'speaker' => null, 'confidence' => null],
+        ],
+    ]);
+
+    Storage::disk('local')->put('live-chunks/again.webm', 'fake-audio-data');
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('transcribe')->once()->andReturn(new TranscriptionResult(
+        fullText: 'fresh',
+        confidence: 0.9,
+        segments: [new TranscriptionSegmentData(text: 'fresh', startTime: 0.0, endTime: 1.0, confidence: 0.9)],
+    ));
+
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    $segments = $chunk->fresh()->segments;
+
+    expect($segments)->toHaveCount(1)
+        ->and($segments[0]['text'])->toBe('fresh');
+});
+
+// A provider that returns no segments must not be mistaken later for a chunk
+// that was never transcribed at all.
+test('records an empty segment list rather than null when there were none', function () {
+    Event::fake();
+    Storage::fake('local');
+
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'audio_file_path' => 'live-chunks/none.webm',
+        'status' => ChunkStatus::Pending,
+    ]);
+
+    Storage::disk('local')->put('live-chunks/none.webm', 'fake-audio-data');
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('transcribe')->once()->andReturn(
+        new TranscriptionResult(fullText: 'no segments here', confidence: null, segments: []),
+    );
+
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    expect($chunk->fresh()->segments)->toBe([]);
+});
