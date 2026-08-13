@@ -289,5 +289,6 @@
   "approvalsEmptyDetail": "Minit yang diedarkan kepada anda untuk pengesahan muncul di sini sehingga anda menjawabnya.",
   "unassigned": "Belum ditugaskan",
   "unassignedDetail": "Diekstrak daripada mesyuarat anda tanpa nama padanya",
-  "gutterUnassigned": "belum"
+  "gutterUnassigned": "belum",
+  "showingOf": "Memaparkan {shown} daripada {total}. Selebihnya di web."
 }

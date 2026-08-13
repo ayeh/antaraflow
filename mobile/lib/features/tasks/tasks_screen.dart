@@ -138,55 +138,112 @@ class TasksScreen extends ConsumerWidget {
 
 /// The unassigned block: its own request, its own empty behaviour — it shows
 /// nothing at all when there is nothing, rather than an empty heading.
-class _Unassigned extends ConsumerWidget {
+class _Unassigned extends ConsumerStatefulWidget {
   const _Unassigned();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref.watch(unassignedTasksProvider).valueOrNull ?? const [];
+  ConsumerState<_Unassigned> createState() => _UnassignedState();
+}
 
-    if (items.isEmpty) return const SizedBox.shrink();
+class _UnassignedState extends ConsumerState<_Unassigned> {
+  /// Folded, like the closed group above it and for the same reason: on an
+  /// account that has been used a while this is the largest group on the
+  /// screen — 122 on the first one it met — and none of it is addressed to
+  /// the reader. It should be findable, not in the way.
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = ref.watch(unassignedTasksProvider).valueOrNull;
+
+    if (data == null || data.items.isEmpty) return const SizedBox.shrink();
+
+    final items = data.items;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionRule(
-          label: L.of(context).unassigned,
-          trailing: '${items.length}',
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-          child: Text(
-            L.of(context).unassignedDetail,
-            style: Theme.of(context).textTheme.bodySmall,
+        InkWell(
+          onTap: () {
+            Haptics.select();
+            setState(() => _open = !_open);
+          },
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 26, 20, 10),
+            child: Row(
+              children: [
+                // Uppercased here, like every other eyebrow on the screen.
+                // CLOSED is capitalised in the ARB; this one is a heading and
+                // a row caption, so the string stays sentence case.
+                Text(
+                  L.of(context).unassigned.toUpperCase(),
+                  style: AppTheme.eyebrow(),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(child: Divider(color: AppColors.rule)),
+                const SizedBox(width: 12),
+                Text(
+                  '${data.total}',
+                  style: AppTheme.mono(size: 11, colour: AppColors.inkFaint),
+                ),
+                AnimatedRotation(
+                  turns: _open ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                    color: AppColors.inkFaint,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        for (final task in items)
-          GutterRow(
-            key: ValueKey('unassigned-${task.id}'),
-            gutter: task.dueDate == null
-                ? L.of(context).gutterNil
-                : DateFormat(
-                    'd MMM',
-                    Localizations.localeOf(context).toLanguageTag(),
-                  ).format(task.dueDate!),
-            // Its own short key, not the section heading lowercased:
-            // "unassigned" wrapped to two lines in a 62pt column and broke the
-            // alignment the whole list is built on.
-            gutterCaption: L.of(context).gutterUnassigned,
-            title: task.title,
-            subtitle: task.meetingTitle,
-            onTap: task.meetingId == null
-                ? null
-                : () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => MeetingDetailScreen(
-                        id: task.meetingId!,
-                        title: task.meetingTitle ?? task.title,
+        if (!_open) const SizedBox.shrink(),
+        if (_open) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+            child: Text(
+              L.of(context).unassignedDetail,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+          for (final task in items)
+            GutterRow(
+              key: ValueKey('unassigned-${task.id}'),
+              gutter: task.dueDate == null
+                  ? L.of(context).gutterNil
+                  : DateFormat(
+                      'd MMM',
+                      Localizations.localeOf(context).toLanguageTag(),
+                    ).format(task.dueDate!),
+              // Its own short key, not the section heading lowercased:
+              // "unassigned" wrapped to two lines in a 62pt column and broke the
+              // alignment the whole list is built on.
+              gutterCaption: L.of(context).gutterUnassigned,
+              title: task.title,
+              subtitle: task.meetingTitle,
+              onTap: task.meetingId == null
+                  ? null
+                  : () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => MeetingDetailScreen(
+                          id: task.meetingId!,
+                          title: task.meetingTitle ?? task.title,
+                        ),
                       ),
                     ),
-                  ),
-          ),
+            ),
+          // Said out loud rather than left as a short list that looks complete.
+          if (data.total > items.length)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+              child: Text(
+                L.of(context).showingOf(items.length, data.total),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+        ],
       ],
     );
   }
@@ -200,15 +257,31 @@ class _Unassigned extends ConsumerWidget {
 /// lie. Government minutes assign work to an agency — MBPJ, a department — and
 /// matchAssignee correctly finds no user, so these would otherwise exist only
 /// on the web.
-final unassignedTasksProvider = FutureProvider.autoDispose<List<TaskItem>>((
-  ref,
-) async {
-  final rows = await ref
-      .read(apiClientProvider)
-      .getList('/action-items', query: {'unassigned': 1, 'per_page': 50});
+final unassignedTasksProvider =
+    FutureProvider.autoDispose<({List<TaskItem> items, int total})>((
+      ref,
+    ) async {
+      const cap = 50;
 
-  return rows.cast<Map<String, dynamic>>().map(TaskItem.fromJson).toList();
-});
+      final body = await ref
+          .read(apiClientProvider)
+          .get('/action-items', query: {'unassigned': 1, 'per_page': cap});
+
+      final items = (body['data'] as List? ?? [])
+          .cast<Map<String, dynamic>>()
+          .map(TaskItem.fromJson)
+          .toList();
+
+      // The true total, not the page size. There are 122 of these on a real
+      // account and the first attempt showed "50" as though that were all of
+      // them — a cap presented as a count is a lie the reader cannot see.
+      final total =
+          ((body['meta'] as Map<String, dynamic>?)?['total'] as num?)
+              ?.toInt() ??
+          items.length;
+
+      return (items: items, total: total);
+    });
 
 enum _Group { overdue, today, later, closed }
 

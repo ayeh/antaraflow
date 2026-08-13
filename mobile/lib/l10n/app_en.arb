@@ -478,5 +478,16 @@
   },
   "unassigned": "Unassigned",
   "unassignedDetail": "Extracted from your sittings with no name on them",
-  "gutterUnassigned": "nobody"
+  "gutterUnassigned": "nobody",
+  "showingOf": "Showing {shown} of {total}. The rest are on the web.",
+  "@showingOf": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }
