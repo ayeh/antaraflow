@@ -1,6 +1,7 @@
 import 'package:antaranote/features/tasks/tasks_controller.dart';
 import 'package:antaranote/features/tasks/tasks_screen.dart';
 import 'package:antaranote/features/widgets/gutter_row.dart';
+import 'package:antaranote/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,8 +46,21 @@ void main() {
         overrides: [
           tasksProvider.overrideWith(() => _FakeTasks(tasks)),
           taskTickProvider.overrideWith(_FakeTicker.new),
+          // The screen asks for these too. Left un-overridden it reaches the
+          // network, and the request outlives the test as a pending timer.
+          unassignedTasksProvider.overrideWith(
+            (ref) async => (items: <TaskItem>[], total: 0),
+          ),
         ],
-        child: const MaterialApp(home: TasksScreen()),
+        // The screen reads its strings through L, so the delegates have to be
+        // here. Without them L.of returns null and the screen throws before it
+        // draws anything — which is what happened when it was localised and
+        // this harness was not updated with it.
+        child: const MaterialApp(
+          localizationsDelegates: L.localizationsDelegates,
+          supportedLocales: L.supportedLocales,
+          home: TasksScreen(),
+        ),
       ),
     );
 

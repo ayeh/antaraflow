@@ -552,6 +552,11 @@ class _Check extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      // A node of its own. Without this the annotation merges into whatever
+      // ancestor is nearest, and on a row that opens nothing there is no
+      // gesture node to anchor it — the checkbox vanished from the semantics
+      // tree entirely and could not be reached by a screen reader.
+      container: true,
       checked: done,
       label: L.of(context).markComplete,
       child: GestureDetector(
