@@ -63,6 +63,25 @@ machine is not installed):
 "/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/keytool" -genkeypair -v -keystore ~/.android/antaranote-upload.jks -storetype PKCS12 -keyalg RSA -keysize 4096 -validity 10000 -alias antaranote-upload -dname "CN=antaraNote, O=Antara, C=MY"
 ```
 
+Back it up **before building anything with it**. Into the login Keychain, hex
+encoded because `security` mangles binary:
+
+```bash
+security add-generic-password -a antaranote-upload -s antaranote-play-upload-key -w "$(xxd -p ~/.android/antaranote-upload.jks | tr -d '\n')" -U
+```
+
+Restore is the same trip backwards:
+
+```bash
+security find-generic-password -a antaranote-upload -s antaranote-play-upload-key -w | xxd -r -p > antaranote-upload.jks
+```
+
+That round trip is verified byte-identical on a 4096-bit PKCS12 keystore, and
+`keytool -list` reads the private key out of the restored file. The Keychain is
+still only one disk, so the `.jks` and both passwords also go into Bitwarden as
+an attachment — the Keychain copy is for convenience, the Bitwarden copy is the
+one that survives losing this Mac.
+
 Then point Gradle at it — `android/key.properties`, never committed:
 
 ```
