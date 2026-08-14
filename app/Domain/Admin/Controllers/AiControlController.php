@@ -159,6 +159,7 @@ class AiControlController extends Controller
             'creditTopupDate' => $creditTopupDate,
             'anomalyEnabled' => $this->control->anomalyEnabled(),
             'anomalyMultiplier' => $this->control->anomalyMultiplier(),
+            'anomalyMinSpend' => $this->control->anomalyMinSpend(),
             'openAiConfigured' => $openAiConfigured,
             'openAiMonthCost' => $openAiMonthCost,
             'openAiProjectScoped' => $openAiProjectScoped,
@@ -219,6 +220,7 @@ class AiControlController extends Controller
             'credit_topup' => ['required', 'numeric', 'min:0'],
             'credit_topup_date' => ['nullable', 'date'],
             'anomaly_multiplier' => ['required', 'numeric', 'min:1', 'max:100'],
+            'anomaly_min_spend' => ['required', 'numeric', 'min:0'],
         ]);
 
         $this->control->setDailyBudget((float) $validated['daily_budget']);
@@ -228,6 +230,7 @@ class AiControlController extends Controller
         $this->control->setCreditTopup((float) $validated['credit_topup'], $validated['credit_topup_date'] ?? null);
         $this->control->setAnomalyEnabled($request->boolean('anomaly_enabled'));
         $this->control->setAnomalyMultiplier((float) $validated['anomaly_multiplier']);
+        $this->control->setAnomalyMinSpend((float) $validated['anomaly_min_spend']);
 
         return redirect()->route('admin.ai.index')->with('success', __('AI budget & alert settings saved.'));
     }

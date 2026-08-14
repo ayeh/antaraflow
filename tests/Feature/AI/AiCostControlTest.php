@@ -134,6 +134,7 @@ test('admin can save budget and alert settings', function () {
             'credit_topup_date' => '2026-07-01',
             'anomaly_enabled' => '1',
             'anomaly_multiplier' => 2.5,
+            'anomaly_min_spend' => 5,
         ])
         ->assertRedirect(route('admin.ai.index'));
 
@@ -146,6 +147,7 @@ test('admin can save budget and alert settings', function () {
     expect($control->creditTopupDate())->toBe('2026-07-01');
     expect($control->anomalyEnabled())->toBeTrue();
     expect($control->anomalyMultiplier())->toBe(2.5);
+    expect($control->anomalyMinSpend())->toBe(5.0);
 });
 
 test('test alert sends to configured email', function () {
