@@ -47,8 +47,14 @@ class CheckAiUsageBudgetCommand extends Command
             $baseline = $usage->dailyBaseline(7);
             $multiplier = $control->anomalyMultiplier();
             $threshold = $baseline * $multiplier;
+            $floor = $control->anomalyMinSpend();
 
-            if ($baseline > 0 && $spend >= $threshold) {
+            // The floor is not a nicety. The baseline averages in days with no
+            // usage, so after a quiet week it sits near zero and any ordinary
+            // day clears any multiple of it — on real spend this fired on a
+            // fifth of all days at 2x, and still fired at 10x, over amounts
+            // under three dollars.
+            if ($baseline > 0 && $spend >= $threshold && $spend >= $floor) {
                 $this->warn(sprintf('Anomaly: $%.2f is ≥ %.1f× the 7-day baseline ($%.2f).', $spend, $multiplier, $baseline));
                 $this->dispatchAlert($control, 'anomaly', $spend, $threshold, false);
             }

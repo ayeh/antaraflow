@@ -138,7 +138,10 @@
             $vals = array_values($dailySeries);
             $days = array_keys($dailySeries);
             $n = max(1, count($vals));
-            $threshold = $dailyBaseline * $anomalyMultiplier;
+            // Matches CheckAiUsageBudgetCommand exactly: a day is anomalous
+            // only when it clears the multiplier AND the floor. Without the
+            // floor here the chart would paint bars red that nothing alerts on.
+            $threshold = max($dailyBaseline * $anomalyMultiplier, $anomalyMinSpend);
             $maxV = max(0.0001, max($vals), $threshold);
             $chartW = 680; $chartH = 150; $slot = $chartW / $n; $barW = max(2, $slot * 0.68);
             $yBaseline = $chartH - ($dailyBaseline / $maxV) * $chartH;
@@ -490,6 +493,14 @@
                                    class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
                             @error('anomaly_multiplier') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
                             <p class="mt-1 text-[10px] text-slate-500">{{ __('Alert when today\'s spend ≥ this many times the 7-day daily average.') }}</p>
+                        </div>
+                        <div class="max-w-xs">
+                            <label for="anomaly_min_spend" class="block text-xs font-medium text-slate-300 mb-1">{{ __('Anomaly floor (USD)') }}</label>
+                            <input type="number" step="0.01" min="0" name="anomaly_min_spend" id="anomaly_min_spend"
+                                   value="{{ old('anomaly_min_spend', $anomalyMinSpend) }}"
+                                   class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                            @error('anomaly_min_spend') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                            <p class="mt-1 text-[10px] text-slate-500">{{ __('Never call a day anomalous below this. The baseline averages in days with no usage, so without a floor the first busy day after a quiet week trips any multiplier.') }}</p>
                         </div>
                     </div>
 

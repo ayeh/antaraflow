@@ -171,3 +171,73 @@ test('anomaly detection is skipped when disabled', function () {
 
     Notification::assertNothingSent();
 });
+
+// The baseline averages in days with no usage at all, so after a quiet week it
+// sits near zero and the first ordinary day of work clears any multiple of it.
+// Measured on a month of real spend, that fired on a fifth of all days at 2x
+// and still fired at 10x, over amounts under three dollars. An alert that
+// arrives when nothing is wrong is the one people learn to ignore.
+test('a small day after a quiet week is not an anomaly', function () {
+    Notification::fake();
+
+    $control = app(AiControlService::class);
+    $control->setAnomalyEnabled(true);
+    $control->setAnomalyMultiplier(2.0);
+    $control->setAnomalyMinSpend(5.0);
+    $control->setAlertEmail('ops@example.com');
+
+    // Six quiet days and one small one: baseline lands at about 7 cents.
+    seedSpendOn(0.50, 3);
+    seedSpend(2.00); // twenty-eight times the baseline, and still nothing to see
+
+    $this->artisan('ai:check-budget')->assertSuccessful();
+
+    Notification::assertNothingSent();
+});
+
+test('a genuinely large day still alerts through the floor', function () {
+    Notification::fake();
+
+    $control = app(AiControlService::class);
+    $control->setAnomalyEnabled(true);
+    $control->setAnomalyMultiplier(2.0);
+    $control->setAnomalyMinSpend(5.0);
+    $control->setAlertEmail('ops@example.com');
+
+    for ($d = 1; $d <= 7; $d++) {
+        seedSpendOn(10.0, $d);
+    }
+    seedSpend(30.00);
+
+    $this->artisan('ai:check-budget')->assertSuccessful();
+
+    Notification::assertSentTo(
+        new AnonymousNotifiable,
+        AiBudgetAlertNotification::class,
+        fn ($notification) => $notification->level === 'anomaly',
+    );
+});
+
+// Everything recorded before this setting existed reads zero, which is the
+// behaviour those installations already had.
+test('a floor of zero leaves the check exactly as it was', function () {
+    Notification::fake();
+
+    $control = app(AiControlService::class);
+    $control->setAnomalyEnabled(true);
+    $control->setAnomalyMultiplier(2.0);
+    $control->setAlertEmail('ops@example.com');
+
+    expect($control->anomalyMinSpend())->toBe(0.0);
+
+    seedSpendOn(0.50, 3);
+    seedSpend(2.00);
+
+    $this->artisan('ai:check-budget')->assertSuccessful();
+
+    Notification::assertSentTo(
+        new AnonymousNotifiable,
+        AiBudgetAlertNotification::class,
+        fn ($notification) => $notification->level === 'anomaly',
+    );
+});

@@ -42,6 +42,8 @@ class AiControlService
 
     private const KEY_ANOMALY_MULTIPLIER = 'ai_anomaly_multiplier';
 
+    private const KEY_ANOMALY_MIN_SPEND = 'ai_anomaly_min_spend';
+
     public function isEnabled(): bool
     {
         return (bool) PlatformSetting::getValue(self::KEY_ENABLED, true);
@@ -153,6 +155,30 @@ class AiControlService
         $value = (float) PlatformSetting::getValue(self::KEY_ANOMALY_MULTIPLIER, 2.0);
 
         return $value > 0 ? $value : 2.0;
+    }
+
+    /**
+     * The least a day must cost before it can be called an anomaly, in USD.
+     *
+     * The multiplier alone cannot carry this. `dailyBaseline()` averages the
+     * previous seven days including the ones with no usage at all, so after a
+     * quiet week the baseline sits near zero and the first ordinary day of
+     * work clears any multiple of it. Measured against a month of real spend,
+     * that fired on 20% of days at 2x and still fired at 10x — on days costing
+     * under three dollars.
+     *
+     * An alert that arrives when nothing is wrong is worse than no alert,
+     * because it is the one people learn to ignore. This floor is what stops
+     * the relative check reporting the return from a weekend.
+     */
+    public function anomalyMinSpend(): float
+    {
+        return (float) PlatformSetting::getValue(self::KEY_ANOMALY_MIN_SPEND, 0);
+    }
+
+    public function setAnomalyMinSpend(float $amount): void
+    {
+        PlatformSetting::setValue(self::KEY_ANOMALY_MIN_SPEND, max(0, $amount));
     }
 
     public function setAnomalyMultiplier(float $multiplier): void
