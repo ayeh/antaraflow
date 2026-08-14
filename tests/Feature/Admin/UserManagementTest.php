@@ -22,14 +22,35 @@ test('admin can view users index', function () {
 });
 
 test('admin can search users', function () {
-    User::factory()->create(['name' => 'John Doe']);
-    User::factory()->create(['name' => 'Jane Smith']);
+    // Emails are pinned, not left to the factory. The search matches email as
+    // well as name, and the factory fills email from `fake()->safeEmail()`,
+    // which is built out of a random person's name — so roughly one run in two
+    // hundred handed the row named "Jane Smith" an address like
+    // johnson.eva@example.org, which matches a search for John and put her on
+    // the page the assertion below says she must not be on.
+    //
+    // The test then failed once in a blue moon, on a suite that had not
+    // changed, which is the most expensive kind of failure to read.
+    User::factory()->create(['name' => 'John Doe', 'email' => 'jdoe@example.test']);
+    User::factory()->create(['name' => 'Jane Smith', 'email' => 'jsmith@example.test']);
 
     $this->actingAs($this->admin, 'admin')
         ->get(route('admin.users.index', ['search' => 'John']))
         ->assertStatus(200)
         ->assertSee('John Doe')
         ->assertDontSee('Jane Smith');
+});
+
+// The behaviour that made the fixture above fragile, and which nothing covered.
+test('the search matches an email as well as a name', function () {
+    User::factory()->create(['name' => 'Aminah Yusof', 'email' => 'treasurer@example.test']);
+    User::factory()->create(['name' => 'Ravi Kumar', 'email' => 'secretary@example.test']);
+
+    $this->actingAs($this->admin, 'admin')
+        ->get(route('admin.users.index', ['search' => 'treasurer']))
+        ->assertStatus(200)
+        ->assertSee('Aminah Yusof')
+        ->assertDontSee('Ravi Kumar');
 });
 
 test('admin can view user detail', function () {
