@@ -43,6 +43,77 @@ xcrun altool --upload-app --type ios \
 Bump `version:` in `pubspec.yaml` first — App Store Connect rejects a build
 number it has already seen, and it counts a rejected upload as seen.
 
+## Shipping to Play
+
+The same `API_BASE_URL` warning applies, and for the same reason — the default
+is the Herd host.
+
+### The upload key
+
+Release builds are signed with the upload key described by
+`android/key.properties`, which is gitignored along with the keystore itself.
+**Losing that keystore means never being able to publish an update to the
+listing again**, so it is generated once, backed up before anything is built
+with it, and never committed.
+
+Generate it (`keytool` needs the Android Studio JDK; the system `java` on this
+machine is not installed):
+
+```bash
+"/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/keytool" -genkeypair -v -keystore ~/.android/antaranote-upload.jks -storetype PKCS12 -keyalg RSA -keysize 4096 -validity 10000 -alias antaranote-upload -dname "CN=antaraNote, O=Antara, C=MY"
+```
+
+Then point Gradle at it — `android/key.properties`, never committed:
+
+```
+storeFile=/Users/ayeh/.android/antaranote-upload.jks
+storePassword=…
+keyAlias=antaranote-upload
+keyPassword=…
+```
+
+`storeFile` is resolved from `mobile/android/`, so an absolute path is the
+safe form. When `key.properties` is absent the release build falls back to the
+debug key with a warning, so `flutter run --release` still works for anyone
+without it — but a debug-signed AAB is rejected by Play Console, so the
+signature check below is not optional.
+
+### Build
+
+```bash
+flutter build appbundle --release --dart-define=API_BASE_URL=https://note.antara.cloud
+```
+
+Verify the artefact before uploading. The build succeeds either way, so the
+command line is not evidence:
+
+```bash
+unzip -o -q -d /tmp/aab build/app/outputs/bundle/release/app-release.aab
+strings -a /tmp/aab/base/lib/arm64-v8a/libapp.so | grep -E "note\.antara\.cloud|antaraflow\.test"
+```
+
+The compiled `libapp.so` must contain `https://note.antara.cloud/api/mobile/v1`
+and must not contain `antaraflow.test`. Note that a plain `grep` on the `.so`
+reports nothing either way — it treats the file as binary — so the string has
+to come out through `strings`.
+
+Confirm it is the upload key and not the debug key:
+
+```bash
+"/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/keytool" -printcert -jarfile build/app/outputs/bundle/release/app-release.aab | grep Owner
+```
+
+`CN=Android Debug` means `key.properties` was not picked up. Stop there.
+
+Then upload the AAB at Play Console → antaraNote → Testing → Internal testing →
+Create new release. The first upload also has to enrol in Play App Signing,
+which is where the upload key stops being the signing key — Google re-signs
+with a key it holds, and the upload key only proves the build came from us.
+
+Bump `version:` in `pubspec.yaml` first; Play rejects a version code it has
+already seen. It reaches the manifest through `flutter.versionCode`, so
+`aapt2 dump badging` on the APK is the way to confirm it landed.
+
 ## Layout
 
 ```
