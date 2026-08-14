@@ -105,6 +105,15 @@ Confirm it is the upload key and not the debug key:
 
 `CN=Android Debug` means `key.properties` was not picked up. Stop there.
 
+Play also rejects native libraries that are not 16 KB page aligned. Flutter's
+own libraries are fine; a plugin bump is what would regress this, so it is
+worth re-checking whenever `pubspec.lock` moves. Every `LOAD` alignment must be
+`0x4000` or larger:
+
+```bash
+for so in /tmp/aab/base/lib/arm64-v8a/*.so; do echo "$(basename $so): $(~/Library/Android/sdk/ndk/*/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-readelf -l $so | awk '/LOAD/{print $NF}' | sort -u | tr '\n' ' ')"; done
+```
+
 Then upload the AAB at Play Console → antaraNote → Testing → Internal testing →
 Create new release. The first upload also has to enrol in Play App Signing,
 which is where the upload key stops being the signing key — Google re-signs
