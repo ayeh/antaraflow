@@ -31,3 +31,15 @@ it('privacy and terms are reachable without authentication', function () {
     $this->get('/terms')->assertOk();
     $this->get('/about')->assertOk();
 });
+
+it('renders the account deletion page Google Play links to', function () {
+    $this->get(route('account-deletion'))
+        ->assertOk()
+        ->assertSee('Deleting your account')
+        ->assertSee('support@antara.cloud')
+        ->assertSee('within 30 days');
+});
+
+it('the account deletion page is reachable without authentication', function () {
+    $this->get('/account-deletion')->assertOk();
+});
