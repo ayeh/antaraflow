@@ -70,6 +70,11 @@ Route::view('/about', 'legal.about')->name('about');
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/terms', 'legal.terms')->name('terms');
 
+// Google Play requires a public, unauthenticated URL describing how to request
+// account deletion for any app that lets users sign themselves up, and the Data
+// safety form asks for this address by name.
+Route::view('/account-deletion', 'legal.account-deletion')->name('account-deletion');
+
 // Language switcher (public — works for guests and logged-in users)
 Route::get('locale/{locale}', [LocaleController::class, 'update'])->name('locale.switch');
 
