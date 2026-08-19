@@ -393,6 +393,10 @@ class LiveMeetingService
             $session->chunks()
                 ->where('status', ChunkStatus::Completed)
                 ->whereNotNull('text')
+                // A chunk of silence or a dropped decode loop is transcribed but
+                // empty. Kept out here so it neither leaves a blank line in the
+                // minutes nor, on its own, stands in for a transcript with content.
+                ->where('text', '!=', '')
                 ->orderBy('chunk_number')
                 ->get(),
         );

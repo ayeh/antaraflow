@@ -11,6 +11,7 @@ use App\Domain\LiveMeeting\Enums\ChunkStatus;
 use App\Domain\LiveMeeting\Events\TranscriptionChunkProcessed;
 use App\Domain\LiveMeeting\Models\LiveTranscriptChunk;
 use App\Domain\Transcription\Services\AudioConditioner;
+use App\Domain\Transcription\Services\RepetitionGuard;
 use App\Domain\Transcription\Services\TranscriptionHintBuilder;
 use App\Infrastructure\AI\DTOs\TranscriptionResult;
 use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
@@ -102,6 +103,25 @@ class LiveTranscriptionJob implements ShouldQueue
                 'duration_seconds' => $this->chunk->end_time - $this->chunk->start_time,
             ]);
 
+            // A chunk of silence or room noise comes back as one word looped for
+            // its whole length. That is not speech, and — left in — its tail
+            // becomes the next chunk's context prompt and teaches the model to
+            // keep looping, so a single bad chunk fills the rest of the sitting.
+            // Drop it to the same empty-but-transcribed state as a silent chunk.
+            if (app(RepetitionGuard::class)->isDegenerate($result->fullText)) {
+                $this->chunk->update([
+                    'text' => '',
+                    'segments' => [],
+                    'speaker' => null,
+                    'confidence' => $result->confidence,
+                    'status' => ChunkStatus::Completed,
+                ]);
+
+                event(new TranscriptionChunkProcessed($this->chunk));
+
+                return;
+            }
+
             $speaker = $result->segments[0]->speaker ?? null;
 
             $this->chunk->update([
@@ -181,7 +201,16 @@ class LiveTranscriptionJob implements ShouldQueue
             return null;
         }
 
-        return mb_substr(trim($previous), -self::CONTEXT_CHAR_BUDGET) ?: null;
+        $tail = mb_substr(trim($previous), -self::CONTEXT_CHAR_BUDGET) ?: null;
+
+        // Never hand the model a looped tail as context: even if the chunk it
+        // came from was mostly real speech, priming the next chunk with a run of
+        // one word is exactly what starts the loop propagating.
+        if ($tail !== null && app(RepetitionGuard::class)->isDegenerate($tail)) {
+            return null;
+        }
+
+        return $tail;
     }
 
     /**

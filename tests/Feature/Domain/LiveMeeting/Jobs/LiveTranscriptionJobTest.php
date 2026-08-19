@@ -528,3 +528,77 @@ test('records an empty segment list rather than null when there were none', func
 
     expect($chunk->fresh()->segments)->toBe([]);
 });
+
+// Silence or room noise comes back as one word looped for the whole chunk.
+// Storing that fills the transcript with garbage, so it is dropped to the same
+// empty state as a silent chunk rather than kept.
+test('drops a looped hallucination instead of storing it', function () {
+    Event::fake();
+    Storage::fake('local');
+
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'audio_file_path' => 'live-chunks/loop.webm',
+        'status' => ChunkStatus::Pending,
+    ]);
+
+    Storage::disk('local')->put('live-chunks/loop.webm', 'fake-audio-data');
+
+    $looped = trim(str_repeat('tidak, ', 200));
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('transcribe')->once()->andReturn(new TranscriptionResult(
+        fullText: $looped,
+        confidence: 0.4,
+        segments: [new TranscriptionSegmentData(text: $looped, startTime: 0.0, endTime: 30.0, confidence: 0.4)],
+    ));
+
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    $chunk->refresh();
+
+    expect($chunk->status)->toBe(ChunkStatus::Completed)
+        ->and($chunk->text)->toBe('')
+        ->and($chunk->segments)->toBe([]);
+});
+
+// A looped chunk must never seed the next chunk's context: doing so teaches the
+// model to keep looping, which is how one bad chunk fills a whole sitting.
+test('does not feed a looped previous chunk forward as context', function () {
+    Event::fake();
+    Storage::fake('local');
+
+    app(AiCircuitBreaker::class)->reset(LiveTranscriptionJob::CIRCUIT);
+
+    $session = LiveMeetingSession::factory()->create();
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 1,
+        'text' => trim(str_repeat('tidak, ', 200)),
+    ]);
+
+    $chunk = LiveTranscriptChunk::factory()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 2,
+        'audio_file_path' => 'live-chunks/next.webm',
+        'status' => ChunkStatus::Pending,
+        'text' => null,
+    ]);
+
+    Storage::disk('local')->put('live-chunks/next.webm', 'fake-audio-data');
+
+    $captured = ['prompt' => 'unset'];
+
+    $mockTranscriber = Mockery::mock(TranscriberInterface::class);
+    $mockTranscriber->shouldReceive('transcribe')
+        ->once()
+        ->andReturnUsing(function (string $path, array $options) use (&$captured) {
+            $captured = $options;
+
+            return new TranscriptionResult(fullText: 'a fresh clean sentence', confidence: null, segments: []);
+        });
+
+    (new LiveTranscriptionJob($chunk))->handle(fakeTranscriberFactory($mockTranscriber));
+
+    expect($captured['prompt'])->toBeNull();
+});
