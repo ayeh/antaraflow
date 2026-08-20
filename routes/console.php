@@ -23,6 +23,8 @@ Schedule::command('transcription:cleanup-chunks')->hourly();
 
 Schedule::command('live:prune-audio')->dailyAt('03:30');
 
+Schedule::command('live:detect-stalled')->everyMinute()->withoutOverlapping();
+
 Schedule::command('calendar:notify-upcoming')->everyFiveMinutes();
 
 Schedule::command('reports:generate-scheduled')->hourly();
