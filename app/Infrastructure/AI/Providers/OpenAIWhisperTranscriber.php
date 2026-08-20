@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\AI\Providers;
 
 use App\Domain\AI\Services\AiUsageRecorder;
+use App\Domain\Transcription\Services\RepetitionGuard;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use App\Infrastructure\AI\DTOs\TranscriptionResult;
 use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
@@ -101,6 +102,8 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
             durationMs: (int) round((microtime(true) - $start) * 1000),
         );
 
+        $repetition = app(RepetitionGuard::class);
+
         $segments = [];
         foreach ($data['segments'] ?? [] as $segment) {
             $noSpeechProb = (float) ($segment['no_speech_prob'] ?? 0);
@@ -111,7 +114,10 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
 
             $text = trim($segment['text'] ?? '');
 
-            if ($text === '' || $this->isHallucination($text)) {
+            // A silent stretch amplified to the speech floor comes back as one
+            // word looped for the whole segment. Drop those here so a partly
+            // real recording keeps its speech and loses only the dead air.
+            if ($text === '' || $this->isHallucination($text) || $repetition->isDegenerate($text)) {
                 continue;
             }
 
@@ -128,6 +134,14 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
         $fullText = empty($segments)
             ? ''
             : implode(' ', array_map(fn (TranscriptionSegmentData $s) => trim($s->text), $segments));
+
+        // A loop split across one-word segments survives the per-segment drop but
+        // collapses the transcript as a whole — a recording of near silence comes
+        // back as nothing but "tidak" and "okey". Discard it wholesale.
+        if ($fullText !== '' && $repetition->isDegenerate($fullText)) {
+            $segments = [];
+            $fullText = '';
+        }
 
         return new TranscriptionResult(
             fullText: $fullText,
