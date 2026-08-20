@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\AI\Providers;
 
 use App\Domain\AI\Services\AiUsageRecorder;
+use App\Domain\Transcription\Services\RepetitionGuard;
 use App\Infrastructure\AI\Contracts\TranscriberInterface;
 use App\Infrastructure\AI\DTOs\TranscriptionResult;
 use App\Infrastructure\AI\DTOs\TranscriptionSegmentData;
@@ -80,8 +81,19 @@ class OpenAiTranscriber implements TranscriberInterface
             ? $this->parseDiarizedSegments($data)
             : $this->parsePlainSegment($data, $audioSeconds);
 
+        $fullText = $this->fullTextFrom($data, $segments);
+
+        // A loop split across one-word segments survives the per-segment drop but
+        // collapses the transcript as a whole — near silence comes back as nothing
+        // but a single repeated word. Discard it wholesale. The live path also
+        // guards its own chunks, so this only ever bites genuine degeneracy.
+        if ($fullText !== '' && app(RepetitionGuard::class)->isDegenerate($fullText)) {
+            $segments = [];
+            $fullText = '';
+        }
+
         return new TranscriptionResult(
-            fullText: $this->fullTextFrom($data, $segments),
+            fullText: $fullText,
             // Neither model reports a confidence score.
             confidence: null,
             segments: $segments,
@@ -190,12 +202,17 @@ class OpenAiTranscriber implements TranscriberInterface
      */
     private function parseDiarizedSegments(array $data): array
     {
+        $repetition = app(RepetitionGuard::class);
+
         $segments = [];
 
         foreach ($data['segments'] ?? [] as $segment) {
             $text = trim((string) ($segment['text'] ?? ''));
 
-            if ($text === '') {
+            // Silence amplified to the speech floor comes back as one word looped
+            // for the whole segment; drop those so real speech is kept and only
+            // the dead air is lost.
+            if ($text === '' || $repetition->isDegenerate($text)) {
                 continue;
             }
 

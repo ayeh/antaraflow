@@ -246,6 +246,57 @@ it('still drops phrases whisper invents from silence', function (): void {
         ->and($result->fullText)->toBe('Okay kita mula sekarang.');
 });
 
+it('drops a looped segment but keeps the real speech around it', function (): void {
+    Http::fake([
+        '*/audio/transcriptions' => Http::response([
+            'text' => '',
+            'duration' => 30,
+            'segments' => [
+                ['start' => 0, 'end' => 5, 'text' => 'Selamat pagi semua, kita mulakan mesyuarat.', 'no_speech_prob' => 0.1],
+                ['start' => 5, 'end' => 25, 'text' => trim(str_repeat('tidak, ', 40)), 'no_speech_prob' => 0.2],
+                ['start' => 25, 'end' => 30, 'text' => 'Baik, kita teruskan ke item seterusnya.', 'no_speech_prob' => 0.1],
+            ],
+        ]),
+    ]);
+
+    $result = whisperTranscriber()->transcribe(audioFixture());
+
+    expect($result->segments)->toHaveCount(2)
+        ->and($result->fullText)->toBe('Selamat pagi semua, kita mulakan mesyuarat. Baik, kita teruskan ke item seterusnya.');
+});
+
+it('discards a whisper transcript that is nothing but a loop across one-word segments', function (): void {
+    $segments = [];
+    foreach (range(0, 200) as $i) {
+        $segments[] = ['start' => $i, 'end' => $i + 1, 'text' => $i % 2 === 0 ? 'Tidak.' : 'Okey.', 'no_speech_prob' => 0.2];
+    }
+
+    Http::fake(['*/audio/transcriptions' => Http::response(['text' => '', 'duration' => 200, 'segments' => $segments])]);
+
+    $result = whisperTranscriber()->transcribe(audioFixture());
+
+    expect($result->fullText)->toBe('')
+        ->and($result->segments)->toBe([]);
+});
+
+it('discards a diarized transcript that is a single looped word', function (): void {
+    Http::fake([
+        '*/audio/transcriptions' => Http::response([
+            'text' => trim(str_repeat('tidak, ', 300)),
+            'duration' => 120,
+            'segments' => [
+                ['start' => 0, 'end' => 60, 'text' => trim(str_repeat('tidak, ', 150)), 'speaker' => 'A'],
+                ['start' => 60, 'end' => 120, 'text' => trim(str_repeat('tidak, ', 150)), 'speaker' => 'A'],
+            ],
+        ]),
+    ]);
+
+    $result = diarizeTranscriber()->transcribe(audioFixture());
+
+    expect($result->fullText)->toBe('')
+        ->and($result->segments)->toBe([]);
+});
+
 it('never sends whisper a prompt, whatever hints it is given', function (): void {
     Http::fake(['*/audio/transcriptions' => Http::response(['text' => 'ok', 'duration' => 5, 'segments' => []])]);
 
