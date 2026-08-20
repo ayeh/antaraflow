@@ -1,3 +1,4 @@
+import { CHUNK_LENGTH_MS, createChunkWatchdog } from './audio/chunk-watchdog.js';
 import { CLIPPING_DBFS, SILENCE_DBFS, rmsFromTimeDomain, toDbfs } from './audio/level.js';
 import { createQuietWarning } from './audio/quiet-warning.js';
 import { createTape } from './audio/tape-buffer.js';
@@ -1540,6 +1541,11 @@ export default function audioRecorder(config) {
         switchToChunkedMode() {
             this.isLongRecording = true;
 
+            // Arm the stall watchdog: from here a chunk must flush regularly or
+            // the cycle is considered dead and restarted.
+            this._chunkWatchdog = createChunkWatchdog();
+            this._chunkWatchdog.reset(Date.now());
+
             if (this.mediaRecorder?.state === 'recording') {
                 this.mediaRecorder.stop();
 
@@ -1584,6 +1590,10 @@ export default function audioRecorder(config) {
                         return;
                     }
 
+                    // A chunk boundary was reached and the chain is advancing —
+                    // the watchdog's proof of life.
+                    this._chunkWatchdog?.flushed(Date.now());
+
                     // Upload the complete chunk (has proper file header)
                     const blob = new Blob(chunkData, { type: this.mimeType });
                     if (blob.size > 0) {
@@ -1606,15 +1616,52 @@ export default function audioRecorder(config) {
 
                 recorder.start();
 
-                // Stop after 30 seconds to flush as a complete file
+                // Stop after one chunk length to flush as a complete file
                 this.chunkInterval = setTimeout(() => {
                     if (recorder.state === 'recording') {
                         recorder.stop();
                     }
-                }, 30000);
+                }, CHUNK_LENGTH_MS);
             };
 
             startNewChunk();
+        },
+
+        /**
+         * Bring the chunk cycle back after a silent stall.
+         *
+         * The cycle restarts itself only from a chunk recorder's `onstop` (or
+         * `onerror`). When a backgrounded tab swallows `onstop` — or throttles
+         * the stop timer so it never fires — the chain simply ends: no error,
+         * the session stays open, and only the meter (driven off the audio
+         * thread) keeps moving. The one-second timer tick watches for that gap
+         * and calls this to start a fresh chain.
+         */
+        recoverStalledChunkCycle() {
+            // Detach the stuck recorder so a late, out-of-order `onstop` cannot
+            // start a second chain racing this one, then best-effort stop it.
+            const stuck = this.mediaRecorder;
+            if (stuck) {
+                stuck.ondataavailable = null;
+                stuck.onstop = null;
+                stuck.onerror = null;
+                try {
+                    if (stuck.state !== 'inactive') {
+                        stuck.stop();
+                    }
+                } catch (e) {
+                    console.warn('Stalled chunk recorder would not stop:', e);
+                }
+            }
+
+            clearTimeout(this.chunkInterval);
+
+            // Reset the clock before restarting so the watchdog does not fire
+            // again on the next tick while the fresh chunk is still recording.
+            this._chunkWatchdog?.reset(Date.now());
+
+            console.warn('Chunk cycle stalled; restarting recording.');
+            this.startChunkCycle();
         },
 
         /**
@@ -1634,6 +1681,14 @@ export default function audioRecorder(config) {
 
                 if (this.timer === 300 && !this.isLongRecording && !this.liveMode) {
                     this.switchToChunkedMode();
+                }
+
+                // Watchdog: while chunking, a chunk must flush regularly. If the
+                // chain has gone quiet past its limit it stalled silently, so
+                // restart it rather than record on into a dead session.
+                if (this.isLongRecording && this.state === 'recording'
+                    && this._chunkWatchdog?.isStalled(Date.now())) {
+                    this.recoverStalledChunkCycle();
                 }
             }, 1000);
         },
@@ -1660,6 +1715,10 @@ export default function audioRecorder(config) {
                     this._pausedDuration += Date.now() - this._pauseStartTime;
                     this._pauseStartTime = null;
                 }
+
+                // The gap while paused is not a stall — do not let the watchdog
+                // read it as one on the first tick back.
+                this._chunkWatchdog?.reset(Date.now());
 
                 this.pulseOn = true;
                 this.startTimerTick();

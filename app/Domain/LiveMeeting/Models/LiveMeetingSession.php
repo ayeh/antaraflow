@@ -25,6 +25,7 @@ class LiveMeetingSession extends Model
         'started_at',
         'paused_at',
         'ended_at',
+        'stall_notified_at',
         'total_duration_seconds',
     ];
 
@@ -37,6 +38,7 @@ class LiveMeetingSession extends Model
             'started_at' => 'datetime',
             'paused_at' => 'datetime',
             'ended_at' => 'datetime',
+            'stall_notified_at' => 'datetime',
         ];
     }
 
