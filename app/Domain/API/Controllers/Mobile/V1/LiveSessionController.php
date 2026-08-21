@@ -13,6 +13,7 @@ use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\LiveMeeting\Services\LiveMeetingService;
 use App\Domain\LiveMeeting\Support\AudioChunkFormats;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Support\DeviceLabel;
 use App\Support\Enums\BookmarkKind;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,13 +35,16 @@ class LiveSessionController extends MobileController
             'live_extraction' => ['sometimes', 'boolean'],
             'client_id' => ['sometimes', 'string', 'max:64'],
             'device_id' => ['sometimes', 'string', 'max:64'],
+            'device_label' => ['sometimes', 'nullable', 'string', 'max:120'],
         ]);
 
         $deviceId = (string) ($config['device_id'] ?? '');
-        unset($config['client_id'], $config['device_id']);
+        $deviceLabel = $config['device_label'] ?? null;
+        unset($config['client_id'], $config['device_id'], $config['device_label']);
 
         try {
             $session = $this->liveMeetingService->startSession($meeting, $this->user($request), $config);
+            $this->liveMeetingService->recordDevice($session, $deviceId, $this->appDeviceLabel($deviceLabel));
         } catch (\RuntimeException $e) {
             $active = LiveMeetingSession::query()
                 ->where('minutes_of_meeting_id', $meeting->id)
@@ -95,11 +99,17 @@ class LiveSessionController extends MobileController
             'speech_dbfs' => ['sometimes', 'numeric', 'between:-100,0'],
             'noise_dbfs' => ['sometimes', 'numeric', 'between:-100,0'],
             'device_id' => ['sometimes', 'string', 'max:64'],
+            'device_label' => ['sometimes', 'nullable', 'string', 'max:120'],
             'role' => ['sometimes', Rule::enum(ChunkRole::class)],
         ]);
 
         $deviceId = (string) ($validated['device_id'] ?? '');
         $role = ChunkRole::tryFrom((string) ($validated['role'] ?? '')) ?? ChunkRole::Primary;
+
+        // A satellite phone joins by uploading chunks without ever calling
+        // start, so its label first reaches us here. Cheap to repeat: recordDevice
+        // skips the write once the label is already stored.
+        $this->liveMeetingService->recordDevice($session, $deviceId, $this->appDeviceLabel($validated['device_label'] ?? null));
 
         $existing = $this->liveMeetingService->findExistingChunk(
             $session,
@@ -255,6 +265,17 @@ class LiveSessionController extends MobileController
         $bookmark->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Wraps a raw device string from the app ("iPhone 15 Pro") with the app
+     * channel tag, or null when the client sent nothing to label it with.
+     */
+    private function appDeviceLabel(?string $raw): ?string
+    {
+        $raw = trim((string) $raw);
+
+        return $raw === '' ? null : DeviceLabel::app($raw);
     }
 
     private function authorizeSession(LiveMeetingSession $session, string $ability): void

@@ -40,6 +40,21 @@ test('it can start a live session', function () {
     ]);
 });
 
+test('starting a web live session records the browser as the recording device', function () {
+    $chromeMac = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
+        .'(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+    $this->actingAs($this->user)
+        ->withHeaders(['User-Agent' => $chromeMac])
+        ->postJson(route('meetings.live.start', $this->meeting))
+        ->assertCreated();
+
+    $session = LiveMeetingSession::query()->latest('id')->first();
+
+    expect($session->config['recording_device_label'])->toBe('Chrome on macOS · Web')
+        ->and($session->config['device_map'][''])->toBe('Chrome on macOS · Web');
+});
+
 test('it can start a live session with custom config', function () {
     $response = $this->actingAs($this->user)
         ->postJson(route('meetings.live.start', $this->meeting), [

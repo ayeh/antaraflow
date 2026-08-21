@@ -8,6 +8,7 @@ use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Transcription\Requests\StoreAudioChunkRequest;
 use App\Domain\Transcription\Services\AudioStorageService;
 use App\Domain\Transcription\Services\TranscriptionService;
+use App\Support\DeviceLabel;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,6 +71,7 @@ class AudioChunkController extends Controller
                 $validated['mime_type'],
                 $validated['duration_seconds'],
                 $validated['language'] ?? 'en',
+                DeviceLabel::fromUserAgent($request->userAgent()),
             );
         } catch (\Throwable $e) {
             report($e);

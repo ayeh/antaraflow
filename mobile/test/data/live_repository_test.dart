@@ -235,6 +235,43 @@ void main() {
     expect(adapter.seen?.path, '/meetings/12/live/start');
   });
 
+  test('start sends the device label so the web app can name the phone', () async {
+    final adapter = _Canned(
+      status: 201,
+      body: {
+        'session': {'id': 7, 'meeting_id': 12, 'status': 'active'},
+      },
+    );
+
+    await _repositoryReturning(adapter).start(
+      12,
+      chunkSeconds: 15,
+      clientId: 'abc',
+      deviceId: 'phone-uuid',
+      deviceLabel: 'iPhone 15 Pro',
+    );
+
+    final body = adapter.seen?.data as Map<String, dynamic>;
+    expect(body['device_label'], 'iPhone 15 Pro');
+    expect(body['device_id'], 'phone-uuid');
+  });
+
+  test('start omits the device label when there is none', () async {
+    final adapter = _Canned(
+      status: 201,
+      body: {
+        'session': {'id': 7, 'meeting_id': 12, 'status': 'active'},
+      },
+    );
+
+    await _repositoryReturning(
+      adapter,
+    ).start(12, chunkSeconds: 15, clientId: 'abc');
+
+    final body = adapter.seen?.data as Map<String, dynamic>;
+    expect(body.keys, isNot(contains('device_label')));
+  });
+
   group('uploading a chunk from more than one device', () {
     late Directory scratch;
     late File audio;
@@ -259,6 +296,7 @@ void main() {
 
     Future<_Canned> upload({
       String deviceId = '',
+      String deviceLabel = '',
       RecorderRole role = RecorderRole.primary,
     }) async {
       final adapter = _Canned(status: 201, body: {'chunk': {}});
@@ -270,6 +308,7 @@ void main() {
         startTime: 60,
         endTime: 75,
         deviceId: deviceId,
+        deviceLabel: deviceLabel,
         role: role,
       );
 
@@ -321,6 +360,16 @@ void main() {
         fieldsOf(adapter.seen),
         containsPair('device_id', 'phone-at-the-far-end'),
       );
+    });
+
+    test('a satellite carries its device label so it can be named too', () async {
+      final adapter = await upload(
+        deviceId: 'phone-at-the-far-end',
+        deviceLabel: 'Pixel 7',
+        role: RecorderRole.satellite,
+      );
+
+      expect(fieldsOf(adapter.seen), containsPair('device_label', 'Pixel 7'));
     });
 
     // The browser recorder sends no device, and neither does an app build that

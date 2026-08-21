@@ -58,6 +58,70 @@ test('starting a session returns broadcast and upload guidance', function () {
         ->assertJsonStructure(['upload' => ['max_chunk_bytes', 'accepted_mimetypes']]);
 });
 
+test('a phone start records its tagged device label against the session', function () {
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/live/start", [
+            'device_id' => 'phone-uuid-1',
+            'device_label' => 'iPhone 15 Pro',
+        ])
+        ->assertCreated();
+
+    $session = LiveMeetingSession::query()->latest('id')->first();
+
+    expect($session->config['device_map']['phone-uuid-1'])->toBe('iPhone 15 Pro · antaraNote app')
+        ->and($session->config['recording_device_label'])->toBe('iPhone 15 Pro · antaraNote app');
+});
+
+test('a satellite chunk records its device label without ever calling start', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->post("/api/mobile/v1/live/{$session->id}/chunks", [
+            'audio' => m4aChunk(),
+            'chunk_number' => 0,
+            'start_time' => 0,
+            'end_time' => 15,
+            'device_id' => 'satellite-uuid',
+            'device_label' => 'Pixel 7',
+            'role' => 'satellite',
+        ])
+        ->assertCreated();
+
+    expect($session->fresh()->config['device_map']['satellite-uuid'])
+        ->toBe('Pixel 7 · antaraNote app');
+});
+
+test('ending a phone session labels the merged transcription with the recording device', function () {
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/live/start", [
+            'device_id' => 'phone-uuid-1',
+            'device_label' => 'iPhone 15 Pro',
+        ])
+        ->assertCreated();
+
+    $session = LiveMeetingSession::query()->latest('id')->first();
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'phone-uuid-1',
+        'chunk_number' => 0,
+        'text' => 'The meeting has come to order.',
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/live/{$session->id}/end")
+        ->assertOk();
+
+    $this->assertDatabaseHas('audio_transcriptions', [
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'device_label' => 'iPhone 15 Pro · antaraNote app',
+    ]);
+});
+
 test('starting a second session returns the running one so the app can rejoin', function () {
     $first = $this->actingAs($this->user, 'sanctum')
         ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/live/start")

@@ -114,6 +114,68 @@ test('finalizes chunks into a single transcription', function () {
     Queue::assertPushed(ProcessTranscriptionJob::class);
 });
 
+test('finalize derives a device label from the browser user agent', function () {
+    Storage::fake('local');
+    Queue::fake();
+
+    $sessionId = Str::uuid()->toString();
+
+    $this->actingAs($this->user)
+        ->postJson(route('meetings.audio-chunks.store', $this->meeting), [
+            'chunk' => UploadedFile::fake()->create('chunk0.webm', 512, 'audio/webm'),
+            'session_id' => $sessionId,
+            'chunk_index' => 0,
+            'mime_type' => 'audio/webm',
+        ])
+        ->assertOk();
+
+    $chromeMac = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
+        .'(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+    $this->actingAs($this->user)
+        ->withHeaders(['User-Agent' => $chromeMac])
+        ->postJson(route('meetings.audio-chunks.finalize', $this->meeting), [
+            'session_id' => $sessionId,
+            'mime_type' => 'audio/webm',
+            'duration_seconds' => 60,
+            'language' => 'en',
+        ])
+        ->assertOk();
+
+    $this->assertDatabaseHas('audio_transcriptions', [
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'device_label' => 'Chrome on macOS · Web',
+    ]);
+});
+
+test('finalize leaves the device label null when the user agent is unrecognised', function () {
+    Storage::fake('local');
+    Queue::fake();
+
+    $sessionId = Str::uuid()->toString();
+
+    $this->actingAs($this->user)
+        ->postJson(route('meetings.audio-chunks.store', $this->meeting), [
+            'chunk' => UploadedFile::fake()->create('chunk0.webm', 512, 'audio/webm'),
+            'session_id' => $sessionId,
+            'chunk_index' => 0,
+            'mime_type' => 'audio/webm',
+        ])
+        ->assertOk();
+
+    $this->actingAs($this->user)
+        ->withHeaders(['User-Agent' => ''])
+        ->postJson(route('meetings.audio-chunks.finalize', $this->meeting), [
+            'session_id' => $sessionId,
+            'mime_type' => 'audio/webm',
+            'duration_seconds' => 60,
+        ])
+        ->assertOk();
+
+    $transcription = $this->meeting->transcriptions()->sole();
+    expect($transcription->device_label)->toBeNull();
+});
+
 test('deletes chunks when recording is cancelled', function () {
     Storage::fake('local');
 

@@ -22,6 +22,7 @@ use App\Support\Enums\InputType;
 use App\Support\Enums\TranscriptionStatus;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -110,6 +111,51 @@ class LiveMeetingService
             'status' => LiveSessionStatus::Active,
             'paused_at' => null,
         ]);
+    }
+
+    /**
+     * Remembers which physical device a live recording came from, so the
+     * finished transcript can say "iPhone 15 Pro · antaraNote app" instead of a
+     * bare "Live" badge that cannot tell one of a person's devices from another.
+     *
+     * Kept in the session config keyed by device id: the web recorder has no id
+     * (empty string), while the app sends a stable per-install uuid, and a
+     * second phone joining as a satellite gets its own entry. The first device
+     * to record is remembered separately as the one the merged transcript is
+     * attributed to. Locked because two devices can write here at once.
+     */
+    public function recordDevice(LiveMeetingSession $session, string $deviceId, ?string $label): void
+    {
+        $label = trim((string) $label);
+
+        if ($label === '') {
+            return;
+        }
+
+        DB::transaction(function () use ($session, $deviceId, $label): void {
+            $fresh = LiveMeetingSession::query()
+                ->whereKey($session->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($fresh === null) {
+                return;
+            }
+
+            $config = $fresh->config ?? [];
+            $map = $config['device_map'] ?? [];
+
+            if (($map[$deviceId] ?? null) === $label && ($config['recording_device_label'] ?? null) !== null) {
+                return;
+            }
+
+            $map[$deviceId] = $label;
+            $config['device_map'] = $map;
+            $config['recording_device_label'] ??= $label;
+
+            $fresh->update(['config' => $config]);
+            $session->setAttribute('config', $config);
+        });
     }
 
     /**
@@ -384,6 +430,23 @@ class LiveMeetingService
         return $elapsed >= $chunkSeconds ? 0.0 : round($elapsed, 3);
     }
 
+    /**
+     * The device string to attribute the merged transcript to: the first
+     * device that recorded, falling back to any device seen, or null for older
+     * sessions that recorded before device capture existed.
+     */
+    private function recordingDeviceLabel(LiveMeetingSession $session): ?string
+    {
+        $config = $session->config ?? [];
+
+        $label = $config['recording_device_label']
+            ?? (! empty($config['device_map']) ? Arr::first($config['device_map']) : null);
+
+        $label = trim((string) $label);
+
+        return $label === '' ? null : $label;
+    }
+
     private function mergeChunksIntoTranscription(LiveMeetingSession $session): ?AudioTranscription
     {
         // One transcript per moment, not one per upload. With a satellite in
@@ -435,6 +498,7 @@ class LiveMeetingService
             'file_size' => 0,
             'duration_seconds' => $session->total_duration_seconds,
             'language' => 'en',
+            'device_label' => $this->recordingDeviceLabel($session),
             'status' => TranscriptionStatus::Completed,
             'full_text' => $fullText,
             'provider_metadata' => [

@@ -28,6 +28,7 @@ class LiveRepository {
     required int chunkSeconds,
     required String clientId,
     String deviceId = '',
+    String deviceLabel = '',
   }) async {
     try {
       final body = await _client.post(
@@ -37,6 +38,7 @@ class LiveRepository {
           'live_extraction': true,
           'client_id': clientId,
           if (deviceId.isNotEmpty) 'device_id': deviceId,
+          if (deviceLabel.isNotEmpty) 'device_label': deviceLabel,
         },
       );
 
@@ -80,6 +82,7 @@ class LiveRepository {
     required double endTime,
     LevelReading? reading,
     String deviceId = '',
+    String deviceLabel = '',
     RecorderRole role = RecorderRole.primary,
   }) async {
     final form = FormData.fromMap({
@@ -99,6 +102,7 @@ class LiveRepository {
       // actually taken.
       if (reading != null && reading.frames > 0) ...reading.toJson(),
       if (deviceId.isNotEmpty) ...{'device_id': deviceId, 'role': role.wire},
+      if (deviceLabel.isNotEmpty) 'device_label': deviceLabel,
     });
 
     final body = await _client.upload(

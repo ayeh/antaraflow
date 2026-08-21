@@ -36,6 +36,7 @@ class ChunkOutbox {
     required LiveRepository repository,
     required this.sessionId,
     this.deviceId = '',
+    this.deviceLabel = '',
     this.role = RecorderRole.primary,
   }) : _repository = repository;
 
@@ -46,6 +47,10 @@ class ChunkOutbox {
   /// the keychain, and reaching for it every fifteen seconds for the length of
   /// a meeting is work for nothing.
   final String deviceId;
+
+  /// The human device name, sent alongside every chunk so a satellite phone —
+  /// which never calls start — still gets labelled on the web app.
+  final String deviceLabel;
 
   final RecorderRole role;
 
@@ -109,6 +114,7 @@ class ChunkOutbox {
             endTime: chunk.end.inMilliseconds / 1000,
             reading: chunk.reading,
             deviceId: deviceId,
+            deviceLabel: deviceLabel,
             role: role,
           );
 
