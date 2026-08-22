@@ -54,6 +54,7 @@ class TranscriptionService
         string $mimeType,
         int $durationSeconds,
         string $language = 'en',
+        ?string $deviceLabel = null,
     ): AudioTranscription {
         $disk = Storage::disk('local');
         $fileSize = $disk->size($filePath);
@@ -68,6 +69,7 @@ class TranscriptionService
             'file_size' => $fileSize,
             'duration_seconds' => $durationSeconds,
             'language' => $language,
+            'device_label' => $deviceLabel,
             'status' => TranscriptionStatus::Pending,
         ]);
 

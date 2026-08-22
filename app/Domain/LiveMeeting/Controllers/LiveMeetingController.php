@@ -8,6 +8,7 @@ use App\Domain\LiveMeeting\Enums\LiveSessionStatus;
 use App\Domain\LiveMeeting\Models\LiveMeetingSession;
 use App\Domain\LiveMeeting\Services\LiveMeetingService;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
+use App\Support\DeviceLabel;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,6 +35,7 @@ class LiveMeetingController extends Controller
 
         try {
             $session = $this->liveMeetingService->startSession($meeting, $request->user(), $config);
+            $this->liveMeetingService->recordDevice($session, '', DeviceLabel::fromUserAgent($request->userAgent()));
         } catch (\RuntimeException $e) {
             $activeSession = LiveMeetingSession::query()
                 ->where('minutes_of_meeting_id', $meeting->id)

@@ -10,6 +10,7 @@ import '../../core/providers.dart';
 import '../../data/repositories/live_repository.dart';
 import '../../domain/models/live_session.dart';
 import '../../core/haptics.dart';
+import '../../data/local/device_label.dart';
 import '../../data/local/secure_store.dart';
 import 'audio_chunker.dart';
 import 'chunk_outbox.dart';
@@ -176,6 +177,7 @@ class RecorderController extends StateNotifier<RecorderState> {
   final _service = RecordingService();
   RoomNotices? _notices;
   String _deviceId = '';
+  String _deviceLabel = '';
 
   /// The running sitting this phone has been asked to help with, held while
   /// the question is on screen.
@@ -222,12 +224,14 @@ class RecorderController extends StateNotifier<RecorderState> {
 
     try {
       _deviceId = await _store.deviceId();
+      _deviceLabel = await DeviceLabel.resolve();
 
       final session = await _repository.start(
         meetingId,
         chunkSeconds: _chunker.chunkSeconds,
         clientId: _uuid.v4(),
         deviceId: _deviceId,
+        deviceLabel: _deviceLabel,
       );
 
       // Somebody else is recording this sitting. Opening the microphone now
@@ -268,6 +272,7 @@ class RecorderController extends StateNotifier<RecorderState> {
       repository: _repository,
       sessionId: session.id,
       deviceId: _deviceId,
+      deviceLabel: _deviceLabel,
       role: role,
     );
     _chunkSub = _chunker.chunks.listen((chunk) => _outbox?.add(chunk));

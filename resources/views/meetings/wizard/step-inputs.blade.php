@@ -643,7 +643,7 @@
                                                 <span class="text-xs text-gray-500 dark:text-gray-400" x-text="formatSize(item.file_size)"></span>
                                                 <span x-show="item.duration_seconds" class="text-xs text-gray-500 dark:text-gray-400" x-text="formatDuration(item.duration_seconds)" x-cloak></span>
                                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium" :class="statusClasses(item.status)" x-text="statusLabel(item.status)"></span>
-                                                <span class="text-xs text-gray-400 dark:text-gray-500" x-text="sourceLabel(item.original_filename)"></span>
+                                                <span class="text-xs text-gray-400 dark:text-gray-500" x-text="item.recorded_by_label || sourceLabel(item.original_filename)"></span>
                                             </div>
                                         </div>
                                     </div>
