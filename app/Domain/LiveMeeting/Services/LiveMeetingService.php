@@ -82,7 +82,17 @@ class LiveMeetingService
     public function endSession(LiveMeetingSession $session): void
     {
         $endedAt = now();
-        $totalDuration = (int) $session->started_at->diffInSeconds($endedAt);
+
+        // The recorded length is what the chunks span, not the wall clock. A
+        // session ended the moment recording stops reads the same either way,
+        // but one the watchdog closes hours later — a pause abandoned overnight
+        // — would otherwise report a day-long recording. The last chunk's end
+        // time is the true duration; only a session that captured nothing falls
+        // back to elapsed time.
+        $recordedSeconds = (int) round((float) $session->chunks()->max('end_time'));
+        $totalDuration = $recordedSeconds > 0
+            ? $recordedSeconds
+            : (int) $session->started_at->diffInSeconds($endedAt);
 
         $session->update([
             'status' => LiveSessionStatus::Ended,
@@ -90,7 +100,23 @@ class LiveMeetingService
             'total_duration_seconds' => $totalDuration,
         ]);
 
-        $transcription = $this->mergeChunksIntoTranscription($session);
+        // Resolve the meeting free of the tenant and soft-delete scopes: this
+        // runs from the scheduler with no signed-in organization, and the
+        // meeting may even be in the trash. Without this the relation comes
+        // back null and the merge dies on it. If the meeting is truly gone,
+        // there is nowhere to attach the recording — close the session and stop.
+        $meeting = $session->meeting()->withoutGlobalScopes()->first();
+
+        if ($meeting === null) {
+            Log::warning('Ended a live session whose meeting no longer exists; nothing to merge into.', [
+                'session_id' => $session->id,
+                'meeting_id' => $session->minutes_of_meeting_id,
+            ]);
+
+            return;
+        }
+
+        $transcription = $this->mergeChunksIntoTranscription($session, $meeting);
 
         // Dispatched alongside extraction rather than before it. Extraction
         // reads `full_text`, which the names never touch, so making the
@@ -99,7 +125,7 @@ class LiveMeetingService
             DiarizeTranscriptionJob::dispatch($transcription);
         }
 
-        ExtractMeetingDataJob::dispatch($session->meeting);
+        ExtractMeetingDataJob::dispatch($meeting);
     }
 
     public function pauseSession(LiveMeetingSession $session): void
@@ -463,7 +489,7 @@ class LiveMeetingService
         };
     }
 
-    private function mergeChunksIntoTranscription(LiveMeetingSession $session): ?AudioTranscription
+    private function mergeChunksIntoTranscription(LiveMeetingSession $session, MinutesOfMeeting $meeting): ?AudioTranscription
     {
         // One transcript per moment, not one per upload. With a satellite in
         // the room the same fifteen seconds arrives twice, and merging both
@@ -517,7 +543,7 @@ class LiveMeetingService
                 ->filter()
                 ->values()
                 ->all(),
-            $session->meeting->organization_id,
+            $meeting->organization_id,
             $session->id,
         );
 
@@ -566,7 +592,7 @@ class LiveMeetingService
 
         $this->writeSegments($transcription, $completedChunks);
 
-        $session->meeting->inputs()->create([
+        $meeting->inputs()->create([
             'type' => InputType::BrowserRecording,
             'source_type' => AudioTranscription::class,
             'source_id' => $transcription->id,

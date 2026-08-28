@@ -294,6 +294,71 @@ test('keeps the placeholder path when the chunk audio is already gone', function
         ->and($transcription->file_size)->toBe(0);
 });
 
+test('the recorded duration is the chunk span, not the wall clock', function () {
+    Queue::fake();
+
+    // Finalised twenty hours after recording, as the watchdog would close a
+    // pause abandoned overnight. The duration must still be the half a minute
+    // that was recorded, not the day that elapsed.
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'started_at' => now()->subHours(20),
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    foreach ([[0, 0.0, 15.0], [1, 15.0, 30.0]] as [$number, $start, $end]) {
+        LiveTranscriptChunk::factory()->completed()->create([
+            'live_meeting_session_id' => $session->id,
+            'chunk_number' => $number,
+            'text' => "chunk {$number}",
+            'start_time' => $start,
+            'end_time' => $end,
+        ]);
+    }
+
+    $this->service->endSession($session);
+
+    expect($session->fresh()->total_duration_seconds)->toBe(30);
+});
+
+test('finalising a session whose meeting is in the trash still recovers the recording', function () {
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'started_at' => now()->subMinutes(30),
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 0,
+        'text' => 'the recording outlived the meeting',
+        'segments' => null,
+    ]);
+
+    // The organiser deleted the meeting; the session was never ended.
+    $this->meeting->delete();
+
+    $this->service->endSession($session);
+
+    $transcription = AudioTranscription::query()
+        ->where('minutes_of_meeting_id', $this->meeting->id)
+        ->first();
+
+    expect($transcription)->not->toBeNull()
+        ->and($transcription->full_text)->toContain('the recording outlived the meeting')
+        ->and($session->fresh()->status)->toBe(LiveSessionStatus::Ended);
+
+    $this->assertDatabaseHas('mom_inputs', [
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'source_type' => AudioTranscription::class,
+        'source_id' => $transcription->id,
+    ]);
+});
+
 test('end session without completed chunks does not create transcription', function () {
     Queue::fake();
 
