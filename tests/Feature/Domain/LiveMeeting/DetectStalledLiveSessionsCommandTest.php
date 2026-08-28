@@ -115,6 +115,33 @@ test('ignores a session the user deliberately paused', function () {
     expect($session->fresh()->status)->toBe(LiveSessionStatus::Paused);
 });
 
+test('finalises a paused session abandoned far past any real break', function () {
+    Notification::fake();
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->paused()->create();
+    // Seven hours idle — past the six-hour paused window, but never nagged.
+    chunkAgedMinutes($session, 7 * 60);
+
+    $this->artisan('live:detect-stalled')->assertSuccessful();
+
+    Notification::assertNothingSent();
+    expect($session->fresh()->status)->toBe(LiveSessionStatus::Ended)
+        ->and($session->fresh()->ended_at)->not->toBeNull();
+});
+
+test('the paused finalize window is configurable', function () {
+    Notification::fake();
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->paused()->create();
+    chunkAgedMinutes($session, 20);
+
+    $this->artisan('live:detect-stalled --finalize-paused-after=15')->assertSuccessful();
+
+    expect($session->fresh()->status)->toBe(LiveSessionStatus::Ended);
+});
+
 test('the alert window is configurable', function () {
     Notification::fake();
     Queue::fake();

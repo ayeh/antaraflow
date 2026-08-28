@@ -24,12 +24,22 @@ use Illuminate\Support\Facades\Log;
  * resume, then — if the silence continues — finalising the session so the
  * transcript is closed off and the minutes generated from what was captured
  * rather than waiting on a recording that is never coming back.
+ *
+ * Paused sessions are treated apart. Pausing is deliberate, so a pause of
+ * minutes is left alone with no nag — the user means to come back. But a
+ * paused session is a recording that never ended, and one abandoned for hours
+ * (the tab closed over lunch, the phone locked overnight) strands everything
+ * it captured: the merge that turns chunks into a transcript and playable
+ * audio only runs on end. So a pause left untouched far past any real break is
+ * finalised too, on its own much longer clock, rescuing the recording instead
+ * of leaving it in limbo forever.
  */
 class DetectStalledLiveSessionsCommand extends Command
 {
     protected $signature = 'live:detect-stalled
         {--alert-after=3 : Minutes of silence before the user is told recording seems to have stopped}
-        {--finalize-after=10 : Minutes of silence before the session is auto-finalised}';
+        {--finalize-after=10 : Minutes of silence before an active session is auto-finalised}
+        {--finalize-paused-after=360 : Minutes a paused session may sit idle before it is auto-finalised}';
 
     protected $description = 'Alert on, then finalise, live sessions whose recording has silently stopped';
 
@@ -37,10 +47,11 @@ class DetectStalledLiveSessionsCommand extends Command
     {
         $alertAfter = max(1, (int) $this->option('alert-after')) * 60;
         $finalizeAfter = max(1, (int) $this->option('finalize-after')) * 60;
+        $finalizePausedAfter = max(1, (int) $this->option('finalize-paused-after')) * 60;
         $now = now();
 
         $sessions = LiveMeetingSession::query()
-            ->where('status', LiveSessionStatus::Active)
+            ->whereIn('status', [LiveSessionStatus::Active, LiveSessionStatus::Paused])
             ->has('chunks')
             ->withMax('chunks', 'created_at')
             ->get();
@@ -54,6 +65,24 @@ class DetectStalledLiveSessionsCommand extends Command
                 ? Carbon::parse($session->chunks_max_created_at)
                 : $session->started_at;
             $idleSeconds = $now->getTimestamp() - $lastActivity->getTimestamp();
+
+            // A pause is a choice, not a stall: never alert on one, and give it
+            // a much longer rope before finalising so an ordinary mid-meeting
+            // break is never yanked away from the person who took it.
+            if ($session->status === LiveSessionStatus::Paused) {
+                if ($idleSeconds >= $finalizePausedAfter) {
+                    $service->endSession($session);
+                    $finalised++;
+
+                    Log::warning('Auto-finalised a paused live session abandoned without ending.', [
+                        'session_id' => $session->id,
+                        'meeting_id' => $session->minutes_of_meeting_id,
+                        'idle_seconds' => $idleSeconds,
+                    ]);
+                }
+
+                continue;
+            }
 
             if ($idleSeconds >= $finalizeAfter) {
                 $service->endSession($session);
