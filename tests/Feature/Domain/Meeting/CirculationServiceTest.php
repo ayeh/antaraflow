@@ -3,14 +3,20 @@
 declare(strict_types=1);
 
 use App\Domain\Account\Models\Organization;
+use App\Domain\Meeting\Mail\CirculationInviteMail;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Meeting\Models\MomCirculation;
 use App\Domain\Meeting\Services\CirculationService;
 use App\Models\User;
 use App\Support\Enums\MeetingStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    Mail::fake();
+});
 
 test('circulate creates circulation and recipient records', function () {
     $org = Organization::factory()->create();
@@ -72,4 +78,39 @@ test('each recipient gets a unique token', function () {
     $tokens = $circulation->recipients->pluck('token');
     expect($tokens->unique())->toHaveCount(2);
     expect($tokens->first())->toHaveLength(64);
+});
+
+test('circulate queues an invite email to every recipient', function () {
+    $org = Organization::factory()->create();
+    $user = User::factory()->create(['current_organization_id' => $org->id]);
+    $this->actingAs($user);
+
+    $meeting = MinutesOfMeeting::factory()->finalized()->create([
+        'organization_id' => $org->id,
+        'created_by' => $user->id,
+    ]);
+
+    $service = app(CirculationService::class);
+
+    $recipients = [
+        ['name' => 'Nor Khamisah', 'email' => 'khamisah@example.com'],
+        ['name' => 'Irfan Hakim', 'email' => 'irfan@example.com'],
+    ];
+
+    $service->circulate(
+        meeting: $meeting,
+        sentBy: $user,
+        recipients: $recipients,
+        subject: 'Sila sahkan minit mesyuarat',
+        deadline: now()->addDays(3),
+    );
+
+    Mail::assertQueued(CirculationInviteMail::class, 2);
+
+    foreach ($recipients as $recipient) {
+        Mail::assertQueued(
+            CirculationInviteMail::class,
+            fn (CirculationInviteMail $mail): bool => $mail->hasTo($recipient['email']),
+        );
+    }
 });
