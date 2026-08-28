@@ -76,16 +76,23 @@ class DeepLinkEntry {
     }
   }
 
-  /// The invite token in `antaranote://live/join/<token>`, or null for any
-  /// other link: the scheme is ours but nothing promises it will only ever
-  /// carry this one shape.
+  /// The invite token in a join link, or null for anything else.
+  ///
+  /// Two shapes reach here. The shared, tappable one is an https link —
+  /// `https://<host>/live/join/<token>` — which is what a chat linkifies and
+  /// what the platform association turns back into an app open. The custom
+  /// scheme — `antaranote://live/join/<token>` — is the fallback page's own
+  /// door back into the app. Both resolve to the same three segments once the
+  /// custom scheme's host is folded back into the path.
   static String? tokenFrom(Uri uri) {
-    if (uri.scheme != AppConfig.deepLinkScheme) return null;
+    final isCustom = uri.scheme == AppConfig.deepLinkScheme;
+    final isWeb = uri.scheme == 'https' || uri.scheme == 'http';
 
-    // The first segment of a custom-scheme URI parses as the host, not the
-    // path, so it has to be folded back in before the path makes sense.
+    if (!isCustom && !isWeb) return null;
+
     final segments = [
-      uri.host,
+      // A custom-scheme URI parses its first segment as the host, not the path.
+      if (isCustom) uri.host,
       ...uri.pathSegments,
     ].where((segment) => segment.isNotEmpty).toList();
 
@@ -99,8 +106,13 @@ class DeepLinkEntry {
   }
 
   /// The link a primary shares for [token] — the inverse of [tokenFrom].
+  ///
+  /// An https link, not the custom scheme: a chat only makes http(s) tappable,
+  /// and this is what the platform association opens the app from. The host is
+  /// the API host, so a debug build shares a link back to the server it talks
+  /// to rather than always to production.
   static String linkFor(String token) =>
-      '${AppConfig.deepLinkScheme}://live/join/$token';
+      '${AppConfig.apiBaseUrl}/live/join/$token';
 
   void dispose() {
     _sub?.cancel();
