@@ -38,15 +38,27 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Satellite invite links: antaranote://live/join/<token>, shared
-                 from a running recording so a colleague's phone opens straight
-                 onto the offer to add its microphone. The iOS half is the
-                 CFBundleURLSchemes entry in Info.plist. -->
+            <!-- Satellite invite links, custom scheme: the fallback page's own
+                 door back into the app (antaranote://live/join/<token>). The
+                 iOS half is the CFBundleURLSchemes entry in Info.plist. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="antaranote"/>
+            </intent-filter>
+            <!-- The shared, tappable form: an App Link that opens straight into
+                 the app once verified against /.well-known/assetlinks.json on
+                 note.antara.cloud. autoVerify makes Android check that file on
+                 install; until the Play App Signing fingerprint is published
+                 there, the link falls back to the web page. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"
+                    android:host="note.antara.cloud"
+                    android:pathPrefix="/live/join"/>
             </intent-filter>
         </activity>
         <!-- Declared microphone-typed, which is what lets the recorder keep

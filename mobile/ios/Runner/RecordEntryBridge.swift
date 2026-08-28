@@ -116,9 +116,7 @@ final class DeepLinkBridge {
   /// True when the URL was an invite link and its token has been dealt with.
   @discardableResult
   func handle(_ url: URL) -> Bool {
-    guard url.scheme == "antaranote", let token = Self.token(from: url) else {
-      return false
-    }
+    guard let token = Self.token(from: url) else { return false }
 
     deliver(token)
     return true
@@ -133,12 +131,24 @@ final class DeepLinkBridge {
     channel.invokeMethod("link", arguments: token)
   }
 
-  /// The token in `antaranote://live/join/<token>`, or nil for anything else.
+  /// The token in a join link, or nil for anything else.
+  ///
+  /// Two shapes: the shared universal link `https://<host>/live/join/<token>`,
+  /// and the fallback page's custom scheme `antaranote://live/join/<token>` —
+  /// whose first segment parses as the host rather than the path.
   static func token(from url: URL) -> String? {
-    guard url.host == "live" else { return nil }
+    var parts = url.pathComponents.filter { $0 != "/" }
 
-    // pathComponents on antaranote://live/join/<token> is ["/", "join", "<token>"].
-    let parts = url.pathComponents.filter { $0 != "/" }
+    if url.scheme == "antaranote", url.host == "live" {
+      // parts is already [join, token].
+    } else if url.scheme == "https" || url.scheme == "http" {
+      // parts is [live, join, token]; drop the leading "live".
+      guard parts.first == "live" else { return nil }
+      parts.removeFirst()
+    } else {
+      return nil
+    }
+
     guard parts.count == 2, parts[0] == "join" else { return nil }
 
     return parts[1]

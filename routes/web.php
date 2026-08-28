@@ -37,6 +37,7 @@ use App\Domain\Attendee\Controllers\AttendeeController;
 use App\Domain\Attendee\Controllers\QrRegistrationController;
 use App\Domain\Calendar\Controllers\CalendarConnectionController;
 use App\Domain\Calendar\Controllers\CalendarWebhookController;
+use App\Domain\LiveMeeting\Controllers\LiveJoinPageController;
 use App\Domain\Meeting\Controllers\BoardSettingController;
 use App\Domain\Meeting\Controllers\CirculateController;
 use App\Domain\Meeting\Controllers\CirculationRecipientController;
@@ -118,6 +119,16 @@ Route::middleware('throttle:120,1,qr-lobby')->group(function () {
     Route::get('lobby/{token}', [QrRegistrationController::class, 'showLobby'])->name('qr-registration.lobby');
     Route::get('lobby/{token}/attendees', [QrRegistrationController::class, 'lobbyAttendees'])->name('qr-registration.lobby.attendees');
 });
+
+// Satellite invite links. The https form is what makes the link tappable in a
+// chat; it opens the app directly once the platform association below verifies,
+// and lands on a fallback page otherwise. Public and unauthenticated — the
+// recipient is being invited, and the token is the whole credential.
+Route::middleware('throttle:120,1,live-join')->group(function () {
+    Route::get('live/join/{token}', [LiveJoinPageController::class, 'show'])->name('live.join.web');
+});
+Route::get('.well-known/apple-app-site-association', [LiveJoinPageController::class, 'appleAppSiteAssociation']);
+Route::get('.well-known/assetlinks.json', [LiveJoinPageController::class, 'assetLinks']);
 
 // Organization invitation acceptance (public - works for guests and logged-in users)
 Route::middleware('throttle:10,1,invitations')->group(function () {
