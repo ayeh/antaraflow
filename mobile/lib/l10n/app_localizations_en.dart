@@ -381,6 +381,12 @@ class LEn extends L {
   String get factTranscribed => 'Transcribed';
 
   @override
+  String get factRecordedBy => 'Recorded by';
+
+  @override
+  String get factExtraMic => 'Extra mic';
+
+  @override
   String get factPapers => 'Papers';
 
   @override
@@ -654,6 +660,19 @@ class LEn extends L {
   @override
   String get extraMicrophoneDetail =>
       'This phone is helping. Stopping it does not stop the meeting recording.';
+
+  @override
+  String get inviteMic => 'Add a microphone';
+
+  @override
+  String inviteShareSubject(String title) {
+    return 'Add your mic to $title';
+  }
+
+  @override
+  String inviteShareMessage(String title, String link) {
+    return 'Help record \"$title\" on antaraNote. Open this on your phone, in the room, to add your microphone: $link';
+  }
 
   @override
   String get marksSection => 'MARKS';

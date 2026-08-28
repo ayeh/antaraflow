@@ -21,6 +21,7 @@ class LiveMeetingSession extends Model
         'minutes_of_meeting_id',
         'started_by',
         'status',
+        'share_token',
         'config',
         'started_at',
         'paused_at',

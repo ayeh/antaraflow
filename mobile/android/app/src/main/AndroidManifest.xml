@@ -38,6 +38,16 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Satellite invite links: antaranote://live/join/<token>, shared
+                 from a running recording so a colleague's phone opens straight
+                 onto the offer to add its microphone. The iOS half is the
+                 CFBundleURLSchemes entry in Info.plist. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="antaranote"/>
+            </intent-filter>
         </activity>
         <!-- Declared microphone-typed, which is what lets the recorder keep
              the mic once the app leaves the screen. Android cuts it silently

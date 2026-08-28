@@ -428,6 +428,9 @@ test('records dropped chunks on the transcription when the merge is incomplete',
         // from data rather than from impressions; there is one device here, so
         // every moment is the primary's.
         'chunk_sources' => [1 => 'primary'],
+        // Nobody was captured behind a device in this service-level test, so
+        // there is no one to name.
+        'contributors' => [],
     ]);
 
     Log::shouldHaveReceived('warning')

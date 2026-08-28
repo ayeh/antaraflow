@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
+import 'live_contributor.dart';
 
 /// Where a sitting is in its life.
 ///
@@ -63,6 +64,7 @@ class MeetingDetail {
     this.createdBy,
     this.documentCount = 0,
     this.hasTranscript = false,
+    this.recordingContributors = const [],
   });
 
   factory MeetingDetail.fromJson(Map<String, dynamic> json) {
@@ -89,6 +91,16 @@ class MeetingDetail {
       resolutions: rows('resolutions').map(Resolution.fromJson).toList(),
       documentCount: rows('documents').length,
       hasTranscript: rows('transcriptions').isNotEmpty,
+      recordingContributors: rows('transcriptions')
+          .expand(
+            (transcription) =>
+                (transcription['contributors'] as List?)
+                    ?.whereType<Map<String, dynamic>>() ??
+                const <Map<String, dynamic>>[],
+          )
+          .map(LiveContributor.fromJson)
+          .toSet()
+          .toList(),
     );
   }
 
@@ -109,7 +121,23 @@ class MeetingDetail {
   final int documentCount;
   final bool hasTranscript;
 
+  /// Who fed the recording: the primary and any satellites that helped. Empty
+  /// for records made before this was captured, or by the web recorder.
+  final List<LiveContributor> recordingContributors;
+
   int get presentCount => attendees.where((a) => a.isPresent).length;
+
+  /// The people who ran the recording itself, comma-joined for one line.
+  String get recordedByNames => recordingContributors
+      .where((person) => !person.isSatellite)
+      .map((person) => person.name)
+      .join(', ');
+
+  /// The people who added a second microphone, comma-joined for one line.
+  String get extraMicNames => recordingContributors
+      .where((person) => person.isSatellite)
+      .map((person) => person.name)
+      .join(', ');
 
   /// The one action the record is waiting for, if any.
   ///

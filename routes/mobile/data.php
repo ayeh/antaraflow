@@ -64,6 +64,8 @@ Route::middleware('throttle:180,1')->group(function () {
     Route::get('transcriptions/{transcription}/segments', [TranscriptionController::class, 'segments'])->name('transcriptions.segments');
 
     Route::get('live/{session}/state', [LiveSessionController::class, 'state'])->name('live.state');
+    Route::get('live/join/{token}', [LiveSessionController::class, 'join'])->name('live.join');
+    Route::get('live/{session}/participants', [LiveSessionController::class, 'participants'])->name('live.participants');
 
     Route::get('circulations/pending', [CirculationController::class, 'pending'])->name('circulations.pending');
 
@@ -128,6 +130,7 @@ Route::middleware(['throttle:60,1', 'mobile.idempotency'])->group(function () {
     Route::post('live/{session}/resume', [LiveSessionController::class, 'resume'])->name('live.resume');
     Route::post('live/{session}/extraction', [LiveSessionController::class, 'extraction'])->name('live.extraction');
     Route::post('live/{session}/end', [LiveSessionController::class, 'end'])->name('live.end');
+    Route::post('live/{session}/invite', [LiveSessionController::class, 'invite'])->name('live.invite');
     Route::post('live/{session}/bookmarks', [LiveSessionController::class, 'storeBookmark'])->name('live.bookmarks.store');
     Route::delete('live/bookmarks/{bookmark}', [LiveSessionController::class, 'destroyBookmark'])->name('live.bookmarks.destroy');
 

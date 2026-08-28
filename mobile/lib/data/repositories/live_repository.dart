@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 
 import '../../core/error/api_exception.dart';
+import '../../domain/models/live_contributor.dart';
 import '../../domain/models/live_session.dart';
 import '../../features/recorder/recorder_role.dart';
 import '../../features/recorder/room_level.dart';
@@ -121,6 +122,55 @@ class LiveRepository {
     );
 
     return body['code'] != 'CHUNK_DUPLICATE';
+  }
+
+  /// Mints, or hands back, the token a primary shares so a colleague in the
+  /// room can join this sitting as a satellite.
+  ///
+  /// Stable by design: sharing the same sitting twice returns the same token,
+  /// so a link already sitting in a chat window keeps working.
+  Future<({String token, int meetingId, String title})> invite(
+    int sessionId,
+  ) async {
+    final body = await _client.post('/live/$sessionId/invite');
+    final meeting = body['meeting'] as Map<String, dynamic>? ?? const {};
+
+    return (
+      token: body['token'] as String,
+      meetingId: (meeting['id'] as num).toInt(),
+      title: meeting['title'] as String? ?? '',
+    );
+  }
+
+  /// Who is feeding the sitting right now: the recording and every satellite
+  /// that has joined, named. Polled by the primary so it can show the room who
+  /// has added a microphone.
+  Future<List<LiveContributor>> participants(int sessionId) async {
+    final body = await _client.get('/live/$sessionId/participants');
+    final list = body['participants'];
+
+    if (list is! List) return const [];
+
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map(LiveContributor.fromJson)
+        .toList();
+  }
+
+  /// Resolves a shared token to the sitting it points at, so an invited phone
+  /// knows which meeting to open and record.
+  ///
+  /// Throws [ApiException] when the link is no longer good — an ended sitting,
+  /// or a token that never existed — which the caller shows as one plain line
+  /// rather than opening a recorder onto nothing.
+  Future<({int meetingId, String title})> resolveInvite(String token) async {
+    final body = await _client.get('/live/join/$token');
+    final meeting = body['meeting'] as Map<String, dynamic>? ?? const {};
+
+    return (
+      meetingId: (meeting['id'] as num).toInt(),
+      title: meeting['title'] as String? ?? '',
+    );
   }
 
   Future<Bookmark> addBookmark(

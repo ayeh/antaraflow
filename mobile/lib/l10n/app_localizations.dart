@@ -781,6 +781,18 @@ abstract class L {
   /// **'Transcribed'**
   String get factTranscribed;
 
+  /// No description provided for @factRecordedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded by'**
+  String get factRecordedBy;
+
+  /// No description provided for @factExtraMic.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra mic'**
+  String get factExtraMic;
+
   /// No description provided for @factPapers.
   ///
   /// In en, this message translates to:
@@ -1290,6 +1302,24 @@ abstract class L {
   /// In en, this message translates to:
   /// **'This phone is helping. Stopping it does not stop the meeting recording.'**
   String get extraMicrophoneDetail;
+
+  /// No description provided for @inviteMic.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a microphone'**
+  String get inviteMic;
+
+  /// No description provided for @inviteShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your mic to {title}'**
+  String inviteShareSubject(String title);
+
+  /// The message a primary shares so a colleague in the room can join the recording as a satellite. The link opens the app straight onto the offer to add their mic.
+  ///
+  /// In en, this message translates to:
+  /// **'Help record \"{title}\" on antaraNote. Open this on your phone, in the room, to add your microphone: {link}'**
+  String inviteShareMessage(String title, String link);
 
   /// No description provided for @marksSection.
   ///

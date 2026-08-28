@@ -27,6 +27,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class LiveMeetingService
 {
@@ -155,15 +156,20 @@ class LiveMeetingService
      * to record is remembered separately as the one the merged transcript is
      * attributed to. Locked because two devices can write here at once.
      */
-    public function recordDevice(LiveMeetingSession $session, string $deviceId, ?string $label): void
-    {
+    public function recordDevice(
+        LiveMeetingSession $session,
+        string $deviceId,
+        ?string $label,
+        ?User $user = null,
+        ChunkRole $role = ChunkRole::Primary,
+    ): void {
         $label = trim((string) $label);
 
         if ($label === '') {
             return;
         }
 
-        DB::transaction(function () use ($session, $deviceId, $label): void {
+        DB::transaction(function () use ($session, $deviceId, $label, $user, $role): void {
             $fresh = LiveMeetingSession::query()
                 ->whereKey($session->id)
                 ->lockForUpdate()
@@ -175,8 +181,12 @@ class LiveMeetingService
 
             $config = $fresh->config ?? [];
             $map = $config['device_map'] ?? [];
+            $users = $config['device_users'] ?? [];
 
-            if (($map[$deviceId] ?? null) === $label && ($config['recording_device_label'] ?? null) !== null) {
+            $labelKnown = ($map[$deviceId] ?? null) === $label && ($config['recording_device_label'] ?? null) !== null;
+            $userKnown = $user === null || isset($users[$deviceId]);
+
+            if ($labelKnown && $userKnown) {
                 return;
             }
 
@@ -184,9 +194,55 @@ class LiveMeetingService
             $config['device_map'] = $map;
             $config['recording_device_label'] ??= $label;
 
+            // Captured once, on the device's first appearance: who is behind
+            // this microphone. The person, not just the hardware — a satellite
+            // is somebody in the room choosing to help, and the finished record
+            // and the live screen both want to name them.
+            if ($user !== null && ! isset($users[$deviceId])) {
+                $users[$deviceId] = [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'role' => $role->value,
+                ];
+                $config['device_users'] = $users;
+            }
+
             $fresh->update(['config' => $config]);
             $session->setAttribute('config', $config);
         });
+    }
+
+    /**
+     * The people whose devices fed this sitting, each once per role they held.
+     *
+     * Built from the users captured as devices joined, so a satellite whose
+     * audio was never worth keeping is still shown as having helped: the point
+     * is who was in the room contributing a microphone, not whose audio won a
+     * given second.
+     *
+     * @return list<array{name: string, role: string}>
+     */
+    public function contributors(LiveMeetingSession $session): array
+    {
+        $users = $session->config['device_users'] ?? [];
+
+        $seen = [];
+        $out = [];
+
+        foreach ($users as $entry) {
+            $name = trim((string) ($entry['name'] ?? ''));
+            $role = (string) ($entry['role'] ?? ChunkRole::Primary->value);
+            $key = ($entry['id'] ?? $name).'-'.$role;
+
+            if ($name === '' || in_array($key, $seen, true)) {
+                continue;
+            }
+
+            $seen[] = $key;
+            $out[] = ['name' => $name, 'role' => $role];
+        }
+
+        return $out;
     }
 
     /**
@@ -239,6 +295,46 @@ class LiveMeetingService
         return $session->chunks()->exists()
             ? ChunkRole::Satellite
             : ChunkRole::Primary;
+    }
+
+    /**
+     * The token a primary shares so a colleague in the room can join as a
+     * satellite, minted once and reused.
+     *
+     * Lazy because most sittings are recorded on one phone and never shared:
+     * the column stays null until somebody actually taps share, and every
+     * later share on the same sitting hands back the same string rather than
+     * invalidating a link that may already be in a chat window.
+     */
+    public function inviteToken(LiveMeetingSession $session): string
+    {
+        if ($session->share_token === null) {
+            $session->forceFill(['share_token' => Str::random(64)])->save();
+        }
+
+        return $session->share_token;
+    }
+
+    /**
+     * The sitting a shared token points at, or null when it points at nothing
+     * worth joining.
+     *
+     * A link is only good while the sitting is still running: an ended session
+     * is a satellite arriving to record a room that has already emptied, and a
+     * token for one is treated as if it never existed. Tenant isolation is not
+     * enforced here — the token is a random needle and the caller is
+     * authorised against the meeting afterwards — so this stays a plain lookup.
+     */
+    public function resolveInvite(string $token): ?LiveMeetingSession
+    {
+        if ($token === '') {
+            return null;
+        }
+
+        return LiveMeetingSession::query()
+            ->where('share_token', $token)
+            ->where('status', LiveSessionStatus::Active)
+            ->first();
     }
 
     /**
@@ -577,6 +673,11 @@ class LiveMeetingService
                         $chunk->chunk_number => $chunk->role->value,
                     ])
                     ->all(),
+                // Who was behind each microphone: the primary and every
+                // satellite that helped, named. Kept on the record so the
+                // minutes can say who was in the room contributing audio, not
+                // just which device the merge was attributed to.
+                'contributors' => $this->contributors($session),
             ],
             'completed_at' => now(),
         ]);

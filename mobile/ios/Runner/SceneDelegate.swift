@@ -4,8 +4,9 @@ import UIKit
 class SceneDelegate: FlutterSceneDelegate {
   /// A widget tap or an Action button press while the app is already running.
   override func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-    for context in URLContexts where RecordEntryBridge.shared.handle(context.url) {
-      return
+    for context in URLContexts {
+      if RecordEntryBridge.shared.handle(context.url) { return }
+      if DeepLinkBridge.shared.handle(context.url) { return }
     }
 
     super.scene(scene, openURLContexts: URLContexts)
@@ -21,7 +22,8 @@ class SceneDelegate: FlutterSceneDelegate {
     super.scene(scene, willConnectTo: session, options: connectionOptions)
 
     for context in connectionOptions.urlContexts {
-      RecordEntryBridge.shared.handle(context.url)
+      if RecordEntryBridge.shared.handle(context.url) { continue }
+      DeepLinkBridge.shared.handle(context.url)
     }
   }
 }

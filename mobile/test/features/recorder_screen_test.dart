@@ -1,6 +1,7 @@
 import 'package:antaranote/data/api/api_client.dart';
 import 'package:antaranote/data/local/secure_store.dart';
 import 'package:antaranote/data/repositories/live_repository.dart';
+import 'package:antaranote/domain/models/live_contributor.dart';
 import 'package:antaranote/features/recorder/recorder_controller.dart';
 import 'package:antaranote/features/recorder/recorder_role.dart';
 import 'package:antaranote/features/recorder/recorder_screen.dart';
@@ -277,6 +278,86 @@ void main() {
         find.textContaining('does not stop the meeting recording'),
         findsNothing,
       );
+    });
+  });
+
+  group('inviting a second microphone', () {
+    final invite = find.byIcon(Icons.person_add_alt_1_rounded);
+
+    testWidgets('the recording offers to share while it is running', (
+      tester,
+    ) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(phase: RecorderPhase.recording, sessionId: 42),
+      );
+
+      expect(invite, findsOneWidget);
+    });
+
+    testWidgets('a satellite has nothing to share', (tester) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(
+          phase: RecorderPhase.recording,
+          sessionId: 42,
+          role: RecorderRole.satellite,
+        ),
+      );
+
+      expect(invite, findsNothing);
+    });
+
+    testWidgets('a paused sitting cannot be shared', (tester) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(phase: RecorderPhase.paused, sessionId: 42),
+      );
+
+      expect(invite, findsNothing);
+    });
+
+    testWidgets('a sitting with no session id yet shows nothing', (
+      tester,
+    ) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(phase: RecorderPhase.recording),
+      );
+
+      expect(invite, findsNothing);
+    });
+  });
+
+  group('naming who is helping record', () {
+    testWidgets('the recording names a satellite that joined', (tester) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(
+          phase: RecorderPhase.recording,
+          sessionId: 42,
+          contributors: [
+            LiveContributor(name: 'Siti', role: RecorderRole.satellite),
+          ],
+        ),
+      );
+
+      expect(find.text('Siti'), findsOneWidget);
+    });
+
+    testWidgets('it does not name the recording itself', (tester) async {
+      await pumpRecorder(
+        tester,
+        const RecorderState(
+          phase: RecorderPhase.recording,
+          sessionId: 42,
+          contributors: [
+            LiveContributor(name: 'Ariff', role: RecorderRole.primary),
+          ],
+        ),
+      );
+
+      expect(find.text('Ariff'), findsNothing);
     });
   });
 }
