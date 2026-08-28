@@ -383,6 +383,12 @@ class LMs extends L {
   String get factTranscribed => 'Ditranskripsi';
 
   @override
+  String get factRecordedBy => 'Dirakam oleh';
+
+  @override
+  String get factExtraMic => 'Mic tambahan';
+
+  @override
   String get factPapers => 'Dokumen';
 
   @override
@@ -657,6 +663,19 @@ class LMs extends L {
   @override
   String get extraMicrophoneDetail =>
       'Telefon ini sedang membantu. Menghentikannya tidak menghentikan rakaman mesyuarat.';
+
+  @override
+  String get inviteMic => 'Tambah mikrofon';
+
+  @override
+  String inviteShareSubject(String title) {
+    return 'Tambah mikrofon anda ke $title';
+  }
+
+  @override
+  String inviteShareMessage(String title, String link) {
+    return 'Bantu rakam \"$title\" di antaraNote. Buka ini di telefon anda, di dalam bilik, untuk tambah mikrofon anda: $link';
+  }
 
   @override
   String get marksSection => 'TANDA';

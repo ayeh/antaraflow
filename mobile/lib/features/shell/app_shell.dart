@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/error/api_exception.dart';
 import '../../core/haptics.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_colors.dart';
@@ -10,7 +11,9 @@ import '../../domain/models/bootstrap.dart';
 import '../home/home_screen.dart';
 import '../me/me_screen.dart';
 import '../meetings/meetings_screen.dart';
+import '../recorder/deep_link.dart';
 import '../recorder/record_entry.dart';
+import '../recorder/recorder_controller.dart';
 import 'glass_tab_bar.dart';
 import 'tab_bar_styles.dart';
 import '../recorder/start_recording_sheet.dart';
@@ -54,6 +57,9 @@ class _AppShellState extends ConsumerState<AppShell> {
   /// The widget, the Action button and Siri all land here.
   final _entry = RecordEntry();
 
+  /// A shared invite link lands here, to open the recorder as a satellite.
+  final _link = DeepLinkEntry();
+
   final _visibility = TabBarVisibility();
 
   static const _tabs = <Widget>[
@@ -72,12 +78,14 @@ class _AppShellState extends ConsumerState<AppShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final waiting = await _entry.listen(_openRecorder);
       if (waiting) unawaited(_openRecorder());
+      unawaited(_link.listen(_joinAsSatellite));
     });
   }
 
   @override
   void dispose() {
     _entry.dispose();
+    _link.dispose();
     super.dispose();
   }
 
@@ -91,6 +99,38 @@ class _AppShellState extends ConsumerState<AppShell> {
     _entering = true;
     try {
       await startRecording(context, ref);
+    } finally {
+      _entering = false;
+    }
+  }
+
+  /// Opens the recorder onto the sitting a shared link points at.
+  ///
+  /// The token is resolved before anything opens, so a dead link — an ended
+  /// sitting, or one from another tenant — is one quiet line rather than a
+  /// recorder staring at nothing. The recorder it lands on asks before it
+  /// records: the server answers this phone's start with the satellite role,
+  /// and that is the offer screen, not a microphone already open.
+  Future<void> _joinAsSatellite(String token) async {
+    if (!mounted || _entering) return;
+
+    _entering = true;
+    try {
+      final invite = await ref.read(liveRepositoryProvider).resolveInvite(token);
+      if (!mounted) return;
+
+      await startRecordingFor(
+        context,
+        ref,
+        meetingId: invite.meetingId,
+        title: invite.title,
+      );
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
     } finally {
       _entering = false;
     }

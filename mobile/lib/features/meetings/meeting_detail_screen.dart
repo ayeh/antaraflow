@@ -318,6 +318,10 @@ class _Facts extends StatelessWidget {
         ),
       if (meeting.createdBy != null) (l.factKeptBy, meeting.createdBy!),
       if (meeting.hasTranscript) (l.factAudio, l.factTranscribed),
+      if (meeting.recordedByNames.isNotEmpty)
+        (l.factRecordedBy, meeting.recordedByNames),
+      if (meeting.extraMicNames.isNotEmpty)
+        (l.factExtraMic, meeting.extraMicNames),
       if (meeting.documentCount > 0)
         (l.factPapers, l.factPapersCount(meeting.documentCount)),
     ];

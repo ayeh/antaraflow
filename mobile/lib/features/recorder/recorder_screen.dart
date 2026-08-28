@@ -2,14 +2,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../core/error/api_exception.dart';
 import '../../core/haptics.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../domain/models/live_contributor.dart';
 import '../../domain/models/live_session.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/ledger_scaffold.dart';
 import 'chunk_outbox.dart';
+import 'deep_link.dart';
 import 'recorder_controller.dart';
 import 'recorder_role.dart';
 import 'room_level.dart';
@@ -154,7 +158,7 @@ class _Live extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _Header(title: state.meetingTitle),
+        _Header(title: state.meetingTitle, action: _InviteButton(state: state)),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
           child: Column(
@@ -183,6 +187,10 @@ class _Live extends ConsumerWidget {
                   ),
                 ),
               ],
+              if (state.satellites.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _Contributors(people: state.satellites),
+              ],
             ],
           ),
         ),
@@ -193,6 +201,44 @@ class _Live extends ConsumerWidget {
         _RoomLine(state: state),
         Expanded(child: _Marks(bookmarks: state.bookmarks)),
         _Actions(state: state),
+      ],
+    );
+  }
+}
+
+/// Names the people whose phones are helping record, on the recording's own
+/// screen.
+///
+/// The recording knows it is itself, so only the satellites are worth naming
+/// here — "Ariff added a mic" is the useful thing to see, not a roll call that
+/// includes yourself.
+class _Contributors extends StatelessWidget {
+  const _Contributors({required this.people});
+
+  final List<LiveContributor> people;
+
+  @override
+  Widget build(BuildContext context) {
+    final names = people.map((person) => person.name).join(' · ');
+
+    return Row(
+      children: [
+        const Icon(
+          Icons.person_add_alt_1_rounded,
+          size: 15,
+          color: AppColors.lime,
+        ),
+        const SizedBox(width: 7),
+        Expanded(
+          child: Text(
+            names,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: _Dark.bright),
+          ),
+        ),
       ],
     );
   }
@@ -277,9 +323,13 @@ class _Offered extends ConsumerWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.title});
+  const _Header({required this.title, this.action});
 
   final String title;
+
+  /// An optional control sitting between the title and the mark — the invite
+  /// button while this phone is the recording, nothing otherwise.
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -303,6 +353,7 @@ class _Header extends StatelessWidget {
               style: AppTheme.eyebrow(colour: _Dark.faint),
             ),
           ),
+          ?action,
           // The one screen other people in the room look at. A phone lies face
           // up on the table for an hour with this on it, so the mark earns its
           // place here in a way it does not on a working list.
@@ -313,6 +364,62 @@ class _Header extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Shares a link that pulls a colleague in the room into this recording as a
+/// second microphone.
+///
+/// Shown only while this phone is the recording and actually running: a
+/// satellite has nothing to hand out, and a paused sitting is not one to invite
+/// anyone into — the server would refuse the token anyway.
+class _InviteButton extends ConsumerWidget {
+  const _InviteButton({required this.state});
+
+  final RecorderState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (state.role.isSatellite || !state.isLive || state.sessionId == null) {
+      return const SizedBox.shrink();
+    }
+
+    return IconButton(
+      icon: const Icon(Icons.person_add_alt_1_rounded),
+      color: _Dark.soft,
+      tooltip: L.of(context).inviteMic,
+      onPressed: () => _share(context, ref, state.sessionId!),
+    );
+  }
+
+  Future<void> _share(BuildContext context, WidgetRef ref, int sessionId) async {
+    Haptics.tick();
+
+    // iPad anchors the share sheet to whatever was tapped; without an origin it
+    // throws rather than guessing.
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box == null ? null : box.localToGlobal(Offset.zero) & box.size;
+
+    try {
+      final invite = await ref.read(liveRepositoryProvider).invite(sessionId);
+      final link = DeepLinkEntry.linkFor(invite.token);
+
+      if (!context.mounted) return;
+
+      await SharePlus.instance.share(
+        ShareParams(
+          text: L.of(context).inviteShareMessage(invite.title, link),
+          subject: L.of(context).inviteShareSubject(invite.title),
+          sharePositionOrigin: origin,
+        ),
+      );
+    } on ApiException catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
   }
 }
 

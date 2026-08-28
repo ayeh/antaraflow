@@ -152,4 +152,60 @@ void main() {
       expect(textOf(tester).single, 'No minutes have been written yet.');
     });
   });
+
+  group('who recorded a sitting', () {
+    Map<String, dynamic> withTranscriptions(List<Map<String, dynamic>> rows) => {
+      ...meeting(),
+      'transcriptions': rows,
+    };
+
+    test('names the recording and the extra mics separately', () {
+      final detail = MeetingDetail.fromJson(
+        withTranscriptions([
+          {
+            'id': 1,
+            'contributors': [
+              {'name': 'Ariff', 'role': 'primary'},
+              {'name': 'Siti', 'role': 'satellite'},
+            ],
+          },
+        ]),
+      );
+
+      expect(detail.recordedByNames, 'Ariff');
+      expect(detail.extraMicNames, 'Siti');
+    });
+
+    test('a record with nothing captured names nobody', () {
+      final detail = MeetingDetail.fromJson(
+        withTranscriptions([
+          {'id': 1},
+        ]),
+      );
+
+      expect(detail.recordedByNames, '');
+      expect(detail.extraMicNames, '');
+    });
+
+    test('the same person across two transcriptions is not repeated', () {
+      final detail = MeetingDetail.fromJson(
+        withTranscriptions([
+          {
+            'id': 1,
+            'contributors': [
+              {'name': 'Ariff', 'role': 'primary'},
+            ],
+          },
+          {
+            'id': 2,
+            'contributors': [
+              {'name': 'Ariff', 'role': 'primary'},
+            ],
+          },
+        ]),
+      );
+
+      expect(detail.recordedByNames, 'Ariff');
+    });
+  });
 }

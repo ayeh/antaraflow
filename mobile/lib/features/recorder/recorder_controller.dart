@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/error/api_exception.dart';
 import '../../core/providers.dart';
 import '../../data/repositories/live_repository.dart';
+import '../../domain/models/live_contributor.dart';
 import '../../domain/models/live_session.dart';
 import '../../core/haptics.dart';
 import '../../data/local/device_label.dart';
@@ -68,6 +69,7 @@ class RecorderState {
     this.check = RoomVerdict.listening,
     this.room = RoomVerdict.listening,
     this.role = RecorderRole.primary,
+    this.contributors = const [],
     this.error,
   });
 
@@ -75,6 +77,16 @@ class RecorderState {
   final String meetingTitle;
   final int? sessionId;
   final Duration elapsed;
+
+  /// Who else is feeding this sitting. Polled by the recording so it can show
+  /// the room who has added a microphone; empty on a satellite, which does not
+  /// ask.
+  final List<LiveContributor> contributors;
+
+  /// The satellites among the contributors — the ones worth naming on the
+  /// recording's screen, since the recording is already itself.
+  List<LiveContributor> get satellites =>
+      contributors.where((person) => person.isSatellite).toList();
 
   /// How the phone was placed, settled once near the start of the sitting.
   final RoomVerdict check;
@@ -120,6 +132,7 @@ class RecorderState {
     RoomVerdict? check,
     RoomVerdict? room,
     RecorderRole? role,
+    List<LiveContributor>? contributors,
     String? error,
     bool clearError = false,
   }) {
@@ -133,6 +146,7 @@ class RecorderState {
       check: check ?? this.check,
       room: room ?? this.room,
       role: role ?? this.role,
+      contributors: contributors ?? this.contributors,
       error: clearError ? null : (error ?? this.error),
     );
   }
@@ -307,10 +321,14 @@ class RecorderController extends StateNotifier<RecorderState> {
     // The card runs its own clock, so it only needs telling when something
     // it cannot work out for itself changes. Once every fifteen seconds is
     // roughly per chunk, and well inside what the system will budget.
-    _activityTicker = Timer.periodic(
-      const Duration(seconds: 15),
-      (_) => _pushActivity(),
-    );
+    _activityTicker = Timer.periodic(const Duration(seconds: 15), (_) {
+      _pushActivity();
+      unawaited(_pollParticipants());
+    });
+
+    // Once now, so a satellite that joined before this device opened is named
+    // without waiting out the first fifteen-second tick.
+    unawaited(_pollParticipants());
 
     state = state.copyWith(
       phase: RecorderPhase.recording,
@@ -467,6 +485,23 @@ class RecorderController extends StateNotifier<RecorderState> {
     // The one part somebody feels without looking, which is the point: the
     // phone is face down on the table and nobody is watching the screen.
     Haptics.commit();
+  }
+
+  /// Asks the server who else is in the room feeding this sitting.
+  ///
+  /// Only the recording asks: a satellite is helping one device, not running a
+  /// roll call. A missed poll is nothing — the screen keeps whoever it last
+  /// heard about, and the next tick is fifteen seconds away.
+  Future<void> _pollParticipants() async {
+    final sessionId = state.sessionId;
+    if (sessionId == null || state.role.isSatellite) return;
+
+    try {
+      final people = await _repository.participants(sessionId);
+      if (mounted) state = state.copyWith(contributors: people);
+    } on ApiException {
+      // Left for the next tick.
+    }
   }
 
   void _pushActivity() {

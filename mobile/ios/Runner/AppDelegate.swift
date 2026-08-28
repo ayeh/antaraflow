@@ -16,6 +16,7 @@ import UIKit
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "LiveActivityBridge") {
       LiveActivityBridge.register(with: registrar.messenger())
       RecordEntryBridge.register(with: registrar.messenger())
+      DeepLinkBridge.register(with: registrar.messenger())
 
       // Prototype: Liquid Glass pane for the tab bar spike.
       registrar.register(

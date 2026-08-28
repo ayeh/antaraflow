@@ -716,3 +716,243 @@ test('a client that names no device is still the recording', function () {
         ->assertJsonPath('resume.role', 'primary')
         ->assertJsonPath('resume.next_chunk_number', 1);
 });
+
+// ── Satellite invite ────────────────────────────────────────────────────────
+// A primary shares a token; a colleague's phone exchanges it for the sitting to
+// open and record as a satellite.
+
+test('inviting hands back a token and the meeting to share', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/live/{$session->id}/invite")
+        ->assertOk()
+        ->assertJsonPath('session_id', $session->id)
+        ->assertJsonPath('meeting.id', $this->meeting->id)
+        ->assertJsonPath('meeting.title', 'Board meeting')
+        ->assertJsonPath('token', fn (string $token) => strlen($token) === 64);
+
+    expect($session->fresh()->share_token)->toHaveLength(64);
+});
+
+test('inviting the same sitting twice keeps the link stable', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $first = $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/live/{$session->id}/invite")
+        ->json('token');
+
+    $second = $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/live/{$session->id}/invite")
+        ->json('token');
+
+    expect($second)->toBe($first);
+});
+
+test('an ended sitting cannot be shared', function () {
+    $session = LiveMeetingSession::factory()->ended()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/live/{$session->id}/invite")
+        ->assertStatus(409)
+        ->assertJsonPath('code', 'SESSION_NOT_ACTIVE');
+
+    expect($session->fresh()->share_token)->toBeNull();
+});
+
+test('a member of another tenant cannot mint an invite', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $otherOrg = Organization::factory()->create();
+    $outsider = User::factory()->create(['current_organization_id' => $otherOrg->id]);
+    $otherOrg->members()->attach($outsider, ['role' => UserRole::Owner->value]);
+
+    $this->actingAs($outsider, 'sanctum')
+        ->postJson("/api/mobile/v1/live/{$session->id}/invite")
+        ->assertNotFound();
+});
+
+test('a shared token resolves to the sitting to record', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $token = $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/live/{$session->id}/invite")
+        ->json('token');
+
+    $this->actingAs($this->user, 'sanctum')
+        ->getJson("/api/mobile/v1/live/join/{$token}")
+        ->assertOk()
+        ->assertJsonPath('session_id', $session->id)
+        ->assertJsonPath('status', 'active')
+        ->assertJsonPath('meeting.id', $this->meeting->id)
+        ->assertJsonPath('meeting.title', 'Board meeting');
+});
+
+test('a token for an ended sitting is treated as if it never existed', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+        'share_token' => str_repeat('a', 64),
+    ]);
+
+    $session->update(['status' => LiveSessionStatus::Ended, 'ended_at' => now()]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->getJson('/api/mobile/v1/live/join/'.str_repeat('a', 64))
+        ->assertNotFound()
+        ->assertJsonPath('code', 'INVITE_INVALID');
+});
+
+test('a token that matches nothing is refused', function () {
+    $this->actingAs($this->user, 'sanctum')
+        ->getJson('/api/mobile/v1/live/join/'.str_repeat('z', 64))
+        ->assertNotFound()
+        ->assertJsonPath('code', 'INVITE_INVALID');
+});
+
+test('a token cannot be redeemed from another tenant', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+        'share_token' => str_repeat('b', 64),
+    ]);
+
+    $otherOrg = Organization::factory()->create();
+    $outsider = User::factory()->create(['current_organization_id' => $otherOrg->id]);
+    $otherOrg->members()->attach($outsider, ['role' => UserRole::Owner->value]);
+
+    $this->actingAs($outsider, 'sanctum')
+        ->getJson('/api/mobile/v1/live/join/'.str_repeat('b', 64))
+        ->assertNotFound();
+});
+
+// ── Who is behind each microphone ────────────────────────────────────────────
+// A satellite is a person choosing to help, not just a device. The live screen
+// and the finished record both want to name them.
+
+test('a satellite chunk captures who is behind it', function () {
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $mate = User::factory()->create(['current_organization_id' => $this->org->id]);
+    $this->org->members()->attach($mate, ['role' => UserRole::Admin->value]);
+
+    $this->actingAs($mate, 'sanctum')
+        ->post("/api/mobile/v1/live/{$session->id}/chunks", [
+            'audio' => m4aChunk(),
+            'chunk_number' => 0,
+            'start_time' => 0,
+            'end_time' => 15,
+            'device_id' => 'satellite-uuid',
+            'device_label' => 'Pixel 7',
+            'role' => 'satellite',
+        ])
+        ->assertCreated();
+
+    $behind = $session->fresh()->config['device_users']['satellite-uuid'];
+
+    expect($behind['id'])->toBe($mate->id)
+        ->and($behind['name'])->toBe($mate->name)
+        ->and($behind['role'])->toBe('satellite');
+});
+
+test('participants names the recording and its satellites with roles', function () {
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/live/start", [
+            'device_id' => 'primary-uuid',
+            'device_label' => 'iPhone 15 Pro',
+        ])
+        ->assertCreated();
+
+    $session = LiveMeetingSession::query()->latest('id')->first();
+
+    $mate = User::factory()->create(['current_organization_id' => $this->org->id]);
+    $this->org->members()->attach($mate, ['role' => UserRole::Admin->value]);
+
+    $this->actingAs($mate, 'sanctum')
+        ->post("/api/mobile/v1/live/{$session->id}/chunks", [
+            'audio' => m4aChunk(),
+            'chunk_number' => 0,
+            'start_time' => 0,
+            'end_time' => 15,
+            'device_id' => 'satellite-uuid',
+            'device_label' => 'Pixel 7',
+            'role' => 'satellite',
+        ])
+        ->assertCreated();
+
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->getJson("/api/mobile/v1/live/{$session->id}/participants")
+        ->assertOk()
+        ->json('participants');
+
+    expect($response)->toContain(['name' => $this->user->name, 'role' => 'primary'])
+        ->and($response)->toContain(['name' => $mate->name, 'role' => 'satellite']);
+});
+
+test('the merged transcription remembers who contributed', function () {
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/meetings/{$this->meeting->id}/live/start", [
+            'device_id' => 'primary-uuid',
+            'device_label' => 'iPhone 15 Pro',
+        ])
+        ->assertCreated();
+
+    $session = LiveMeetingSession::query()->latest('id')->first();
+
+    $mate = User::factory()->create(['current_organization_id' => $this->org->id]);
+    $this->org->members()->attach($mate, ['role' => UserRole::Admin->value]);
+
+    $this->actingAs($mate, 'sanctum')
+        ->post("/api/mobile/v1/live/{$session->id}/chunks", [
+            'audio' => m4aChunk(),
+            'chunk_number' => 0,
+            'start_time' => 0,
+            'end_time' => 15,
+            'device_id' => 'satellite-uuid',
+            'device_label' => 'Pixel 7',
+            'role' => 'satellite',
+        ])
+        ->assertCreated();
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'device_id' => 'primary-uuid',
+        'chunk_number' => 0,
+        'text' => 'The meeting has come to order.',
+    ]);
+
+    $this->actingAs($this->user, 'sanctum')
+        ->postJson("/api/mobile/v1/live/{$session->id}/end")
+        ->assertOk();
+
+    $transcription = $this->meeting->transcriptions()->latest('id')->first();
+    $contributors = $transcription->provider_metadata['contributors'];
+
+    expect($contributors)->toContain(['name' => $this->user->name, 'role' => 'primary'])
+        ->and($contributors)->toContain(['name' => $mate->name, 'role' => 'satellite']);
+});

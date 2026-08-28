@@ -44,7 +44,7 @@ class LiveSessionController extends MobileController
 
         try {
             $session = $this->liveMeetingService->startSession($meeting, $this->user($request), $config);
-            $this->liveMeetingService->recordDevice($session, $deviceId, $this->appDeviceLabel($deviceLabel));
+            $this->liveMeetingService->recordDevice($session, $deviceId, $this->appDeviceLabel($deviceLabel), $this->user($request), ChunkRole::Primary);
         } catch (\RuntimeException $e) {
             $active = LiveMeetingSession::query()
                 ->where('minutes_of_meeting_id', $meeting->id)
@@ -75,6 +75,74 @@ class LiveSessionController extends MobileController
                 'accepted_mimetypes' => AudioChunkFormats::MIMETYPES,
             ],
         ], 201);
+    }
+
+    /**
+     * Mints (or hands back) the token a primary shares so a colleague in the
+     * room can open their phone straight onto this sitting as a satellite.
+     */
+    public function invite(Request $request, LiveMeetingSession $session): JsonResponse
+    {
+        $this->authorizeSession($session, 'startLive');
+
+        if (! $session->isActive()) {
+            return $this->failure(__('This session is not active.'), 'SESSION_NOT_ACTIVE', 409);
+        }
+
+        $token = $this->liveMeetingService->inviteToken($session);
+        $meeting = $session->meeting;
+
+        return response()->json([
+            'token' => $token,
+            'session_id' => $session->id,
+            'meeting' => [
+                'id' => $meeting->id,
+                'title' => $meeting->title,
+            ],
+        ]);
+    }
+
+    /**
+     * Resolves a shared token to the sitting behind it, so the invited phone
+     * knows which meeting to open and record. The token is a random needle;
+     * the real gate is the same startLive authorisation every other write here
+     * passes, which is where a wrong tenant or a viewer-only member is turned
+     * away.
+     */
+    public function join(Request $request, string $token): JsonResponse
+    {
+        $session = $this->liveMeetingService->resolveInvite($token);
+
+        if ($session === null) {
+            return $this->failure(__('This invite is no longer valid.'), 'INVITE_INVALID', 404);
+        }
+
+        $this->authorizeSession($session, 'startLive');
+
+        $meeting = $session->meeting;
+
+        return response()->json([
+            'session_id' => $session->id,
+            'status' => $session->status->value,
+            'meeting' => [
+                'id' => $meeting->id,
+                'title' => $meeting->title,
+            ],
+        ]);
+    }
+
+    /**
+     * Who is feeding this sitting right now: the recording and every satellite
+     * that has joined, named. Polled by the primary so it can show the room who
+     * has added a microphone.
+     */
+    public function participants(Request $request, LiveMeetingSession $session): JsonResponse
+    {
+        $this->authorizeSession($session, 'startLive');
+
+        return response()->json([
+            'participants' => $this->liveMeetingService->contributors($session),
+        ]);
     }
 
     public function chunk(Request $request, LiveMeetingSession $session): JsonResponse
@@ -109,7 +177,7 @@ class LiveSessionController extends MobileController
         // A satellite phone joins by uploading chunks without ever calling
         // start, so its label first reaches us here. Cheap to repeat: recordDevice
         // skips the write once the label is already stored.
-        $this->liveMeetingService->recordDevice($session, $deviceId, $this->appDeviceLabel($validated['device_label'] ?? null));
+        $this->liveMeetingService->recordDevice($session, $deviceId, $this->appDeviceLabel($validated['device_label'] ?? null), $this->user($request), $role);
 
         $existing = $this->liveMeetingService->findExistingChunk(
             $session,

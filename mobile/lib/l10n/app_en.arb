@@ -164,6 +164,8 @@
   "factKeptBy": "Kept by",
   "factAudio": "Audio",
   "factTranscribed": "Transcribed",
+  "factRecordedBy": "Recorded by",
+  "factExtraMic": "Extra mic",
   "factPapers": "Papers",
   "factPapersCount": "{count} attached",
   "approvedStamp": "Approved",
@@ -316,6 +318,21 @@
   "notNow": "Not now",
   "extraMicrophone": "EXTRA MICROPHONE",
   "extraMicrophoneDetail": "This phone is helping. Stopping it does not stop the meeting recording.",
+  "inviteMic": "Add a microphone",
+  "inviteShareSubject": "Add your mic to {title}",
+  "@inviteShareSubject": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "inviteShareMessage": "Help record \"{title}\" on antaraNote. Open this on your phone, in the room, to add your microphone: {link}",
+  "@inviteShareMessage": {
+    "description": "The message a primary shares so a colleague in the room can join the recording as a satellite. The link opens the app straight onto the offer to add their mic.",
+    "placeholders": {
+      "title": { "type": "String" },
+      "link": { "type": "String" }
+    }
+  },
   "marksSection": "MARKS",
   "marksEmpty": "Mark a decision as it is carried and it lands here, timed to the second. The marks become the skeleton of the minutes.",
   "notYetSent": "Not yet sent",
