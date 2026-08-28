@@ -1,5 +1,5 @@
 @if($circulation)
-<div class="mt-6 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+<div class="mt-6 mb-8 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
     <div class="px-4 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
         <h3 class="text-sm font-semibold text-gray-800 dark:text-slate-200">
             {{ __('Circulation Monitor') }} · {{ __('Round') }} {{ $circulation->round }}
