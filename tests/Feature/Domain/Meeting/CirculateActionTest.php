@@ -9,8 +9,13 @@ use App\Models\User;
 use App\Support\Enums\MeetingStatus;
 use App\Support\Enums\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    Mail::fake();
+});
 
 test('secretary can circulate a finalized meeting', function () {
     $org = Organization::factory()->create();

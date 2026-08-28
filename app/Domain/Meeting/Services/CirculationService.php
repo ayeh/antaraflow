@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Meeting\Services;
 
+use App\Domain\Meeting\Mail\CirculationInviteMail;
 use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Meeting\Models\MomCirculation;
 use App\Domain\Meeting\Models\MomCirculationRecipient;
@@ -11,6 +12,7 @@ use App\Models\User;
 use App\Support\Enums\MeetingStatus;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CirculationService
@@ -27,7 +29,7 @@ class CirculationService
         ?string $bodyNote = null,
         int $round = 1,
     ): MomCirculation {
-        return DB::transaction(function () use ($meeting, $sentBy, $recipients, $subject, $deadline, $bodyNote, $round): MomCirculation {
+        $circulation = DB::transaction(function () use ($meeting, $sentBy, $recipients, $subject, $deadline, $bodyNote, $round): MomCirculation {
             $circulation = MomCirculation::createForOrganization($meeting->organization_id, [
                 'minutes_of_meeting_id' => $meeting->id,
                 'sent_by' => $sentBy->id,
@@ -52,5 +54,16 @@ class CirculationService
 
             return $circulation->load('recipients');
         });
+
+        $this->sendInvites($circulation);
+
+        return $circulation;
+    }
+
+    private function sendInvites(MomCirculation $circulation): void
+    {
+        foreach ($circulation->recipients as $recipient) {
+            Mail::to($recipient->email)->queue(new CirculationInviteMail($recipient));
+        }
     }
 }
