@@ -230,6 +230,70 @@ test('merges chunks into final audio transcription on session end', function () 
     ]);
 });
 
+test('joins the chunk audio into one playable recording on merge', function () {
+    Storage::fake('local');
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'started_at' => now()->subMinutes(1),
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    $org = $this->meeting->organization_id;
+
+    foreach ([0, 1] as $number) {
+        $path = "organizations/{$org}/audio/live/{$session->id}/chunk_0000{$number}.wav";
+        Storage::disk('local')->put($path, "RIFF-fake-wav-bytes-{$number}");
+
+        LiveTranscriptChunk::factory()->completed()->create([
+            'live_meeting_session_id' => $session->id,
+            'chunk_number' => $number,
+            'text' => "chunk {$number}",
+            'audio_file_path' => $path,
+            'segments' => null,
+        ]);
+    }
+
+    $this->service->endSession($session);
+
+    $transcription = AudioTranscription::query()->latest('id')->first();
+
+    expect($transcription->file_path)->toBe("organizations/{$org}/audio/live_recording_{$session->id}.wav")
+        ->and($transcription->mime_type)->toBe('audio/wav')
+        ->and($transcription->file_size)->toBeGreaterThan(0);
+
+    Storage::disk('local')->assertExists($transcription->file_path);
+});
+
+test('keeps the placeholder path when the chunk audio is already gone', function () {
+    Storage::fake('local');
+    Queue::fake();
+
+    $session = LiveMeetingSession::factory()->create([
+        'minutes_of_meeting_id' => $this->meeting->id,
+        'started_by' => $this->user->id,
+        'started_at' => now()->subMinutes(1),
+        'status' => LiveSessionStatus::Active,
+    ]);
+
+    LiveTranscriptChunk::factory()->completed()->create([
+        'live_meeting_session_id' => $session->id,
+        'chunk_number' => 0,
+        'text' => 'the audio for this chunk was pruned',
+        'audio_file_path' => "organizations/{$this->meeting->organization_id}/audio/live/{$session->id}/chunk_00000.wav",
+        'segments' => null,
+    ]);
+
+    $this->service->endSession($session);
+
+    $transcription = AudioTranscription::query()->latest('id')->first();
+
+    expect($transcription->file_path)->toBe("live_session/{$session->id}")
+        ->and($transcription->file_size)->toBe(0);
+});
+
 test('end session without completed chunks does not create transcription', function () {
     Queue::fake();
 

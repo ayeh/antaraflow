@@ -80,6 +80,56 @@ class AudioStorageService
     }
 
     /**
+     * Stitch a live session's per-chunk recordings into one playable file.
+     *
+     * Live and mobile recordings are kept as one file per chunk so any single
+     * chunk can be re-transcribed on its own. Nothing ever joined them back
+     * together, so every live recording ended up with a transcript but a
+     * `file_path` pointing at a directory the player could not stream. Given
+     * the chunk paths that survived on disk, in play order, this concatenates
+     * them into a single container and returns its stored path — or null when
+     * none of the source files are still there (already pruned, or a test that
+     * only ever wrote database rows), leaving the caller to fall back.
+     *
+     * @param  array<int, string>  $chunkPaths  Stored chunk paths, in play order.
+     */
+    public function mergeLiveChunks(array $chunkPaths, int $organizationId, int $sessionId): ?string
+    {
+        $disk = Storage::disk('local');
+
+        $present = array_values(array_filter(
+            $chunkPaths,
+            fn (string $path): bool => $disk->exists($path),
+        ));
+
+        if ($present === []) {
+            return null;
+        }
+
+        $extension = pathinfo($present[0], PATHINFO_EXTENSION) ?: 'webm';
+        $mergedPath = "organizations/{$organizationId}/audio/live_recording_{$sessionId}.{$extension}";
+        $mergedFullPath = $disk->path($mergedPath);
+
+        $dir = dirname($mergedFullPath);
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        /** @var array<int, string> $chunkFullPaths */
+        $chunkFullPaths = array_map(fn (string $path): string => $disk->path($path), $present);
+
+        if (! $this->concatWithFfmpeg($chunkFullPaths, $mergedFullPath)) {
+            $this->concatRaw($chunkFullPaths, $mergedFullPath);
+        }
+
+        if (! file_exists($mergedFullPath) || filesize($mergedFullPath) === 0) {
+            return null;
+        }
+
+        return $mergedPath;
+    }
+
+    /**
      * Rebuild a single valid container from the per-chunk recordings.
      *
      * Each chunk is a complete media file with its own header, so concatenating

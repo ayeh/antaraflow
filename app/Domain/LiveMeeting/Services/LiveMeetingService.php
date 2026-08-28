@@ -17,6 +17,7 @@ use App\Domain\Meeting\Models\MinutesOfMeeting;
 use App\Domain\Transcription\Jobs\DiarizeTranscriptionJob;
 use App\Domain\Transcription\Models\AudioTranscription;
 use App\Domain\Transcription\Models\TranscriptionSegment;
+use App\Domain\Transcription\Services\AudioStorageService;
 use App\Models\User;
 use App\Support\Enums\InputType;
 use App\Support\Enums\TranscriptionStatus;
@@ -39,6 +40,10 @@ class LiveMeetingService
      * on every chunk are how it gets replaced with a number from real rooms.
      */
     private const FAINT_DBFS = -45.0;
+
+    public function __construct(
+        private readonly AudioStorageService $audioStorage,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $config
@@ -447,6 +452,17 @@ class LiveMeetingService
         return $label === '' ? null : $label;
     }
 
+    private function mimeForExtension(string $extension): string
+    {
+        return match (strtolower($extension)) {
+            'wav' => 'audio/wav',
+            'mp4', 'm4a' => 'audio/mp4',
+            'ogg' => 'audio/ogg',
+            'mp3' => 'audio/mpeg',
+            default => 'audio/webm',
+        };
+    }
+
     private function mergeChunksIntoTranscription(LiveMeetingSession $session): ?AudioTranscription
     {
         // One transcript per moment, not one per upload. With a satellite in
@@ -489,13 +505,35 @@ class LiveMeetingService
             ]);
         }
 
+        // Join the surviving chunk audio into one file so the recording can be
+        // played back, not just read. One chunk per moment, in order, mirroring
+        // the transcript above. When the source files are gone (pruned, or a
+        // test that only wrote rows) this returns null and the recording keeps
+        // the placeholder path it always had — transcript intact, no player.
+        $mergedAudioPath = $this->audioStorage->mergeLiveChunks(
+            $completedChunks
+                ->sortBy('chunk_number')
+                ->pluck('audio_file_path')
+                ->filter()
+                ->values()
+                ->all(),
+            $session->meeting->organization_id,
+            $session->id,
+        );
+
+        $audioExtension = $mergedAudioPath !== null
+            ? (pathinfo($mergedAudioPath, PATHINFO_EXTENSION) ?: 'webm')
+            : 'webm';
+
         $transcription = AudioTranscription::query()->create([
             'minutes_of_meeting_id' => $session->minutes_of_meeting_id,
             'uploaded_by' => $session->started_by,
-            'original_filename' => "live_session_{$session->id}.webm",
-            'file_path' => "live_session/{$session->id}",
-            'mime_type' => 'audio/webm',
-            'file_size' => 0,
+            'original_filename' => "live_session_{$session->id}.{$audioExtension}",
+            'file_path' => $mergedAudioPath ?? "live_session/{$session->id}",
+            'mime_type' => $this->mimeForExtension($audioExtension),
+            'file_size' => $mergedAudioPath !== null
+                ? (int) filesize($this->audioStorage->getFullPath($mergedAudioPath))
+                : 0,
             'duration_seconds' => $session->total_duration_seconds,
             'language' => 'en',
             'device_label' => $this->recordingDeviceLabel($session),
