@@ -120,6 +120,18 @@ Route::middleware('throttle:120,1,qr-lobby')->group(function () {
     Route::get('lobby/{token}/attendees', [QrRegistrationController::class, 'lobbyAttendees'])->name('qr-registration.lobby.attendees');
 });
 
+// Join by code. The human-readable alternative to scanning the QR: a walk-in
+// opens /join, types the 6-character code shown on the lobby screen, and lands
+// on the very same registration form the QR points at. The code is only a
+// finder for the token, never the access grant — the 64-char token still does
+// the work once resolved. throttle is DoS protection only; a 6-char code over
+// [A-Z0-9] is a ~2-billion space, unguessable at any allowed rate, and the
+// throttle stays generous so a boardroom behind one NAT IP is not locked out.
+Route::middleware('throttle:30,1,join-code')->group(function () {
+    Route::get('join', [QrRegistrationController::class, 'showJoinForm'])->name('qr-registration.join');
+    Route::post('join', [QrRegistrationController::class, 'join'])->name('qr-registration.join.submit');
+});
+
 // Satellite invite links. The https form is what makes the link tappable in a
 // chat; it opens the app directly once the platform association below verifies,
 // and lands on a fallback page otherwise. Public and unauthenticated — the

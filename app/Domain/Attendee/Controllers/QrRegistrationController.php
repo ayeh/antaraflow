@@ -156,6 +156,41 @@ class QrRegistrationController extends Controller
         ]);
     }
 
+    public function showJoinForm(): View
+    {
+        return view('qr-registration.join');
+    }
+
+    public function join(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'join_code' => ['required', 'string', 'size:6'],
+        ], [], [
+            'join_code' => __('code'),
+        ]);
+
+        $code = strtoupper(trim($validated['join_code']));
+
+        $qrToken = QrRegistrationToken::where('join_code', $code)
+            ->where('is_active', true)
+            ->latest('id')
+            ->first();
+
+        if (! $qrToken || ! $qrToken->isValid() || ! $qrToken->meeting) {
+            return back()
+                ->withInput()
+                ->withErrors(['join_code' => __('That code is not valid or has expired. Check the code and try again.')]);
+        }
+
+        if ($qrToken->isFull()) {
+            return back()
+                ->withInput()
+                ->withErrors(['join_code' => __('Registration is full. No more spots available.')]);
+        }
+
+        return redirect()->route('qr-registration.form', $qrToken->token);
+    }
+
     public function showForm(string $token): View
     {
         $qrToken = QrRegistrationToken::where('token', $token)->firstOrFail();

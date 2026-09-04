@@ -96,6 +96,7 @@
             <div class="mt-6 text-center">
                 <p class="text-xs md:text-sm uppercase tracking-widest text-white/50">{{ __('Or enter join code') }}</p>
                 <p class="mt-1 text-4xl md:text-6xl font-black font-mono tracking-[0.2em] text-transparent bg-clip-text" style="background-image: linear-gradient(to right, color-mix(in srgb, var(--lobby-primary) 55%, white), color-mix(in srgb, var(--lobby-secondary) 55%, white));" x-text="qrData?.join_code"></p>
+                <p x-show="qrData?.join_code" x-cloak class="mt-2 text-xs md:text-sm text-white/40">{{ __('at') }} <span class="font-semibold text-white/60">{{ preg_replace('#^https?://#', '', route('qr-registration.join')) }}</span></p>
             </div>
         </div>
 
