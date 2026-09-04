@@ -75,6 +75,14 @@
                 </div>
             @endif
 
+            {{-- Present Live Lobby (public live-attendance screen) --}}
+            <a href="{{ route('qr-registration.lobby', $qrToken->token) }}" target="_blank" rel="noopener"
+               class="group w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-200 hover:-translate-y-0.5 mb-2">
+                <svg class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2m8-16h2a2 2 0 012 2v2m-4 12h2a2 2 0 002-2v-2"/></svg>
+                {{ __('Present Live Lobby') }}
+            </a>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mb-4">{{ __('Open the live attendance screen that updates as people join.') }}</p>
+
             {{-- Add to Calendar --}}
             @if($meeting->meeting_date)
                 @php
