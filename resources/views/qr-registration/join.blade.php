@@ -9,20 +9,13 @@
 <body class="bg-gray-50 dark:bg-slate-900 min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
 
-        {{-- antaraNote brand header --}}
-        <div class="flex items-center justify-center gap-2 mb-5">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 50" width="24" height="18" aria-hidden="true">
-                <rect x="0"  y="21" width="7" height="16" rx="3.5" fill="#0D7377"/>
-                <rect x="11" y="10" width="7" height="36" rx="3.5" fill="#0D7377"/>
-                <rect x="22" y="16" width="7" height="25" rx="3.5" fill="#0D7377"/>
-                <rect x="33" y="4"  width="7" height="50" rx="3.5" fill="#0D7377"/>
-                <rect x="44" y="13" width="7" height="31" rx="3.5" fill="#0D7377"/>
-                <rect x="55" y="8"  width="7" height="43" rx="3.5" fill="#0D7377"/>
-                <rect x="66" y="19" width="7" height="22" rx="3.5" fill="#0D7377"/>
-            </svg>
-            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">
-                <span style="font-weight:400;">antara</span><span style="font-weight:700;">Note</span>
-            </span>
+        {{-- Brand header — honors the live/organization branding --}}
+        <div class="flex items-center justify-center mb-5">
+            @if($branding->logoUrl())
+                <img src="{{ $branding->logoUrl() }}" alt="{{ $branding->appName() }}" class="h-7 w-auto" />
+            @else
+                <span class="text-lg font-bold" style="color: {{ $branding->get('primary_color', '#7c3aed') }};">{{ $branding->appName() }}</span>
+            @endif
         </div>
 
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 p-8">
