@@ -304,6 +304,103 @@ test('shareable lobby returns 404 for an unknown token', function () {
     $this->get(route('qr-registration.lobby', 'does-not-exist'))->assertNotFound();
 });
 
+describe('join by code', function () {
+    test('shows the join-by-code form publicly', function () {
+        $this->get(route('qr-registration.join'))
+            ->assertSuccessful()
+            ->assertSee('join_code', false);
+    });
+
+    test('resolves a valid code and redirects to that meeting registration form', function () {
+        $token = QrRegistrationToken::create([
+            'minutes_of_meeting_id' => $this->meeting->id,
+            'token' => 'join-code-token-111',
+            'join_code' => 'ABC123',
+            'is_active' => true,
+            'expires_at' => now()->addHours(24),
+        ]);
+
+        $this->post(route('qr-registration.join.submit'), ['join_code' => 'ABC123'])
+            ->assertRedirect(route('qr-registration.form', $token->token));
+    });
+
+    test('normalizes a lowercase code before looking it up', function () {
+        $token = QrRegistrationToken::create([
+            'minutes_of_meeting_id' => $this->meeting->id,
+            'token' => 'join-code-token-222',
+            'join_code' => 'ABC123',
+            'is_active' => true,
+        ]);
+
+        $this->post(route('qr-registration.join.submit'), ['join_code' => 'abc123'])
+            ->assertRedirect(route('qr-registration.form', $token->token));
+    });
+
+    test('rejects an unknown code without redirecting to a form', function () {
+        $this->post(route('qr-registration.join.submit'), ['join_code' => 'ZZZ999'])
+            ->assertRedirect()
+            ->assertSessionHasErrors('join_code');
+    });
+
+    test('rejects an expired code', function () {
+        QrRegistrationToken::create([
+            'minutes_of_meeting_id' => $this->meeting->id,
+            'token' => 'join-code-token-333',
+            'join_code' => 'EXP123',
+            'is_active' => true,
+            'expires_at' => now()->subHour(),
+        ]);
+
+        $this->post(route('qr-registration.join.submit'), ['join_code' => 'EXP123'])
+            ->assertSessionHasErrors('join_code');
+    });
+
+    test('rejects an inactive code', function () {
+        QrRegistrationToken::create([
+            'minutes_of_meeting_id' => $this->meeting->id,
+            'token' => 'join-code-token-444',
+            'join_code' => 'INA123',
+            'is_active' => false,
+        ]);
+
+        $this->post(route('qr-registration.join.submit'), ['join_code' => 'INA123'])
+            ->assertSessionHasErrors('join_code');
+    });
+
+    test('rejects a code whose registration is full', function () {
+        QrRegistrationToken::create([
+            'minutes_of_meeting_id' => $this->meeting->id,
+            'token' => 'join-code-token-555',
+            'join_code' => 'FUL123',
+            'is_active' => true,
+            'max_attendees' => 1,
+            'registrations_count' => 1,
+        ]);
+
+        $this->post(route('qr-registration.join.submit'), ['join_code' => 'FUL123'])
+            ->assertSessionHasErrors('join_code');
+    });
+
+    test('rejects a code whose meeting is soft-deleted', function () {
+        QrRegistrationToken::create([
+            'minutes_of_meeting_id' => $this->meeting->id,
+            'token' => 'join-code-token-666',
+            'join_code' => 'DEL123',
+            'is_active' => true,
+        ]);
+
+        $this->meeting->delete();
+
+        $this->post(route('qr-registration.join.submit'), ['join_code' => 'DEL123'])
+            ->assertSessionHasErrors('join_code');
+    });
+
+    test('requires a code of the right length', function () {
+        $this->post(route('qr-registration.join.submit'), ['join_code' => 'AB'])
+            ->assertSessionHasErrors('join_code');
+    });
+});
+
 describe('guest rate limits', function () {
     beforeEach(function () {
         $this->token = $this->meeting->qrRegistrationTokens()->create([
