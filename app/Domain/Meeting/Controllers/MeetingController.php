@@ -238,12 +238,14 @@ class MeetingController extends Controller
             ->latest()
             ->first();
 
+        $recordingConsented = $meeting->hasRecordingConsent();
+
         return view('meetings.show', compact(
             'meeting', 'isEditable', 'orgMembers',
             'attendeeStats', 'actionItemStats',
             'comments', 'shares', 'decisionTracker',
             'relatedMeetings', 'exportTemplates',
-            'openCirculation',
+            'openCirculation', 'recordingConsented',
         ));
     }
 

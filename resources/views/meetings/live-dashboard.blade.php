@@ -352,6 +352,9 @@
                             liveChunkUrl: '{{ route('meetings.live.chunk', [$meeting, $session]) }}',
                             liveSessionId: {{ $session->id }},
                             initialChunkCount: {{ $state['chunks']->count() }},
+                            consentUrl: '{{ route('meetings.recording-consent.store', $meeting) }}',
+                            consentGiven: {{ ($recordingConsented ?? false) ? 'true' : 'false' }},
+                            consentNoticeVersion: 'v1',
                             i18n: {
                                 recordingInProgress: '{{ __('Recording is in progress. Are you sure you want to leave?') }}',
                                 micDenied: '{{ __('Microphone access denied. Please allow microphone access in your browser settings.') }}',
@@ -369,8 +372,11 @@
                                 tabAudioUnsupported: '{{ __('This browser cannot share tab audio. Use Chrome on desktop.') }}',
                                 tabAudioFailed: '{{ __('Could not capture tab audio. Please try again.') }}',
                                 tabAudioNoTrack: '{{ __('No tab audio was shared. Pick a browser tab and turn on "Share tab audio".') }}',
+                                consentFailed: '{{ __('Could not save your acknowledgement. Please try again.') }}',
                             },
                         })">
+                            @include('meetings.partials._recording-consent')
+
                             <template x-if="['recording', 'paused'].includes(state)">
                                 <div class="mb-2 flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
                                     <div class="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse flex-shrink-0"></div>

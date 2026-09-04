@@ -62,6 +62,7 @@ class LiveMeetingController extends Controller
             'meeting' => $meeting,
             'session' => $session,
             'state' => $state,
+            'recordingConsented' => $meeting->hasRecordingConsent(),
         ]);
     }
 

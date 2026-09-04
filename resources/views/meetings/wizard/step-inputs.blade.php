@@ -873,6 +873,9 @@
                                 finalizeUrl: '{{ route('meetings.audio-chunks.finalize', $meeting) }}',
                                 cancelUrl: '{{ route('meetings.audio-chunks.destroy', $meeting) }}',
                                 meetingId: {{ $meeting->id }},
+                                consentUrl: '{{ route('meetings.recording-consent.store', $meeting) }}',
+                                consentGiven: {{ ($recordingConsented ?? false) ? 'true' : 'false' }},
+                                consentNoticeVersion: 'v1',
                                 i18n: {
                                     recording: '{{ __('RECORDING') }}',
                                     recordingInProgress: '{{ __('Recording is in progress. Are you sure you want to leave?') }}',
@@ -891,10 +894,13 @@
                                     tabAudioUnsupported: '{{ __('This browser cannot share tab audio. Use Chrome on desktop.') }}',
                                     tabAudioFailed: '{{ __('Could not capture tab audio. Please try again.') }}',
                                     tabAudioNoTrack: '{{ __('No tab audio was shared. Pick a browser tab and turn on "Share tab audio".') }}',
+                                    consentFailed: '{{ __('Could not save your acknowledgement. Please try again.') }}',
                                 },
                             })"
                             class="mt-4 rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden"
                         >
+                            @include('meetings.partials._recording-consent')
+
                             {{-- Sticky status pill.
 
                                  Worded, not merely coloured: a red dot alone is

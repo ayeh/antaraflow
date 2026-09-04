@@ -385,6 +385,9 @@ Route::middleware(['auth', 'verified', 'org.context', 'org.suspended', 'onboardi
         Route::post('audio-chunks/finalize', [AudioChunkController::class, 'finalize'])->name('audio-chunks.finalize');
         Route::delete('audio-chunks', [AudioChunkController::class, 'destroy'])->name('audio-chunks.destroy');
 
+        // Recording consent (acknowledged once per meeting before recording)
+        Route::post('recording-consent', [\App\Domain\Meeting\Controllers\RecordingConsentController::class, 'store'])->name('recording-consent.store');
+
         // Voice Notes
         Route::get('voice-notes', [VoiceNoteController::class, 'index'])->name('voice-notes.index');
         Route::post('voice-notes', [VoiceNoteController::class, 'store'])->name('voice-notes.store');

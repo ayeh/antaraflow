@@ -105,6 +105,21 @@ export default function audioRecorder(config) {
         liveSessionId: config.liveSessionId || null,
         liveChunkNumber: config.initialChunkCount || 0,
 
+        // Recording consent. When a consentUrl is supplied and consent has not
+        // yet been recorded for this meeting, the first press of record opens a
+        // gate that asks the recorder to inform participants and acknowledge
+        // responsibility — important above all for the invisible tab-audio
+        // capture, where remote participants see no bot. Acknowledgement is
+        // posted to the server as a per-meeting audit record; once given, it is
+        // not asked again for this meeting.
+        consentUrl: config.consentUrl || '',
+        consentGiven: config.consentGiven || false,
+        consentNoticeVersion: config.consentNoticeVersion || 'v1',
+        showConsentGate: false,
+        consentChecked: false,
+        consentSubmitting: false,
+        consentError: '',
+
         // State machine
         state: 'idle', // idle, requesting_permission, checking, ready, countdown, recording, paused, stopping, processing, uploading, complete, error
 
@@ -1576,8 +1591,89 @@ export default function audioRecorder(config) {
             this.setFavicon(false);
         },
 
+        // -- Recording Consent --
+        /**
+         * Open the consent gate, or report that there is nothing to gate.
+         *
+         * Returns true when the gate was opened, so startRecording() can stop
+         * and hand control to the modal instead of opening the microphone.
+         */
+        maybeGateOnConsent() {
+            if (! this.consentUrl || this.consentGiven) {
+                return false;
+            }
+
+            this.consentChecked = false;
+            this.consentError = '';
+            this.showConsentGate = true;
+
+            return true;
+        },
+
+        /**
+         * Record the acknowledgement, then proceed straight into recording.
+         *
+         * The checkbox is enforced here as well as in the markup: the button can
+         * be re-enabled from devtools, and the server also requires it, but a
+         * client guard keeps the honest path honest.
+         */
+        async confirmConsent() {
+            if (this.consentSubmitting || ! this.consentChecked) {
+                return;
+            }
+
+            this.consentSubmitting = true;
+            this.consentError = '';
+
+            try {
+                const response = await fetch(this.consentUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken(),
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        notice_version: this.consentNoticeVersion,
+                        includes_tab_audio: this.tabAudioActive,
+                        acknowledged: true,
+                    }),
+                });
+
+                if (! response.ok) {
+                    throw new Error('consent failed');
+                }
+
+                this.consentGiven = true;
+                this.showConsentGate = false;
+                this.consentSubmitting = false;
+
+                // Consent is recorded; fall through into the recording the user
+                // pressed for. maybeGateOnConsent() now returns false.
+                this.startRecording();
+            } catch {
+                this.consentSubmitting = false;
+                this.consentError = this.config.i18n?.consentFailed || 'Could not save your acknowledgement. Please try again.';
+            }
+        },
+
+        /**
+         * Dismiss the gate without recording. The microphone was never opened.
+         */
+        cancelConsent() {
+            this.showConsentGate = false;
+            this.consentChecked = false;
+        },
+
         // -- Recording Controls --
         async startRecording() {
+            // Consent comes before the microphone. When the gate opens, control
+            // passes to the modal and confirmConsent() re-enters this method
+            // once the acknowledgement is recorded.
+            if (this.maybeGateOnConsent()) {
+                return;
+            }
+
             // Pressing record during a pre-flight check answers the question the
             // check was asking, so the check gets out of the way. It leaves the
             // microphone open, which is the whole reason the countdown below is
