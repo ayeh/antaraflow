@@ -352,6 +352,9 @@
                             liveChunkUrl: '{{ route('meetings.live.chunk', [$meeting, $session]) }}',
                             liveSessionId: {{ $session->id }},
                             initialChunkCount: {{ $state['chunks']->count() }},
+                            consentUrl: '{{ route('meetings.recording-consent.store', $meeting) }}',
+                            consentGiven: {{ ($recordingConsented ?? false) ? 'true' : 'false' }},
+                            consentNoticeVersion: 'v1',
                             i18n: {
                                 recordingInProgress: '{{ __('Recording is in progress. Are you sure you want to leave?') }}',
                                 micDenied: '{{ __('Microphone access denied. Please allow microphone access in your browser settings.') }}',
@@ -366,8 +369,14 @@
                                 uploadRetrying: '{{ __('Upload failed. Retrying in {seconds}s...') }}',
                                 uploadFailed: '{{ __('Upload failed after multiple attempts. Your recording is saved locally — click Retry to try again.') }}',
                                 recoverFailed: '{{ __('Could not recover recording.') }}',
+                                tabAudioUnsupported: '{{ __('This browser cannot share tab audio. Use Chrome on desktop.') }}',
+                                tabAudioFailed: '{{ __('Could not capture tab audio. Please try again.') }}',
+                                tabAudioNoTrack: '{{ __('No tab audio was shared. Pick a browser tab and turn on "Share tab audio".') }}',
+                                consentFailed: '{{ __('Could not save your acknowledgement. Please try again.') }}',
                             },
                         })">
+                            @include('meetings.partials._recording-consent')
+
                             <template x-if="['recording', 'paused'].includes(state)">
                                 <div class="mb-2 flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
                                     <div class="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse flex-shrink-0"></div>
@@ -419,6 +428,28 @@
                                         <span class="text-sm">{{ __('Processing...') }}</span>
                                     </div>
                                 </template>
+                            </div>
+
+                            {{-- Meeting tab audio (Approach A): capture Meet/Zoom/Teams
+                                 participants with no bot by mixing the shared tab's
+                                 audio into the recording. Hidden once recording is
+                                 done or errored. --}}
+                            <div x-show="!['complete', 'error'].includes(state)" class="mt-2">
+                                <button type="button" @click="captureTabAudio()"
+                                        :class="tabAudioActive
+                                            ? 'border-teal-500 bg-teal-50 text-teal-700 dark:border-teal-400 dark:bg-teal-900/20 dark:text-teal-300'
+                                            : 'border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/40'"
+                                        class="w-full inline-flex items-center justify-center gap-2 border px-3 py-2 rounded-lg text-xs font-medium transition-colors">
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
+                                    <span x-text="tabAudioActive ? '{{ __('Meeting audio: on') }}' : '{{ __('Add meeting audio (share tab)') }}'"></span>
+                                </button>
+                                <p x-show="tabAudioActive" x-cloak class="mt-1 text-[11px] text-gray-400 dark:text-gray-500 text-center">
+                                    {{ __('Remote participants are being captured from the shared tab.') }}
+                                </p>
+                                <div x-show="tabAudioError" x-cloak
+                                     class="mt-1 text-[11px] text-amber-600 dark:text-amber-400 text-center"
+                                     x-text="tabAudioError">
+                                </div>
                             </div>
 
                             {{-- Recording Timer --}}

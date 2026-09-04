@@ -105,6 +105,21 @@ export default function audioRecorder(config) {
         liveSessionId: config.liveSessionId || null,
         liveChunkNumber: config.initialChunkCount || 0,
 
+        // Recording consent. When a consentUrl is supplied and consent has not
+        // yet been recorded for this meeting, the first press of record opens a
+        // gate that asks the recorder to inform participants and acknowledge
+        // responsibility — important above all for the invisible tab-audio
+        // capture, where remote participants see no bot. Acknowledgement is
+        // posted to the server as a per-meeting audit record; once given, it is
+        // not asked again for this meeting.
+        consentUrl: config.consentUrl || '',
+        consentGiven: config.consentGiven || false,
+        consentNoticeVersion: config.consentNoticeVersion || 'v1',
+        showConsentGate: false,
+        consentChecked: false,
+        consentSubmitting: false,
+        consentError: '',
+
         // State machine
         state: 'idle', // idle, requesting_permission, checking, ready, countdown, recording, paused, stopping, processing, uploading, complete, error
 
@@ -113,6 +128,19 @@ export default function audioRecorder(config) {
         mediaStream: null,
         captureStream: null,
         micOpen: false,
+
+        // Meeting tab audio (Approach A: bot-free online-meeting capture).
+        // When the user shares a Meet/Zoom/Teams tab with its audio, that
+        // stream is mixed into the recording alongside the microphone, so
+        // remote participants are captured without any bot joining the call.
+        // The mic keeps its own analyser branch, so the level meter and the
+        // pre-flight check still describe the microphone alone.
+        displayStream: null,
+        tabAudioActive: false,
+        tabAudioError: '',
+        _destinationNode: null,
+        _tabSourceNode: null,
+        _tabGainNode: null,
         permissionGranted: false,
         selectedDeviceId: null,
         inputDevices: [],
@@ -728,6 +756,14 @@ export default function audioRecorder(config) {
             this.audioContext = null;
             this.analyserNode = null;
             this.micOpen = false;
+
+            // The tab-audio nodes belong to the context just closed; drop them.
+            // The shared stream itself is kept, so a mic change re-splices the
+            // same tab audio into the rebuilt graph rather than making the user
+            // pick the tab again. stopTabAudio() ends the share for good.
+            this._tabSourceNode = null;
+            this._tabGainNode = null;
+            this._destinationNode = null;
         },
 
         /**
@@ -782,6 +818,13 @@ export default function audioRecorder(config) {
 
                 this.resumeAudioContext();
 
+                // Held so shared tab audio can be spliced straight into the
+                // recording without passing through the mic's analyser. The
+                // graph is rebuilt on every mic change, so keep the reference
+                // fresh and re-attach any active share below.
+                this._destinationNode = destination;
+                this.attachTabAudioToGraph();
+
                 return destination.stream;
             } catch {
                 if (this.audioContext) {
@@ -789,6 +832,7 @@ export default function audioRecorder(config) {
                 }
                 this.audioContext = null;
                 this.analyserNode = null;
+                this._destinationNode = null;
 
                 return null;
             }
@@ -804,6 +848,125 @@ export default function audioRecorder(config) {
             if (this.audioContext?.state === 'suspended') {
                 this.audioContext.resume().catch(() => {});
             }
+        },
+
+        // -- Meeting Tab Audio (Approach A: bot-free online-meeting capture) --
+        /**
+         * Ask the browser to share a meeting tab and fold its audio into the
+         * recording, so Meet / Zoom / Teams participants are captured with no
+         * bot in the call. getDisplayMedia must run inside a user gesture, so
+         * this is wired to its own button rather than the record flow.
+         *
+         * A tab share cannot be audio-only, so video is requested and then
+         * dropped the instant it arrives — only the audio is wanted, and a
+         * live video track would cost memory for nothing. Calling this while a
+         * share is active toggles it off.
+         */
+        async captureTabAudio() {
+            if (this.tabAudioActive) {
+                this.stopTabAudio();
+
+                return;
+            }
+
+            this.tabAudioError = '';
+
+            if (! navigator.mediaDevices?.getDisplayMedia) {
+                this.tabAudioError = this.config.i18n?.tabAudioUnsupported || 'This browser cannot share tab audio. Use Chrome on desktop.';
+
+                return;
+            }
+
+            let stream;
+
+            try {
+                stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true,
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false,
+                    },
+                });
+            } catch (err) {
+                // Dismissing the picker rejects with NotAllowedError; that is a
+                // choice, not a fault, so it passes without a message.
+                if (err.name !== 'NotAllowedError') {
+                    this.tabAudioError = this.config.i18n?.tabAudioFailed || 'Could not capture tab audio. Please try again.';
+                }
+
+                return;
+            }
+
+            // Video is never wanted; stop it the moment the share arrives.
+            stream.getVideoTracks().forEach((track) => track.stop());
+
+            if (stream.getAudioTracks().length === 0) {
+                // The user shared a screen or window, or left "Share tab audio"
+                // unticked. There is nothing to mix, so release it and say so.
+                stream.getTracks().forEach((track) => track.stop());
+                this.tabAudioError = this.config.i18n?.tabAudioNoTrack || 'No tab audio was shared. Pick a browser tab and turn on "Share tab audio".';
+
+                return;
+            }
+
+            this.displayStream = stream;
+            this.tabAudioActive = true;
+
+            // The share can be ended from the browser's own "Stop sharing" bar;
+            // keep our state in step when that happens.
+            stream.getAudioTracks()[0].addEventListener('ended', () => this.stopTabAudio());
+
+            this.attachTabAudioToGraph();
+        },
+
+        /**
+         * Connect the shared tab audio into the capture graph, parallel to the
+         * mic chain and straight into the destination — so it reaches the
+         * recording but never the mic's analyser, leaving the level meter and
+         * the pre-flight verdict about the microphone alone.
+         *
+         * A source node is bound to the context that made it, so the nodes are
+         * rebuilt here every time the graph is. Idempotent: safe to call from
+         * buildGainChain on every (re)build and from captureTabAudio.
+         */
+        attachTabAudioToGraph() {
+            if (! this.displayStream || ! this.audioContext || ! this._destinationNode) {
+                return;
+            }
+
+            this._tabSourceNode?.disconnect();
+            this._tabGainNode?.disconnect();
+
+            try {
+                this._tabSourceNode = this.audioContext.createMediaStreamSource(this.displayStream);
+                this._tabGainNode = this.audioContext.createGain();
+
+                // Tab audio arrives at line level and already clean, so it wants
+                // none of the mic chain's lift; unity keeps it from swamping the
+                // room mic in the mix.
+                this._tabGainNode.gain.value = 1.0;
+
+                this._tabSourceNode.connect(this._tabGainNode);
+                this._tabGainNode.connect(this._destinationNode);
+            } catch (err) {
+                console.error('Could not attach tab audio to graph:', err);
+            }
+        },
+
+        /**
+         * Stop sharing the meeting tab and detach it from the graph. The
+         * recording itself carries on with the microphone alone.
+         */
+        stopTabAudio() {
+            this._tabSourceNode?.disconnect();
+            this._tabGainNode?.disconnect();
+            this._tabSourceNode = null;
+            this._tabGainNode = null;
+
+            this.displayStream?.getTracks().forEach((track) => track.stop());
+            this.displayStream = null;
+            this.tabAudioActive = false;
         },
 
         // -- Waveform Visualization (time-based animation) --
@@ -1428,8 +1591,89 @@ export default function audioRecorder(config) {
             this.setFavicon(false);
         },
 
+        // -- Recording Consent --
+        /**
+         * Open the consent gate, or report that there is nothing to gate.
+         *
+         * Returns true when the gate was opened, so startRecording() can stop
+         * and hand control to the modal instead of opening the microphone.
+         */
+        maybeGateOnConsent() {
+            if (! this.consentUrl || this.consentGiven) {
+                return false;
+            }
+
+            this.consentChecked = false;
+            this.consentError = '';
+            this.showConsentGate = true;
+
+            return true;
+        },
+
+        /**
+         * Record the acknowledgement, then proceed straight into recording.
+         *
+         * The checkbox is enforced here as well as in the markup: the button can
+         * be re-enabled from devtools, and the server also requires it, but a
+         * client guard keeps the honest path honest.
+         */
+        async confirmConsent() {
+            if (this.consentSubmitting || ! this.consentChecked) {
+                return;
+            }
+
+            this.consentSubmitting = true;
+            this.consentError = '';
+
+            try {
+                const response = await fetch(this.consentUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken(),
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        notice_version: this.consentNoticeVersion,
+                        includes_tab_audio: this.tabAudioActive,
+                        acknowledged: true,
+                    }),
+                });
+
+                if (! response.ok) {
+                    throw new Error('consent failed');
+                }
+
+                this.consentGiven = true;
+                this.showConsentGate = false;
+                this.consentSubmitting = false;
+
+                // Consent is recorded; fall through into the recording the user
+                // pressed for. maybeGateOnConsent() now returns false.
+                this.startRecording();
+            } catch {
+                this.consentSubmitting = false;
+                this.consentError = this.config.i18n?.consentFailed || 'Could not save your acknowledgement. Please try again.';
+            }
+        },
+
+        /**
+         * Dismiss the gate without recording. The microphone was never opened.
+         */
+        cancelConsent() {
+            this.showConsentGate = false;
+            this.consentChecked = false;
+        },
+
         // -- Recording Controls --
         async startRecording() {
+            // Consent comes before the microphone. When the gate opens, control
+            // passes to the modal and confirmConsent() re-enters this method
+            // once the acknowledgement is recorded.
+            if (this.maybeGateOnConsent()) {
+                return;
+            }
+
             // Pressing record during a pre-flight check answers the question the
             // check was asking, so the check gets out of the way. It leaves the
             // microphone open, which is the whole reason the countdown below is
@@ -1766,6 +2010,7 @@ export default function audioRecorder(config) {
             // then goes out exactly when recording stops, including when the
             // upload fails and the user sits on the retry button.
             this.releaseStream();
+            this.stopTabAudio();
 
             // In live mode, chunks are already uploaded via the live endpoint
             if (this.liveMode && this.isLongRecording) {
@@ -2119,6 +2364,8 @@ export default function audioRecorder(config) {
             this.cancelMicCheck();
             this.micCheckResult = null;
             this.releaseStream();
+            this.stopTabAudio();
+            this.tabAudioError = '';
             this.state = 'idle';
             this.timer = 0;
             this.chunks = [];
@@ -2154,6 +2401,7 @@ export default function audioRecorder(config) {
             this.releaseWakeLock();
             this.restoreTabIndicator();
             this.releaseStream();
+            this.stopTabAudio();
         },
     };
 }

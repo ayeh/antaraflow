@@ -222,4 +222,19 @@ class MinutesOfMeeting extends Model
     {
         return $this->morphMany(KnowledgeLink::class, 'target');
     }
+
+    public function recordingConsents(): HasMany
+    {
+        return $this->hasMany(RecordingConsent::class, 'minutes_of_meeting_id');
+    }
+
+    /**
+     * Whether anyone has already acknowledged the recording notice for this
+     * meeting. The consent gate is shown once per meeting, so a single record
+     * is enough to let recording proceed without asking again.
+     */
+    public function hasRecordingConsent(): bool
+    {
+        return $this->recordingConsents()->exists();
+    }
 }
