@@ -38,6 +38,26 @@ class RepetitionGuard
     private const MIN_DISTINCT_RATIO = 0.3;
 
     /**
+     * Above this many words the type-token ratio stops meaning anything: it falls
+     * with length for real speech too, because ordinary talk saturates its common
+     * vocabulary. Applying MIN_DISTINCT_RATIO to a whole meeting therefore wiped
+     * genuine minutes wholesale. A live chunk (~15s) never reaches this many
+     * words, so the ratio test stays scoped below it; longer text is judged by
+     * its absolute vocabulary instead.
+     */
+    private const SHORT_TEXT_TOKENS = 150;
+
+    /**
+     * Fewest distinct words a genuine long transcript ever holds. Real minutes
+     * run to hundreds of distinct words within a couple of minutes of speech
+     * (the smallest real recording measured kept 180+); a phrase looped for an
+     * hour — "it's a beautiful day …", "tidak, okey, tidak, okey …" — never
+     * leaves double digits however long it runs. That gap, not the ratio, is what
+     * separates a loop from real speech once the text is long.
+     */
+    private const MIN_DISTINCT_VOCABULARY = 40;
+
+    /**
      * Whether a transcript is a decode loop rather than speech.
      */
     public function isDegenerate(string $text): bool
@@ -50,12 +70,22 @@ class RepetitionGuard
         }
 
         $frequencies = array_count_values($tokens);
+        $distinctCount = count($frequencies);
 
-        $dominance = max($frequencies) / $count;
-        $distinctRatio = count($frequencies) / $count;
+        // One word swallowing the text is a loop at any length.
+        if (max($frequencies) / $count >= self::DOMINANCE_THRESHOLD) {
+            return true;
+        }
 
-        return $dominance >= self::DOMINANCE_THRESHOLD
-            || $distinctRatio <= self::MIN_DISTINCT_RATIO;
+        // Short text: the type-token ratio still tells a repeated phrase apart
+        // from speech before length drags every transcript's ratio down.
+        if ($count <= self::SHORT_TEXT_TOKENS) {
+            return $distinctCount / $count <= self::MIN_DISTINCT_RATIO;
+        }
+
+        // Long text: a real meeting keeps introducing words; a loop is trapped
+        // in a handful of them no matter how many times they repeat.
+        return $distinctCount <= self::MIN_DISTINCT_VOCABULARY;
     }
 
     /**

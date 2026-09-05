@@ -33,13 +33,16 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
      */
     private const HALLUCINATIONS = [
         'terima kasih kerana menonton',
-        'terima kasih kerana menonton!',
         'terima kasih atas dukungan anda',
         'berita terkini terima kasih atas dukungan anda',
         'subscribe',
         'like and subscribe',
         'thank you for watching',
         'thanks for watching',
+        // Whisper's stock invention over music and melodic tones (the U2 line);
+        // a tab-share recording of a meeting with hold music filled with it.
+        "it's a beautiful day",
+        'beautiful day',
         'you',
     ];
 
@@ -117,7 +120,7 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
             // A silent stretch amplified to the speech floor comes back as one
             // word looped for the whole segment. Drop those here so a partly
             // real recording keeps its speech and loses only the dead air.
-            if ($text === '' || $this->isHallucination($text) || $repetition->isDegenerate($text)) {
+            if ($text === '' || $this->isNonSpeech($text) || $this->isHallucination($text) || $repetition->isDegenerate($text)) {
                 continue;
             }
 
@@ -156,10 +159,23 @@ class OpenAIWhisperTranscriber implements TranscriberInterface
         return false;
     }
 
+    /**
+     * A segment with no letters or digits — "...", "—", stray punctuation —
+     * which Whisper emits over non-speech and which carries nothing for the
+     * minutes. Left in, thousands of these bury the real speech in the transcript
+     * and drag the whole thing under the repetition guard.
+     */
+    private function isNonSpeech(string $text): bool
+    {
+        return ! preg_match('/[\p{L}\p{N}]/u', $text);
+    }
+
     /** Whether the whole segment is a phrase Whisper invents from silence. */
     private function isHallucination(string $text): bool
     {
-        return in_array(mb_strtolower($text), self::HALLUCINATIONS, true);
+        $normalized = rtrim(mb_strtolower(trim($text)), " \t\n\r\0\x0B.!?…");
+
+        return in_array($normalized, self::HALLUCINATIONS, true);
     }
 
     /**
