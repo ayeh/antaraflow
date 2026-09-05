@@ -2149,5 +2149,19 @@
     "If you only want to remove particular content, you do not need to delete your account. You can delete individual meetings and recordings in the app, and disconnect a calendar connection at any time from your account settings, which revokes and deletes the stored tokens for that connection.": "Jika anda hanya mahu membuang kandungan tertentu, anda tidak perlu memadam akaun anda. Anda boleh memadam mesyuarat dan rakaman satu per satu di dalam aplikasi, dan memutuskan sambungan kalendar pada bila-bila masa melalui tetapan akaun anda, yang akan membatalkan dan memadam token tersimpan bagi sambungan itu.",
     "Questions": "Soalan",
     "See our": "Lihat",
-    "for how we handle information generally, or write to us at": "kami untuk mengetahui cara kami mengendalikan maklumat secara amnya, atau hubungi kami di"
+    "for how we handle information generally, or write to us at": "kami untuk mengetahui cara kami mengendalikan maklumat secara amnya, atau hubungi kami di",
+    "Record Google Meet / Zoom / Teams": "Rakam Google Meet / Zoom / Teams",
+    "Recording the online meeting": "Sedang merakam meeting online",
+    "Share the meeting tab to capture everyone in the call.": "Kongsi tab meeting untuk rakam semua orang dalam panggilan.",
+    "Remote participants are being captured from the shared tab.": "Peserta jauh sedang dirakam dari tab yang dikongsi.",
+    "This browser cannot share tab audio. Use Chrome on desktop.": "Pelayar ini tidak boleh kongsi audio tab. Guna Chrome di desktop.",
+    "Could not capture tab audio. Please try again.": "Tidak dapat merakam audio tab. Sila cuba lagi.",
+    "No tab audio was shared. Pick a browser tab and turn on \"Share tab audio\".": "Tiada audio tab dikongsi. Pilih tab pelayar dan hidupkan \"Share tab audio\".",
+    "Could not save your acknowledgement. Please try again.": "Tidak dapat menyimpan pengesahan anda. Sila cuba lagi.",
+    "Before you record": "Sebelum anda merakam",
+    "Let everyone know the meeting is being recorded. You can read this out:": "Beritahu semua orang meeting ini sedang dirakam. Anda boleh baca ini:",
+    "This meeting is being recorded and transcribed to create the minutes. Please let me know if you would prefer not to be recorded.": "Meeting ini sedang dirakam dan ditranskrip untuk menyediakan minit. Sila beritahu saya jika anda tidak mahu dirakam.",
+    "I confirm I have the right to record this meeting and will inform all participants.": "Saya sahkan saya berhak merakam meeting ini dan akan memberitahu semua peserta.",
+    "I've informed everyone — Start": "Saya dah beritahu semua — Mula",
+    "Please confirm you will inform all participants before recording.": "Sila sahkan anda akan memberitahu semua peserta sebelum merakam."
 }
