@@ -441,8 +441,11 @@
                                             : 'border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700/40'"
                                         class="w-full inline-flex items-center justify-center gap-2 border px-3 py-2 rounded-lg text-xs font-medium transition-colors">
                                     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
-                                    <span x-text="tabAudioActive ? '{{ __('Meeting audio: on') }}' : '{{ __('Add meeting audio (share tab)') }}'"></span>
+                                    <span x-text="tabAudioActive ? '{{ __('Recording the online meeting') }}' : '{{ __('Record Google Meet / Zoom / Teams') }}'"></span>
                                 </button>
+                                <p x-show="!tabAudioActive" class="mt-1 text-[11px] text-gray-400 dark:text-gray-500 text-center">
+                                    {{ __('Share the meeting tab to capture everyone in the call.') }}
+                                </p>
                                 <p x-show="tabAudioActive" x-cloak class="mt-1 text-[11px] text-gray-400 dark:text-gray-500 text-center">
                                     {{ __('Remote participants are being captured from the shared tab.') }}
                                 </p>
