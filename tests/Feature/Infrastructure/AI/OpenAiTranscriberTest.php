@@ -246,6 +246,44 @@ it('still drops phrases whisper invents from silence', function (): void {
         ->and($result->fullText)->toBe('Okay kita mula sekarang.');
 });
 
+it('drops the ellipsis segments whisper emits over non-speech', function (): void {
+    Http::fake([
+        '*/audio/transcriptions' => Http::response([
+            'text' => '',
+            'duration' => 30,
+            'segments' => [
+                ['start' => 0, 'end' => 10, 'text' => '...', 'no_speech_prob' => 0.4],
+                ['start' => 10, 'end' => 20, 'text' => 'Kita mula dengan item pertama.', 'no_speech_prob' => 0.2],
+                ['start' => 20, 'end' => 30, 'text' => '—', 'no_speech_prob' => 0.4],
+            ],
+        ]),
+    ]);
+
+    $result = whisperTranscriber()->transcribe(audioFixture());
+
+    expect($result->segments)->toHaveCount(1)
+        ->and($result->fullText)->toBe('Kita mula dengan item pertama.');
+});
+
+it('drops the beautiful-day line whisper invents over music', function (): void {
+    Http::fake([
+        '*/audio/transcriptions' => Http::response([
+            'text' => '',
+            'duration' => 30,
+            'segments' => [
+                ['start' => 0, 'end' => 10, 'text' => "It's a beautiful day.", 'no_speech_prob' => 0.3],
+                ['start' => 10, 'end' => 20, 'text' => 'Beautiful day', 'no_speech_prob' => 0.3],
+                ['start' => 20, 'end' => 30, 'text' => 'Setuju, kita teruskan.', 'no_speech_prob' => 0.2],
+            ],
+        ]),
+    ]);
+
+    $result = whisperTranscriber()->transcribe(audioFixture());
+
+    expect($result->segments)->toHaveCount(1)
+        ->and($result->fullText)->toBe('Setuju, kita teruskan.');
+});
+
 it('drops a looped segment but keeps the real speech around it', function (): void {
     Http::fake([
         '*/audio/transcriptions' => Http::response([
